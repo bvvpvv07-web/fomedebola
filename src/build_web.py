@@ -1,7 +1,6 @@
 import json,os,shutil
-import sys
-OUT=sys.argv[1] if len(sys.argv)>1 else '../site'
-FILES='data.js logic.js youth.js ui.js fx.js minigames.js nss.js nss2.js fast.js gallery.js agent.js youth_ui.js flow.js moments.js dyn.js onescreen.js cards.js swipe.js nssmoment.js youthflow.js journey.js webcloud.js cloud.js home.js'.split()
+OUT='/home/claude/web'
+FILES='data.js logic.js youth.js ui.js fx.js minigames.js nss.js nss2.js fast.js gallery.js agent.js youth_ui.js flow.js moments.js dyn.js onescreen.js cards.js swipe.js nssmoment.js youthflow.js journey.js torcida.js webcloud.js cloud.js home.js'.split()
 css=''.join(open(f).read() for f in ['base.css','extra.css','extra2.css','extra3.css','extra4.css'])
 am=json.load(open('assets/map.json'))
 cfg={'url':'https://dwrvpzmfhprazbkmmhqh.supabase.co','key':'sb_publishable_NlDnuy7PDBwiGnygbSkNFA_E5m6TkAG'}

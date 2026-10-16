@@ -358,7 +358,7 @@ function weekHTML(){
   ${(S.st.lifeNews||[]).length?`<div class="wnews">${S.st.lifeNews.map(t=>`<div>💬 ${esc(t)}</div>`).join('')}</div>`:''}
  </section>
  <section class="card todo">
-  <div class="row" style="justify-content:space-between;align-items:baseline"><h3 class="todoh">${today?`${today}: o que vai fazer?`:'Semana cheia. Bora pro jogo!'}</h3><span class="chip">${S.tempo} dia${S.tempo===1?'':'s'} livre${S.tempo===1?'':'s'} · ${money(S.din)}</span></div>
+  <div class="row" style="justify-content:space-between;align-items:baseline"><h3 class="todoh">${today?`${today}`:'Semana cheia. Bora pro jogo!'}</h3><span class="chip">${S.tempo} dia${S.tempo===1?'':'s'} livre${S.tempo===1?'':'s'} · ${money(S.din)}</span></div>
   ${LIFE_MSG&&!body?`<div class="outcome"><p>${esc(LIFE_MSG.txt)}</p><div class="chipsrow">${(LIFE_MSG.chips||[]).map(([t,k])=>`<span class="chip ${k}">${esc(t)}</span>`).join('')}</div></div>`:''}
   <div class="wacts">${tabs.map(([k,ic,n])=>`<button class="wact ${WEEK_TAB===k?'on':''}" data-wt="${k}"><span>${ic}</span>${n}</button>`).join('')}<button class="wact" id="wRest" ${S.tempo>0?'':'disabled'}><span>😴</span>Descansar</button></div>
   ${body?(()=>{const t=tabs.find(x=>x[0]===WEEK_TAB);return`<div class="sheetbg" id="shBg"><div class="sheet" role="dialog" aria-label="${t[2]}"><div class="shgrab"></div>

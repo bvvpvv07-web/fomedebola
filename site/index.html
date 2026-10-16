@@ -1047,6 +1047,41 @@ body.onescreen .wrap::-webkit-scrollbar{display:none}
 .st-txt{margin:4px 0 0;font-size:16px;line-height:1.55;color:#efe9da;min-height:7.5em;text-align:left;font-family:Georgia,'Times New Roman',serif}
 .st-meta{font-size:12px;color:var(--muted);letter-spacing:.06em}.story .btn{transition:opacity .4s}
 .book{display:grid;gap:6px}.bk summary{display:flex;align-items:center;gap:8px;cursor:pointer;list-style:none;padding:6px 0}.bk summary::-webkit-details-marker{display:none}.bk summary small{margin-left:auto;color:var(--muted)}.bk p{margin:0 0 8px;font-family:Georgia,serif;color:#e6e0d0;font-size:14.5px;line-height:1.5}
+
+.dfinger.sw{animation:dfs 2.2s ease-in-out infinite}@keyframes dfs{0%{transform:translate(70px,92px);opacity:0}20%{opacity:1}55%{transform:translate(70px,92px)}80%{transform:translate(122px,90px);opacity:1}100%{opacity:0;transform:translate(122px,90px)}}
+.dring{animation:drg 2.2s ease-in-out infinite;transform-origin:80px 52px}@keyframes drg{0%{transform:scale(1.8);opacity:.5}55%{transform:scale(1);opacity:1}100%{transform:scale(1);opacity:.3}}
+/* ---------- faixa de vida no hub ---------- */
+.lifestrip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:8px;align-items:center;width:100%;padding:8px 10px;border-radius:14px;border:1px solid var(--line-2);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));color:inherit;cursor:pointer;text-align:left}
+.ls-m{display:flex;align-items:center;gap:5px;min-width:0}.ls-m>span{font-size:15px;flex:none}.ls-m div{min-width:0;flex:1}
+.ls-m small{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls-m i{display:block;height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:3px}.ls-m s{display:block;height:100%;border-radius:3px}
+.ls-imp{display:grid;justify-items:center;padding-left:8px;border-left:1px solid var(--line-2)}.ls-imp b{font-family:var(--f-mono,monospace);font-size:15px}.ls-imp small{font-size:9.5px;color:var(--muted);white-space:nowrap}
+.ls-imp.up b{color:var(--good)}.ls-imp.down b{color:#ff8a7a}
+/* ---------- minigames da vida ---------- */
+.lifemg{max-width:440px;display:grid;gap:8px;text-align:center}.lm-top{display:flex;gap:8px;align-items:center;justify-content:center}.lm-hint{margin:0;color:#d8dfcf;font-size:14px}.lm-hint b{color:var(--gold)}
+.aut{position:relative;height:min(360px,46vh);border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#1b2a3a 0%,#22384a 45%,#2c5a35 46%,#3a8a42 100%);border:1px solid var(--line-2);touch-action:manipulation}
+.aut::before{content:'';position:absolute;inset:0 0 54% 0;background:radial-gradient(circle at 10% 60%,#c8102e 0 3px,transparent 4px),radial-gradient(circle at 30% 40%,#f2c443 0 3px,transparent 4px),radial-gradient(circle at 60% 70%,#fff 0 3px,transparent 4px),radial-gradient(circle at 85% 45%,#1e4fd8 0 3px,transparent 4px);background-size:38px 26px;opacity:.55}
+.aut-hud{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;font-family:var(--f-mono,monospace);font-weight:700;z-index:2}.aut-hud span{background:rgba(0,0,0,.5);padding:3px 9px;border-radius:999px}
+.autit{position:absolute;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;border:none;font-size:30px;background:radial-gradient(circle at 35% 30%,#fff,#e8e2d0);box-shadow:0 6px 14px rgba(0,0,0,.4);cursor:pointer;animation:autin .18s both;transform-origin:center}
+.autit::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:3px solid var(--gold);animation:autlife var(--life) linear both}
+.autit.bad{background:radial-gradient(circle at 35% 30%,#ffd6d0,#ff7a6a)}.autit.bad::after{border-color:#ff5a4a}
+.autit.hit{animation:autout .2s both}.autit.hitbad{animation:autshake .2s both}
+@keyframes autin{from{transform:scale(0)}to{transform:scale(1)}}@keyframes autlife{from{transform:scale(1);opacity:1}to{transform:scale(.55);opacity:.2}}
+@keyframes autout{to{transform:scale(1.5);opacity:0}}@keyframes autshake{50%{transform:translateX(-6px)}100%{transform:translateX(6px);opacity:0}}
+.press-mics{font-size:30px;letter-spacing:6px}.press-q{font-family:Georgia,serif;font-size:19px;line-height:1.4;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid var(--line-2)}
+.press-t{height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}.press-t i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff5a4a,#f2c443)}
+.date-st{position:relative;height:200px;display:grid;place-items:center}.date-ring{position:absolute;width:150px;height:150px;border-radius:50%;border:4px solid var(--gold);box-shadow:0 0 30px rgba(242,196,67,.35)}
+.date-heart{font-size:110px;line-height:1;cursor:pointer;filter:drop-shadow(0 6px 16px rgba(255,60,120,.5));user-select:none}
+.date-lines{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:30px}
+.fancard{border-color:rgba(242,196,67,.25)}
+
+/* ---------- refinamento visual geral ---------- */
+.card{border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012)),var(--panel);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 10px 26px rgba(0,0,0,.16)}
+.ls-m small{font-family:var(--f-mono,monospace);font-size:11px;letter-spacing:0;color:#e6ecdf;text-transform:none}
+.todoh{font-family:var(--f-display);font-weight:800;letter-spacing:.02em;text-transform:uppercase}
+.wact{transition:transform .12s,background .15s}.wact:active{transform:scale(.96)}
+.hubnav button{transition:transform .12s}.hubnav button:active{transform:scale(.95)}
+.btn{letter-spacing:.02em}.btn:active{transform:translateY(1px)}
 </style></head><body>
 <div id="app"></div>
 <div id="overlay" hidden></div>
@@ -3823,7 +3858,7 @@ function weekHTML(){
   ${(S.st.lifeNews||[]).length?`<div class="wnews">${S.st.lifeNews.map(t=>`<div>💬 ${esc(t)}</div>`).join('')}</div>`:''}
  </section>
  <section class="card todo">
-  <div class="row" style="justify-content:space-between;align-items:baseline"><h3 class="todoh">${today?`${today}: o que vai fazer?`:'Semana cheia. Bora pro jogo!'}</h3><span class="chip">${S.tempo} dia${S.tempo===1?'':'s'} livre${S.tempo===1?'':'s'} · ${money(S.din)}</span></div>
+  <div class="row" style="justify-content:space-between;align-items:baseline"><h3 class="todoh">${today?`${today}`:'Semana cheia. Bora pro jogo!'}</h3><span class="chip">${S.tempo} dia${S.tempo===1?'':'s'} livre${S.tempo===1?'':'s'} · ${money(S.din)}</span></div>
   ${LIFE_MSG&&!body?`<div class="outcome"><p>${esc(LIFE_MSG.txt)}</p><div class="chipsrow">${(LIFE_MSG.chips||[]).map(([t,k])=>`<span class="chip ${k}">${esc(t)}</span>`).join('')}</div></div>`:''}
   <div class="wacts">${tabs.map(([k,ic,n])=>`<button class="wact ${WEEK_TAB===k?'on':''}" data-wt="${k}"><span>${ic}</span>${n}</button>`).join('')}<button class="wact" id="wRest" ${S.tempo>0?'':'disabled'}><span>😴</span>Descansar</button></div>
   ${body?(()=>{const t=tabs.find(x=>x[0]===WEEK_TAB);return`<div class="sheetbg" id="shBg"><div class="sheet" role="dialog" aria-label="${t[2]}"><div class="shgrab"></div>
@@ -5135,9 +5170,9 @@ function nssMoment(o){
    mk('opp',a.x+R(-1,1),a.d-1.2,{sp:5.2,mark:a});mk('opp',b.x+R(-1,1),b.d-1.2,{sp:5.2,mark:b});mk('opp',me.x-side*3,me.d-4,{sp:4.8});
    gk=mk('gk',0,1.2);tmax=8;tag='Cruzamento';hint='Puxe pra trás mirando <b>no anel dentro da área</b>.';
   }else if(K==='dribble'){
-   me=mk('me',R(-6,6),R(30,34));const n=o.need||2;
-   for(let i=0;i<n;i++)mk('opp',clamp(me.x+(i-(n-1)/2)*R(5,8),-20,20),me.d-R(5,9)-i*2,{sp:(4.3+(n>2?.3:0))*spdMul});
-   gk=mk('gk',0,1.2);tmax=12;tag='Drible';hint='<b>Puxadas curtas</b> conduzem a bola. Fuja dos marcadores e entre na área.';
+   me=mk('me',R(-4,4),R(34,37));me.laneX=me.x;const n=o.need||2;
+   for(let i=0;i<n;i++){const q=mk('opp',clamp(me.x+R(-1,1),-18,18),me.d-8-i*7.5,{sp:2.4*spdMul,drb:true});q.open=ch(.5)?1:-1;q.nut=ch(.2)}
+   gk=mk('gk',0,1.2);tmax=30;tag='Drible';hint='Quando o anel fechar no <b>dourado</b>, arraste o dedo <b>pro lado livre</b> (seta verde). Pernas abertas? Arraste <b>pra cima</b>: caneta!';
   }else if(GK){
    gk=mk('me',0,.9);gk.isGK=true;const sh=mk('opp',o.pen?R(-.4,.4):R(-8,8),o.pen?11.6:R(13,20),{sp:0,shooter:true});ball.x=sh.x;ball.d=sh.d-.5;
    tmax=6;tag='Defesa';hint='Quando ele chutar, <b>arraste do goleiro até a bola</b> pra pular.';
@@ -5201,6 +5236,7 @@ function nssMoment(o){
    T+=dt;
    // goleiro do jogo (eu) — modo defesa
    if(GK)return stepGK(dt);
+   if(K==='dribble')return stepDRB(dt);
    // bola
    if(owner){const m=owner;ball.x+=(m.x-ball.x)*Math.min(1,dt*18);ball.d+=(m.d-.5-ball.d)*Math.min(1,dt*18);ball.h=0;ball.vx=ball.vd=ball.vh=0}
    else if(!((K==='fk'||K==='pen')&&!kicked)){
@@ -5286,6 +5322,56 @@ function nssMoment(o){
   }
   NM.gkDelay=R(.9,1.8);
 
+  // ---------- drible sincronizado ----------
+  let drbSlow=false,drbPerf=0,drbTot=0;
+  const drbAct=()=>P.find(q=>q.drb&&!q.passed&&!q.beat);
+  function stepDRB(dt){
+   // corre sozinho com a bola rumo à área
+   const tv=6+vel*1.4;me.vd+=(-tv-me.vd)*Math.min(1,dt*3);me.vx+=((me.laneX-me.x)*5-me.vx)*Math.min(1,dt*8);me.x+=me.vx*dt;me.d+=me.vd*dt;
+   ball.x=me.x+me.vx*.05;ball.d=me.d-.55+Math.sin(T*9)*.12;ball.h=0;ball.rot+=dt*10;owner=me;
+   drbSlow=false;
+   for(const q of P){if(!q.drb)continue;
+    if(q.stun>0){q.stun-=dt;q.x+=q.vx*dt;q.d+=q.vd*dt;q.vx*=.92;q.vd*=.92;if(q.d>me.d+1.5)q.passed=true;continue}
+    if(q.beat){q.d+=(-1.5)*dt;continue}
+    const dd=me.d-q.d;if(dd<-1.5){q.passed=true;continue}
+    // marcador vem de frente acompanhando seu lado
+    q.vx+=((me.x-q.x)*2.2-q.vx)*Math.min(1,dt*4);q.x+=q.vx*dt;q.d+=q.sp*dt*.6;
+    if(q===drbAct()){if(dd<4.6&&dd>1)drbSlow=true;
+     if(dd<1.15){q.beat=true;return finish(false,'Ele tomou a bola. Faltou tempo no drible.',false,'DESARMOU!')}}
+   }
+   if(me.d<16.5&&Math.abs(me.x)<20&&!drbAct())return finish(true,o.okTxt||'Passou por todos!',drbTot>0&&drbPerf===drbTot,drbPerf===drbTot&&drbTot>0?'PERFEITO!':'PASSOU!');
+   if(me.d<14)return finish(true,o.okTxt||'Passou por todos!',false,'PASSOU!');
+  }
+  function drbSwipe(dir){
+   if(phase!=='play')return;const q=drbAct();if(!q)return;const dd=me.d-q.d;
+   if(dd>4.6){banner={txt:'AINDA NÃO!',ok:false,t:0,tmp:true};return}
+   const good=dir==='up'?q.nut:dir===q.open;
+   if(dd>3.3){// cedo demais: ele lê o movimento
+    if(ch(.12+dri*.25)){beat(q,dir,false)}else{q.beat=true;finish(false,'Cedo demais: ele leu o drible.',false,'CEDO DEMAIS!')}return}
+   if(!good){if(ch(.08+dri*.12)){beat(q,dir,false);return}q.beat=true;finish(false,dir==='up'?'Ele fechou as pernas!':'Foi pro lado fechado.',false,'DESARMOU!');return}
+   const perfect=dd>=1.7&&dd<=2.6;beat(q,dir,perfect);
+  }
+  function beat(q,dir,perfect){drbTot++;if(perfect)drbPerf++;q.passed=false;q.stun=1.2;
+   const side=dir==='up'?0:dir;q.vx=-side*3.5;q.vd=2.2;q.fall=perfect?1:0;q.passed=false;q.beatAt=T;
+   if(dir!=='up')me.laneX=clamp(me.x+side*1.8,-18,18);else{ball.h=.2}
+   q.drb=true;q.passedMark=true;q.passed=false;q.beatFlag=true;q.stunned=true;q.done=true;
+   banner={txt:dir==='up'?'CANETA!':perfect?'PERFEITO!':'PASSOU!',ok:true,t:0,tmp:true};SFX.touch();if(perfect||dir==='up'){SFX.tone({f:880,dur:.12,gain:.1});shake(3,.2)}
+   const bp=proj(ball.x,ball.d,0);if(bp)burst(bp.x,bp.y,8,['#3d8a35','#9ad07a'],70,240,2);
+   q.passed=true;
+  }
+  function drawDRB(){const q=drbAct();if(!q||phase!=='play')return;const dd=me.d-q.d;if(dd>7)return;
+   const fp=proj(q.x,q.d,0);if(!fp)return;
+   // anel de tempo: fecha conforme ele chega
+   const k=clamp((dd-1.2)/(4.6-1.2),0,1);const rOut=.55+k*1.6,rGold=.55+((2.15-1.2)/(4.6-1.2))*1.6;const inWin=dd<=3.3&&dd>=1.2,perf=dd>=1.7&&dd<=2.6;
+   ring(q.x,q.d,rGold,'rgba(242,196,67,.9)',3);ring(q.x,q.d,rOut,perf?'#f2c443':inWin?'#ffffff':'rgba(255,255,255,.45)',perf?5:3);
+   if(perf)glow(fp.x,fp.y,fp.s*1.4,'rgba(242,196,67,.25)');
+   // lado livre (seta verde) e lado fechado (bloqueio)
+   const ar=(sx,col,up)=>{const a=proj(q.x+sx,q.d+.3,0),b=proj(q.x+sx*(up?0:2.6),q.d-(up?1.8:.5),0);if(!a||!b)return;ctx.strokeStyle=col;ctx.lineWidth=Math.max(5,a.s*.2);ctx.lineCap='round';ctx.beginPath();ctx.moveTo(a.x,a.y);ctx.lineTo(b.x,b.y);ctx.stroke();const ang=Math.atan2(b.y-a.y,b.x-a.x),hl=Math.max(12,a.s*.5);ctx.fillStyle=col;ctx.beginPath();ctx.moveTo(b.x+Math.cos(ang)*hl*.6,b.y+Math.sin(ang)*hl*.6);ctx.lineTo(b.x+Math.cos(ang+2.4)*hl,b.y+Math.sin(ang+2.4)*hl);ctx.lineTo(b.x+Math.cos(ang-2.4)*hl,b.y+Math.sin(ang-2.4)*hl);ctx.closePath();ctx.fill()};
+   ar(q.open*1.1,'rgba(110,255,150,.95)',false);
+   const bx=proj(q.x-q.open*.75,q.d,0),by=proj(q.x-q.open*.75,q.d,.9);if(bx&&by){ctx.strokeStyle='rgba(255,80,70,.9)';ctx.lineWidth=Math.max(3,bx.s*.1);ctx.beginPath();ctx.moveTo(bx.x,bx.y);ctx.lineTo(by.x,by.y);ctx.stroke()}
+   if(q.nut)ar(0,'rgba(120,200,255,.95)',true);
+   if(inWin){const tp=proj(q.x,q.d,2.6);if(tp){ctx.font="900 16px 'Saira Condensed',sans-serif";ctx.textAlign='center';ctx.textBaseline='middle';const lb=perf?'AGORA!':'ARRASTE!';const tw=ctx.measureText(lb).width+16;ctx.fillStyle='rgba(0,0,0,.6)';roundRect(tp.x-tw/2,tp.y-11,tw,22,11);ctx.fill();ctx.fillStyle=perf?'#f2c443':'#fff';ctx.fillText(lb,tp.x,tp.y+1)}}
+  }
   // ---------- ambiente e visual ----------
   const TRAIN=/Treino|Peneira|Pré|Tutorial/i.test(o.comp||'');
   const NIGHT=!TRAIN&&(NM.night=ch(.7));
@@ -5405,7 +5491,7 @@ function nssMoment(o){
    const lift=(p.jump>0?Math.sin(p.jump/.45*Math.PI)*.5:0)+(p.lift&&p.isGK?Math.max(0,p.lift-1.2)*.6:0);
    const pr=proj(p.x,p.d,lift);if(!pr)return;const s=pr.s,x=pr.x,y=pr.y;if(s<1.5)return;
    const v=Math.hypot(p.vx,p.vd);p.ph+=v*.09;const amt=Math.min(1,v/3);
-   let tilt=0;if(isGK&&(p===gk&&gkDive&&!GK)){tilt=gkDive*1.05*cam.dir}if(GK&&p===gk&&gkTarget){tilt=clamp((gkTarget.x-p.x)*-.35*cam.dir,-1.25,1.25)*(gkTarget.h<1.4?1:.6)}
+   let tilt=0;if(isGK&&(p===gk&&gkDive&&!GK)){tilt=gkDive*1.05*cam.dir}if(p.drb&&p.stun>0){tilt=(p.vx>0?1:-1)*Math.min(1.3,(1.2-p.stun)*2.4)*(p.fall?1:.45)*cam.dir}if(GK&&p===gk&&gkTarget){tilt=clamp((gkTarget.x-p.x)*-.35*cam.dir,-1.25,1.25)*(gkTarget.h<1.4?1:.6)}
    ctx.save();ctx.translate(x,y);ctx.rotate(tilt);if(GK&&p===gk)ctx.globalAlpha=.85;ctx.lineCap='round';ctx.lineJoin='round';
    const skin=p.skin||'#c98d62',sock=isGK?'#1a1a1a':p.c2,shirt=p.c,shorts=isGK?'#1a1a1a':(p.team==='opp'?p.c2:'#161616');
    // pernas (coxa + canela + chuteira)
@@ -5474,7 +5560,7 @@ function nssMoment(o){
   function star(cx,cy,r,fill){ctx.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;ctx.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr)}ctx.closePath();ctx.fillStyle=fill?'#f2c443':'rgba(255,255,255,.18)';ctx.fill();ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=1.5;ctx.stroke()}
   function drawHUD(){
    // placa de tempo (anel)
-   if(!GK&&phase!=='intro'&&(!kicked||kicked==='touch')&&!ended){const left=clamp(1-T/tmax,0,1);const cx=W-24,cy=24;ctx.fillStyle='rgba(0,0,0,.5)';ctx.beginPath();ctx.arc(cx,cy,15,0,7);ctx.fill();ctx.strokeStyle=left<.3?'#ff5a4a':'#f2c443';ctx.lineWidth=4;ctx.beginPath();ctx.arc(cx,cy,12,-Math.PI/2,-Math.PI/2+left*Math.PI*2);ctx.stroke();ctx.fillStyle='#fff';ctx.font="800 11px 'Saira Condensed',sans-serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(Math.ceil(tmax-T),cx,cy+1)}
+   if(!GK&&K!=='dribble'&&phase!=='intro'&&(!kicked||kicked==='touch')&&!ended){const left=clamp(1-T/tmax,0,1);const cx=W-24,cy=24;ctx.fillStyle='rgba(0,0,0,.5)';ctx.beginPath();ctx.arc(cx,cy,15,0,7);ctx.fill();ctx.strokeStyle=left<.3?'#ff5a4a':'#f2c443';ctx.lineWidth=4;ctx.beginPath();ctx.arc(cx,cy,12,-Math.PI/2,-Math.PI/2+left*Math.PI*2);ctx.stroke();ctx.fillStyle='#fff';ctx.font="800 11px 'Saira Condensed',sans-serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(Math.ceil(tmax-T),cx,cy+1)}
    // etiqueta do lance
    if(phase!=='intro'){ctx.font="800 12px 'Saira Condensed',sans-serif";const lbl=(o.min!=null?o.min+"' · ":'')+tag.toUpperCase();const tw=ctx.measureText(lbl).width+18;ctx.fillStyle='rgba(0,0,0,.5)';roundRect(10,12,tw,22,11);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(lbl,19,23.5)}
    if(curl&&kicked&&kicked!=='touch'&&T-kickT<1.4){ctx.fillStyle='rgba(0,0,0,.5)';roundRect(W/2-50,44,100,22,11);ctx.fill();ctx.fillStyle='#ffd34a';ctx.font="800 13px 'Saira Condensed',sans-serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(curl>0?'EFEITO ↷':'↶ EFEITO',W/2,55)}
@@ -5487,7 +5573,7 @@ function nssMoment(o){
     if(ended&&!banner.tmp&&banner.t>.25){const n=ended.ok?(ended.perfect?3:2):(/TRAVE|DEFENDEU|CORTOU|BARREIRA/.test(banner.txt)?1:0);for(let i=0;i<3;i++){const t=clamp((banner.t-.3-i*.12)*6,0,1);if(t>0){ctx.save();ctx.translate(W/2+(i-1)*34,H*.38+52);ctx.scale(t,t);star(0,0,13,i<n);ctx.restore()}}}}
    if(phase==='intro'){const k=Math.min(1,tIntro/.85);const bh=H*.09*(1-k*.6);ctx.fillStyle='#000';ctx.fillRect(0,0,W,bh);ctx.fillRect(0,H-bh,W,bh);
     const sx=-W*.6+W*.6*Math.min(1,k*2.2);ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(sx,H*.36,W,H*.12);ctx.fillStyle='#ff7a2b';ctx.fillRect(sx,H*.36,6,H*.12);ctx.fillStyle='#fff';ctx.font=`900 ${Math.min(40,W*.105)}px 'Saira Condensed',sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(GK?'ATENÇÃO, GOLEIRO!':tag.toUpperCase()+'!',W/2+sx,H*.42)}
-   if(phase==='play'&&!aim&&!kicked&&T<2.4&&!(S.tips&&S.tips.nssm>2)){const t=(performance.now()/900)%1;const bp=GK?proj(gk.x,gk.d,1):proj(ball.x,ball.d,0);if(bp){const y0=bp.y+10,y1=bp.y+(GK?-40:70);const yy=y0+(y1-y0)*Math.min(1,t*1.4);ctx.globalAlpha=1-t;ctx.font='30px sans-serif';ctx.textAlign='center';ctx.fillText('👆',bp.x+(GK?t*50:0),yy);ctx.globalAlpha=1}}
+   if(phase==='play'&&K!=='dribble'&&!aim&&!kicked&&T<2.4&&!(S.tips&&S.tips.nssm>2)){const t=(performance.now()/900)%1;const bp=GK?proj(gk.x,gk.d,1):proj(ball.x,ball.d,0);if(bp){const y0=bp.y+10,y1=bp.y+(GK?-40:70);const yy=y0+(y1-y0)*Math.min(1,t*1.4);ctx.globalAlpha=1-t;ctx.font='30px sans-serif';ctx.textAlign='center';ctx.fillText('👆',bp.x+(GK?t*50:0),yy);ctx.globalAlpha=1}}
    if(flashT>0){ctx.fillStyle=`rgba(255,255,255,${flashT})`;ctx.fillRect(0,0,W,H);flashT=Math.max(0,flashT-.03)}
   }
   function drawParts(dt){for(let i=parts.length-1;i>=0;i--){const q=parts[i];q.vy+=q.g*dt;q.x+=q.vx*dt;q.y+=q.vy*dt;q.life-=q.dec*dt;q.rot+=dt*8;if(q.life<=0){parts.splice(i,1);continue}ctx.save();ctx.globalAlpha=Math.min(1,q.life*1.5);ctx.translate(q.x,q.y);ctx.rotate(q.rot);ctx.fillStyle=q.c;ctx.fillRect(-q.s/2,-q.s/4,q.s,q.s/2);ctx.restore()}}
@@ -5503,7 +5589,7 @@ function nssMoment(o){
    P.forEach(p=>shadow(p.x,p.d,.32,.32));shadow(ball.x,ball.d,.13,clamp(.42-ball.h*.08,.08,.42));
    if(phase==='play')drawAim();
    const ents=P.map(p=>({d:p.d,f:()=>drawPlayer(p)}));if(!(cam.dir>0&&ball.d<0))ents.push({d:ball.d-.01,f:drawBall});
-   ents.sort((a,b)=>(b.d-a.d)*cam.dir).forEach(e=>e.f());
+   ents.sort((a,b)=>(b.d-a.d)*cam.dir).forEach(e=>e.f());if(K==='dribble')drawDRB();
    if(cam.dir<0){drawNet();drawPosts()}
    if(me&&!GK){const pp=proj(me.x,me.d,2.2);if(pp){const bob=Math.sin(performance.now()/220)*3;ctx.fillStyle='#f2c443';ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=1.5;ctx.beginPath();ctx.moveTo(pp.x-7,pp.y-10+bob);ctx.lineTo(pp.x+7,pp.y-10+bob);ctx.lineTo(pp.x,pp.y+bob);ctx.closePath();ctx.fill();ctx.stroke()}}
    vignette();drawParts(rdt);
@@ -5514,6 +5600,7 @@ function nssMoment(o){
    if(GK)return;let fx,fd,fh=5.2;
    if(phase==='intro'){const k=Math.min(1,dt*3.2);cam.x+=(camEnd.x-cam.x)*k;cam.d+=(camEnd.d-cam.d)*k;cam.h+=(camEnd.h-cam.h)*k;return}
    if((K==='fk'||K==='pen')&&!kicked){fx=ball.x*.8;fd=ball.d+9}
+   else if(K==='dribble'){fx=me.x*.85;fd=me.d+12.5;fh=6.8}
    else if(K==='header'&&!headed){fx=me.x*.9+(ball.x-me.x)*.22;fd=me.d+10.5}
    else if(owner===me||kicked==='touch'){fx=me.x*.88;fd=me.d+10.5}
    else{fx=ball.x*.85;fd=Math.max(ball.d+11,10)}
@@ -5523,13 +5610,16 @@ function nssMoment(o){
   // ---------- toque ----------
   const pt=e=>{const r=cv.getBoundingClientRect();return{x:(e.clientX-r.left)*(W/r.width),y:(e.clientY-r.top)*(H/r.height)}};
   let drag=null,curlLast=null;
+  let swp=null;
   cv.addEventListener('pointerdown',e=>{e.preventDefault();SFX.ctx();if(!SFX.loop)SFX.startLoop();try{cv.setPointerCapture(e.pointerId)}catch(_){}const p=pt(e);
+   if(K==='dribble'){swp=p;return}
    if(kicked&&kicked!=='touch'&&!ended&&T-kickT<1.2){curlLast=p;return}
    if(!canAim())return;aim={sx:p.x,sy:p.y,cx:p.x,cy:p.y,len:0};drag=true});
   cv.addEventListener('pointermove',e=>{const p=pt(e);
    if(curlLast&&kicked&&kicked!=='touch'){const dx=p.x-curlLast.x;curlLast=p;const add=dx*.16*cam.dir;ball.ax=clamp(ball.ax+add,-11,11);curl=Math.sign(ball.ax);return}
    if(drag&&aim){aim.cx=p.x;aim.cy=p.y;aim.len=Math.hypot(aim.cx-aim.sx,aim.cy-aim.sy)}});
-  const up=e=>{if(curlLast){curlLast=null;return}if(!drag||!aim){drag=null;return}drag=null;const a=aim;
+  const up=e=>{if(K==='dribble'){if(!swp)return;const p=pt(e);const dx=p.x-swp.x,dy=p.y-swp.y;swp=null;if(Math.hypot(dx,dy)<26)return;drbSwipe(-dy>Math.abs(dx)*1.1?'up':dx>0?1:-1);return}
+   if(curlLast){curlLast=null;return}if(!drag||!aim){drag=null;return}drag=null;const a=aim;
    if(a.len<14){aim=null;return}
    if(GK){aim=null;const r=cv.getBoundingClientRect();const g=proj(gk.x,gk.d,1);const dep=(cam.d-gk.d)*cam.dir;const s=F/dep;const wx=cam.x+(a.cx-W/2)/s*cam.dir;const wh=cam.h-(a.cy-hz)/s;gkTarget={x:clamp(wx,-3.6,3.6),h:clamp(wh,0,2.6)};return}
    if(K==='header'){lastAim={...a};aim=null;return}
@@ -5542,7 +5632,7 @@ function nssMoment(o){
   function loop(now){
    const rdt=Math.min(.04,(now-last)/1000);last=now;
    if(phase==='intro'){tIntro+=rdt;if(tIntro>.85)phase='play'}
-   ts=aim&&phase==='play'&&!(K==='header')?.22:(aim&&K==='header'?.5:1);
+   ts=aim&&phase==='play'&&!(K==='header')?.22:(aim&&K==='header'?.5:(K==='dribble'&&drbSlow?.55:1));
    if(phase==='end'){ts=.45;ended.t+=rdt}
    if(phase!=='intro'){const dt=rdt*ts;const n=3;for(let i=0;i<n;i++){if(phase==='end'&&ended.t>1.6)break;step(dt/n)}}
    camUpdate(rdt);render(rdt);
@@ -5550,7 +5640,7 @@ function nssMoment(o){
     swEnd(r.ok,r.txt,r.perfect).then(()=>res({ok:r.ok,perfect:!!r.perfect}));return}
    raf=requestAnimationFrame(loop)}
   raf=requestAnimationFrame(loop);SFX.startLoop();setTimeout(()=>SFX.whistle(),350);
-  NM.api={kickTo(tx,td,p,c){const ox=K==='header'?me.x:ball.x,od=K==='header'?me.d:ball.d;const dx0=tx-ox,dd0=td-od;const ang=Math.atan2(dx0,-dd0);const L=p*H*.34;const a={sx:0,sy:0,cx:-Math.sin(ang)*L,cy:Math.cos(ang)*L,len:L};if(K==='header'){lastAim=a;return}doKick(a,false);if(c)ball.ax=c},state:()=>({phase,T,owner:!!owner,ball:{...ball},me:me&&{x:me.x,d:me.d}}),P,gkSet(x,h){gkTarget={x,h}}};
+  NM.api={kickTo(tx,td,p,c){const ox=K==='header'?me.x:ball.x,od=K==='header'?me.d:ball.d;const dx0=tx-ox,dd0=td-od;const ang=Math.atan2(dx0,-dd0);const L=p*H*.34;const a={sx:0,sy:0,cx:-Math.sin(ang)*L,cy:Math.cos(ang)*L,len:L};if(K==='header'){lastAim=a;return}doKick(a,false);if(c)ball.ax=c},state:()=>({phase,T,owner:!!owner,ball:{...ball},me:me&&{x:me.x,d:me.d}}),P,gkSet(x,h){gkTarget={x,h}},swipe(d){drbSwipe(d)},drb(){const q=drbAct();return q?{dd:me.d-q.d,open:q.open,nut:q.nut}:null}};
  });
 }
 // ---------- liga o motor novo em tudo que usava os mini games de arrastar ----------
@@ -5663,7 +5753,7 @@ if(typeof oneScreenHub==='function'){const _oshAG=oneScreenHub;oneScreenHub=func
 const COACH={n:'Professor Tião',r:'Coordenador da peneira',ic:'🧢'};
 const PEN_ST_OUT=[
  {k:'pass',ic:'🎯',n:'Passe',at:'PAS',how:['Encoste o dedo na tela e <b>puxe pra trás</b>, como um estilingue.','A linha amarela mostra pra onde a bola vai. O tempo fica lento enquanto você mira.','Mire no <b>companheiro com anel azul</b>. Quanto mais longe puxar, mais forte.'],tip:'Passe, lançamento e cruzamento usam esse mesmo gesto nos jogos.'},
- {k:'dribble',ic:'⚡',n:'Condução e drible',at:'DRI',how:['<b>Puxadas curtas</b> dão um toquinho na bola e você corre atrás dela.','Mude de direção pra fugir dos marcadores de branco.','Entre na área com a bola dominada.'],tip:'Às vezes o seu drible desequilibra o marcador sozinho: quanto melhor o DRI, mais vezes.'},
+ {k:'dribble',ic:'⚡',n:'Drible',at:'DRI',how:['Você corre sozinho com a bola. O marcador vem de frente.','Quando o anel em volta dele fechar no <b>dourado</b>, <b>arraste o dedo pro lado da seta verde</b>: é pra lá que você dribla.','Pernas abertas (seta azul)? <b>Arraste pra cima</b>: caneta!'],tip:'Cedo demais ele lê o drible; tarde demais ele toma a bola. Sincronia é tudo.'},
  {k:'finish',ic:'🥅',n:'Finalização',at:'FIN',how:['<b>Puxada longa</b> = chute forte. Forte demais vai por cima.','Mire nos cantos. Bola no meio, o goleiro pega.','Logo depois de chutar, <b>arraste o dedo pro lado</b> pra dar efeito.'],tip:'Nos jogos, cada lance desses pode virar gol de verdade na súmula.'},
  {k:'header',ic:'🤯',n:'Cabeçada',at:'FIS',how:['O cruzamento vem lá da ponta.','<b>Mire antes</b>: puxe pra trás e segure o dedo.','Ele cabeceia sozinho quando a bola chegar.'],tip:'Escanteio e cruzamento viram gol pra quem sobe no tempo certo.'},
  {k:'fk',ic:'🌀',n:'Falta',at:'FIN',how:['Puxe pra trás com força média e solte.','<b>Arraste pro lado logo depois</b> pra curvar a bola.','Passe por cima ou em volta da barreira.'],tip:'Quem bate bem falta pode pedir a cobrança ao treinador.'},
@@ -5674,7 +5764,7 @@ const PEN_ST_GK=[
  {k:'long',ic:'🚀',n:'Reposição',at:'PAS',how:['Goleiro também joga com os pés.','<b>Puxada longa</b> pra lançar no companheiro lá na frente.','Mire no anel azul.'],tip:'Reposição boa começa contra-ataque.'},
 ];
 function penStations(){return S.pos==='GOL'?PEN_ST_GK:PEN_ST_OUT}
-function demoSVG(k){const gk=k==='keeper';
+function demoSVG(k){const gk=k==='keeper';if(k==='dribble')return`<svg class="demo" viewBox="0 0 160 110"><rect width="160" height="110" rx="10" fill="#3a9a3e"/><ellipse cx="80" cy="52" rx="30" ry="10" fill="none" stroke="#f2c443" stroke-width="3" class="dring"/><rect x="74" y="28" width="12" height="22" rx="4" fill="#f4f4f4"/><path d="M88 52 L118 46" stroke="#6eff96" stroke-width="4" stroke-linecap="round"/><path d="M118 46l-8-5v10z" fill="#6eff96"/><path d="M68 40v14" stroke="#ff5046" stroke-width="4"/><circle cx="80" cy="88" r="5" fill="#fff"/><g class="dfinger sw"><text x="-7" y="6" font-size="16">👆</text></g></svg>`;
  return`<svg class="demo" viewBox="0 0 160 110"><defs><linearGradient id="dg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2e7d32"/><stop offset="1" stop-color="#4caf50"/></linearGradient></defs><rect width="160" height="110" rx="10" fill="url(#dg)"/>
  <path d="M50 22h60v18H50z" fill="none" stroke="#fff" stroke-width="2"/><circle cx="80" cy="${gk?60:78}" r="5" fill="#fff" class="${gk?'dball':''}"/>
  ${gk?'<g class="dkeeper"><rect x="74" y="26" width="12" height="16" rx="4" fill="#3cdc5a"/></g>':'<path class="dline" d="M80 78 Q 92 52 98 30" stroke="#ffd34a" stroke-width="3" stroke-dasharray="4 4" fill="none"/>'}
@@ -5815,6 +5905,156 @@ if(typeof retireShow==='function'){const _rsJ=retireShow;retireShow=async functi
 // livro da carreira no painel do jogador
 const _ohpJ=openHubPanel;openHubPanel=function(k){_ohpJ(k);if(k!=='jogador')return;const b=document.getElementById('ppB');const st=S.story;if(!b||!st||!st.log.length)return;
  b.insertAdjacentHTML('beforeend',`<section class="card book"><div class="eyebrow">📖 Sua história</div>${st.log.slice().reverse().map(c=>`<details class="bk"><summary><span>${c.ic||'📖'}</span><b>Cap. ${c.n} · ${esc(c.title)}</b><small>${c.age} anos</small></summary><p>${esc(c.txt)}</p></details>`).join('')}</section>`)};
+
+// ================== TORCIDA + VIDA PESSOAL COM PESO ==================
+function fansOf(id){S.fans=S.fans||{};if(id&&S.fans[id]==null){S.fans[id]=(S.heart===id?65:50)+(S.idols&&S.idols.includes(id)?20:0)}return id?S.fans[id]:50}
+function fansCur(){return S&&S.club?fansOf(S.club):50}
+function fansAdd(d,id){id=id||(S&&S.club);if(!id)return 0;const v=fansOf(id);S.fans[id]=clamp(v+d,0,100);return S.fans[id]-v}
+function fansMood(v){return v>=85?['Ídolo da arquibancada','#f2c443']:v>=65?['Te apoia','#6fdc8c']:v>=40?['Desconfiada','#cfd6c8']:v>=20?['Na bronca','#ff9a5a']:['Pede sua saída','#ff5a4a']}
+// humor geral da vida: pesa em campo
+function lifeMod(){if(!S||!S.life)return 0;const L=S.life;let m=(L.cab-55)/40+(L.corpo-60)/55+((S.pais??70)-55)/160+(fansCur()-50)/120;
+ if(S.gf)m+=(S.gf.v-50)/130;if(S.st&&S.st.injLeft>0)m-=.2;return clamp(m,-1,1)}
+function lifeImpact(){return Math.round(lifeMod()*6)/10} // até ±0,6 na nota
+// nota e lances sentem a vida
+const _playMineT=playMine;playMine=async function(o,io){const r=await _playMineT(o,io);try{
+ if(r&&r.me&&r.me.play&&r.me.nota!=null&&!(typeof HIDDEN_PRO!=='undefined'&&HIDDEN_PRO)){r.me.nota=Math.round(clamp(r.me.nota+lifeImpact(),3,10)*10)/10;
+  if((o.kind||'club')==='club'&&!S.youth){const win=r.gu>r.gt,loss=r.gu<r.gt;let d=(r.me.nota-6.6)*1.7+r.me.g*1.3+r.me.a*.6+(win?.6:loss?-.5:0)+(r.me.r?-3:0);
+   if(o.label&&/Final/i.test(o.label))d*=2;d*=.3;const v=fansCur();d*=d>0?Math.max(.15,1-v/115):(.45+v/110);fansAdd(d)}}
+ else if(r&&r.me&&!r.me.play&&(o.kind||'club')==='club'&&!S.youth&&r.me.why==='banco')fansAdd(-.15);
+}catch(e){}return r};
+if(typeof skillOf==='function'){const _skT=skillOf;skillOf=function(k){return clamp(_skT(k)+lifeMod()*.06,.08,.98)}}
+// torcida mexe na escalação
+const _partT=participation;participation=function(kind,o){const r=_partT(kind,o);try{if(kind==='club'&&!r.play&&r.why==='banco'&&fansCur()>=80&&ch(.18))return{play:true,start:false,min:RI(10,30),role:r.role,fans:true};
+ if(kind==='club'&&r.play&&r.start&&fansCur()<18&&ch(.25))return{play:true,start:false,min:RI(8,25),role:r.role}}catch(e){}return r};
+// efeitos fora de campo também mexem com a torcida
+const _applyFxT=applyFx;applyFx=function(fx){const chips=_applyFxT(fx);try{if(fx&&S&&S.club&&!S.youth){let d=fx.torc||0;if(fx.preso)d-=15;if(fx.fama&&fx.fama<0)d+=fx.fama*.6;if(fx.board&&fx.board<=-6)d-=2;
+ if(d){const got=fansAdd(d);if(Math.round(got))chips.push([`${got>0?'+':'−'}${Math.abs(Math.round(got))} Torcida`,got>0?'up':'down'])}}}catch(e){}return chips};
+// trocou de clube: a nova torcida começa do zero (mas lembra de quem já foi ídolo)
+const _acceptT=acceptOffer;acceptOffer=function(o){const r=_acceptT(o);try{fansOf(S.club)}catch(e){}return r};
+// fim de temporada: veredito da torcida
+const _endT=endSeason;endSeason=function(){const id=S.club;const wasYouth=S.youth;const ls=_endT();try{
+ if(!ls||wasYouth||!id)return ls;const v0=fansOf(id);
+ const T=(ls.titles||[]).filter(t=>t.t!=='base');fansAdd(T.length*7,id);if(ls.myMove&&ls.myMove.dir==='down')fansAdd(-10,id);if(ls.myMove&&ls.myMove.dir==='up')fansAdd(6,id);
+ const v=fansOf(id);const c=CLUB[id];const seasons=(S.clubs[id]&&S.clubs[id].seasons)||0;ls.fans={from:Math.round(v0),to:Math.round(v)};
+ // ídolo pela arquibancada
+ if(v>=88&&seasons>=3&&!S.idols.includes(id)){S.idols.push(id);S.life.fama=clamp(S.life.fama+8,0,100);ls.news.push({t:'idolo',club:id,txt:`A torcida do ${c.n} te elegeu ídolo. Seu nome virou música na arquibancada.`})}
+ if(v>=96&&seasons>=8&&S.idols.includes(id)&&!S.statues.includes(id)){S.statues.push(id);ls.news.push({t:'estatua',club:id,txt:`Uma campanha da torcida vai erguer sua estátua na porta do estádio do ${c.n}.`})}
+ // a torcida te tira do time…
+ if(v<15&&!S.loan){S.flags.release=true;S.board=clamp(S.board-10,0,100);ls.news.push({t:'torcida',club:id,txt:`A torcida do ${c.n} pichou o muro do CT pedindo sua saída. A diretoria vai te negociar.`})}
+ // …ou te salva
+ else if(v>=72&&(S.flags.release||S.board<25||S.life.disc<30)){S.flags.release=false;S.flags.fanSaved=true;S.board=clamp(S.board+15,0,100);ls.news.push({t:'torcida',club:id,txt:`A diretoria pensou em te vender, mas a torcida do ${c.n} fez um abaixo-assinado com milhares de nomes. Você fica.`})}
+}catch(e){console.error(e)}return ls};
+// a torcida também protege na janela
+const _wsT=windowState;windowState=function(){const r=_wsT();try{if(r.release&&S.flags.release!=='youth'&&fansCur()>=72){r.release=false;r.stay=true}}catch(e){}return r};
+
+// ---------- eventos da torcida ----------
+EV.push(
+{id:'protesto',k:'vida',a:[18,40],c:()=>!S.youth&&fansCur()<30,t:'Protesto no CT',d:()=>`Uns cem torcedores do ${club().n} cercaram o CT. Faixas com seu nome riscado.`,o:[
+ ['Descer e conversar com eles',()=>ch(.55)?['Você ouviu, prometeu suor. Alguns até aplaudiram.',{torc:12,cab:-2}]:['Viraram as costas e continuaram gritando.',{torc:-4,cab:-6}],1],
+ ['Sair pelos fundos',()=>['Escapou, mas a foto do carro saindo virou meme.',{torc:-6,cab:-3}]],
+ ['Mandar um recado duro nas redes',()=>ch(.25)?['Parte da torcida gostou da personalidade.',{torc:6,fama:4}]:['Jogou gasolina no fogo.',{torc:-14,board:-5}]]]},
+{id:'faixa',k:'vida',a:[18,40],c:()=>!S.youth&&fansCur()>=75,t:'Faixa no estádio',d:()=>`A organizada do ${club().n} estendeu uma faixa gigante com seu rosto.`,o:[
+ ['Agradecer beijando o escudo',()=>['A arquibancada veio abaixo.',{torc:6,cab:4,fama:2}],1],
+ ['Tirar foto com a faixa e postar',()=>['Milhões de curtidas.',{fama:5,torc:3}]],
+ ['Ficar na sua',()=>['Humildade também agrada.',{torc:2}]]]},
+{id:'rival',k:'vida',a:[18,40],c:()=>!S.youth,t:'Provocação do rival',d:()=>'O maior rival publicou um vídeo zoando você depois do último clássico.',o:[
+ ['Responder com deboche',()=>ch(.5)?['Sua torcida amou. A deles, odiou.',{torc:8,fama:3,disc:-2}]:['Virou polêmica e o técnico te chamou.',{torc:3,disc:-5,board:-3}]],
+ ['Responder dentro de campo',()=>['Guardou pra quando a bola rolar.',{forma:2,cab:2}],1],
+ ['Ignorar',()=>['Postura de profissional.',{disc:2}]]]},
+{id:'crianca',k:'vida',a:[17,40],c:()=>!S.youth,t:'O menino da arquibancada',d:()=>'No fim do jogo, um menino chora na grade segurando um cartaz: "ME DÁ SUA CAMISA?"',o:[
+ ['Pular a placa e entregar a camisa',()=>['O vídeo rodou o país. A torcida te adotou.',{torc:9,fama:4,cab:3}],1],
+ ['Jogar a camisa de longe',()=>['Um adulto pegou antes dele.',{torc:-2}]],
+ ['Ir pro vestiário',()=>['Ninguém viu. Ou quase ninguém.',{}]]]},
+{id:'aeroporto',k:'vida',a:[18,40],c:()=>!S.youth&&fansCur()<45&&S.st&&S.st.forma<0,t:'Cobrança no aeroporto',d:()=>'Na volta de uma derrota, torcedores esperam o elenco no desembarque.',o:[
+ ['Parar e ouvir a cobrança',()=>['Ouviu calado. Respeitaram.',{torc:6,cab:-3}],1],
+ ['Passar de fone e capuz',()=>['"Mercenário!" ecoou no saguão.',{torc:-7}]],
+ ['Bater boca',()=>['A polícia teve que separar.',{torc:-12,disc:-6,heat:5}]]]}
+);
+
+// ---------- MINIGAMES DA VIDA ----------
+function lifeFrame(o,inner){$ov.hidden=false;$ov.innerHTML=`<div class="ovwrap lifemg ${o.cls||''}"><div class="lm-top"><span class="tag vida">${esc(o.tag)}</span><span class="eyebrow">${esc(o.sub||'')}</span></div><h2 class="pkh">${esc(o.title)}</h2><p class="lm-hint">${o.hint}</p>${inner}<div class="pkres" id="mgRes"></div></div>`}
+// 1) Sessão de autógrafos: toque nos torcedores antes de irem embora
+function mgAutografos(){return new Promise(res=>{
+ lifeFrame({tag:'Torcida',sub:'Sessão de autógrafos',title:'Fila de autógrafos',hint:'Toque nas <b>camisas e cadernos</b> antes que o torcedor desista. Cuidado com o <b>📸 paparazzi</b>.'},`<div class="aut" id="aut"><div class="aut-hud"><span id="autT">⏱ 15</span><span id="autS">✍️ 0</span><span id="autC"></span></div></div>`);
+ const box=document.getElementById('aut');let score=0,miss=0,combo=0,t=15,done=false;const items=['👕','📓','⚽','🧢','🖼️','👕'];
+ const spawn=()=>{if(done)return;const bad=ch(.14);const e=document.createElement('button');e.className='autit'+(bad?' bad':'');e.textContent=bad?'📸':items[(Math.random()*items.length)|0];
+  e.style.left=R(4,80)+'%';e.style.top=R(16,78)+'%';const life=R(900,1500)-Math.min(400,score*12);e.style.setProperty('--life',life+'ms');box.appendChild(e);
+  const kill=setTimeout(()=>{if(e.isConnected){e.remove();if(!bad){miss++;combo=0;upd()}}},life);
+  e.onpointerdown=ev=>{ev.preventDefault();clearTimeout(kill);if(bad){score=Math.max(0,score-3);combo=0;SFX.tone({f:200,dur:.2,gain:.15,type:'square'});e.classList.add('hitbad')}else{combo++;score+=1+(combo>=5?1:0);SFX.tone({f:600+combo*40,dur:.08,gain:.1});e.classList.add('hit')}setTimeout(()=>e.remove(),220);upd()}};
+ const upd=()=>{document.getElementById('autS').textContent='✍️ '+score;document.getElementById('autC').textContent=combo>=5?`🔥 x${combo}`:''};
+ const sp=setInterval(spawn,430);const tm=setInterval(()=>{t--;document.getElementById('autT').textContent='⏱ '+t;if(t<=0)end()},1000);
+ function end(){if(done)return;done=true;clearInterval(sp);clearInterval(tm);const ok=score>=14;swEnd(ok,`${score} autógrafos`,score>=22).then(()=>res({score,ok,perfect:score>=22}))}
+})}
+// 2) Coletiva de imprensa: responda antes do tempo acabar
+const PRESS_Q=[
+ {q:'"O time não vem bem. A culpa é do técnico?"',a:[['Todo mundo tem culpa, eu também.',{torc:4,coach:6}],['Algumas escolhas não ajudam.',{coach:-10,fama:3,torc:2}],['Pergunta pra ele, ué.',{coach:-6,fama:4,torc:-2}]]},
+ {q:'"Você sairia do clube por uma proposta melhor?"',a:[['Aqui é minha casa.',{torc:8,board:3}],['Futebol é dinâmico, nunca se sabe.',{torc:-6,fama:2}],['Meu empresário cuida disso.',{torc:-3}]]},
+ {q:'"O que achou da provocação do rival?"',a:[['Respondo em campo.',{torc:5,disc:2}],['Eles vivem falando da gente.',{torc:7,fama:3,disc:-2}],['Nem vi.',{torc:1}]]},
+ {q:'"E a vida fora de campo? Foi visto na balada…"',a:[['Folga é folga, mas sou profissional.',{board:2,torc:2}],['Minha vida pessoal não é assunto.',{fama:2,torc:-1}],['Tava comemorando o gol, ué!',{fama:4,torc:3,board:-4}]]},
+ {q:'"Qual é o seu sonho no futebol?"',a:[['Ganhar tudo com essa camisa.',{torc:7}],['Seleção e Bola de Ouro.',{fama:4}],['Dar uma casa pros meus pais.',{cab:3,torc:3}]]},
+ {q:'"A torcida vaiou você no último jogo. Magoou?"',a:[['Eles têm o direito. Vou virar o jogo.',{torc:8,cab:-1}],['Magoou sim, sou humano.',{torc:2,cab:2}],['Vaia de quem não joga não me afeta.',{torc:-12,fama:3}]]},
+];
+function mgColetiva(){return new Promise(res=>{
+ const qs=shuffle(PRESS_Q.slice()).slice(0,3);let i=0;const tot={};let late=0;
+ const step=()=>{if(i>=qs.length){const tor=tot.torc||0;swEnd(tor>=6,tor>=6?'A coletiva repercutiu bem':'Foi uma coletiva morna',tor>=14).then(()=>res({fx:tot,late}));return}
+  const q=qs[i];const T=4500;
+  lifeFrame({tag:'Imprensa',sub:`Pergunta ${i+1} de ${qs.length}`,title:'Coletiva de imprensa',hint:'Responda <b>antes do tempo acabar</b>. Silêncio pega mal.',cls:'press'},
+   `<div class="press-mics">🎙️🎙️🎙️</div><div class="press-q">${esc(q.q)}</div><div class="press-t"><i id="prT"></i></div><div class="choices">${shuffle(q.a.map((a,j)=>[a,j])).map(([a,j])=>`<button class="choice" data-pa="${j}"><span>${esc(a[0])}</span><span class="arrow">→</span></button>`).join('')}</div>`);
+  const bar=document.getElementById('prT');bar.style.transition=`width ${T}ms linear`;requestAnimationFrame(()=>requestAnimationFrame(()=>bar.style.width='0%'));
+  let ans=false;const to=setTimeout(()=>{if(ans)return;ans=true;late++;tot.torc=(tot.torc||0)-3;tot.fama=(tot.fama||0)-1;toast({ic:'😶',title:'Silêncio constrangedor',ms:1500});i++;setTimeout(step,500)},T);
+  $ov.querySelectorAll('[data-pa]').forEach(b=>b.onclick=()=>{if(ans)return;ans=true;clearTimeout(to);const fx=q.a[+b.dataset.pa][1];for(const k in fx)tot[k]=(tot[k]||0)+fx[k];b.classList.add('picked');SFX.tone({f:520,dur:.1,gain:.08});i++;setTimeout(step,450)})};
+ step();
+})}
+// 3) Encontro: toque quando o coração estiver no ponto
+function mgEncontro(name){return new Promise(res=>{
+ lifeFrame({tag:'Amor',sub:name?`Encontro com ${name}`:'Primeiro encontro',title:name?'Noite a dois':'Puxar conversa',hint:'Toque quando o coração <b>encher o anel dourado</b>. 5 momentos da noite.',cls:'date'},
+  `<div class="date-st"><div class="date-ring"></div><div class="date-heart" id="dh">❤️</div></div><div class="date-lines" id="dl"></div><button class="btn wide" id="dTap">Agora!</button>`);
+ const lines=['Elogio na hora certa','Piada que funcionou','Escutou com atenção','Pediu a sobremesa certa','Despedida perfeita'];
+ const lbad=['Falou de futebol demais','Olhou o celular','Silêncio esquisito','Esqueceu o nome do cachorro dela','Tropeçou na saída'];
+ let k=0,good=0,t0=performance.now();const per=1100;const h=document.getElementById('dh');let raf;
+ const loop=now=>{const ph=((now-t0)%per)/per;const sc=.55+.75*Math.sin(ph*Math.PI);h.style.transform=`scale(${sc})`;h.dataset.sc=sc;raf=requestAnimationFrame(loop)};raf=requestAnimationFrame(loop);
+ const tap=()=>{if(k>=5)return;const sc=+h.dataset.sc;const ok=sc>1.12;if(ok)good++;document.getElementById('dl').insertAdjacentHTML('beforeend',`<span class="chip ${ok?'up':'down'}">${ok?'💘 '+lines[k]:'💔 '+lbad[k]}</span>`);SFX.tone({f:ok?660:180,dur:.12,gain:.12,type:ok?'sine':'square'});k++;
+  if(k>=5){cancelAnimationFrame(raf);swEnd(good>=3,good>=4?'Noite perfeita':good>=3?'Rolou química':'Não foi dessa vez',good===5).then(()=>res({good}))}};
+ document.getElementById('dTap').onclick=tap;h.onclick=tap;
+})}
+// ações novas nas relações
+const _relActT=relActions;relActions=function(){const a=_relActT();try{
+ if(S.club&&!S.youth){a.push({who:'torc',id:'autografos',n:'Sessão de autógrafos',t:1,c:0,d:'Minigame: atender a fila de torcedores.'});
+  a.push({who:'torc',id:'coletiva',n:'Dar entrevista coletiva',t:1,c:0,d:'Minigame: responder a imprensa a tempo.'});
+  a.push({who:'torc',id:'organizada',n:'Visitar a sede da organizada',t:1,c:.002,d:'Churrasco com os líderes da torcida.'})}
+ else a.push({who:'torc',id:'autografos',n:'Autógrafos na escolinha',t:1,c:0,d:'Minigame: a molecada do bairro quer seu autógrafo.'});
+ if(S.gf)a.push({who:'gf',id:'encontro',n:'Noite especial',t:1,c:.006,d:`Minigame: um encontro caprichado com ${S.gf.n}.`});
+ else a.push({who:'gf',id:'encontro',n:'Chamar alguém pra sair',t:1,c:.003,d:'Minigame: o primeiro encontro.'});
+ a.push({who:'pais',id:'pelada',n:'Racha no campinho do bairro',t:1,c:0,d:'Minigame: jogar com os amigos de infância.'});
+}catch(e){}return a};
+const LIFE_ASYNC={autografos:1,coletiva:1,encontro:1,pelada:1};
+async function doRelAsync(id){
+ if(id==='autografos'){const r=await mgAutografos();const fx=S.youth||!S.club?{fama:Math.round(r.score/8),cab:2}:{torc:Math.min(8,Math.round(r.score/3)),fama:Math.min(3,Math.round(r.score/10))};if(!r.ok)fx.cab=-1;return{txt:r.ok?`Você assinou ${r.score} camisas. Saiu com a mão doendo e o coração cheio.`:`Só ${r.score} autógrafos. Teve gente que foi embora chateada.`,chips:applyFx(fx)}}
+ if(id==='coletiva'){const r=await mgColetiva();const fx={...r.fx};if(fx.torc)fx.torc=Math.round(fx.torc*.5);if(fx.fama)fx.fama=Math.round(fx.fama*.6);const coach=fx.coach||0;delete fx.coach;if(coach)S.coach=clamp((S.coach??50)+coach,0,100);const ch2=applyFx(fx);if(coach)ch2.push([`${coach>0?'+':'−'}${Math.abs(coach)} Técnico`,coach>0?'up':'down']);return{txt:r.late?'Você travou em uma pergunta e isso virou meme.':'Suas falas viraram manchete.',chips:ch2}}
+ if(id==='encontro'){const r=await mgEncontro(S.gf&&S.gf.n);if(S.gf){S.gf.v=clamp(S.gf.v+(r.good*5-8),0,100);return{txt:r.good>=3?`${S.gf.n} disse que foi a melhor noite em meses.`:`${S.gf.n} voltou pra casa calada.`,chips:applyFx({cab:r.good>=3?4:-3})}}
+  if(r.good>=3){S.gf={n:pick(GF_NAMES),v:50+r.good*4};S.rel='namorando';return{txt:`Deu certo! Você e ${S.gf.n} estão namorando.`,chips:applyFx({cab:5})}}return{txt:'Foi simpático, mas não passou disso.',chips:applyFx({cab:-1})}}
+ if(id==='pelada'){const r=await nssMoment({kind:ch(.5)?'dribble':'finish',comp:'Pelada no bairro',title:'Racha com os amigos',skill:.85,keeper:.25,planned:true,need:2,speed:.8,okTxt:'Golaço no racha!'});S.pais=clamp((S.pais??70)+6,0,100);return{txt:r.ok?'Golaço no campinho onde tudo começou. Os amigos te carregaram nos ombros.':'Levou um chapéu do seu amigo de infância. Riram até de noite.',chips:applyFx({cab:r.ok?6:4,corpo:-1})}}
+}
+const _relHTMLT=relHTML;relHTML=function(){let h=_relHTMLT();try{const acts=relActions().filter(a=>a.who==='torc');const v=fansCur();const[md,col]=fansMood(v);
+ const card=`<section class="card relcard fancard"><div class="relhd"><span class="relic">📣</span><div><b>Torcida${S.club&&CLUB[S.club]?' do '+esc(CLUB[S.club].n):''}</b><span class="muted" style="color:${col}">${md}</span></div></div>${meterHTML('Apoio',v,col)}
+ <div class="muted" style="font-size:12.5px;margin:2px 0 6px">${v>=72?'Com esse apoio, a torcida te protege se a diretoria quiser te vender.':v<20?'Se continuar assim, a torcida força sua saída no fim da temporada.':'Gols, notas altas, títulos e atitudes fora de campo mexem com ela. Com apoio alto por 3 temporadas, você vira ídolo.'}</div>
+ <div class="relacts">${acts.map(a=>`<button class="relbtn" data-rel="${a.id}" ${canPay(a.c,a.t)?'':'disabled'}><b>${esc(a.n)}</b><span>${esc(a.d)}</span><em>${costLbl(a.c,a.t)}</em></button>`).join('')}</div></section>`;
+ h=card+h}catch(e){}return h};
+const _doRelT=doRel;doRel=function(id){
+ if(id==='organizada'){const ok=ch(.65);return{txt:ok?'Churrasco, fotos e uma camisa assinada pra sede. Agora você é "da casa".':'Um dos líderes cobrou sua última atuação na frente de todo mundo.',chips:applyFx(ok?{torc:9,disc:-1}:{torc:2,cab:-3})}}
+ return _doRelT(id)};
+const _bindLifeT=bindLife;bindLife=function(){_bindLifeT();try{$app.querySelectorAll('[data-rel]').forEach(b=>{if(!LIFE_ASYNC[b.dataset.rel])return;b.onclick=async()=>{const a=relActions().find(x=>x.id===b.dataset.rel);if(!a||!canPay(a.c,a.t))return;S.tempo-=a.t;S.din-=a.c;if(a.t)dayLog({gf:'❤️',tec:'📋',pais:'🏠',dir:'💼',torc:'📣'}[a.who],a.n);LIFE_MSG=await doRelAsync(a.id);lifeRefresh()}})}catch(e){console.error(e)}};
+// término quando o namoro esfria
+const _lifeTickT=lifeTick;lifeTick=function(...a){const r=_lifeTickT.apply(this,a);try{if(S.gf&&S.gf.v<12&&ch(.2)){const n=S.gf.n;S.gf=null;S.rel=S.rel==='casado'?'divorciado':'solteiro';S.life.cab=clamp(S.life.cab-15,0,100);if(typeof toast==='function')toast({ic:'💔',title:`${n} terminou com você`,txt:'Faltou atenção. A cabeça vai sentir nos jogos.',ms:4200})}}catch(e){}return r};
+
+// ---------- faixa de estado no hub (vida pesa em campo) ----------
+function lifeStripHTML(){const L=S.life;const v=fansCur();const heart=S.gf?S.gf.v:(S.pais??70);const imp=lifeImpact();
+ const m=(ic,lbl,val,col)=>`<div class="ls-m" title="${lbl}"><span>${ic}</span><div><small>${Math.round(val)}</small><i><s style="width:${clamp(val,0,100)}%;background:${col}"></s></i></div></div>`;
+ return`<button class="lifestrip" id="lifeStrip" aria-label="Vida fora de campo">${m('🧠','Cabeça',L.cab,'#8fd3ff')}${m('💪','Corpo',L.corpo,'#7dff9a')}${m(S.gf?'❤️':'🏠',S.gf?'Amor':'Família',heart,'#ff8fb3')}${m('📣','Torcida',S.youth?50:v,fansMood(v)[1])}
+ <div class="ls-imp ${imp>0?'up':imp<0?'down':''}"><b>${imp>0?'+':''}${imp.toFixed(1)}</b><small>na nota</small></div></button>`}
+if(typeof oneScreenHub==='function'){const _oshT=oneScreenHub;oneScreenHub=function(...a){const r=_oshT.apply(this,a);try{
+ const w=$app.querySelector('.wrap');const j=w&&w.querySelector(':scope > .journey');if(w&&S.st&&!S.st.done&&!PAUSE&&!(S.tips&&!S.tips.tourHub)){const dec=isDecisive(nextItem());if(!dec&&j&&!document.getElementById('lifeStrip')){j.insertAdjacentHTML('afterend',lifeStripHTML());j.remove();document.getElementById('lifeStrip').onclick=()=>{WEEK_TAB='rel';renderHub()}}}
+}catch(e){console.error(e)}return r}}
 
 // ================== VERSÃO WEB: ranking no Supabase ==================
 function webDevice(){let d=null;try{d=localStorage.getItem('fdb_dev')}catch(e){}if(!d){d='d'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);try{localStorage.setItem('fdb_dev',d)}catch(e){}}return d}

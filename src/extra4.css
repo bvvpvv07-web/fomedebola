@@ -487,3 +487,38 @@ body.onescreen .wrap::-webkit-scrollbar{display:none}
 .st-txt{margin:4px 0 0;font-size:16px;line-height:1.55;color:#efe9da;min-height:7.5em;text-align:left;font-family:Georgia,'Times New Roman',serif}
 .st-meta{font-size:12px;color:var(--muted);letter-spacing:.06em}.story .btn{transition:opacity .4s}
 .book{display:grid;gap:6px}.bk summary{display:flex;align-items:center;gap:8px;cursor:pointer;list-style:none;padding:6px 0}.bk summary::-webkit-details-marker{display:none}.bk summary small{margin-left:auto;color:var(--muted)}.bk p{margin:0 0 8px;font-family:Georgia,serif;color:#e6e0d0;font-size:14.5px;line-height:1.5}
+
+.dfinger.sw{animation:dfs 2.2s ease-in-out infinite}@keyframes dfs{0%{transform:translate(70px,92px);opacity:0}20%{opacity:1}55%{transform:translate(70px,92px)}80%{transform:translate(122px,90px);opacity:1}100%{opacity:0;transform:translate(122px,90px)}}
+.dring{animation:drg 2.2s ease-in-out infinite;transform-origin:80px 52px}@keyframes drg{0%{transform:scale(1.8);opacity:.5}55%{transform:scale(1);opacity:1}100%{transform:scale(1);opacity:.3}}
+/* ---------- faixa de vida no hub ---------- */
+.lifestrip{display:grid;grid-template-columns:repeat(4,minmax(0,1fr)) auto;gap:8px;align-items:center;width:100%;padding:8px 10px;border-radius:14px;border:1px solid var(--line-2);background:linear-gradient(180deg,rgba(255,255,255,.05),rgba(255,255,255,.015));color:inherit;cursor:pointer;text-align:left}
+.ls-m{display:flex;align-items:center;gap:5px;min-width:0}.ls-m>span{font-size:15px;flex:none}.ls-m div{min-width:0;flex:1}
+.ls-m small{display:block;font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.ls-m i{display:block;height:5px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden;margin-top:3px}.ls-m s{display:block;height:100%;border-radius:3px}
+.ls-imp{display:grid;justify-items:center;padding-left:8px;border-left:1px solid var(--line-2)}.ls-imp b{font-family:var(--f-mono,monospace);font-size:15px}.ls-imp small{font-size:9.5px;color:var(--muted);white-space:nowrap}
+.ls-imp.up b{color:var(--good)}.ls-imp.down b{color:#ff8a7a}
+/* ---------- minigames da vida ---------- */
+.lifemg{max-width:440px;display:grid;gap:8px;text-align:center}.lm-top{display:flex;gap:8px;align-items:center;justify-content:center}.lm-hint{margin:0;color:#d8dfcf;font-size:14px}.lm-hint b{color:var(--gold)}
+.aut{position:relative;height:min(360px,46vh);border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#1b2a3a 0%,#22384a 45%,#2c5a35 46%,#3a8a42 100%);border:1px solid var(--line-2);touch-action:manipulation}
+.aut::before{content:'';position:absolute;inset:0 0 54% 0;background:radial-gradient(circle at 10% 60%,#c8102e 0 3px,transparent 4px),radial-gradient(circle at 30% 40%,#f2c443 0 3px,transparent 4px),radial-gradient(circle at 60% 70%,#fff 0 3px,transparent 4px),radial-gradient(circle at 85% 45%,#1e4fd8 0 3px,transparent 4px);background-size:38px 26px;opacity:.55}
+.aut-hud{position:absolute;top:8px;left:8px;right:8px;display:flex;justify-content:space-between;font-family:var(--f-mono,monospace);font-weight:700;z-index:2}.aut-hud span{background:rgba(0,0,0,.5);padding:3px 9px;border-radius:999px}
+.autit{position:absolute;width:58px;height:58px;margin:-29px 0 0 -29px;border-radius:50%;border:none;font-size:30px;background:radial-gradient(circle at 35% 30%,#fff,#e8e2d0);box-shadow:0 6px 14px rgba(0,0,0,.4);cursor:pointer;animation:autin .18s both;transform-origin:center}
+.autit::after{content:'';position:absolute;inset:-6px;border-radius:50%;border:3px solid var(--gold);animation:autlife var(--life) linear both}
+.autit.bad{background:radial-gradient(circle at 35% 30%,#ffd6d0,#ff7a6a)}.autit.bad::after{border-color:#ff5a4a}
+.autit.hit{animation:autout .2s both}.autit.hitbad{animation:autshake .2s both}
+@keyframes autin{from{transform:scale(0)}to{transform:scale(1)}}@keyframes autlife{from{transform:scale(1);opacity:1}to{transform:scale(.55);opacity:.2}}
+@keyframes autout{to{transform:scale(1.5);opacity:0}}@keyframes autshake{50%{transform:translateX(-6px)}100%{transform:translateX(6px);opacity:0}}
+.press-mics{font-size:30px;letter-spacing:6px}.press-q{font-family:Georgia,serif;font-size:19px;line-height:1.4;padding:12px 14px;border-radius:14px;background:rgba(255,255,255,.06);border:1px solid var(--line-2)}
+.press-t{height:6px;border-radius:3px;background:rgba(255,255,255,.1);overflow:hidden}.press-t i{display:block;height:100%;width:100%;background:linear-gradient(90deg,#ff5a4a,#f2c443)}
+.date-st{position:relative;height:200px;display:grid;place-items:center}.date-ring{position:absolute;width:150px;height:150px;border-radius:50%;border:4px solid var(--gold);box-shadow:0 0 30px rgba(242,196,67,.35)}
+.date-heart{font-size:110px;line-height:1;cursor:pointer;filter:drop-shadow(0 6px 16px rgba(255,60,120,.5));user-select:none}
+.date-lines{display:flex;flex-wrap:wrap;gap:6px;justify-content:center;min-height:30px}
+.fancard{border-color:rgba(242,196,67,.25)}
+
+/* ---------- refinamento visual geral ---------- */
+.card{border-radius:16px;background:linear-gradient(180deg,rgba(255,255,255,.045),rgba(255,255,255,.012)),var(--panel);box-shadow:inset 0 1px 0 rgba(255,255,255,.05),0 10px 26px rgba(0,0,0,.16)}
+.ls-m small{font-family:var(--f-mono,monospace);font-size:11px;letter-spacing:0;color:#e6ecdf;text-transform:none}
+.todoh{font-family:var(--f-display);font-weight:800;letter-spacing:.02em;text-transform:uppercase}
+.wact{transition:transform .12s,background .15s}.wact:active{transform:scale(.96)}
+.hubnav button{transition:transform .12s}.hubnav button:active{transform:scale(.95)}
+.btn{letter-spacing:.02em}.btn:active{transform:translateY(1px)}
