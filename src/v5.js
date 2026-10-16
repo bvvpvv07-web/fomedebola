@@ -25,7 +25,7 @@ function revealOVR(){return new Promise(res=>{
  <div class="rv-attrs">${top.map(([k,v])=>`<div><span>${ATTR_NAME[k]}</span><i><s style="width:${v}%"></s></i><b class="mono">${v}</b></div>`).join('')}</div>
  <p class="muted" style="font-size:13px;margin:6px 0 10px">Seu nível nasceu do que você fez na peneira. Daqui pra frente ele cresce com treino, vida em ordem e temporadas boas.</p>
  <button class="btn wide" id="rvOk" style="opacity:0">Ver quem te quer</button></div>`;
- const el=document.getElementById('rvO');let v=40;const tick=()=>{v=Math.min(r.ovr,v+1);el.textContent=v;if(v<r.ovr)setTimeout(tick,reduced?0:45);else{el.classList.add('pop');SFX.tone({f:880,dur:.18,gain:.12});document.getElementById('rvOk').style.opacity=1}};setTimeout(tick,500);
+ const el=document.getElementById('rvO');let v=40;const tick=()=>{if(!el.isConnected)return;v=Math.min(r.ovr,v+1);el.textContent=v;if(v<r.ovr)setTimeout(tick,reduced?0:45);else{el.classList.add('pop');SFX.tone({f:880,dur:.18,gain:.12});(document.getElementById('rvOk')||{style:{}}).style.opacity=1}};setTimeout(tick,500);
  document.getElementById('rvOk').onclick=()=>{$ov.hidden=true;$ov.innerHTML='';res()};
 })}
 const _penResultV5=peneiraResult;peneiraResult=function(...a){if(S.ovrHidden){revealOVR().then(()=>_penResultV5.apply(this,a));return}return _penResultV5.apply(this,a)};
@@ -89,7 +89,7 @@ function retireCutscene(card){return new Promise(res=>{
  $ov.innerHTML=`<div class="ovwrap cut" style="--c1:${c1};--c2:${c2}"><div class="cut-sky"><i></i><i></i><i></i></div><div class="cut-crowd"></div><div class="cut-pitch"></div>
  <div class="cut-player"><svg viewBox="0 0 60 120"><circle cx="30" cy="14" r="10" fill="#1a1a1a"/><path d="M14 30h32l-4 40H18z" fill="${c1}"/><path d="M18 70h24l-2 14H20z" fill="#111"/><path d="M20 84l-4 34h8l6-30 6 30h8l-4-34z" fill="#1a1a1a"/><path d="M14 32l-8 30 6 2 8-26zM46 32l8 30-6 2-8-26z" fill="${c1}"/><text x="30" y="56" text-anchor="middle" font-size="16" font-weight="900" fill="${c2}">${S.shirt||S.num}</text></svg></div>
  <div class="cut-txt" id="cutT"></div><div class="cut-dots">${slides.map((_,k)=>`<i data-k="${k}"></i>`).join('')}</div><button class="btn wide" id="cutNx">Próximo</button><div class="cut-tier">${esc(t)}</div></div>`;
- const show=()=>{const s=slides[i];document.getElementById('cutT').innerHTML=`<div class="cut-ic">${s.ic}</div><h2>${esc(s.h)}</h2><p>${esc(s.p)}</p>`;$ov.querySelectorAll('.cut-dots i').forEach((d,k)=>d.classList.toggle('on',k<=i));document.getElementById('cutNx').textContent=i===slides.length-1?'Ver a carta final':'Próximo';if(i===0){SFX.roar()}};
+ const show=()=>{const s=slides[i];(document.getElementById('cutT')||{}).innerHTML=`<div class="cut-ic">${s.ic}</div><h2>${esc(s.h)}</h2><p>${esc(s.p)}</p>`;$ov.querySelectorAll('.cut-dots i').forEach((d,k)=>d.classList.toggle('on',k<=i));(document.getElementById('cutNx')||{}).textContent=i===slides.length-1?'Ver a carta final':'Próximo';if(i===0){SFX.roar()}};
  show();document.getElementById('cutNx').onclick=()=>{i++;if(i>=slides.length){$ov.hidden=true;$ov.innerHTML='';res();return}show()};
 })}
 if(typeof retireShow==='function'){const _rsV5=retireShow;retireShow=async function(card){try{await retireCutscene(card)}catch(e){console.error(e)}return _rsV5(card)}}
@@ -113,19 +113,19 @@ function mgAssalto(){return new Promise(res=>{
  <div class="hz-hud"><span id="hzT">⏱ 35</span><span id="hzL">💼 0/${loot.length}</span><span id="hzA"></span></div><div class="hz" id="hz" style="grid-template-columns:repeat(${W},1fr)"></div>
  <div class="hz-pad"><button data-mv="0,-1">▲</button><div><button data-mv="-1,0">◀</button><button data-mv="1,0">▶</button></div><button data-mv="0,1">▼</button></div><div class="pkres" id="mgRes"></div></div>`;
  const box=document.getElementById('hz');
- const draw=()=>{let h='';for(let y=0;y<H;y++)for(let x=0;x<W;x++){let c=g[y][x]?'w':'f',ic='';if(x===exit.x&&y===exit.y)ic='🚪';const l=loot.find(q=>q.x===x&&q.y===y);if(l)ic=l.ic;if(dog.x===x&&dog.y===y)ic='🐕';if(cop.on&&cop.x===x&&cop.y===y)ic='👮';if(me.x===x&&me.y===y)ic='🥷';h+=`<i class="${c}">${ic}</i>`}box.innerHTML=h;document.getElementById('hzL').textContent=`💼 ${got.length}/${loot.length}`};
+ const draw=()=>{let h='';for(let y=0;y<H;y++)for(let x=0;x<W;x++){let c=g[y][x]?'w':'f',ic='';if(x===exit.x&&y===exit.y)ic='🚪';const l=loot.find(q=>q.x===x&&q.y===y);if(l)ic=l.ic;if(dog.x===x&&dog.y===y)ic='🐕';if(cop.on&&cop.x===x&&cop.y===y)ic='👮';if(me.x===x&&me.y===y)ic='🥷';h+=`<i class="${c}">${ic}</i>`}box.innerHTML=h;(document.getElementById('hzL')||{}).textContent=`💼 ${got.length}/${loot.length}`};
  const bfs=(sx,sy,tx,ty)=>{const q=[[sx,sy]];const prev={};prev[sx+','+sy]=null;while(q.length){const[x,y]=q.shift();if(x===tx&&y===ty)break;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,k=nx+','+ny;if(g[ny]&&g[ny][nx]===0&&!(k in prev)){prev[k]=[x,y];q.push([nx,ny])}}}
   let k=tx+','+ty;if(!(k in prev))return null;let cur=[tx,ty],p=prev[k];while(p&&!(p[0]===sx&&p[1]===sy)){cur=p;p=prev[p[0]+','+p[1]]}return cur};
  const caught=()=>(cop.on&&cop.x===me.x&&cop.y===me.y)||(dog.x===me.x&&dog.y===me.y);
  const end=(kind)=>{if(over)return;over=true;clearInterval(ti);clearInterval(ci);const val=got.reduce((s,q)=>s+q.v,0);
   swEnd(kind==='ok',kind==='ok'?`Saiu com ${got.length} ite${got.length===1?'m':'ns'}`:kind==='dog'?'O cachorro te pegou!':kind==='cop'?'Algemado!':'O tempo acabou',kind==='ok'&&got.length===loot.length).then(()=>res({kind,got:got.length,val}))};
  const move=(dx,dy)=>{if(over)return;const nx=me.x+dx,ny=me.y+dy;if(!g[ny]||g[ny][nx])return;me.x=nx;me.y=ny;SFX.tone({f:300,dur:.04,gain:.05});
-  const i=loot.findIndex(q=>q.x===nx&&q.y===ny);if(i>=0){got.push(loot.splice(i,1)[0]);SFX.tone({f:900,dur:.1,gain:.1});if(!alarm&&ch(.35)){alarm=true;cop.on=true;document.getElementById('hzA').textContent='🚨 ALARME!';SFX.whistle()}}
+  const i=loot.findIndex(q=>q.x===nx&&q.y===ny);if(i>=0){got.push(loot.splice(i,1)[0]);SFX.tone({f:900,dur:.1,gain:.1});if(!alarm&&ch(.35)){alarm=true;cop.on=true;(document.getElementById('hzA')||{}).textContent='🚨 ALARME!';SFX.whistle()}}
   if(caught())return end(dog.x===me.x&&dog.y===me.y?'dog':'cop');if(nx===exit.x&&ny===exit.y&&got.length)return end('ok');draw()};
  $ov.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{const[dx,dy]=b.dataset.mv.split(',').map(Number);move(dx,dy)});
  let sp=null;box.addEventListener('pointerdown',e=>{sp={x:e.clientX,y:e.clientY}});box.addEventListener('pointerup',e=>{if(!sp)return;const dx=e.clientX-sp.x,dy=e.clientY-sp.y;sp=null;if(Math.hypot(dx,dy)<14)return;Math.abs(dx)>Math.abs(dy)?move(Math.sign(dx),0):move(0,Math.sign(dy))});
  const kh=e=>{const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];if(m){e.preventDefault();move(...m)}};addEventListener('keydown',kh);
- const ti=setInterval(()=>{t--;document.getElementById('hzT').textContent='⏱ '+t;if(t===24&&!cop.on){cop.on=true;document.getElementById('hzA').textContent='🚔 Polícia chegou';SFX.whistle()}if(t<=0)end('time')},1000);
+ const ti=setInterval(()=>{t--;(document.getElementById('hzT')||{}).textContent='⏱ '+t;if(t===24&&!cop.on){cop.on=true;(document.getElementById('hzA')||{}).textContent='🚔 Polícia chegou';SFX.whistle()}if(t<=0)end('time')},1000);
  let tickN=0;const ci=setInterval(()=>{if(over){removeEventListener('keydown',kh);return}tickN++;
   if(cop.on&&tickN%2===0){const n=bfs(cop.x,cop.y,me.x,me.y);if(n){cop.x=n[0];cop.y=n[1]}}
   if(tickN%3===0){const opts=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>[dog.x+dx,dog.y+dy]).filter(([x,y])=>g[y]&&g[y][x]===0);const near=Math.abs(dog.x-me.x)+Math.abs(dog.y-me.y)<=4;let n=near?bfs(dog.x,dog.y,me.x,me.y):null;if(!n&&opts.length)n=pick(opts);if(n){dog.x=n[0];dog.y=n[1]}}

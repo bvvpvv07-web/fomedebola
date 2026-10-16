@@ -39,9 +39,9 @@ function mgRhythm(o){
   requestAnimationFrame(tick);
   const tap=()=>{if(done)return;const t=performance.now();let bi=-1,bd=1e9;times.forEach((tt,i)=>{if(judged[i])return;const d=Math.abs(t-tt);if(d<bd){bd=d;bi=i}});if(bi<0)return;
    if(bd<=150){judged[bi]=true;hits++;if(bd<=60)perf++;els[bi].classList.add('hit')}else if(bd<=300){judged[bi]=true;els[bi].classList.add('miss')}
-   document.getElementById('rStat').textContent=`${hits} de ${N}${perf?` · ${perf} perfeitos`:''}`};
+   (document.getElementById('rStat')||{}).textContent=`${hits} de ${N}${perf?` · ${perf} perfeitos`:''}`};
   document.getElementById('rGo').onclick=tap;
-  const finish=async()=>{if(done)return;done=true;document.getElementById('rGo').disabled=true;const ok=hits>=Math.ceil(N*.6);await mgEnd(ok,ok?(hits===N?'Show perfeito!':`Mandou bem: ${hits}/${N}`):`Desafinou: ${hits}/${N}`,hits===N);res({ok,hits,perf,of:N})};
+  const finish=async()=>{if(done)return;done=true;(document.getElementById('rGo')||{}).disabled=true;const ok=hits>=Math.ceil(N*.6);await mgEnd(ok,ok?(hits===N?'Show perfeito!':`Mandou bem: ${hits}/${N}`):`Desafinou: ${hits}/${N}`,hits===N);res({ok,hits,perf,of:N})};
  });
 }
 function mgLockpick(o){

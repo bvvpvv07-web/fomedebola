@@ -156,7 +156,7 @@ function diveParams(z){
  const hx=KO.x+63*Math.sin(th),hy=KO.y-63*Math.cos(th);
  return{r,dx:tx-hx,dy:ty-hy,up:true,hand:[tx,ty]};
 }
-function anim(el,frames,opt){if(!el)return Promise.resolve();if(reduced||opt.instant){const f=frames[frames.length-1];for(const k in f)el.style[k]=f[k];return Promise.resolve()}const a=el.animate(frames,{fill:'forwards',...opt});return a.finished.catch(()=>{})}
+function anim(el,frames,opt){if(!el)return Promise.resolve();if(reduced||opt.instant){const f=frames[frames.length-1];for(const k in f)el.style[k]=f[k];return Promise.resolve()}const a=el.animate(frames,{fill:'forwards',...opt});const T=(opt.duration||0)+(opt.delay||0)+250;return Promise.race([a.finished.catch(()=>{}),new Promise(r=>setTimeout(()=>{try{a.finish()}catch(e){}r()},T))])}
 function mountScene(host,o){
  host.innerHTML=sceneSVG(o);const svg=host.querySelector('svg');const $=s=>svg.querySelector(s);
  const sc={

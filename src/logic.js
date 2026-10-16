@@ -725,11 +725,11 @@ async function stepSeason(io,mode){
    if(mode==='auto'||mode==='sim'){const r=await io.event(ev);st.evlog.push({t:ev.t,txt:r.txt});continue}
    return{results:out,pause:{ev}};
   }
-  if((mode==='auto'||mode==='block')&&isDecisive(it)&&!st.noStop)return{results:out,stop:it};
+  if((mode==='auto'||mode==='block')&&isDecisive(it)&&!st.noStop&&(typeof visItem!=='function'||visItem(it)))return{results:out,stop:it};
   const r=await processItem(it,io);st.idx++;
   if(r){if(r.k==='multi')out.push(...r.list);else out.push(r)}
   if(r&&io.moment&&typeof postMatchMoments==='function')await postMatchMoments(r.k==='multi'?r.list:[r],io);
-  if(mode==='one'&&r&&(r.k==='match'||r.k==='multi'))break;
+  if(mode==='one'&&r&&(r.k==='match'||r.k==='multi')&&(typeof visItem!=='function'||visItem(it)))break;
   if(mode==='block'&&st.idx>=blockEnd(st))break;
  }
  if(st.idx>=st.cal.length)st.done=true;

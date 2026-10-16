@@ -73,8 +73,8 @@ function mgAutografos(){return new Promise(res=>{
   e.style.left=R(4,80)+'%';e.style.top=R(16,78)+'%';const life=R(900,1500)-Math.min(400,score*12);e.style.setProperty('--life',life+'ms');box.appendChild(e);
   const kill=setTimeout(()=>{if(e.isConnected){e.remove();if(!bad){miss++;combo=0;upd()}}},life);
   e.onpointerdown=ev=>{ev.preventDefault();clearTimeout(kill);if(bad){score=Math.max(0,score-3);combo=0;SFX.tone({f:200,dur:.2,gain:.15,type:'square'});e.classList.add('hitbad')}else{combo++;score+=1+(combo>=5?1:0);SFX.tone({f:600+combo*40,dur:.08,gain:.1});e.classList.add('hit')}setTimeout(()=>e.remove(),220);upd()}};
- const upd=()=>{document.getElementById('autS').textContent='✍️ '+score;document.getElementById('autC').textContent=combo>=5?`🔥 x${combo}`:''};
- const sp=setInterval(spawn,430);const tm=setInterval(()=>{t--;document.getElementById('autT').textContent='⏱ '+t;if(t<=0)end()},1000);
+ const upd=()=>{(document.getElementById('autS')||{}).textContent='✍️ '+score;(document.getElementById('autC')||{}).textContent=combo>=5?`🔥 x${combo}`:''};
+ const sp=setInterval(spawn,430);const tm=setInterval(()=>{t--;(document.getElementById('autT')||{}).textContent='⏱ '+t;if(t<=0)end()},1000);
  function end(){if(done)return;done=true;clearInterval(sp);clearInterval(tm);const ok=score>=14;swEnd(ok,`${score} autógrafos`,score>=22).then(()=>res({score,ok,perfect:score>=22}))}
 })}
 // 2) Coletiva de imprensa: responda antes do tempo acabar

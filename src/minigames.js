@@ -19,7 +19,7 @@ function mgTiming(o){
   const tick=t=>{if(done)return;const e=(t-t0)/per;if(o.oneWay){x=e;if(x>=1){finish(false,true);return}}else{const f=e%2;x=f<1?f:2-f}n.style.left=(x*100)+'%';requestAnimationFrame(tick)};
   requestAnimationFrame(tick);
   const finish=async(tap,late)=>{if(done)return;done=true;const ok=tap&&x>=z0&&x<=z0+zw;const perfect=ok&&Math.abs(x-(z0+zw/2))<=zw*.15;
-   document.getElementById('mgGo').disabled=true;await mgEnd(ok,ok?(o.okTxt||'Na mosca!'):late?'Passou do tempo':(o.failTxt||'Errou o tempo'),perfect);res({ok,perfect})};
+   (document.getElementById('mgGo')||{}).disabled=true;await mgEnd(ok,ok?(o.okTxt||'Na mosca!'):late?'Passou do tempo':(o.failTxt||'Errou o tempo'),perfect);res({ok,perfect})};
   document.getElementById('mgGo').onclick=()=>finish(true);
   setTimeout(()=>finish(false,true),8000);
  });

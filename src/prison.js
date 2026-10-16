@@ -91,9 +91,9 @@ function mgFuga(){return new Promise(res=>{
  $ov.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{const[dx,dy]=b.dataset.mv.split(',').map(Number);move(dx,dy)});
  let sp=null;box.addEventListener('pointerdown',e=>{sp={x:e.clientX,y:e.clientY}});box.addEventListener('pointerup',e=>{if(!sp)return;const dx=e.clientX-sp.x,dy=e.clientY-sp.y;sp=null;if(Math.hypot(dx,dy)<14)return;Math.abs(dx)>Math.abs(dy)?move(Math.sign(dx),0):move(0,Math.sign(dy))});
  const kh=e=>{const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];if(m){e.preventDefault();move(...m)}};addEventListener('keydown',kh);
- const ti=setInterval(()=>{t--;document.getElementById('fzT').textContent='⏱ '+t;if(t<=0)end(false)},1000);
+ const ti=setInterval(()=>{t--;(document.getElementById('fzT')||{}).textContent='⏱ '+t;if(t<=0)end(false)},1000);
  let ld=1;const gi=setInterval(()=>{if(over)return;tick++;if(tick%2===0){lightX+=ld;if(lightX>=W-1||lightX<=0)ld=-ld}
   for(const q of guards){const near=Math.abs(q.x-me.x)+Math.abs(q.y-me.y)<=4;let n=null;if(near&&tick%2===0)n=bfs(q.x,q.y,me.x,me.y);else if(tick%3===0){const o=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>[q.x+dx,q.y+dy]).filter(([x,y])=>g[y]&&g[y][x]===0);if(o.length)n=pick(o)}if(n){q.x=n[0];q.y=n[1]}}
-  if(lit(me.x)&&ch(.18)){document.getElementById('fzA').textContent='🔦 Te viram!';return end(false)}
+  if(lit(me.x)&&ch(.18)){(document.getElementById('fzA')||{}).textContent='🔦 Te viram!';return end(false)}
   if(guards.some(q=>q.x===me.x&&q.y===me.y))return end(false);draw()},300);
  draw()})}
