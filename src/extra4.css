@@ -522,3 +522,36 @@ body.onescreen .wrap::-webkit-scrollbar{display:none}
 .wact{transition:transform .12s,background .15s}.wact:active{transform:scale(.96)}
 .hubnav button{transition:transform .12s}.hubnav button:active{transform:scale(.95)}
 .btn{letter-spacing:.02em}.btn:active{transform:translateY(1px)}
+
+/* ---------- legendas com cor do time ---------- */
+.live-feed .fl.tm{border-left:4px solid var(--tc);background:linear-gradient(90deg,color-mix(in srgb,var(--tc) 26%,transparent),transparent 75%);padding-left:10px}
+.fl .tmb{display:inline-block;margin:0 6px 0 2px;padding:1px 6px;border-radius:6px;background:var(--tc);color:var(--tc2);font-family:var(--f-mono,monospace);font-size:10.5px;font-weight:800;letter-spacing:.04em;vertical-align:1px}
+/* ---------- revelação do OVR ---------- */
+.reveal{max-width:420px;text-align:center;display:grid;gap:10px}
+.rv-card{justify-self:center;width:180px;padding:18px 10px 14px;border-radius:18px 18px 40px 40px;background:linear-gradient(160deg,#ffe9a3,#d9a42b 55%,#8a5a12);color:#2a1a04;box-shadow:0 18px 40px rgba(0,0,0,.5);animation:pop .6s both}
+.rv-ovr{font-size:76px;font-weight:900;line-height:1}.rv-ovr.pop{animation:pop .4s both}.rv-lbl{font-weight:800;letter-spacing:.2em;font-size:12px}.rv-pot{margin-top:6px;font-size:15px;letter-spacing:.1em}
+.rv-why{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.rv-why div{padding:8px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--line-2)}.rv-why b{display:block;font-size:18px}.rv-why small{color:var(--muted);font-size:11px}
+.rv-attrs{display:grid;gap:6px}.rv-attrs div{display:grid;grid-template-columns:90px 1fr 34px;gap:8px;align-items:center;text-align:left;font-size:13px}.rv-attrs i{height:7px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden}.rv-attrs s{display:block;height:100%;background:linear-gradient(90deg,#7dff9a,#f2c443)}
+/* ---------- competições no balanço ---------- */
+.cmp-strip{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.cmp-list{display:grid;gap:6px}.cmp{display:grid;grid-template-columns:26px 1fr auto;gap:8px;align-items:center;padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line-2)}
+.cmp b{font-size:14px}.cmp em{font-style:normal;font-size:12.5px;color:var(--muted)}.cmp.win{border-color:rgba(242,196,67,.5);background:rgba(242,196,67,.08)}.cmp.win em{color:var(--gold)}.cmp-t td:first-child{text-align:left}
+/* ---------- aposentadoria ---------- */
+.cut{max-width:460px;position:relative;overflow:hidden;min-height:min(640px,86vh);display:grid;align-content:end;gap:10px;padding:16px;background:#050a14}
+.cut-sky{position:absolute;inset:0;background:radial-gradient(80% 50% at 50% 0%,#1b2f55,#050a14 70%)}.cut-sky i{position:absolute;top:6%;width:120px;height:120px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,230,.7),transparent);animation:cutl 3s ease-in-out infinite alternate}
+.cut-sky i:nth-child(1){left:-30px}.cut-sky i:nth-child(2){right:-30px;animation-delay:.6s}.cut-sky i:nth-child(3){left:40%;top:2%;width:80px;height:80px;opacity:.5}
+@keyframes cutl{to{opacity:.55;transform:scale(1.1)}}
+.cut-crowd{position:absolute;left:0;right:0;top:18%;height:26%;background:radial-gradient(circle,var(--c1) 0 2px,transparent 3px) 0 0/12px 10px,radial-gradient(circle,var(--c2) 0 2px,transparent 3px) 6px 5px/12px 10px,#111a26;opacity:.75;animation:cutc .5s steps(2) infinite}
+@keyframes cutc{50%{background-position:1px 1px,7px 4px,0 0}}
+.cut-pitch{position:absolute;left:0;right:0;top:44%;bottom:0;background:repeating-linear-gradient(180deg,#2f7d32 0 26px,#358a37 26px 52px)}
+.cut-player{position:absolute;left:50%;top:30%;width:70px;transform:translateX(-50%);animation:cutw 6s ease-out both;filter:drop-shadow(0 10px 10px rgba(0,0,0,.5))}
+@keyframes cutw{from{transform:translate(-50%,60%) scale(1.5);opacity:0}to{transform:translate(-50%,0) scale(1);opacity:1}}
+.cut-txt{position:relative;z-index:1;padding:14px;border-radius:16px;background:rgba(0,0,0,.62);backdrop-filter:blur(4px);text-align:left;animation:pop .4s both}.cut-txt h2{margin:2px 0 6px;font-family:var(--f-display);font-weight:900;text-transform:uppercase;font-size:28px;color:var(--gold)}.cut-txt p{margin:0;font-family:Georgia,serif;font-size:16px;line-height:1.5;color:#f1ead8}.cut-ic{font-size:30px}
+.cut-dots{position:relative;z-index:1;display:flex;gap:6px;justify-content:center}.cut-dots i{width:22px;height:4px;border-radius:2px;background:rgba(255,255,255,.25)}.cut-dots i.on{background:var(--gold)}
+.cut .btn{position:relative;z-index:1}.cut-tier{position:absolute;top:12px;left:0;right:0;text-align:center;z-index:1;font-family:var(--f-display);font-weight:900;letter-spacing:.3em;color:rgba(255,255,255,.6);font-size:12px;text-transform:uppercase}
+/* ---------- assalto ---------- */
+.heist{max-width:420px}.hz-hud{display:flex;justify-content:space-between;font-family:var(--f-mono,monospace);font-weight:700}.hz-hud span{background:rgba(0,0,0,.4);padding:3px 9px;border-radius:999px}
+.hz{display:grid;gap:2px;padding:6px;border-radius:14px;background:#120d0a;border:1px solid var(--line-2);touch-action:none;user-select:none}
+.hz i{aspect-ratio:1;display:grid;place-items:center;font-style:normal;font-size:clamp(14px,4.6vw,22px);border-radius:4px}.hz i.w{background:linear-gradient(160deg,#5a4636,#3a2c22)}.hz i.f{background:#2a221b}
+.hz-pad{display:grid;justify-items:center;gap:4px}.hz-pad div{display:flex;gap:56px}.hz-pad button{width:56px;height:44px;border-radius:12px;border:1px solid var(--line-2);background:rgba(255,255,255,.08);color:inherit;font-size:18px;cursor:pointer}
+.tag.crime{background:#5a1a1a;color:#ffb3aa}
+.heist{width:100%;max-width:400px;box-sizing:border-box}.hz{width:100%;box-sizing:border-box}.hz i{min-width:0;overflow:hidden;font-size:clamp(11px,3.6vw,20px)}

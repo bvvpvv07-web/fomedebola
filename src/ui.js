@@ -88,7 +88,7 @@ function renderCreate(){
   <div class="stepttl"><b>4</b>Ritmo do jogo<span>dá pra trocar depois</span></div>
   <div class="behs"><button class="beh ${CR.fast!==false?'on':''}" data-fast="1"><b>⚡ Rápido</b><span>Temporada em 4 blocos. Só as finais ao vivo. Uma carreira em poucos minutos.</span></button><button class="beh ${CR.fast===false?'on':''}" data-fast="0"><b>🗓️ Completo</b><span>Semana a semana: dias livres, lances em todo jogo, mata-mata ao vivo.</span></button></div>
  </section>
- <div class="ctabar"><button class="btn wide cta" id="next">Próximo: os Ícones →</button><span class="ctahint" id="nextHint">${CR.name.trim()?'':'Falta só o seu nome lá em cima.'}</span></div></div>`;
+ <div class="ctabar"><button class="btn wide cta" id="next">Ir para a peneira →</button><span class="ctahint" id="nextHint">${CR.name.trim()?'':'Falta só o seu nome lá em cima.'}</span></div></div>`;
  const nm=document.getElementById('nm');nm.oninput=()=>{CR.name=nm.value;const h=document.getElementById('nextHint');if(h)h.textContent=CR.name.trim()?'':'Falta só o seu nome lá em cima.'};
  const num=document.getElementById('num');num.oninput=()=>CR.num=clamp(parseInt(num.value)||10,1,99);
  document.getElementById('heart').onchange=e=>CR.heart=e.target.value;

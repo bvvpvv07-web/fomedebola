@@ -56,7 +56,7 @@ const PEN_ST_OUT=[
  {k:'dribble',ic:'⚡',n:'Drible',at:'DRI',how:['Você corre sozinho com a bola. O marcador vem de frente.','Quando o anel em volta dele fechar no <b>dourado</b>, <b>arraste o dedo pro lado da seta verde</b>: é pra lá que você dribla.','Pernas abertas (seta azul)? <b>Arraste pra cima</b>: caneta!'],tip:'Cedo demais ele lê o drible; tarde demais ele toma a bola. Sincronia é tudo.'},
  {k:'finish',ic:'🥅',n:'Finalização',at:'FIN',how:['<b>Puxada longa</b> = chute forte. Forte demais vai por cima.','Mire nos cantos. Bola no meio, o goleiro pega.','Logo depois de chutar, <b>arraste o dedo pro lado</b> pra dar efeito.'],tip:'Nos jogos, cada lance desses pode virar gol de verdade na súmula.'},
  {k:'header',ic:'🤯',n:'Cabeçada',at:'FIS',how:['O cruzamento vem lá da ponta.','<b>Mire antes</b>: puxe pra trás e segure o dedo.','Ele cabeceia sozinho quando a bola chegar.'],tip:'Escanteio e cruzamento viram gol pra quem sobe no tempo certo.'},
- {k:'fk',ic:'🌀',n:'Falta',at:'FIN',how:['Puxe pra trás com força média e solte.','<b>Arraste pro lado logo depois</b> pra curvar a bola.','Passe por cima ou em volta da barreira.'],tip:'Quem bate bem falta pode pedir a cobrança ao treinador.'},
+ {k:'fk',ic:'🌀',n:'Falta',at:'FIN',how:['<b>Arraste o alvo vermelho</b> até o ponto do gol e solte.','Toque pra parar a <b>força</b>. A marca branca é a força ideal: mais que isso, por cima.','Toque pra parar o <b>efeito</b>: a bola curva pro lado escolhido. Mire contando com a curva.'],tip:'Quem bate bem falta pode pedir a cobrança ao treinador.'},
 ];
 const PEN_ST_GK=[
  {k:'keeper',ic:'🧤',n:'Reflexo',at:'REF',how:['O atacante vai chutar.','Na hora do chute, <b>arraste do goleiro até onde a bola vai</b>.','Pular antes da hora entrega o outro canto.'],tip:'Nos jogos, os chutes contra o seu gol aparecem assim.'},
@@ -91,7 +91,7 @@ async function penCircuit(){
   const sk=clamp((typeof skillOf==='function'?skillOf(st.at):.6)+.12,.3,.95);
   const r=await nssMoment({kind:st.k,comp:'Peneira',title:st.n,skill:sk,keeper:.3,planned:true,defs:2,need:2,speed:.9,okTxt:'Boa!'});
   const d=r.ok?(r.perfect?RI(7,10):RI(4,7)):-RI(1,3);const txt=r.ok?(r.perfect?'Perfeito':'Acertou'):'Errou';
-  PEN.circ.push({ok:r.ok,d,txt});penLog(`Estação de ${st.n.toLowerCase()}: ${txt.toLowerCase()}`,d);
+  PEN.circ.push({ok:r.ok,d,txt,at:st.at,perfect:!!r.perfect});penLog(`Estação de ${st.n.toLowerCase()}: ${txt.toLowerCase()}`,d);
   toast({ic:COACH.ic,title:COACH.n,txt:(r.ok?COACH_OK:COACH_BAD)[i%4],ms:2600});penCircuit()};
 }
 const _renderPenJ=renderPeneira;

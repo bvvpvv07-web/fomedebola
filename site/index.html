@@ -1082,6 +1082,39 @@ body.onescreen .wrap::-webkit-scrollbar{display:none}
 .wact{transition:transform .12s,background .15s}.wact:active{transform:scale(.96)}
 .hubnav button{transition:transform .12s}.hubnav button:active{transform:scale(.95)}
 .btn{letter-spacing:.02em}.btn:active{transform:translateY(1px)}
+
+/* ---------- legendas com cor do time ---------- */
+.live-feed .fl.tm{border-left:4px solid var(--tc);background:linear-gradient(90deg,color-mix(in srgb,var(--tc) 26%,transparent),transparent 75%);padding-left:10px}
+.fl .tmb{display:inline-block;margin:0 6px 0 2px;padding:1px 6px;border-radius:6px;background:var(--tc);color:var(--tc2);font-family:var(--f-mono,monospace);font-size:10.5px;font-weight:800;letter-spacing:.04em;vertical-align:1px}
+/* ---------- revelação do OVR ---------- */
+.reveal{max-width:420px;text-align:center;display:grid;gap:10px}
+.rv-card{justify-self:center;width:180px;padding:18px 10px 14px;border-radius:18px 18px 40px 40px;background:linear-gradient(160deg,#ffe9a3,#d9a42b 55%,#8a5a12);color:#2a1a04;box-shadow:0 18px 40px rgba(0,0,0,.5);animation:pop .6s both}
+.rv-ovr{font-size:76px;font-weight:900;line-height:1}.rv-ovr.pop{animation:pop .4s both}.rv-lbl{font-weight:800;letter-spacing:.2em;font-size:12px}.rv-pot{margin-top:6px;font-size:15px;letter-spacing:.1em}
+.rv-why{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.rv-why div{padding:8px;border-radius:12px;background:rgba(255,255,255,.05);border:1px solid var(--line-2)}.rv-why b{display:block;font-size:18px}.rv-why small{color:var(--muted);font-size:11px}
+.rv-attrs{display:grid;gap:6px}.rv-attrs div{display:grid;grid-template-columns:90px 1fr 34px;gap:8px;align-items:center;text-align:left;font-size:13px}.rv-attrs i{height:7px;border-radius:4px;background:rgba(255,255,255,.1);overflow:hidden}.rv-attrs s{display:block;height:100%;background:linear-gradient(90deg,#7dff9a,#f2c443)}
+/* ---------- competições no balanço ---------- */
+.cmp-strip{display:flex;flex-wrap:wrap;gap:6px;margin:8px 0}.cmp-list{display:grid;gap:6px}.cmp{display:grid;grid-template-columns:26px 1fr auto;gap:8px;align-items:center;padding:9px 10px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid var(--line-2)}
+.cmp b{font-size:14px}.cmp em{font-style:normal;font-size:12.5px;color:var(--muted)}.cmp.win{border-color:rgba(242,196,67,.5);background:rgba(242,196,67,.08)}.cmp.win em{color:var(--gold)}.cmp-t td:first-child{text-align:left}
+/* ---------- aposentadoria ---------- */
+.cut{max-width:460px;position:relative;overflow:hidden;min-height:min(640px,86vh);display:grid;align-content:end;gap:10px;padding:16px;background:#050a14}
+.cut-sky{position:absolute;inset:0;background:radial-gradient(80% 50% at 50% 0%,#1b2f55,#050a14 70%)}.cut-sky i{position:absolute;top:6%;width:120px;height:120px;border-radius:50%;background:radial-gradient(closest-side,rgba(255,255,230,.7),transparent);animation:cutl 3s ease-in-out infinite alternate}
+.cut-sky i:nth-child(1){left:-30px}.cut-sky i:nth-child(2){right:-30px;animation-delay:.6s}.cut-sky i:nth-child(3){left:40%;top:2%;width:80px;height:80px;opacity:.5}
+@keyframes cutl{to{opacity:.55;transform:scale(1.1)}}
+.cut-crowd{position:absolute;left:0;right:0;top:18%;height:26%;background:radial-gradient(circle,var(--c1) 0 2px,transparent 3px) 0 0/12px 10px,radial-gradient(circle,var(--c2) 0 2px,transparent 3px) 6px 5px/12px 10px,#111a26;opacity:.75;animation:cutc .5s steps(2) infinite}
+@keyframes cutc{50%{background-position:1px 1px,7px 4px,0 0}}
+.cut-pitch{position:absolute;left:0;right:0;top:44%;bottom:0;background:repeating-linear-gradient(180deg,#2f7d32 0 26px,#358a37 26px 52px)}
+.cut-player{position:absolute;left:50%;top:30%;width:70px;transform:translateX(-50%);animation:cutw 6s ease-out both;filter:drop-shadow(0 10px 10px rgba(0,0,0,.5))}
+@keyframes cutw{from{transform:translate(-50%,60%) scale(1.5);opacity:0}to{transform:translate(-50%,0) scale(1);opacity:1}}
+.cut-txt{position:relative;z-index:1;padding:14px;border-radius:16px;background:rgba(0,0,0,.62);backdrop-filter:blur(4px);text-align:left;animation:pop .4s both}.cut-txt h2{margin:2px 0 6px;font-family:var(--f-display);font-weight:900;text-transform:uppercase;font-size:28px;color:var(--gold)}.cut-txt p{margin:0;font-family:Georgia,serif;font-size:16px;line-height:1.5;color:#f1ead8}.cut-ic{font-size:30px}
+.cut-dots{position:relative;z-index:1;display:flex;gap:6px;justify-content:center}.cut-dots i{width:22px;height:4px;border-radius:2px;background:rgba(255,255,255,.25)}.cut-dots i.on{background:var(--gold)}
+.cut .btn{position:relative;z-index:1}.cut-tier{position:absolute;top:12px;left:0;right:0;text-align:center;z-index:1;font-family:var(--f-display);font-weight:900;letter-spacing:.3em;color:rgba(255,255,255,.6);font-size:12px;text-transform:uppercase}
+/* ---------- assalto ---------- */
+.heist{max-width:420px}.hz-hud{display:flex;justify-content:space-between;font-family:var(--f-mono,monospace);font-weight:700}.hz-hud span{background:rgba(0,0,0,.4);padding:3px 9px;border-radius:999px}
+.hz{display:grid;gap:2px;padding:6px;border-radius:14px;background:#120d0a;border:1px solid var(--line-2);touch-action:none;user-select:none}
+.hz i{aspect-ratio:1;display:grid;place-items:center;font-style:normal;font-size:clamp(14px,4.6vw,22px);border-radius:4px}.hz i.w{background:linear-gradient(160deg,#5a4636,#3a2c22)}.hz i.f{background:#2a221b}
+.hz-pad{display:grid;justify-items:center;gap:4px}.hz-pad div{display:flex;gap:56px}.hz-pad button{width:56px;height:44px;border-radius:12px;border:1px solid var(--line-2);background:rgba(255,255,255,.08);color:inherit;font-size:18px;cursor:pointer}
+.tag.crime{background:#5a1a1a;color:#ffb3aa}
+.heist{width:100%;max-width:400px;box-sizing:border-box}.hz{width:100%;box-sizing:border-box}.hz i{min-width:0;overflow:hidden;font-size:clamp(11px,3.6vw,20px)}
 </style></head><body>
 <div id="app"></div>
 <div id="overlay" hidden></div>
@@ -2660,7 +2693,7 @@ function renderCreate(){
   <div class="stepttl"><b>4</b>Ritmo do jogo<span>dá pra trocar depois</span></div>
   <div class="behs"><button class="beh ${CR.fast!==false?'on':''}" data-fast="1"><b>⚡ Rápido</b><span>Temporada em 4 blocos. Só as finais ao vivo. Uma carreira em poucos minutos.</span></button><button class="beh ${CR.fast===false?'on':''}" data-fast="0"><b>🗓️ Completo</b><span>Semana a semana: dias livres, lances em todo jogo, mata-mata ao vivo.</span></button></div>
  </section>
- <div class="ctabar"><button class="btn wide cta" id="next">Próximo: os Ícones →</button><span class="ctahint" id="nextHint">${CR.name.trim()?'':'Falta só o seu nome lá em cima.'}</span></div></div>`;
+ <div class="ctabar"><button class="btn wide cta" id="next">Ir para a peneira →</button><span class="ctahint" id="nextHint">${CR.name.trim()?'':'Falta só o seu nome lá em cima.'}</span></div></div>`;
  const nm=document.getElementById('nm');nm.oninput=()=>{CR.name=nm.value;const h=document.getElementById('nextHint');if(h)h.textContent=CR.name.trim()?'':'Falta só o seu nome lá em cima.'};
  const num=document.getElementById('num');num.oninput=()=>CR.num=clamp(parseInt(num.value)||10,1,99);
  document.getElementById('heart').onchange=e=>CR.heart=e.target.value;
@@ -3337,7 +3370,7 @@ IO_UI.live={
     else if(e.t==='pmiss')html=`<div class="fl ${e.mine?'me bad':''}"><b>${e.m}'</b>❌ Pênalti perdido por ${esc(e.w)}</div>`;
     else if(e.t==='gks')html=`<div class="fl me"><b>${e.m}'</b>🧤 Que defesa! Você parou ${esc(e.w)}</div>`;
     else if(e.t==='psave')html=`<div class="fl ${e.mine?'me':''}"><b>${e.m}'</b>🧤 Pênalti defendido! ${esc(e.w)} parou no goleiro</div>`;
-    if(html){push(html);if(pause)await sleep(pause)}
+    if(html){const sd=(e.us||e.mine||['y','r','inj','in','gks'].includes(e.t))?m.us:m.them;const tc=teamColors(sd);const ab=esc((sd.a||sd.n||'').slice(0,3).toUpperCase());html=html.replace('<div class="fl','<div style="--tc:'+tc[0]+';--tc2:'+tc[1]+'" class="fl tm').replace(/(<b>\d+'<\/b>)/,'$1<span class="tmb">'+ab+'</span>');push(html);if(pause)await sleep(pause)}
    },
    finish(f){
     return new Promise(res=>{L.ended=true;const c=document.getElementById('lclk');if(c)c.textContent='Fim de jogo';
@@ -5125,10 +5158,13 @@ function nmOppColor(c1){const[r,g,b]=nmHex(c1);const red=r>140&&g<110&&b<110,blu
 
 function nssMoment(o){
  return new Promise(res=>{
-  const K=o.kind||'finish';const pl=!!o.planned;const skill=clamp(o.skill??.6,.12,.98);
+  if(o.ast&&o.assist==null)o={...o,assist:true};
+  NM.mateShot=false;NM.netHit=null;
+  const K=o.kind||'finish';const pl=!!o.planned;const BOOT=(()=>{try{if(!S.boot||!(S.bootLeft>0))return null;return BOOTS.find(x=>x.id===S.boot)||null}catch(e){return null}})();const BB=BOOT?Object.values(BOOT.b).reduce((a,c)=>a+c,0)/10:0;const skill=clamp((o.skill??.6)+BB*.06,.12,.98);
   const kq=clamp((o.keeper??.45)*1.65,.45,.95);const spdMul=o.speed||1;
   const myC=club()?[club().c1||'#ff7a2b',club().c2||'#ffffff']:['#ff7a2b','#ffffff'];const opC=nmOppColor(myC[0]);
   const GK=K==='keeper';
+  var fkAim=null;
   const P=[];const mk=(team,x,d,ex={})=>{const p={team,x,d,vx:0,vd:0,ph:Math.random()*6,sp:5,jump:0,...ex};P.push(p);return p};
   let me=null,gk=null;const ball={x:0,d:0,h:0,vx:0,vd:0,vh:0,ax:0,rot:0};
   let tmax=10,hint='',tag='Lance';
@@ -5142,19 +5178,23 @@ function nssMoment(o){
    if(!pl)mk('opp',me.x+(me.x>0?-1:1)*R(4,6),me.d-R(3,5),{sp:5.2*spdMul});
    tmax=pl?9:7;tag='Finalização';hint='Puxe o dedo <b>pra trás</b> e solte pra chutar. Puxada curta conduz a bola.';
   }else if(K==='fk'){
-   const bx=R(-9,9),bd=R(19,25);me=mk('me',bx+(bx>0?.4:-.4),bd+1.1);ball.x=bx;ball.d=bd;
+   const bx=R(-9,9),bd=R(19,25);me=mk('me',bx+(bx>0?.4:-.4),bd+1.1);ball.x=bx;ball.d=bd;fkAim={x:(bx>0?-1:1)*2.4,h:1.7};
    const L=Math.hypot(bx,bd),ux=-bx/L,ud=-bd/L;const cx=bx+ux*9.15,cd=bd+ud*9.15;const px=-ud,pd=ux;const shift=(bx>0?1:-1)*.5;
    for(let i=0;i<4;i++)mk('opp',cx+px*((i-1.5)*.62+shift),cd+pd*((i-1.5)*.62+shift),{wall:true,sp:0});
-   gk=mk('gk',(bx>0?-1:1)*.9,.7);tmax=14;tag='Falta';hint='Puxe pra trás e solte. <b>Logo depois, arraste pro lado</b> pra curvar por cima/em volta da barreira.';
+   gk=mk('gk',(bx>0?-1:1)*.9,.7);tmax=14;tag='Falta';hint='<b>1</b> Arraste o alvo no gol e solte. <b>2</b> Toque pra parar a <b>força</b>. <b>3</b> Toque pra parar o <b>efeito</b>: a bola curva pro lado do efeito.';
   }else if(K==='pen'){
    ball.x=0;ball.d=11;me=mk('me',R(-.5,.5),12.4);gk=mk('gk',0,.25);tmax=14;tag='Pênalti';hint='Puxe pra trás e solte. <b>Cantos e meia altura</b> são o lugar certo. Forte demais isola.';
+  }else if(K==='combo'){
+   me=mk('me',R(-8,8),R(26,30));const mt=mk('mate',clamp(me.x+side*R(6,9),-20,20),me.d-R(4,7),{sp:4});mt.run={x:mt.x-side*1.5,d:mt.d-2};
+   mk('opp',me.x-side*R(2,3),me.d+R(2,4),{sp:4.4*spdMul});mk('opp',mt.x+side*1.2,mt.d-1.2,{sp:3.6,mark:mt});gk=mk('gk',0,1.2);tmax=14;tag='Tabela';
+   hint='<b>1</b> Toque no companheiro (anel azul). <b>2</b> Corra pro passe de volta. <b>3</b> Finalize puxando pra trás.';
   }else if(K==='header'){
    me=mk('me',R(-3,3),R(7,11));gk=mk('gk',0,1);mk('opp',me.x+R(-1.2,1.2),me.d-R(.8,1.4),{sp:4.6,mark:me});
    tmax=6;tag='Cabeçada';hint='<b>Mire antes:</b> puxe o dedo pra trás e segure. Ele cabeceia sozinho quando a bola chegar.';
   }else if(K==='pass'){
-   me=mk('me',R(-12,12),R(44,52));const n=o.defs>=3?3:2;
-   const mates=[];for(let i=0;i<n;i++){const x=clamp(me.x+(i-(n-1)/2)*R(10,14)+R(-3,3),-28,28);mates.push(mk('mate',x,me.d-R(11,20),{sp:5.6}))}
-   mates.forEach(m=>{m.run={x:m.x+R(-4,4),d:m.d-R(9,16)}});
+   me=mk('me',R(-12,12),o.assist?R(27,32):R(44,52));const n=o.defs>=3?3:2;
+   const mates=[];for(let i=0;i<n;i++){const x=clamp(me.x+(i-(n-1)/2)*R(10,14)+R(-3,3),-28,28);mates.push(mk('mate',x,me.d-(o.assist?R(9,13):R(11,20)),{sp:5.6}))}
+   mates.forEach(m=>{m.run={x:m.x*(o.assist?.6:1)+R(-4,4),d:Math.max(9,m.d-(o.assist?R(3,6):R(9,16)))}});
    mk('opp',me.x+R(-2,2),me.d-R(6,8),{sp:5*spdMul});
    for(let i=0;i<(o.defs||2)-1;i++){const m=mates[i%mates.length];mk('opp',m.x+R(-2,2),m.d-R(1,3),{sp:5.4*spdMul,mark:m})}
    gk=mk('gk',0,1.2);tmax=9;tag='Passe';hint='Puxe pra trás <b>mirando no companheiro</b> (anel). Mais longe = mais força.';
@@ -5192,7 +5232,7 @@ function nssMoment(o){
   const dpr=Math.min(2,devicePixelRatio||1);cv.width=W*dpr;cv.height=H*dpr;cv.style.width=W+'px';cv.style.height=H+'px';ctx.setTransform(dpr,0,0,dpr,0,0);
   const F=GK?H*.95:H*1.08,hz=GK?H*.3:H*.19;
   const cam=GK?{x:0,d:-7.6,h:2.5,dir:-1}:{x:(me?me.x:ball.x)*.88,d:(me?me.d:ball.d)+10.5,h:5.2,dir:1};
-  if(K==='fk'||K==='pen'){cam.x=ball.x*.8;cam.d=ball.d+9}
+  if(K==='pen'){cam.x=ball.x*.8;cam.d=ball.d+9}if(K==='fk'){cam.x=ball.x*.7;cam.d=ball.d+5.5;cam.h=3.4}
   const proj=(x,d,h,mn)=>{const dep=(cam.d-d)*cam.dir;if(dep<(mn||.35))return null;const s=F/dep;return{x:W/2+(x-cam.x)*s*cam.dir,y:hz+(cam.h-h)*s,s}};
 
   // ---------- estado ----------
@@ -5200,7 +5240,7 @@ function nssMoment(o){
   const sp2=()=>Math.hypot(ball.vx,ball.vd);
   const dist=(a,b)=>Math.hypot(a.x-b.x,a.d-b.d);
   function finish(ok,txt,perfect,big){if(ended)return;NM.last=txt;ended={ok,txt,perfect,t:0};banner={txt:big||txt,ok,t:0};phase='end';try{onEnd(ok,big)}catch(e){}}
-  function canAim(){if(phase!=='play')return false;if(GK)return !gkTarget;if(K==='header')return !headed;if(K==='fk'||K==='pen')return !kicked;return owner===me}
+  function canAim(){if(phase!=='play')return false;if(GK)return !gkTarget;if(K==='header')return !headed;if(K==='fk')return false;if(K==='pen')return !kicked;return owner===me}
 
   // simulação de bola sem colisão (pra prévia e pros companheiros)
   function simPath(b,secs,withCurl){const p=[];let x=b.x,d=b.d,h=b.h,vx=b.vx,vd=b.vd,vh=b.vh,ax=withCurl?b.ax:0;let g=9.8+(b.dip||0);const dt=1/30;let bounced=null;
@@ -5241,7 +5281,8 @@ function nssMoment(o){
    if(owner){const m=owner;ball.x+=(m.x-ball.x)*Math.min(1,dt*18);ball.d+=(m.d-.5-ball.d)*Math.min(1,dt*18);ball.h=0;ball.vx=ball.vd=ball.vh=0}
    else if(!((K==='fk'||K==='pen')&&!kicked)){
     const pd=ball.d;
-    if(ball.h>0||ball.vh>0){ball.vh-=(9.8+(ball.dip||0))*dt;if(kicked&&kicked!=='touch'&&T-kickT<1.6){ball.vx+=ball.ax*dt;ball.ax*=.985}}
+    if(ball.h>0||ball.vh>0){ball.vh-=(9.8+(ball.dip||0))*dt;if(kicked&&kicked!=='touch'&&T-kickT<1.6){ball.vx+=ball.ax*dt;if(!ball.keepAx)ball.ax*=.985}}
+    if(NM.netHit&&ball.d<.2){ball.vx*=Math.pow(.03,dt);ball.vd*=Math.pow(.004,dt);ball.ax=0;if(ball.d<-1.95)ball.d=-1.95}
     ball.x+=ball.vx*dt;ball.d+=ball.vd*dt;ball.h+=ball.vh*dt;
     if(ball.h<0){ball.h=0;ball.dip=0;if(ball.vh<-1.6)ball.vh=-ball.vh*.45;else ball.vh=0}
     if(ball.h===0){const s=sp2();const ns=Math.max(0,s-3.2*dt);if(s>0){ball.vx*=ns/s;ball.vd*=ns/s}}else{ball.vx*=1-.04*dt;ball.vd*=1-.04*dt}
@@ -5255,7 +5296,7 @@ function nssMoment(o){
     if(pd>0&&ball.d<=0){const f=pd/(pd-ball.d);const x=ball.x,h=ball.h;
      const post=Math.abs(Math.abs(x)-3.66)<.14&&h<2.5,bar=Math.abs(h-2.44)<.14&&Math.abs(x)<3.8;
      if(post||bar){ball.vd=-ball.vd*.5;ball.vx*=.6;return finish(false,bar?'No travessão!':'Na trave!',false,'NA TRAVE!')}
-     if(Math.abs(x)<3.66&&h<2.44){NM.goalX=x;NM.goalH=h;const corner=Math.abs(x)>2.5||h>1.7;return finish(true,o.okTxt||'GOL!',corner,'GOOOL!')}
+     if(Math.abs(x)<3.66&&h<2.44){NM.goalX=x;NM.goalH=h;const corner=Math.abs(x)>2.5||h>1.7||(K==='fk'&&Math.hypot(Math.abs(x)-3.05,h-2.05)<.6);if(NM.mateShot){NM.mateShot=false;return finish(true,o.okTxt||'Assistência!',NM.assistFree,'ASSISTÊNCIA!')}return finish(true,o.okTxt||'GOL!',corner,'GOOOL!')}
      return finish(false,h>2.44?'Por cima do gol!':'Pra fora!',false,'PRA FORA!')}
     if(Math.abs(ball.x)>34||ball.d>72)return finish(false,'Saiu pela lateral.',false,'PRA FORA!');
    }
@@ -5276,7 +5317,9 @@ function nssMoment(o){
    }
    // companheiros
    P.filter(p=>p.team==='mate').forEach(m=>{if(m.run){const dx=m.run.x-m.x,dd=m.run.d-m.d,L=Math.hypot(dx,dd);const v=Math.min(m.sp,L*4);if(L>.05){m.vx=dx/L*v;m.vd=dd/L*v}else m.vx=m.vd=0}m.x+=m.vx*dt;m.d+=m.vd*dt;
-    if(kicked&&kicked!=='touch'&&T-kickT>.15&&ball.h<(K==='cross'?2.7:1.8)&&Math.hypot(m.x-ball.x,m.d-ball.d)<1.15){const free=!P.some(q=>q.team==='opp'&&dist(q,m)<3);finish(true,o.okTxt||'Na medida!',free,K==='cross'?'NA CABEÇA!':'NA MEDIDA!')}});
+    if(!m.got&&kicked&&kicked!=='touch'&&T-kickT>.15&&ball.h<(K==='cross'?2.7:1.8)&&Math.hypot(m.x-ball.x,m.d-ball.d)<1.15)receive(m)});
+   if(retM&&T>=retT){retPass(retM);retM=null}
+   if(shootM&&T>=shootT){mateShoot(shootM);shootM=null}
    if(K!=='header'&&kicked&&kicked!=='touch'&&!ended&&T-kickT>.3)P.filter(p=>p.team==='mate').forEach(m=>{if(((T*4)|0)%2===0)planRun(m)});
    // adversários
    for(const q of P){if(q.team!=='opp')continue;
@@ -5287,7 +5330,7 @@ function nssMoment(o){
      else{tx=ball.x+ball.vx*.25;td=ball.d+ball.vd*.25}
      const dx=tx-q.x,dd=td-q.d,L=Math.hypot(dx,dd);const jock=(owner===me||kicked==='touch')&&L<3.5?.55:1;if(L>.05){const v=Math.min(q.sp*jock,L*5);q.vx+=(dx/L*v-q.vx)*Math.min(1,dt*4);q.vd+=(dd/L*v-q.vd)*Math.min(1,dt*4)}q.x+=q.vx*dt;q.d+=q.vd*dt}
     if(phase!=='play')continue;
-    const db=Math.hypot(q.x-ball.x,q.d-ball.d);const fast=sp2()>14;const top=q.wall?1.85+q.jump*.6:(K==='header'?2.3:1.85);
+    const db=Math.hypot(q.x-ball.x,q.d-ball.d);const fast=sp2()>14;const top=q.wall?1.75+q.jump*.5:(K==='header'?2.3:1.85);
     if((T-kickT>.12||!kicked)&&db<(owner===me?.6:ball.h<.6&&!fast?.7:.5)&&ball.h<top){
      if(q.mark===me&&K==='header'&&!headed)return finish(false,'O zagueiro subiu mais.',false,'CORTOU!');
      if(q.wall)return finish(false,'Bateu na barreira.',false,'BARREIRA!');
@@ -5322,6 +5365,44 @@ function nssMoment(o){
   }
   NM.gkDelay=R(.9,1.8);
 
+  // ---------- recepção, assistência e tabela ----------
+  let retM=null,retT=0,shootM=null,shootT=0,comboStage=0;
+  function receive(m){if(m.got||ended)return;m.got=true;owner=m;kicked=null;ball.vx=ball.vd=ball.vh=0;ball.h=0;ball.ax=0;m.run=null;m.vx*=.2;m.vd*=.2;SFX.touch();tmax=Math.max(tmax,T+6);
+   const free=!P.some(q=>q.team==='opp'&&dist(q,m)<3);
+   if(K==='combo'&&!comboStage){comboStage=1;banner={txt:'TABELA!',ok:true,t:0,tmp:true};retM=m;retT=T+.35;return}
+   if(o.assist){banner={txt:'NA MEDIDA!',ok:true,t:0,tmp:true};shootM=m;shootT=T+(K==='cross'?.15:.45);NM.assistFree=free;return}
+   finish(true,o.okTxt||'Na medida!',free,K==='cross'?'NA CABEÇA!':'NA MEDIDA!')}
+  function retPass(m){const tx=clamp(me.x+R(-1.2,1.2),-20,20),td=Math.max(12,me.d-6.5);const dx=tx-ball.x,dd=td-ball.d,L=Math.hypot(dx,dd)||1;const v=Math.sqrt(2*3.2*L)+2.5;
+   owner=null;ball.vx=dx/L*v;ball.vd=dd/L*v;ball.vh=0;kicked='touch';kickT=T;comboStage=2;SFX.kick(.4);me.run=null}
+  function mateShoot(m){const tx=(ch(.5)?1:-1)*R(1.8,3.2),th=K==='cross'?R(.4,1.6):R(.2,1.9);const bx=ball.x,bd=ball.d,h0=K==='cross'?1.8:.11;
+   const sp=K==='cross'?R(14,18):R(21,26);const t=Math.hypot(tx-bx,bd)/sp;owner=null;ball.h=h0;ball.vx=(tx-bx)/t;ball.vd=-bd/t;ball.dip=5;ball.vh=(th-h0+.5*14.8*t*t)/t;ball.ax=0;
+   kicked='kick';kickT=T;shotLive=true;gkReact=.2+(1-kq)*.25;gk.err=null;gkDive=0;m.jump=K==='cross'?.35:0;SFX.kick(.8);NM.mateShot=true}
+  // ---------- falta: mira, força, efeito ----------
+  let fkS='aim',fkPw=0,fkCv=0,fkT0=0,fkDrag=false;
+  function fkAim0(){return null}
+  function fkKick(){const bx=ball.x,bd=ball.d;const pw=fkPw,cv=fkCv;let tx=fkAim.x+gauss()*(1-skill)*.55,th=fkAim.h;
+   const dist2=Math.hypot(tx-bx,bd);const speed=19+pw*13;const t=dist2/speed;const pIdeal=clamp(.5+dist2/110,.5,.8);
+   th=th+(pw-pIdeal)*7.5+gauss()*(1-skill)*.35;const ax=cv*9*(1+BB*.3);
+   ball.vx=(tx-bx)/t;ball.vd=-bd/t;ball.dip=5;ball.vh=(th-.11+.5*14.8*t*t)/t;ball.ax=ax;ball.keepAx=true;
+   owner=null;kicked='kick';kickT=T;curl=Math.sign(ax);shotLive=true;gkReact=.4+(1-kq)*.25;gk.err=null;P.forEach(p=>{if(p.wall)p.jump=.45});fkS='go';tapFx('kick');
+   NM.fkTarget=fkAim}
+  function fkFromScreen(sx,sy){const s=F/Math.max(.5,cam.d);return{x:clamp(cam.x+(sx-W/2)/s,-4.6,4.6),h:clamp(cam.h-(sy-hz)/s,.1,3.3)}}
+  function drawFK(){if(K!=='fk'||fkS==='go'||phase!=='play')return;
+   if(!fkAim)fkAim={x:(ball.x>0?-1:1)*2.4,h:1.7};
+   const a=proj(fkAim.x,0,fkAim.h);if(a){const r=Math.max(10,a.s*.35);ctx.strokeStyle='#ff3b2f';ctx.lineWidth=3;ctx.beginPath();ctx.arc(a.x,a.y,r,0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(a.x-r*1.5,a.y);ctx.lineTo(a.x+r*1.5,a.y);ctx.moveTo(a.x,a.y-r*1.5);ctx.lineTo(a.x,a.y+r*1.5);ctx.stroke();ctx.fillStyle='rgba(255,59,47,.25)';ctx.beginPath();ctx.arc(a.x,a.y,r,0,7);ctx.fill()}
+   // alvos bônus nos ângulos
+   for(const sx of[-1,1]){const t=proj(sx*3.05,0,2.05);if(t){const rr=Math.max(6,t.s*.32);ctx.strokeStyle='rgba(255,255,255,.85)';ctx.lineWidth=2;ctx.beginPath();ctx.arc(t.x,t.y,rr,0,7);ctx.stroke();ctx.strokeStyle='#f2c443';ctx.beginPath();ctx.arc(t.x,t.y,rr*.55,0,7);ctx.stroke()}}
+   const tt=(performance.now()-fkT0)/1000;const spd=1.7-skill*.55-BB*.2;
+   if(fkS==='power'){fkPw=(Math.sin(tt*Math.PI*spd-Math.PI/2)+1)/2}
+   if(fkS==='curve'){fkCv=Math.sin(tt*Math.PI*spd*1.15)}
+   // medidores
+   const bx=W-26,by=H*.2,bh=H*.5;ctx.fillStyle='rgba(0,0,0,.5)';roundRect(bx-9,by-4,18,bh+8,9);ctx.fill();
+   const gr=ctx.createLinearGradient(0,by+bh,0,by);gr.addColorStop(0,'#7dff9a');gr.addColorStop(.55,'#ffd34a');gr.addColorStop(1,'#ff3b2f');ctx.fillStyle=gr;roundRect(bx-5,by+bh*(1-fkPw),10,bh*fkPw,5);ctx.fill();
+   const id=by+bh*(1-clamp(.5+Math.hypot(ball.x,ball.d)/110,.5,.8));ctx.fillStyle='#fff';ctx.fillRect(bx-12,id-1,24,2);
+   const cx=W/2,cy=H-34,cw=W*.6;ctx.fillStyle='rgba(0,0,0,.5)';roundRect(cx-cw/2-6,cy-9,cw+12,18,9);ctx.fill();ctx.fillStyle='rgba(255,255,255,.35)';ctx.fillRect(cx-1,cy-9,2,18);
+   ctx.fillStyle='#8fd3ff';ctx.beginPath();ctx.arc(cx+fkCv*cw/2,cy,8,0,7);ctx.fill();ctx.strokeStyle='#fff';ctx.lineWidth=2;ctx.stroke();
+   ctx.font="800 12px 'Saira Condensed',sans-serif";ctx.textAlign='center';ctx.fillStyle='#fff';ctx.fillText('↶ EFEITO ↷',cx,cy-14);
+   const msg=fkS==='aim'?'1 · ARRASTE O ALVO NO GOL':fkS==='power'?'2 · TOQUE: FORÇA':'3 · TOQUE: EFEITO';ctx.font="900 15px 'Saira Condensed',sans-serif";const tw=ctx.measureText(msg).width+22;ctx.fillStyle='rgba(0,0,0,.6)';roundRect(W/2-tw/2,44,tw,24,12);ctx.fill();ctx.fillStyle='#f2c443';ctx.textBaseline='middle';ctx.fillText(msg,W/2,57)}
   // ---------- drible sincronizado ----------
   let drbSlow=false,drbPerf=0,drbTot=0;
   const drbAct=()=>P.find(q=>q.drb&&!q.passed&&!q.beat);
@@ -5349,7 +5430,7 @@ function nssMoment(o){
    if(dd>3.3){// cedo demais: ele lê o movimento
     if(ch(.12+dri*.25)){beat(q,dir,false)}else{q.beat=true;finish(false,'Cedo demais: ele leu o drible.',false,'CEDO DEMAIS!')}return}
    if(!good){if(ch(.08+dri*.12)){beat(q,dir,false);return}q.beat=true;finish(false,dir==='up'?'Ele fechou as pernas!':'Foi pro lado fechado.',false,'DESARMOU!');return}
-   const perfect=dd>=1.7&&dd<=2.6;beat(q,dir,perfect);
+   const perfect=dd>=1.7-BB*.2&&dd<=2.6+BB*.2;beat(q,dir,perfect);
   }
   function beat(q,dir,perfect){drbTot++;if(perfect)drbPerf++;q.passed=false;q.stun=1.2;
    const side=dir==='up'?0:dir;q.vx=-side*3.5;q.vd=2.2;q.fall=perfect?1:0;q.passed=false;q.beatAt=T;
@@ -5560,7 +5641,7 @@ function nssMoment(o){
   function star(cx,cy,r,fill){ctx.beginPath();for(let i=0;i<10;i++){const a=-Math.PI/2+i*Math.PI/5,rr=i%2?r*.45:r;ctx.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr)}ctx.closePath();ctx.fillStyle=fill?'#f2c443':'rgba(255,255,255,.18)';ctx.fill();ctx.strokeStyle='rgba(0,0,0,.5)';ctx.lineWidth=1.5;ctx.stroke()}
   function drawHUD(){
    // placa de tempo (anel)
-   if(!GK&&K!=='dribble'&&phase!=='intro'&&(!kicked||kicked==='touch')&&!ended){const left=clamp(1-T/tmax,0,1);const cx=W-24,cy=24;ctx.fillStyle='rgba(0,0,0,.5)';ctx.beginPath();ctx.arc(cx,cy,15,0,7);ctx.fill();ctx.strokeStyle=left<.3?'#ff5a4a':'#f2c443';ctx.lineWidth=4;ctx.beginPath();ctx.arc(cx,cy,12,-Math.PI/2,-Math.PI/2+left*Math.PI*2);ctx.stroke();ctx.fillStyle='#fff';ctx.font="800 11px 'Saira Condensed',sans-serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(Math.ceil(tmax-T),cx,cy+1)}
+   if(!GK&&K!=='dribble'&&K!=='fk'&&phase!=='intro'&&(!kicked||kicked==='touch')&&!ended){const left=clamp(1-T/tmax,0,1);const cx=W-24,cy=24;ctx.fillStyle='rgba(0,0,0,.5)';ctx.beginPath();ctx.arc(cx,cy,15,0,7);ctx.fill();ctx.strokeStyle=left<.3?'#ff5a4a':'#f2c443';ctx.lineWidth=4;ctx.beginPath();ctx.arc(cx,cy,12,-Math.PI/2,-Math.PI/2+left*Math.PI*2);ctx.stroke();ctx.fillStyle='#fff';ctx.font="800 11px 'Saira Condensed',sans-serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(Math.ceil(tmax-T),cx,cy+1)}
    // etiqueta do lance
    if(phase!=='intro'){ctx.font="800 12px 'Saira Condensed',sans-serif";const lbl=(o.min!=null?o.min+"' · ":'')+tag.toUpperCase();const tw=ctx.measureText(lbl).width+18;ctx.fillStyle='rgba(0,0,0,.5)';roundRect(10,12,tw,22,11);ctx.fill();ctx.fillStyle='#fff';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(lbl,19,23.5)}
    if(curl&&kicked&&kicked!=='touch'&&T-kickT<1.4){ctx.fillStyle='rgba(0,0,0,.5)';roundRect(W/2-50,44,100,22,11);ctx.fill();ctx.fillStyle='#ffd34a';ctx.font="800 13px 'Saira Condensed',sans-serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(curl>0?'EFEITO ↷':'↶ EFEITO',W/2,55)}
@@ -5573,7 +5654,8 @@ function nssMoment(o){
     if(ended&&!banner.tmp&&banner.t>.25){const n=ended.ok?(ended.perfect?3:2):(/TRAVE|DEFENDEU|CORTOU|BARREIRA/.test(banner.txt)?1:0);for(let i=0;i<3;i++){const t=clamp((banner.t-.3-i*.12)*6,0,1);if(t>0){ctx.save();ctx.translate(W/2+(i-1)*34,H*.38+52);ctx.scale(t,t);star(0,0,13,i<n);ctx.restore()}}}}
    if(phase==='intro'){const k=Math.min(1,tIntro/.85);const bh=H*.09*(1-k*.6);ctx.fillStyle='#000';ctx.fillRect(0,0,W,bh);ctx.fillRect(0,H-bh,W,bh);
     const sx=-W*.6+W*.6*Math.min(1,k*2.2);ctx.fillStyle='rgba(0,0,0,.55)';ctx.fillRect(sx,H*.36,W,H*.12);ctx.fillStyle='#ff7a2b';ctx.fillRect(sx,H*.36,6,H*.12);ctx.fillStyle='#fff';ctx.font=`900 ${Math.min(40,W*.105)}px 'Saira Condensed',sans-serif`;ctx.textAlign='center';ctx.textBaseline='middle';ctx.fillText(GK?'ATENÇÃO, GOLEIRO!':tag.toUpperCase()+'!',W/2+sx,H*.42)}
-   if(phase==='play'&&K!=='dribble'&&!aim&&!kicked&&T<2.4&&!(S.tips&&S.tips.nssm>2)){const t=(performance.now()/900)%1;const bp=GK?proj(gk.x,gk.d,1):proj(ball.x,ball.d,0);if(bp){const y0=bp.y+10,y1=bp.y+(GK?-40:70);const yy=y0+(y1-y0)*Math.min(1,t*1.4);ctx.globalAlpha=1-t;ctx.font='30px sans-serif';ctx.textAlign='center';ctx.fillText('👆',bp.x+(GK?t*50:0),yy);ctx.globalAlpha=1}}
+   if(phase==='play'&&K!=='dribble'&&K!=='fk'&&!aim&&!kicked&&T<2.4&&!(S.tips&&S.tips.nssm>2)){const t=(performance.now()/900)%1;const bp=GK?proj(gk.x,gk.d,1):proj(ball.x,ball.d,0);if(bp){const y0=bp.y+10,y1=bp.y+(GK?-40:70);const yy=y0+(y1-y0)*Math.min(1,t*1.4);ctx.globalAlpha=1-t;ctx.font='30px sans-serif';ctx.textAlign='center';ctx.fillText('👆',bp.x+(GK?t*50:0),yy);ctx.globalAlpha=1}}
+   if(BOOT&&phase!=='intro'&&!ended){ctx.font="800 11px 'Saira Condensed',sans-serif";const bl='👟 '+BOOT.n;const bw=ctx.measureText(bl).width+16;ctx.fillStyle='rgba(0,0,0,.5)';roundRect(10,H-30,bw,20,10);ctx.fill();ctx.fillStyle='#f2c443';ctx.textAlign='left';ctx.textBaseline='middle';ctx.fillText(bl,18,H-19.5)}
    if(flashT>0){ctx.fillStyle=`rgba(255,255,255,${flashT})`;ctx.fillRect(0,0,W,H);flashT=Math.max(0,flashT-.03)}
   }
   function drawParts(dt){for(let i=parts.length-1;i>=0;i--){const q=parts[i];q.vy+=q.g*dt;q.x+=q.vx*dt;q.y+=q.vy*dt;q.life-=q.dec*dt;q.rot+=dt*8;if(q.life<=0){parts.splice(i,1);continue}ctx.save();ctx.globalAlpha=Math.min(1,q.life*1.5);ctx.translate(q.x,q.y);ctx.rotate(q.rot);ctx.fillStyle=q.c;ctx.fillRect(-q.s/2,-q.s/4,q.s,q.s/2);ctx.restore()}}
@@ -5587,7 +5669,7 @@ function nssMoment(o){
    P.filter(p=>p.team==='mate').forEach(m=>ring(m.x,m.d,.6,'rgba(120,220,255,.95)',2.5,!kicked));
    if(K==='header'&&NM.cross&&!headed)ring(NM.cross.tx,NM.cross.td,.5,'rgba(255,255,255,.55)',2,true);
    P.forEach(p=>shadow(p.x,p.d,.32,.32));shadow(ball.x,ball.d,.13,clamp(.42-ball.h*.08,.08,.42));
-   if(phase==='play')drawAim();
+   if(phase==='play')drawAim();drawFK();
    const ents=P.map(p=>({d:p.d,f:()=>drawPlayer(p)}));if(!(cam.dir>0&&ball.d<0))ents.push({d:ball.d-.01,f:drawBall});
    ents.sort((a,b)=>(b.d-a.d)*cam.dir).forEach(e=>e.f());if(K==='dribble')drawDRB();
    if(cam.dir<0){drawNet();drawPosts()}
@@ -5599,7 +5681,8 @@ function nssMoment(o){
   function camUpdate(dt){
    if(GK)return;let fx,fd,fh=5.2;
    if(phase==='intro'){const k=Math.min(1,dt*3.2);cam.x+=(camEnd.x-cam.x)*k;cam.d+=(camEnd.d-cam.d)*k;cam.h+=(camEnd.h-cam.h)*k;return}
-   if((K==='fk'||K==='pen')&&!kicked){fx=ball.x*.8;fd=ball.d+9}
+   if(K==='fk'&&!kicked){fx=ball.x*.7;fd=ball.d+5.5;fh=3.4}
+   else if(K==='pen'&&!kicked){fx=ball.x*.8;fd=ball.d+9}
    else if(K==='dribble'){fx=me.x*.85;fd=me.d+12.5;fh=6.8}
    else if(K==='header'&&!headed){fx=me.x*.9+(ball.x-me.x)*.22;fd=me.d+10.5}
    else if(owner===me||kicked==='touch'){fx=me.x*.88;fd=me.d+10.5}
@@ -5613,12 +5696,14 @@ function nssMoment(o){
   let swp=null;
   cv.addEventListener('pointerdown',e=>{e.preventDefault();SFX.ctx();if(!SFX.loop)SFX.startLoop();try{cv.setPointerCapture(e.pointerId)}catch(_){}const p=pt(e);
    if(K==='dribble'){swp=p;return}
+   if(K==='fk'&&phase==='play'){if(fkS==='aim'){fkDrag=true;fkAim=fkFromScreen(p.x,p.y)}else if(fkS==='power'){fkS='curve';fkT0=performance.now();SFX.touch()}else if(fkS==='curve'){fkKick()}return}
    if(kicked&&kicked!=='touch'&&!ended&&T-kickT<1.2){curlLast=p;return}
    if(!canAim())return;aim={sx:p.x,sy:p.y,cx:p.x,cy:p.y,len:0};drag=true});
-  cv.addEventListener('pointermove',e=>{const p=pt(e);
+  cv.addEventListener('pointermove',e=>{const p=pt(e);if(K==='fk'&&fkDrag&&fkS==='aim'){fkAim=fkFromScreen(p.x,p.y);return}
    if(curlLast&&kicked&&kicked!=='touch'){const dx=p.x-curlLast.x;curlLast=p;const add=dx*.16*cam.dir;ball.ax=clamp(ball.ax+add,-11,11);curl=Math.sign(ball.ax);return}
    if(drag&&aim){aim.cx=p.x;aim.cy=p.y;aim.len=Math.hypot(aim.cx-aim.sx,aim.cy-aim.sy)}});
-  const up=e=>{if(K==='dribble'){if(!swp)return;const p=pt(e);const dx=p.x-swp.x,dy=p.y-swp.y;swp=null;if(Math.hypot(dx,dy)<26)return;drbSwipe(-dy>Math.abs(dx)*1.1?'up':dx>0?1:-1);return}
+  const up=e=>{if(K==='fk'){if(fkDrag&&fkS==='aim'){fkDrag=false;fkS='power';fkT0=performance.now();SFX.touch()}return}
+   if(K==='dribble'){if(!swp)return;const p=pt(e);const dx=p.x-swp.x,dy=p.y-swp.y;swp=null;if(Math.hypot(dx,dy)<26)return;drbSwipe(-dy>Math.abs(dx)*1.1?'up':dx>0?1:-1);return}
    if(curlLast){curlLast=null;return}if(!drag||!aim){drag=null;return}drag=null;const a=aim;
    if(a.len<14){aim=null;return}
    if(GK){aim=null;const r=cv.getBoundingClientRect();const g=proj(gk.x,gk.d,1);const dep=(cam.d-gk.d)*cam.dir;const s=F/dep;const wx=cam.x+(a.cx-W/2)/s*cam.dir;const wh=cam.h-(a.cy-hz)/s;gkTarget={x:clamp(wx,-3.6,3.6),h:clamp(wh,0,2.6)};return}
@@ -5640,7 +5725,7 @@ function nssMoment(o){
     swEnd(r.ok,r.txt,r.perfect).then(()=>res({ok:r.ok,perfect:!!r.perfect}));return}
    raf=requestAnimationFrame(loop)}
   raf=requestAnimationFrame(loop);SFX.startLoop();setTimeout(()=>SFX.whistle(),350);
-  NM.api={kickTo(tx,td,p,c){const ox=K==='header'?me.x:ball.x,od=K==='header'?me.d:ball.d;const dx0=tx-ox,dd0=td-od;const ang=Math.atan2(dx0,-dd0);const L=p*H*.34;const a={sx:0,sy:0,cx:-Math.sin(ang)*L,cy:Math.cos(ang)*L,len:L};if(K==='header'){lastAim=a;return}doKick(a,false);if(c)ball.ax=c},state:()=>({phase,T,owner:!!owner,ball:{...ball},me:me&&{x:me.x,d:me.d}}),P,gkSet(x,h){gkTarget={x,h}},swipe(d){drbSwipe(d)},drb(){const q=drbAct();return q?{dd:me.d-q.d,open:q.open,nut:q.nut}:null}};
+  NM.api={kickTo(tx,td,p,c){const ox=K==='header'?me.x:ball.x,od=K==='header'?me.d:ball.d;const dx0=tx-ox,dd0=td-od;const ang=Math.atan2(dx0,-dd0);const L=p*H*.34;const a={sx:0,sy:0,cx:-Math.sin(ang)*L,cy:Math.cos(ang)*L,len:L};if(K==='header'){lastAim=a;return}doKick(a,false);if(c)ball.ax=c},state:()=>({phase,T,owner:!!owner,ball:{...ball},me:me&&{x:me.x,d:me.d}}),P,gkSet(x,h){gkTarget={x,h}},swipe(d){drbSwipe(d)},fk(x,h,pw,cv){fkAim={x,h};fkPw=pw;fkCv=cv;fkKick()},drb(){const q=drbAct();return q?{dd:me.d-q.d,open:q.open,nut:q.nut}:null}};
  });
 }
 // ---------- liga o motor novo em tudo que usava os mini games de arrastar ----------
@@ -5653,6 +5738,11 @@ swipeReflex=function(o){return nssMoment({...o,kind:'keeper',skill:typeof skillO
 IO_UI.penalty=async function(o){const save=o.mode==='save';const sk=k=>typeof skillOf==='function'?skillOf(k):.6;
  const r=await nssMoment({kind:save?'keeper':'pen',pen:true,comp:o.comp,min:o.min,title:save?`Pênalti contra! ${o.taker||'O batedor'} vai bater`:'Pênalti! A bola é sua',skill:save?sk('REF'):clamp(sk('FIN')-(55-S.life.cab)/400,.15,.95),keeper:.5,okTxt:save?'DEFENDEU!':'GOL!'});
  const last=NM.last||'';const res=save?(r.ok?'defesa':/fora/i.test(last)?'fora':'gol'):(r.ok?'gol':/segurou|Espalmou/.test(last)?'defesa':'fora');return{goal:res==='gol',res}};
+
+// ---------- tabela e assistência nos jogos ----------
+const _rcNM=runChance;runChance=async function(c){if(c.type==='combo'){const sk=k=>typeof skillOf==='function'?skillOf(k):.6;return(await nssMoment({...c,kind:'combo',title:c.planned?'Tabela na entrada da área!':'Jogada de tabela',skill:sk('PAS')*.5+sk('FIN')*.5,keeper:c.planned?.4:.55,okTxt:'Gol de tabela!'})).ok}return _rcNM(c)};
+IO_UI.chance=async c=>runChance(c);
+const _ctNM=chanceType;chanceType=function(e){const t=_ctNM(e);if(!e.fk&&['finish','dribble'].includes(t)&&['ATA','SA','MEI','MC','PE','PD','ME','MD'].includes(S.pos)&&ch(.28))return'combo';return t};
 
 // ================== CARREIRA COMEÇA NA BASE (só competições de base até subir) ==================
 var HIDDEN_PRO=false;
@@ -5756,7 +5846,7 @@ const PEN_ST_OUT=[
  {k:'dribble',ic:'⚡',n:'Drible',at:'DRI',how:['Você corre sozinho com a bola. O marcador vem de frente.','Quando o anel em volta dele fechar no <b>dourado</b>, <b>arraste o dedo pro lado da seta verde</b>: é pra lá que você dribla.','Pernas abertas (seta azul)? <b>Arraste pra cima</b>: caneta!'],tip:'Cedo demais ele lê o drible; tarde demais ele toma a bola. Sincronia é tudo.'},
  {k:'finish',ic:'🥅',n:'Finalização',at:'FIN',how:['<b>Puxada longa</b> = chute forte. Forte demais vai por cima.','Mire nos cantos. Bola no meio, o goleiro pega.','Logo depois de chutar, <b>arraste o dedo pro lado</b> pra dar efeito.'],tip:'Nos jogos, cada lance desses pode virar gol de verdade na súmula.'},
  {k:'header',ic:'🤯',n:'Cabeçada',at:'FIS',how:['O cruzamento vem lá da ponta.','<b>Mire antes</b>: puxe pra trás e segure o dedo.','Ele cabeceia sozinho quando a bola chegar.'],tip:'Escanteio e cruzamento viram gol pra quem sobe no tempo certo.'},
- {k:'fk',ic:'🌀',n:'Falta',at:'FIN',how:['Puxe pra trás com força média e solte.','<b>Arraste pro lado logo depois</b> pra curvar a bola.','Passe por cima ou em volta da barreira.'],tip:'Quem bate bem falta pode pedir a cobrança ao treinador.'},
+ {k:'fk',ic:'🌀',n:'Falta',at:'FIN',how:['<b>Arraste o alvo vermelho</b> até o ponto do gol e solte.','Toque pra parar a <b>força</b>. A marca branca é a força ideal: mais que isso, por cima.','Toque pra parar o <b>efeito</b>: a bola curva pro lado escolhido. Mire contando com a curva.'],tip:'Quem bate bem falta pode pedir a cobrança ao treinador.'},
 ];
 const PEN_ST_GK=[
  {k:'keeper',ic:'🧤',n:'Reflexo',at:'REF',how:['O atacante vai chutar.','Na hora do chute, <b>arraste do goleiro até onde a bola vai</b>.','Pular antes da hora entrega o outro canto.'],tip:'Nos jogos, os chutes contra o seu gol aparecem assim.'},
@@ -5791,7 +5881,7 @@ async function penCircuit(){
   const sk=clamp((typeof skillOf==='function'?skillOf(st.at):.6)+.12,.3,.95);
   const r=await nssMoment({kind:st.k,comp:'Peneira',title:st.n,skill:sk,keeper:.3,planned:true,defs:2,need:2,speed:.9,okTxt:'Boa!'});
   const d=r.ok?(r.perfect?RI(7,10):RI(4,7)):-RI(1,3);const txt=r.ok?(r.perfect?'Perfeito':'Acertou'):'Errou';
-  PEN.circ.push({ok:r.ok,d,txt});penLog(`Estação de ${st.n.toLowerCase()}: ${txt.toLowerCase()}`,d);
+  PEN.circ.push({ok:r.ok,d,txt,at:st.at,perfect:!!r.perfect});penLog(`Estação de ${st.n.toLowerCase()}: ${txt.toLowerCase()}`,d);
   toast({ic:COACH.ic,title:COACH.n,txt:(r.ok?COACH_OK:COACH_BAD)[i%4],ms:2600});penCircuit()};
 }
 const _renderPenJ=renderPeneira;
@@ -6055,6 +6145,153 @@ function lifeStripHTML(){const L=S.life;const v=fansCur();const heart=S.gf?S.gf.
 if(typeof oneScreenHub==='function'){const _oshT=oneScreenHub;oneScreenHub=function(...a){const r=_oshT.apply(this,a);try{
  const w=$app.querySelector('.wrap');const j=w&&w.querySelector(':scope > .journey');if(w&&S.st&&!S.st.done&&!PAUSE&&!(S.tips&&!S.tips.tourHub)){const dec=isDecisive(nextItem());if(!dec&&j&&!document.getElementById('lifeStrip')){j.insertAdjacentHTML('afterend',lifeStripHTML());j.remove();document.getElementById('lifeStrip').onclick=()=>{WEEK_TAB='rel';renderHub()}}}
 }catch(e){console.error(e)}return r}}
+
+// ================== V5: sem draft, OVR nasce na peneira, copas ao vivo, balanço por competição, aposentadoria, assalto ==================
+
+// ---------- sem draft: o jogador nasce cru e a peneira define o nível ----------
+JOURNEY.ob=['Jogador','Empresário','Peneira','Clube'];
+function baseAttrs(pos){const w=POS[pos].w||{};const A={};const mx=Math.max(...ATTRS.map(k=>w[k]||0),.01);ATTRS.forEach(k=>{A[k]=Math.round(42+(w[k]||0)/mx*14+R(-2,2))});return A}
+startDraft=function(){DR.attrs=baseAttrs(CR.pos);finishDraft()};
+const _finishDraftV5=finishDraft;finishDraft=function(){_finishDraftV5();if(S){S.ovrHidden=true;S.ovr=45;S.pot=70;S.peak=45}};
+// telas da peneira mostram "?" no OVR enquanto ninguém sabe seu nível
+const _penShellV5=penShell;penShell=function(inner){_penShellV5(inner);try{if(S.ovrHidden){const o=$app.querySelector('.ph .ovr b');if(o)o.textContent='?'}}catch(e){}};
+const _pickAgentV5=pickAgent;pickAgent=function(){const p=_pickAgentV5();try{if(S.ovrHidden){const o=$app.querySelector('.ph .ovr b');if(o)o.textContent='?'}const j=$app.querySelector('.journey');if(j)j.outerHTML=journeyHTML('ob',1,'Antes da peneira, escolha quem vai cuidar da sua carreira.')}catch(e){}return p};
+function peneiraRating(){
+ const sc=clamp(PEN.score||40,0,100);const D=DIFF[S.diff]||{pot:0};const A={...S.attrs};
+ for(const c of(PEN.circ||[])){if(!c.at)continue;A[c.at]=clamp((A[c.at]||45)+(c.perfect?8:c.ok?5:-2),30,80)}
+ const ovr=clamp(Math.round(45+sc*.2+R(-1,1)),44,68);
+ const pot=clamp(Math.round(ovr+15+(sc-50)*.18+(D.pot||0)+randn()*2.5),ovr+6,95);
+ return{A,ovr,pot,sc}}
+function revealOVR(){return new Promise(res=>{
+ const r=peneiraRating();S.attrs=r.A;S.ovr=r.ovr;S.pot=r.pot;S.peak=r.ovr;S.peakAge=S.age;S.ovrHidden=false;
+ const circ=PEN.circ||[];const ok=circ.filter(c=>c.ok).length;const top=Object.entries(S.attrs).filter(([k])=>(POS[S.pos].w[k]||0)>0).sort((a,b)=>b[1]-a[1]).slice(0,3);
+ const stars=Math.max(1,Math.min(5,Math.round((r.pot-60)/7)));
+ $ov.hidden=false;
+ $ov.innerHTML=`<div class="ovwrap reveal"><div class="eyebrow" style="color:var(--gold);letter-spacing:.25em">O veredito dos olheiros</div>
+ <div class="rv-card"><div class="rv-ovr mono" id="rvO">40</div><div class="rv-lbl">OVR inicial</div><div class="rv-pot">Potencial ${'★'.repeat(stars)}${'☆'.repeat(5-stars)}</div></div>
+ <div class="rv-why"><div><b>${ok}/${circ.length||5}</b><small>circuito</small></div><div><b>${Math.round(r.sc)}</b><small>impressão</small></div><div><b>${esc(POS[S.pos].n)}</b><small>posição</small></div></div>
+ <div class="rv-attrs">${top.map(([k,v])=>`<div><span>${ATTR_NAME[k]}</span><i><s style="width:${v}%"></s></i><b class="mono">${v}</b></div>`).join('')}</div>
+ <p class="muted" style="font-size:13px;margin:6px 0 10px">Seu nível nasceu do que você fez na peneira. Daqui pra frente ele cresce com treino, vida em ordem e temporadas boas.</p>
+ <button class="btn wide" id="rvOk" style="opacity:0">Ver quem te quer</button></div>`;
+ const el=document.getElementById('rvO');let v=40;const tick=()=>{v=Math.min(r.ovr,v+1);el.textContent=v;if(v<r.ovr)setTimeout(tick,reduced?0:45);else{el.classList.add('pop');SFX.tone({f:880,dur:.18,gain:.12});document.getElementById('rvOk').style.opacity=1}};setTimeout(tick,500);
+ document.getElementById('rvOk').onclick=()=>{$ov.hidden=true;$ov.innerHTML='';res()};
+})}
+const _penResultV5=peneiraResult;peneiraResult=function(...a){if(S.ovrHidden){revealOVR().then(()=>_penResultV5.apply(this,a));return}return _penResultV5.apply(this,a)};
+// circuito guarda o atributo de cada estação
+// desenvolvimento: treino e vida somam no fim da temporada
+const _weeklyV5=weeklyTraining;weeklyTraining=async function(k){const r=await _weeklyV5(k);if(S.st)S.st.trains=(S.st.trains||0)+1;return r};
+const _endV5=endSeason;endSeason=function(){const st=S.st;const trains=st&&st.trains||0;const lm=typeof lifeMod==='function'?lifeMod():0;const ls=_endV5();try{
+ if(ls){let b=0;const why=[];if(trains>=10){b++;why.push(`${trains} treinos`)}if(lm>=.35){b++;why.push('vida em ordem')}if(lm<=-.35){b--;why.push('vida bagunçada')}
+  if(b>0)b=Math.max(0,Math.min(b,S.pot+1-S.ovr));if(b){S.ovr=clamp(S.ovr+b,30,99);if(S.ovr>S.peak){S.peak=S.ovr;S.peakAge=S.age}if(ls.row)ls.row.delta=(ls.row.delta||0)+b;
+   ls.news.push({t:'dev',club:S.club,txt:b>0?`Evolução extra (+${b} OVR): ${why.join(' e ')}.`:`Você perdeu rendimento (${b} OVR): ${why.join(' e ')}.`})}}
+}catch(e){}return ls};
+// textos
+try{const hk=document.createElement('style');hk.textContent='';document.head.appendChild(hk)}catch(e){}
+
+// ---------- todo jogo de copa é ao vivo ----------
+const _isDecV5=isDecisive;isDecisive=function(it){try{if(it&&(it.k==='ko'||it.k==='grp')){const c=S.st.comps[it.cid];if(c&&c.alive!==false)return true}}catch(e){}return _isDecV5(it)};
+const _wantLiveV5=wantLive;wantLive=function(kind){const m=S.liveMode||'decisivos';if(m!=='off'&&(kind==='ko'||kind==='grp'||kind==='tg'))return true;return _wantLiveV5(kind)};
+
+// ---------- balanço: como foi cada competição ----------
+function compResult(c){if(!c)return'';if(c.won)return'🏆 Campeão';if(c.out)return`eliminado · ${c.out}`;
+ if(c.alive===false&&c.rounds&&c.rounds.length){const rd=c.rounds[Math.min(c.stage,c.rounds.length-1)];return rd?(rd.n==='Final'?'🥈 Vice-campeão':`eliminado · ${rd.n}`):'eliminado'}
+ if(c.kind==='yl'||c.gtab)return c.rank?`${c.rank}º lugar`:'Fase de grupos';return'Participou'}
+function compsHTML(ls){const rows=[];
+ if(ls.leagueName&&!ls.youthSeason)rows.push([LG[(CLUB[ls.row&&ls.row.club]||club()).l]?'🏟️':'🏟️',ls.leagueName,`${ls.rank}º lugar${ls.myMove?ls.myMove.dir==='up'?' · subiu':' · caiu':''}`,ls.rank===1]);
+ for(const[k,c]of Object.entries(ls.comps||{})){if(ls.youthSeason&&!c.youth)continue;rows.push([c.won?'🏆':c.youth?'🌱':'🏆',c.n,compResult(c),!!c.won])}
+ const st=ls.stats||{};const cats=Object.entries(st).filter(([k,v])=>v&&v.j);
+ return`<div class="cmp-list">${rows.map(([ic,n,r,w])=>`<div class="cmp ${w?'win':''}"><span>${ic}</span><b>${esc(n)}</b><em>${esc(r)}</em></div>`).join('')}</div>
+ ${cats.length?`<div class="eyebrow" style="margin-top:12px">Seus números por torneio</div><table class="std cmp-t"><thead><tr><th></th><th>J</th><th>${S.pos==='GOL'?'SG':'G'}</th><th>A</th><th>Nota</th></tr></thead><tbody>${cats.map(([k,v])=>`<tr><td>${esc(k)}</td><td class="mono">${v.j}</td><td class="mono">${S.pos==='GOL'?v.cs||0:v.g}</td><td class="mono">${v.a}</td><td class="mono">${v.nn?fmt2(v.ns/v.nn):'—'}</td></tr>`).join('')}</tbody></table>`:''}`}
+const _renderReportV5=renderReport;renderReport=function(ls){const r=_renderReportV5(ls);try{
+ const card=$app.querySelector('.wrap > section.card');if(!card||!ls)return r;
+ const chips=[];if(ls.leagueName&&!ls.youthSeason)chips.push(`${ls.rank}º ${ls.leagueName}`);for(const c of Object.values(ls.comps||{})){if(ls.youthSeason&&!c.youth)continue;chips.push(`${c.won?'🏆 ':''}${c.n}: ${compResult(c).replace('🏆 ','').replace('🥈 ','')}`)}
+ const strip=document.createElement('div');strip.className='cmp-strip';strip.innerHTML=chips.slice(0,6).map(t=>`<span class="chip ${/Campeão/.test(t)?'gold':''}">${esc(t)}</span>`).join('');
+ const tiles=card.querySelector('.plantiles');const btn=document.createElement('button');btn.className='ptile hot';btn.innerHTML='<span>🏟️</span><b>Competições</b><small>Como foi em cada uma</small>';
+ btn.onclick=()=>openPanelHTML('🏟️ Competições',`<section class="card" style="display:grid;gap:8px">${compsHTML(ls)}</section>`);
+ if(tiles)tiles.prepend(btn);else{const t=document.createElement('div');t.className='plantiles';t.appendChild(btn);card.appendChild(t)}
+ card.insertBefore(strip,card.querySelector('.plantiles'));
+}catch(e){console.error(e)}return r};
+
+// ---------- aposentadoria: cutscene + história da vida ----------
+function lifeSummary(){const L=[];if(S.rel==='casado'&&S.gf)L.push(`casado com ${S.gf.n}`);else if(S.rel==='divorciado')L.push('divorciado');if(S.filhos)L.push(`${S.filhos} filho${S.filhos>1?'s':''}`);
+ if(S.props&&S.props.includes('paisCasa'))L.push('deu uma casa pros pais');if(S.ficha)L.push(`${S.ficha} passagem${S.ficha>1?'ns':''} pela polícia`);if(S.music&&S.music.songs)L.push(`${S.music.songs} música${S.music.songs>1?'s':''} gravada${S.music.songs>1?'s':''}`);return L}
+function retireEpilogue(card){const rich=S.din>=5,broke=S.din<.3;const idol=S.idols&&S.idols.length;const ficha=S.ficha>=2;const fam=S.rel==='casado'||S.filhos;
+ if(ficha)return'Longe dos gramados, a vida cobrou a conta. Os processos tomaram tempo e dinheiro. Ele diz que, se pudesse, faria tudo diferente fora de campo.';
+ if(broke)return'O dinheiro foi embora mais rápido que os anos. Hoje ele treina garotos numa escolinha de bairro e diz que nunca foi tão feliz ensinando.';
+ if(idol&&rich)return`Virou embaixador do ${CLUB[S.idols[0]]?CLUB[S.idols[0]].n:'clube'} e comentarista na TV. Nas arquibancadas, o nome dele ainda é cantado.`;
+ if(S.music&&S.music.lvl>=70)return'Trocou a chuteira pelo microfone. Os shows lotam, e no meio de cada um a banda toca o hino do clube onde ele foi feliz.';
+ if(fam)return'Voltou pra cidade natal, construiu a casa dos sonhos perto dos pais e vê os filhos jogando no mesmo campinho onde tudo começou.';
+ if(rich)return'Investiu bem, abriu um centro de treinamento e hoje é dono de um clube da série D. Diz que o próximo craque já está lá.';
+ return'Pendurou as chuteiras sem alarde. De vez em quando aparece numa pelada de fim de semana, e todo mundo ainda quer jogar no time dele.'}
+function retireCutscene(card){return new Promise(res=>{
+ const c=CLUB[S.club]||{};const[c1,c2]=[c.c1||'#ff7a2b',c.c2||'#fff'];const t=TIERS[card.tier]?TIERS[card.tier][1]:'';const first=(S.history[0]&&CLUB[S.history[0].club])?CLUB[S.history[0].club].n:'';
+ const life=lifeSummary();const slides=[
+  {ic:'🏟️',h:'O último jogo',p:`${c.n||'O estádio'} lotado. ${S.age} anos. A torcida sabe que é a despedida de ${S.name.split(' ')[0]}.`},
+  {ic:'👣',h:'Onde tudo começou',p:`Começou aos 16 no ${first}. Foram ${card.history.length} temporadas, ${card.clubs.length} clube${card.clubs.length>1?'s':''} e o auge com ${card.peak} de OVR aos ${card.peakAge} anos.`},
+  {ic:'🏆',h:'O que ficou',p:`${card.tot.games} jogos, ${S.pos==='GOL'?card.tot.cs+' sem sofrer gol':card.tot.goals+' gols'}, ${card.nTitles} títulos${card.bolas?`, ${card.bolas} Bola${card.bolas>1?'s':''} de Ouro`:''}.${S.idols.length?` Ídolo de ${S.idols.map(id=>CLUB[id]?CLUB[id].n:id).join(' e ')}.`:''}`},
+  {ic:'🏠',h:'A vida',p:life.length?`Fora de campo: ${life.join(', ')}. Patrimônio de ${money(S.din)}.`:`Fora de campo, uma vida discreta. Patrimônio de ${money(S.din)}.`},
+  {ic:'🌅',h:'E depois?',p:retireEpilogue(card)},
+ ];
+ let i=0;
+ $ov.hidden=false;
+ $ov.innerHTML=`<div class="ovwrap cut" style="--c1:${c1};--c2:${c2}"><div class="cut-sky"><i></i><i></i><i></i></div><div class="cut-crowd"></div><div class="cut-pitch"></div>
+ <div class="cut-player"><svg viewBox="0 0 60 120"><circle cx="30" cy="14" r="10" fill="#1a1a1a"/><path d="M14 30h32l-4 40H18z" fill="${c1}"/><path d="M18 70h24l-2 14H20z" fill="#111"/><path d="M20 84l-4 34h8l6-30 6 30h8l-4-34z" fill="#1a1a1a"/><path d="M14 32l-8 30 6 2 8-26zM46 32l8 30-6 2-8-26z" fill="${c1}"/><text x="30" y="56" text-anchor="middle" font-size="16" font-weight="900" fill="${c2}">${S.shirt||S.num}</text></svg></div>
+ <div class="cut-txt" id="cutT"></div><div class="cut-dots">${slides.map((_,k)=>`<i data-k="${k}"></i>`).join('')}</div><button class="btn wide" id="cutNx">Próximo</button><div class="cut-tier">${esc(t)}</div></div>`;
+ const show=()=>{const s=slides[i];document.getElementById('cutT').innerHTML=`<div class="cut-ic">${s.ic}</div><h2>${esc(s.h)}</h2><p>${esc(s.p)}</p>`;$ov.querySelectorAll('.cut-dots i').forEach((d,k)=>d.classList.toggle('on',k<=i));document.getElementById('cutNx').textContent=i===slides.length-1?'Ver a carta final':'Próximo';if(i===0){SFX.roar()}};
+ show();document.getElementById('cutNx').onclick=()=>{i++;if(i>=slides.length){$ov.hidden=true;$ov.innerHTML='';res();return}show()};
+})}
+if(typeof retireShow==='function'){const _rsV5=retireShow;retireShow=async function(card){try{await retireCutscene(card)}catch(e){console.error(e)}return _rsV5(card)}}
+// história da despedida coerente com a vida
+storyRetire=function(card){const t=TIERS[card.tier]?TIERS[card.tier][1]:'';const life=lifeSummary();return{key:'fim',ic:'👋',title:'A despedida',txt:`${card.tot.games} jogos, ${S.pos==='GOL'?card.tot.cs+' sem sofrer gol':card.tot.goals+' gols'}, ${card.nTitles} títulos. ${life.length?'Fora de campo: '+life.join(', ')+'. ':''}${retireEpilogue(card)} Na história do futebol, o nome de ${S.name} fica como: ${t}.`}};
+
+// ---------- assalto a casa: labirinto, joias e polícia ----------
+function mazeGen(w,h){const g=Array.from({length:h},()=>Array(w).fill(1));const st=[[1,1]];g[1][1]=0;
+ while(st.length){const[x,y]=st[st.length-1];const nb=shuffle([[2,0],[-2,0],[0,2],[0,-2]]).map(([dx,dy])=>[x+dx,y+dy,dx,dy]).filter(([nx,ny])=>nx>0&&ny>0&&nx<w-1&&ny<h-1&&g[ny][nx]===1);
+  if(!nb.length){st.pop();continue}const[nx,ny,dx,dy]=nb[0];g[y+dy/2][x+dx/2]=0;g[ny][nx]=0;st.push([nx,ny])}
+ for(let k=0;k<Math.floor(w*h/14);k++){const x=RI(1,w-2),y=RI(1,h-2);if(g[y][x]===1&&((g[y][x-1]===0&&g[y][x+1]===0)||(g[y-1]&&g[y-1][x]===0&&g[y+1]&&g[y+1][x]===0)))g[y][x]=0}
+ return g}
+function mgAssalto(){return new Promise(res=>{
+ const W=11,H=13;const g=mazeGen(W,H);const free=[];for(let y=1;y<H-1;y++)for(let x=1;x<W-1;x++)if(!g[y][x])free.push([x,y]);
+ const me={x:1,y:1};const exit={x:1,y:1};const far=free.sort((a,b)=>(b[0]+b[1])-(a[0]+a[1]));
+ const loot=shuffle(far.slice(0,Math.floor(far.length*.6))).slice(0,5).map(([x,y],i)=>({x,y,ic:['💎','💰','⌚','📺','💍'][i],v:[.012,.008,.006,.004,.01][i]}));
+ const cop={x:far[0][0],y:far[0][1],on:false};const dog={x:far[3][0],y:far[3][1]};let got=[],t=35,over=false,alarm=false;
+ $ov.hidden=false;
+ $ov.innerHTML=`<div class="ovwrap lifemg heist"><div class="lm-top"><span class="tag crime">Lado errado</span><span class="eyebrow">Madrugada</span></div><h2 class="pkh">Assalto à mansão</h2>
+ <p class="lm-hint">Pegue as joias e volte pra <b>porta 🚪</b>. Fuja do <b>👮 policial</b> e do <b>🐕 cachorro</b>. Arraste na casa ou use as setas.</p>
+ <div class="hz-hud"><span id="hzT">⏱ 35</span><span id="hzL">💼 0/${loot.length}</span><span id="hzA"></span></div><div class="hz" id="hz" style="grid-template-columns:repeat(${W},1fr)"></div>
+ <div class="hz-pad"><button data-mv="0,-1">▲</button><div><button data-mv="-1,0">◀</button><button data-mv="1,0">▶</button></div><button data-mv="0,1">▼</button></div><div class="pkres" id="mgRes"></div></div>`;
+ const box=document.getElementById('hz');
+ const draw=()=>{let h='';for(let y=0;y<H;y++)for(let x=0;x<W;x++){let c=g[y][x]?'w':'f',ic='';if(x===exit.x&&y===exit.y)ic='🚪';const l=loot.find(q=>q.x===x&&q.y===y);if(l)ic=l.ic;if(dog.x===x&&dog.y===y)ic='🐕';if(cop.on&&cop.x===x&&cop.y===y)ic='👮';if(me.x===x&&me.y===y)ic='🥷';h+=`<i class="${c}">${ic}</i>`}box.innerHTML=h;document.getElementById('hzL').textContent=`💼 ${got.length}/${loot.length}`};
+ const bfs=(sx,sy,tx,ty)=>{const q=[[sx,sy]];const prev={};prev[sx+','+sy]=null;while(q.length){const[x,y]=q.shift();if(x===tx&&y===ty)break;for(const[dx,dy]of[[1,0],[-1,0],[0,1],[0,-1]]){const nx=x+dx,ny=y+dy,k=nx+','+ny;if(g[ny]&&g[ny][nx]===0&&!(k in prev)){prev[k]=[x,y];q.push([nx,ny])}}}
+  let k=tx+','+ty;if(!(k in prev))return null;let cur=[tx,ty],p=prev[k];while(p&&!(p[0]===sx&&p[1]===sy)){cur=p;p=prev[p[0]+','+p[1]]}return cur};
+ const caught=()=>(cop.on&&cop.x===me.x&&cop.y===me.y)||(dog.x===me.x&&dog.y===me.y);
+ const end=(kind)=>{if(over)return;over=true;clearInterval(ti);clearInterval(ci);const val=got.reduce((s,q)=>s+q.v,0);
+  swEnd(kind==='ok',kind==='ok'?`Saiu com ${got.length} ite${got.length===1?'m':'ns'}`:kind==='dog'?'O cachorro te pegou!':kind==='cop'?'Algemado!':'O tempo acabou',kind==='ok'&&got.length===loot.length).then(()=>res({kind,got:got.length,val}))};
+ const move=(dx,dy)=>{if(over)return;const nx=me.x+dx,ny=me.y+dy;if(!g[ny]||g[ny][nx])return;me.x=nx;me.y=ny;SFX.tone({f:300,dur:.04,gain:.05});
+  const i=loot.findIndex(q=>q.x===nx&&q.y===ny);if(i>=0){got.push(loot.splice(i,1)[0]);SFX.tone({f:900,dur:.1,gain:.1});if(!alarm&&ch(.35)){alarm=true;cop.on=true;document.getElementById('hzA').textContent='🚨 ALARME!';SFX.whistle()}}
+  if(caught())return end(dog.x===me.x&&dog.y===me.y?'dog':'cop');if(nx===exit.x&&ny===exit.y&&got.length)return end('ok');draw()};
+ $ov.querySelectorAll('[data-mv]').forEach(b=>b.onclick=()=>{const[dx,dy]=b.dataset.mv.split(',').map(Number);move(dx,dy)});
+ let sp=null;box.addEventListener('pointerdown',e=>{sp={x:e.clientX,y:e.clientY}});box.addEventListener('pointerup',e=>{if(!sp)return;const dx=e.clientX-sp.x,dy=e.clientY-sp.y;sp=null;if(Math.hypot(dx,dy)<14)return;Math.abs(dx)>Math.abs(dy)?move(Math.sign(dx),0):move(0,Math.sign(dy))});
+ const kh=e=>{const m={ArrowUp:[0,-1],ArrowDown:[0,1],ArrowLeft:[-1,0],ArrowRight:[1,0]}[e.key];if(m){e.preventDefault();move(...m)}};addEventListener('keydown',kh);
+ const ti=setInterval(()=>{t--;document.getElementById('hzT').textContent='⏱ '+t;if(t===24&&!cop.on){cop.on=true;document.getElementById('hzA').textContent='🚔 Polícia chegou';SFX.whistle()}if(t<=0)end('time')},1000);
+ let tickN=0;const ci=setInterval(()=>{if(over){removeEventListener('keydown',kh);return}tickN++;
+  if(cop.on&&tickN%2===0){const n=bfs(cop.x,cop.y,me.x,me.y);if(n){cop.x=n[0];cop.y=n[1]}}
+  if(tickN%3===0){const opts=[[1,0],[-1,0],[0,1],[0,-1]].map(([dx,dy])=>[dog.x+dx,dog.y+dy]).filter(([x,y])=>g[y]&&g[y][x]===0);const near=Math.abs(dog.x-me.x)+Math.abs(dog.y-me.y)<=4;let n=near?bfs(dog.x,dog.y,me.x,me.y):null;if(!n&&opts.length)n=pick(opts);if(n){dog.x=n[0];dog.y=n[1]}}
+  if(caught())return end(dog.x===me.x&&dog.y===me.y?'dog':'cop');draw()},260);
+ draw();
+})}
+const _lifeActsV5=lifeActs;lifeActs=function(){const A=_lifeActsV5();try{if(S.age>=16){const i=A.findIndex(a=>a.id==='carro');A.splice(i>=0?i+1:A.length,0,{g:'Lado errado',id:'casa',ic:'🏚️',n:'Assaltar uma mansão',d:'Mini game: labirinto, joias, cachorro e polícia.',t:1,c:0,crime:1,mg:true})}}catch(e){}return A};
+const _doLifeV5=doLifeAct;doLifeAct=async function(id){if(id!=='casa')return _doLifeV5(id);ensureLife2();
+ const r=await mgAssalto();let txt,fx;
+ if(r.kind==='ok'){txt=`Saiu pela porta dos fundos com ${r.got} ite${r.got===1?'m':'ns'}. Rendeu ${money(r.val)} no receptador.`;fx={din:r.val,heat:10+r.got*4,disc:-5,torc:-2}}
+ else if(r.kind==='time'){txt='O dia clareou e você saiu de mãos vazias. Um vizinho filmou tudo.';fx={heat:20,fama:-3}}
+ else{txt=r.kind==='dog'?'O cachorro te segurou até a polícia chegar. Foto na delegacia em todo jornal.':'Algemado no corredor da mansão. Foto na delegacia em todo jornal.';fx={preso:RI(5,10),fama:-6}}
+ const chips=applyFx(fx);return{txt,chips}};
+
+// ---------- chuteiras com mais peso ----------
+try{BOOTS.forEach(b=>{const pts=Object.values(b.b).reduce((a,c)=>a+c,0);b.mg=Math.round(pts*6);b.d=b.d+` Nos lances: +${b.mg}% de precisão${b.b.FIN?' e efeito':''}${b.b.DRI?', janela do drible maior':''}.`})}catch(e){}
+// legenda do lance com a cor dos times (ver fx.js) e chuteira gasta por jogo
+const _playMineV5=playMine;playMine=async function(o,io){const r=await _playMineV5(o,io);try{if(r&&r.me&&r.me.play&&S.boot&&S.bootLeft>0){if(S.bootLeft===5&&typeof toast==='function')toast({ic:'👟',title:'Chuteira gastando',txt:'Faltam 5 jogos. Compre outra na Loja.',ms:3200})}}catch(e){}return r};
 
 // ================== VERSÃO WEB: ranking no Supabase ==================
 function webDevice(){let d=null;try{d=localStorage.getItem('fdb_dev')}catch(e){}if(!d){d='d'+Date.now().toString(36)+Math.random().toString(36).slice(2,8);try{localStorage.setItem('fdb_dev',d)}catch(e){}}return d}
@@ -6409,12 +6646,12 @@ async function renderIntro(){
  const live=list.filter(x=>!x.done),done=list.filter(x=>x.done).sort((a,b)=>(b.pts||0)-(a.pts||0));
  const cur=live[0];const pr=activeProfile();
  page('home',`
- ${cur?`<section class="continue"><div class="eyebrow">Continuar de onde parou</div>${careerCard(cur,true)}<button class="btn wide big" id="cont0">▶ Continuar</button></section>`:`<section class="hero hhero"><div class="floods"><i></i><i></i></div><div class="eyebrow">Simulador de carreira · futebol</div><h1 class="logo"><span class="l1">Fome</span><span class="l2">de Bola</span></h1><p class="lede">Da peneira à Bola de Ouro. Roube atributos dos Ícones, jogue os lances, viva a vida fora de campo.</p></section>`}
+ ${cur?`<section class="continue"><div class="eyebrow">Continuar de onde parou</div>${careerCard(cur,true)}<button class="btn wide big" id="cont0">▶ Continuar</button></section>`:`<section class="hero hhero"><div class="floods"><i></i><i></i></div><div class="eyebrow">Simulador de carreira · futebol</div><h1 class="logo"><span class="l1">Fome</span><span class="l2">de Bola</span></h1><p class="lede">Da peneira à Bola de Ouro. Seu nível nasce na peneira, cresce no treino e na vida fora de campo.</p></section>`}
  <button class="newcar ${cur?'':'primary'}" id="go"><span>＋</span><div><b>Nova carreira</b><small>${cur?'Começar outra do zero':'Crie seu jogador em 1 minuto'}</small></div><em>→</em></button>
  ${live.length>1?`<section class="hsec"><div class="hsec-h"><span class="eyebrow">Outras em andamento · ${live.length-1}</span><button class="lnk" data-nav="careers">ver todas</button></div>${live.slice(1,4).map(x=>careerCard(x)).join('')}</section>`:''}
  ${done.length?`<section class="hsec"><div class="hsec-h"><span class="eyebrow">Suas lendas</span><button class="lnk" data-nav="careers">ver todas</button></div>${done.slice(0,3).map(x=>careerCard(x)).join('')}</section>`:''}
  <section class="hsec" id="rkTeaser"><div class="hsec-h"><span class="eyebrow">🏆 Top do ranking</span><button class="lnk" data-nav="ranking">ver ranking</button></div><div class="muted" style="font-size:13px">Carregando…</div></section>
- ${!cur&&!done.length?`<details class="hsec howto"><summary>Como funciona <em>›</em></summary><ol><li><b>Crie seu jogador</b> e roube 8 atributos dos Ícones.</li><li><b>Peneira:</b> mostre serviço e escolha seu primeiro clube.</li><li><b>Temporadas</b> em blocos rápidos ou semana a semana, com lances, finais ao vivo e decisões de vida.</li><li><b>Legado:</b> títulos, Bola de Ouro, estátua e ranking.</li></ol></details>`:''}
+ ${!cur&&!done.length?`<details class="hsec howto"><summary>Como funciona <em>›</em></summary><ol><li><b>Crie seu jogador</b> e escolha quem cuida da sua carreira.</li><li><b>Peneira:</b> mostre serviço e escolha seu primeiro clube.</li><li><b>Temporadas</b> em blocos rápidos ou semana a semana, com lances, finais ao vivo e decisões de vida.</li><li><b>Legado:</b> títulos, Bola de Ouro, estátua e ranking.</li></ol></details>`:''}
  <p class="foot">Sem afiliação com clubes, ligas, federações ou com a EA. Nomes reais só para identificação.</p>`);
  document.getElementById('go').onclick=()=>{CLOUD.screen='game';renderCreate()};
  const c0=document.getElementById('cont0');if(c0)c0.onclick=()=>loadSave(cur.cid);
