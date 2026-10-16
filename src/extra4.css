@@ -555,3 +555,31 @@ body.onescreen .wrap::-webkit-scrollbar{display:none}
 .hz-pad{display:grid;justify-items:center;gap:4px}.hz-pad div{display:flex;gap:56px}.hz-pad button{width:56px;height:44px;border-radius:12px;border:1px solid var(--line-2);background:rgba(255,255,255,.08);color:inherit;font-size:18px;cursor:pointer}
 .tag.crime{background:#5a1a1a;color:#ffb3aa}
 .heist{width:100%;max-width:400px;box-sizing:border-box}.hz{width:100%;box-sizing:border-box}.hz i{min-width:0;overflow:hidden;font-size:clamp(11px,3.6vw,20px)}
+
+/* ---------- prisão ---------- */
+body.jail{background:#2b2a28;background-image:repeating-linear-gradient(90deg,rgba(255,255,255,.025) 0 2px,transparent 2px 48px),repeating-linear-gradient(0deg,rgba(0,0,0,.18) 0 1px,transparent 1px 24px)}
+body.jail .ph{background:linear-gradient(180deg,#3a3835,#2b2a28);border-bottom:2px solid #ff7a1a}.jbadge{width:40px;height:40px;border-radius:10px;display:grid;place-items:center;background:#ff7a1a;font-size:20px}
+.jwrap{display:grid;gap:10px;padding-bottom:110px}
+.jcell{position:relative;height:190px;border-radius:16px;overflow:hidden;background:linear-gradient(180deg,#4a4844 0%,#3a3835 60%,#2a2826 100%);border:1px solid #5a5650}
+.jbars{position:absolute;inset:0;background:repeating-linear-gradient(90deg,transparent 0 30px,#1d1c1a 30px 38px);z-index:2;pointer-events:none;box-shadow:inset 0 0 40px rgba(0,0,0,.6)}
+.jbars::before{content:'';position:absolute;left:0;right:0;top:22px;height:8px;background:#1d1c1a}.jbars::after{content:'';position:absolute;left:0;right:0;bottom:30px;height:8px;background:#1d1c1a}
+.jfig{position:absolute;left:18%;bottom:14px;width:46px;z-index:1;animation:jbreath 3s ease-in-out infinite}@keyframes jbreath{50%{transform:translateY(-2px)}}
+.jbunk{position:absolute;right:12%;bottom:18px;font-size:46px;z-index:1}.jlight{position:absolute;top:-30px;left:40%;width:120px;height:220px;background:radial-gradient(ellipse at top,rgba(255,240,190,.25),transparent 70%);transform:rotate(12deg)}
+.jtxt{position:absolute;right:10px;top:10px;z-index:3;width:min(55%,210px);padding:10px 12px;border-radius:12px;background:rgba(0,0,0,.72);display:grid;gap:4px}.jtxt b{font-size:18px}.jtxt small{color:#c9b8a3;font-size:11.5px}
+.jbar{height:7px;border-radius:4px;background:rgba(255,255,255,.12);overflow:hidden}.jbar i{display:block;height:100%;background:linear-gradient(90deg,#ff7a1a,#ffd34a)}
+.jstats{display:flex;flex-wrap:wrap;gap:6px}.jstats span{padding:5px 10px;border-radius:999px;background:#3a3835;border:1px solid #5a5650;font-size:13px}.jstats b{color:#ffb27a;font-family:var(--f-mono,monospace)}
+.jhead{display:flex;justify-content:space-between;align-items:center}.jhead b{font-family:var(--f-display);text-transform:uppercase;letter-spacing:.04em}
+.jacts{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px}
+.jact{display:grid;grid-template-columns:34px 1fr;grid-template-rows:auto auto;column-gap:8px;text-align:left;padding:10px;border-radius:14px;border:1px solid #5a5650;background:linear-gradient(180deg,#3d3b37,#33312e);color:inherit;cursor:pointer}
+.jact span{grid-row:1/3;font-size:24px;align-self:center}.jact b{font-size:13.5px}.jact small{font-size:11.5px;color:#c9b8a3;line-height:1.3}.jact:disabled{opacity:.4;cursor:default}.jact:not(:disabled):active{transform:scale(.97)}
+.jmsg{border-color:#ff7a1a}.jdock .playbtn{background:linear-gradient(180deg,#ff8a2a,#e0661a)}.jdock .playbtn small{display:block;font-size:11px;opacity:.85}
+.jnote{border-color:#ff7a1a;background:rgba(255,122,26,.08)}
+.dom-op,.dom-me{display:flex;gap:10px;justify-content:center;align-items:center}.dom-op span{color:var(--muted);font-size:13px}
+.dtile{width:56px;height:100px;border-radius:10px;border:2px solid #222;background:#f4efe2;color:#111;display:grid;grid-template-rows:1fr 2px 1fr;place-items:center;font-size:24px;font-weight:900;cursor:pointer;font-family:var(--f-mono,monospace);box-shadow:0 6px 12px rgba(0,0,0,.4)}
+.dtile i{width:80%;height:2px;background:#222}.dtile.back{background:repeating-linear-gradient(45deg,#2a4a7a 0 6px,#244068 6px 12px)}.dom-me{margin:14px 0}
+.jz i.lit{box-shadow:inset 0 0 0 999px rgba(255,240,150,.35)}
+
+.jcell{height:150px}.jacts{grid-template-columns:repeat(4,minmax(0,1fr));gap:6px}
+.jact{grid-template-columns:1fr;grid-template-rows:auto auto;justify-items:center;text-align:center;padding:8px 4px;gap:2px}.jact span{grid-row:auto;font-size:22px}.jact b{font-size:11.5px;line-height:1.15}.jact small{display:none}
+.dfinger:not(.gk):not(.sw){animation:dfp2 2.2s ease-in-out infinite}
+@keyframes dfp2{0%{transform:translate(80px,82px);opacity:0}15%{opacity:1}60%{transform:translate(98px,38px)}75%{transform:translate(98px,38px);opacity:1}90%,100%{opacity:0;transform:translate(98px,38px)}}
