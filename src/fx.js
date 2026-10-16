@@ -235,6 +235,11 @@ IO_UI.shootout=function(o){
    frame(`${idx+1}ª cobrança · ${esc(ours?o.us.n:o.them.n)}`,meKick?'Sua vez. Escolha o canto.':meSave?`${esc(taker)} vai bater. Você no gol: escolha o lado.`:`${esc(taker)} vai bater.`);
    const sc=mountScene(document.getElementById('scn'),{keeperColor:ours?'#55d0ff':'#c6f432',shooterColor:c1,shooterColor2:inkFor(c1,c2),shirt:meKick?S.shirt:'',dotMode:meSave?'save':'shoot'});
    let shot,dive,res;
+   if((meKick||meSave)&&typeof nssMoment==='function'){const sk=k=>typeof skillOf==='function'?skillOf(k):.6;
+    const rr=await nssMoment({kind:meKick?'pen':'keeper',pen:true,comp:o.comp,title:meKick?`${idx+1}ª cobrança: sua vez`:`${taker} vai bater`,skill:meKick?clamp(sk('FIN')-(55-S.life.cab)/300-(idx>=4?.05:0),.15,.95):sk('REF'),keeper:.5,okTxt:meKick?'GOL!':'DEFENDEU!'});
+    const last=NM.last||'';res=meKick?(rr.ok?'gol':/segurou|Espalmou/.test(last)?'defesa':'fora'):(rr.ok?'defesa':/fora/i.test(last)?'fora':'gol');
+    $ov.hidden=false;frame(`${idx+1}ª cobrança · ${esc(ours?o.us.n:o.them.n)}`,meKick?'Sua cobrança':'Você no gol');const sn=document.getElementById('scn');if(sn)sn.remove();
+    const g=res==='gol';const good=ours?g:!g;document.getElementById('pkr').innerHTML=`<span class="${good?'good':'bad'}">${g?'GOL':res==='defesa'?'DEFENDEU':'PRA FORA'}</span>`;await sleep(800);return g}
    if(meKick){shot=await sc.pick('shoot');dive=aiDive();const press=(55-S.life.cab)/300+(idx>=4?.03:0);res=kickOutcome(shot,dive,CA().FIN,press)}
    else if(meSave){dive=await sc.pick('save');shot=aiShot();res=gkSave(shot,dive)}
    else{sc.hideDots();await sleep(fast?120:420);shot=aiShot();dive=aiDive();const p=ours?pu:pt;const want=ch(p);

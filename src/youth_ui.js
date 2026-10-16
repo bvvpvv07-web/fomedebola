@@ -12,7 +12,7 @@ const FOCUS={
 };
 function penShell(inner){
  $app.innerHTML=`<header class="ph"><div class="ph-in"><span class="flagbox">${NATS[S.nat].f}</span><div class="who"><b>${esc(S.name)} <span style="color:var(--muted);font-weight:600">#${S.num}</span></b><span>15 anos · ${POS[S.pos].n} · sem clube</span></div><div class="ovr"><b class="mono">${S.ovr}</b><small>OVR</small></div></div></header>
- <div class="wrap">${journeyHTML('ob',2,PEN.step===0?'Escolha onde fazer a peneira. Depois são 5 etapas rápidas até os olheiros decidirem.':'Cada etapa mexe na impressão dos olheiros. Quanto mais alta, melhores os clubes.')}${PEN.step>0?`<div class="penprog">${['Local','Preparação','Teste físico','Jogo-treino','Pênalti','Olheiros'].map((t,i)=>`<span class="${i<PEN.step?'done':i===PEN.step?'on':''}">${t}</span>`).join('')}</div>
+ <div class="wrap">${journeyHTML('ob',2,PEN.step===0?'Escolha onde fazer a peneira. Depois são 6 etapas: no circuito você aprende cada lance do jogo até os olheiros decidirem.':'Cada etapa mexe na impressão dos olheiros. Quanto mais alta, melhores os clubes.')}${PEN.step>0?`<div class="penprog">${['Local','Preparação','Teste físico','Circuito','Jogo-treino','Pênalti','Olheiros'].map((t,i)=>`<span class="${i<PEN.step?'done':i===PEN.step?'on':''}">${t}</span>`).join('')}</div>
  <section class="card penscore"><div class="eyebrow">Impressão dos olheiros</div><div class="pbar"><i style="width:${clamp(PEN.score,0,100)}%"></i></div><b class="mono">${Math.round(PEN.score)}</b></section>`:''}${inner}</div>`;
  scrollTo(0,0);
 }
@@ -48,13 +48,13 @@ function renderPeneira(){
    penLog(txt,d);document.getElementById('res').innerHTML=`<div class="outcome"><p>${esc(txt)}</p><div class="chipsrow"><span class="chip ${d>=0?'up':'down'}">${d>=0?'+':''}${d} impressão</span></div></div><button class="btn wide" id="nx" style="margin-top:12px">Continuar</button>`;
    document.getElementById('nx').onclick=()=>{PEN.step=3;renderPeneira()}});return;
  }
- if(st===3){
+ if(st===4){
   penShell(`<section class="card" style="display:grid;gap:12px"><div class="eyebrow">Jogo-treino · 30 minutos</div><h2 class="h2">Colete laranja contra colete azul</h2>
   <p class="muted" style="margin:0">Você começa jogando. Os olheiros estão na arquibancada de madeira com pranchetas. No meio do jogo, um lance vai ser seu.</p>
   <button class="btn wide" id="go">Entrar em campo</button></section>`);
   document.getElementById('go').onclick=peneiraMatch;return;
  }
- if(st===4){
+ if(st===5){
   penShell(`<section class="card" style="display:grid;gap:12px"><div class="eyebrow">Fim do jogo-treino</div><h2 class="h2">"Vem cá, ${esc(S.name.split(' ')[0])}."</h2>
   <p class="muted" style="margin:0">${S.pos==='GOL'?'O coordenador escolhe o melhor batedor da peneira e manda você pro gol. Um pênalti, valendo a vaga.':'O coordenador coloca a bola na marca. Um pênalti, pra ver se você treme quando vale alguma coisa.'}</p>
   <button class="btn wide" id="go">${S.pos==='GOL'?'Ir pro gol':'Pegar a bola'}</button></section>`);
@@ -63,9 +63,9 @@ function renderPeneira(){
    const r=await IO_UI.penalty({mode:S.pos==='GOL'?'save':'shoot',comp:'Peneira',min:30,us,them,taker:'O melhor batedor da peneira'});
    const good=S.pos==='GOL'?!r.goal:r.goal;const d=good?RI(10,15):-RI(6,10);
    penLog(S.pos==='GOL'?(good?'Pegou o pênalti decisivo da peneira.':'Tomou o gol no pênalti da peneira.'):(good?'Converteu o pênalti com frieza.':'Perdeu o pênalti na frente dos olheiros.'),d);
-   PEN.step=5;renderPeneira()};return;
+   PEN.step=6;renderPeneira()};return;
  }
- if(st===5)return peneiraResult();
+ if(st===6)return peneiraResult();
 }
 async function peneiraMatch(){
  const us={id:'pen_a',n:'Colete laranja',c1:'#ff7a2b',c2:'#151515',a:'LAR'},them={id:'pen_b',n:'Colete azul',c1:'#2f6fd6',c2:'#ffffff',a:'AZU'};
@@ -92,7 +92,7 @@ async function peneiraMatch(){
  if(!gk&&ch(.3+(CA().FIN-70)/100)){await live.until(29);gu++;await live.event({t:'g',us:true,mine:true,w:S.name,m:29},gu,gt);penLog('Ainda fez mais um no fim do jogo-treino.',RI(4,7))}
  await live.until(30);
  await live.finish({msg:d>0?'Os olheiros anotaram seu nome.':'Os olheiros cochicham entre si.',win:d>0?true:null});
- S.liveSpeed=keep;PEN.step=4;renderPeneira();
+ S.liveSpeed=keep;PEN.step=5;renderPeneira();
 }
 function peneiraResult(){
  const V=VENUES[PEN.venue];const nat=NATS[S.nat];const home=countryClubs(nat.home).sort((a,b)=>b.s-a.s);

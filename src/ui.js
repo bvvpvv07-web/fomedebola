@@ -165,7 +165,7 @@ function offerCard(o,i){
 }
 function renderAcademy(){
  const offers=academyOffers();
- shell(`<div class="phead"><h2>${offers.length} clubes te querem</h2><p>Toque no clube onde quer começar. Clube grande treina melhor, mas você joga menos. Clube pequeno te dá minutos. Fora do país, sem falar a língua, pesa na cabeça.</p></div>
+ shell(`<div class="phead"><h2>${offers.length===1?'1 clube te quer':offers.length+' clubes te querem'}</h2><p>Toque no clube onde quer começar. Clube grande treina melhor, mas você joga menos. Clube pequeno te dá minutos. Fora do país, sem falar a língua, pesa na cabeça.</p></div>
  <div class="offers">${offers.map((o,i)=>offerCard(o,i)).join('')}</div>`,{noFast:true,lifeFold:true,noHist:true});
  $app.querySelectorAll('[data-off]').forEach(b=>b.onclick=()=>{acceptOffer(offers[+b.dataset.off]);startPreseason()});
 }
