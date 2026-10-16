@@ -583,3 +583,10 @@ body.jail .ph{background:linear-gradient(180deg,#3a3835,#2b2a28);border-bottom:2
 .jact{grid-template-columns:1fr;grid-template-rows:auto auto;justify-items:center;text-align:center;padding:8px 4px;gap:2px}.jact span{grid-row:auto;font-size:22px}.jact b{font-size:11.5px;line-height:1.15}.jact small{display:none}
 .dfinger:not(.gk):not(.sw){animation:dfp2 2.2s ease-in-out infinite}
 @keyframes dfp2{0%{transform:translate(80px,82px);opacity:0}15%{opacity:1}60%{transform:translate(98px,38px)}75%{transform:translate(98px,38px);opacity:1}90%,100%{opacity:0;transform:translate(98px,38px)}}
+/* controles contextuais do lance (fora do campo) */
+.nssm .nm-ctl{display:flex;gap:6px;align-items:center;justify-content:center;margin-top:8px;flex-wrap:wrap}
+.nssm .nm-cl{font:800 11px/1 'Saira Condensed',sans-serif;letter-spacing:.08em;text-transform:uppercase;color:rgba(255,255,255,.6);margin-right:2px}
+.nssm .nm-cb{font:800 12px/1 'Saira Condensed',sans-serif;padding:7px 10px;border-radius:999px;border:1.5px solid rgba(255,255,255,.22);background:rgba(0,0,0,.35);color:#fff;min-height:34px;cursor:pointer}
+.nssm .nm-cb.on{background:#f2c443;color:#1a1300;border-color:#f2c443}
+.nm-grade{font:600 13px/1.3 'Saira Condensed',sans-serif;color:rgba(255,255,255,.85);margin-top:4px}
+.nm-grade b{color:#f2c443}
