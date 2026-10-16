@@ -97,3 +97,26 @@ function mgFuga(){return new Promise(res=>{
   if(lit(me.x)&&ch(.18)){(document.getElementById('fzA')||{}).textContent='🔦 Te viram!';return end(false)}
   if(guards.some(q=>q.x===me.x&&q.y===me.y))return end(false);draw()},300);
  draw()})}
+
+// ---------- preso perde o contrato; ao sair, só clubes menores fazem proposta ----------
+const _prisonNowF=prisonNow;prisonNow=function(n){const was=inPrison();_prisonNowF(n);try{if(!was&&S.club&&!S.youth&&!S.prisonFired){const c=club();S.prisonFired={club:c.id,s:c.s};S.contract=0;S.wage=0;S.captain=false;S.taker={pen:false,fk:false};S.agreed=null;S.prisonOffers=false;
+ (S.pendingMoments=S.pendingMoments||[]).push({k:'rescisao',emoji:'📄',eyebrow:c.n,big:'CONTRATO RESCINDIDO',title:`O ${c.n} rompeu seu contrato por justa causa.`,lines:['Salário cortado na hora','Quando sair, só clubes menores vão te querer','Seu nome virou problema no mercado']})}}catch(e){}};
+function lowerOffers(){const F=S.prisonFired||{s:S.ovr+4};const cap=Math.min(F.s-6,S.ovr+1);const home=CLUB[F.club]?CLUB[F.club].country:null;
+ let pool=CLUBS.filter(x=>x.id!==F.club&&x.s<=cap&&x.s>=cap-16);if(pool.length<3)pool=CLUBS.filter(x=>x.id!==F.club&&x.s<=cap).sort((a,b)=>b.s-a.s).slice(0,10);
+ const same=shuffle(pool.filter(x=>x.country===home)),abroad=shuffle(pool.filter(x=>x.country!==home));const pick=[...same.slice(0,2),...abroad.slice(0,1)];while(pick.length<3&&pool.length>pick.length){const x=pool.find(y=>!pick.includes(y));if(!x)break;pick.push(x)}
+ return pick.map(x=>({...mkOffer(x,()=>.65),years:RI(1,2),fresh:true}))}
+function releaseOffersPopup(){if(!S.prisonOffers||!$ov.hidden)return;S.prisonOffers=false;const offs=lowerOffers();const F=S.prisonFired;
+ $ov.hidden=false;$ov.innerHTML=`<div class="ovwrap"><div class="eyebrow">Recomeço · ${S.age} anos</div><h2 class="pkh" style="margin:6px 0 4px">Quem ainda aposta em você</h2>
+  <p class="muted" style="margin:0 0 12px">${F&&CLUB[F.club]?`O ${esc(CLUB[F.club].n)} não quer mais saber. `:''}Os grandes sumiram. Estes clubes topam te dar uma chance: você assina agora e estreia na próxima temporada.</p>
+  <div class="offers">${offs.map((o,i)=>offerCard(o,i)).join('')}</div><button class="btn ghost wide" id="relWait" style="margin-top:10px">Esperar a janela e ver o que aparece</button></div>`;
+ $ov.querySelectorAll('[data-off]').forEach(b=>b.onclick=()=>{const o=offs[+b.dataset.off];S.agreed=o;$ov.hidden=true;$ov.innerHTML='';toast({ic:'✍️',title:`Acertado com o ${CLUB[o.club].n}`,txt:'Você treina por conta própria e estreia na próxima temporada.',ms:3600});saveNow('season');renderHub()});
+ document.getElementById('relWait').onclick=()=>{$ov.hidden=true;$ov.innerHTML='';toast({ic:'⏳',title:'Esperando a janela',txt:'No fim da temporada, só clubes menores vão ligar.',ms:3200});renderHub()}}
+// soltou: liga as propostas
+const _playMineF=playMine;playMine=async function(o,io){const was=inPrison();const r=await _playMineF(o,io);try{if(was&&!inPrison()&&S.prisonFired&&!S.foragido)S.prisonOffers=true}catch(e){}return r};
+// sem clube até a próxima temporada
+const _partF=participation;participation=function(kind,o){if(kind==='club'&&S.prisonFired&&!inPrison()&&S.club===S.prisonFired.club)return{play:false,why:'semclube'};return _partF(kind,o)};
+const _renderHubF=renderHub;renderHub=function(...a){const r=_renderHubF.apply(this,a);try{if(S.prisonOffers&&!inPrison())setTimeout(()=>{if(!(S.pendingMoments&&S.pendingMoments.length))releaseOffersPopup()},900)}catch(e){}return r};
+// fim da temporada sem acerto: mercado só de clubes menores
+const _wsF=windowState;windowState=function(){if(S.prisonFired&&S.club===S.prisonFired.club&&!S.agreed)return{open:true,release:true,stay:false};return _wsF()};
+const _genOffF=genOffers;genOffers=function(lf){if(S.prisonFired&&S.club===S.prisonFired.club&&!lf)return lowerOffers().slice(0,2);return _genOffF(lf)};
+const _accF=acceptOffer;acceptOffer=function(o){_accF(o);if(S.prisonFired&&S.club!==S.prisonFired.club){S.prisonFired=null;S.prisonOffers=false}};
