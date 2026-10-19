@@ -375,7 +375,7 @@ async function playMine(o,io){
    else if(e.t==='c'&&e.us&&e.mine&&ch(.6))c={type:chanceType(e),planned:false};
    else if(e.t==='c'&&e.us&&!e.mine&&S.pos!=='GOL'&&typeof assistType==='function'&&ch(.22))c={type:assistType(),planned:false,ast:true};
    else if(S.pos==='GOL'&&!e.us&&(e.t==='g'||e.t==='c')&&ch(e.t==='g'?.75:.35))c={type:'reflex',planned:e.t==='g'};
-   if(c){interN++;if(live){live.flash(c.type==='reflex'?'Perigo no seu gol!':c.ast?'Você tem a bola pra criar…':'A bola é sua…');await sleep(500)}
+   if(c){interN++;if(live){live.flash(c.type==='reflex'?'⚠️ Perigo no seu gol!':c.ast?'⚡ Você tem a bola pra criar…':'⚡ A bola é sua…');await sleep(S.liveSpeed===3?600:1400)}
     const ok=await io.chance({...c,comp:o.comp,min:e.m});if(live)live.redraw();
     if(c.type==='reflex'){if(e.t==='g'&&ok)e={...e,t:'gks'};else if(e.t==='c'&&!ok)e={...e,t:'g'};else if(e.t==='c'&&ok)e={...e,t:'gks'}}
     else if(c.ast){if(e.t==='g'&&!ok)e={...e,t:'c',ast:false};else if(e.t==='c'&&ok)e={...e,t:'g',ast:true,mine:false}}

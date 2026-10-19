@@ -274,8 +274,11 @@ const LIVE_TXT={
 };
 IO_UI.live={
  async start(m){
-  const L={m,min:0,gu:0,gt:0,feed:[],flashMsg:'',ended:false};
-  const speedMs=()=>({1:430,3:130,0:0})[S.liveSpeed??1]||0;const slow=()=>(S.liveSpeed??1)===1?1:(S.liveSpeed??1)===3?.35:0;
+  if(S.liveSpeed===0||S.liveSpeed==null)S.liveSpeed=1;
+  const L={m,min:0,gu:0,gt:0,feed:[],flashMsg:'',ended:false,skip:false,lastAmb:0};
+  const spd=()=>L.skip?0:(S.liveSpeed??1);
+  const speedMs=()=>({1:650,3:170,0:0})[spd()]||0;const slow=()=>spd()===1?1:spd()===3?.35:0;
+  const AMB=[w=>`${w} troca passes no meio-campo`,w=>`${w} tenta pelo lado direito`,w=>`${w} gira a bola na defesa`,w=>`Escanteio pro ${w}`,w=>`Falta no meio-campo, ${w} reclama`,w=>`${w} pressiona a saída de bola`,w=>`Lançamento longo do ${w}, a zaga afasta`,w=>`${w} tem a posse agora`,w=>`Cruzamento do ${w}, ninguém alcança`,w=>`Jogo truncado, muitas faltas`];
   const draw=()=>{
    $ov.hidden=false;const us=m.us,th=m.them;const home=m.neutral?true:m.home;
    const H=home?us:th,A=home?th:us;const hg=home?L.gu:L.gt,ag=home?L.gt:L.gu;
@@ -286,14 +289,15 @@ IO_UI.live={
    <div class="lmsg" id="lmsg">${esc(L.flashMsg)}</div>
    <div class="feed live-feed" id="lfeed">${L.feed.slice(0,8).map(f=>f).join('')}</div>
    <div id="lend"></div>
-   <div class="row speed" style="justify-content:center">${[[1,'Normal'],[3,'Rápido'],[0,'Pular pro fim']].map(([k,n])=>`<button class="tab ${(S.liveSpeed??1)===k?'on':''}" data-sp="${k}">${n}</button>`).join('')}</div></div>`;
-   $ov.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{S.liveSpeed=+b.dataset.sp;$ov.querySelectorAll('[data-sp]').forEach(x=>x.classList.toggle('on',x===b))});
+   <div class="row speed" style="justify-content:center">${[[1,'Normal'],[3,'Rápido'],[0,'Pular pro fim']].map(([k,n])=>`<button class="tab ${spd()===k?'on':''}" data-sp="${k}">${n}</button>`).join('')}</div></div>`;
+   $ov.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{const v=+b.dataset.sp;if(v===0)L.skip=true;else{L.skip=false;S.liveSpeed=v}$ov.querySelectorAll('[data-sp]').forEach(x=>x.classList.toggle('on',x===b))});
   };
   const setMin=n=>{L.min=n;const c=document.getElementById('lclk'),b=document.getElementById('lbar');if(c)c.textContent=n+"'";if(b)b.style.width=(n/90*100)+'%'};
   const push=(html)=>{L.feed.unshift(html);const f=document.getElementById('lfeed');if(f){f.insertAdjacentHTML('afterbegin',html);while(f.children.length>8)f.lastElementChild.remove()}};
   draw();
   const api={
-   async until(t){while(L.min<t){let ms=speedMs();setMin(L.min+1);if(L.min>=80)ms*=1.5;if(L.min===45){api.flash('Intervalo');push(`<div class="fl ht">Intervalo · ${L.gu}–${L.gt}</div>`);await sleep(2600*slow());api.flash('Começa o segundo tempo')}if(L.min===90){api.flash('Acréscimos… o juiz olha o relógio');await sleep(1800*slow())}if(ms)await sleep(ms)}},
+   async until(t){if(L.min===0&&t>0&&!L.kick){L.kick=true;api.flash('Bola rolando!');try{SFX.whistle()}catch(e){}push(`<div class="fl"><b>0'</b>Começa o jogo: ${esc(m.us.n)} x ${esc(m.them.n)}</div>`);if(slow())await sleep(900*slow())}
+    while(L.min<t){let ms=speedMs();setMin(L.min+1);if(slow()&&L.min-L.lastAmb>=RI(4,7)&&L.min<t&&L.min!==45){L.lastAmb=L.min;const sd=ch(.5)?m.us:m.them;push(`<div class="fl amb"><b>${L.min}'</b>${esc(pick(AMB)(sd.n))}</div>`)}if(L.min>=80)ms*=1.5;if(L.min===45){api.flash('Intervalo');push(`<div class="fl ht">Intervalo · ${L.gu}–${L.gt}</div>`);await sleep(2600*slow());api.flash('Começa o segundo tempo')}if(L.min===90){api.flash('Acréscimos… o juiz olha o relógio');await sleep(1800*slow())}if(ms)await sleep(ms)}},
    flash(t){L.flashMsg=t;const e=document.getElementById('lmsg');if(e)e.textContent=t},
    redraw(){L.flashMsg='';draw()},
    async event(e,gu,gt){
