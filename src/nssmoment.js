@@ -66,6 +66,10 @@ function nssMoment(o){
    me=mk('me',R(-8,8),R(26,30));const mt=mk('mate',clamp(me.x+side*R(6,9),-20,20),me.d-R(4,7),{sp:4});mt.run={x:mt.x-side*1.5,d:mt.d-2};
    mk('opp',me.x-side*R(2,3),me.d+R(2,4),{sp:4.4*spdMul});mk('opp',mt.x+side*1.2,mt.d-1.2,{sp:3.6,mark:mt});gk=mk('gk',0,1.2);tmax=14;tag='Tabela';
    hint='<b>1</b> Toque no companheiro. <b>2</b> Receba a devolução. <b>3</b> Puxe para trás, solte e toque na bola.';
+  }else if(K==='chip'){
+   me=mk('me',R(-3,3),R(17,21));gk=mk('gk',me.x*.3,R(6.5,8.5));gk.rush=true;
+   mk('opp',me.x+R(-3,3),me.d+R(3,5),{sp:6*spdMul});
+   tmax=9;tag='Cobertura';hint='O goleiro saiu do gol! <b>Puxe para trás</b> mirando o gol e, na bola, <b>toque embaixo</b> para encobrir. Força média: a bola cai dentro.';
   }else if(K==='header'){
    me=mk('me',R(-3,3),R(7,11));gk=mk('gk',0,1);mk('opp',me.x+R(-1.2,1.2),me.d-R(.8,1.4),{sp:4.6,mark:me});
    tmax=6;tag='Cabeçada';hint='Puxe <b>para trás</b> para mirar. Quando a bola entrar no anel, <b>toque</b> para cabecear.';
@@ -115,7 +119,7 @@ function nssMoment(o){
   const proj=(x,d,h,mn)=>{const cy=Math.cos(cam.yaw||0),sy=Math.sin(cam.yaw||0),dx0=x-cam.x,dd0=d-cam.d;const lat=(dx0*cy+dd0*sy)*cam.dir,dz=(dx0*sy-dd0*cy)*cam.dir,dy=h-cam.h,ct=Math.cos(cam.tilt),st=Math.sin(cam.tilt);const zc=dz*ct-dy*st;if(zc<(mn||.35))return null;const yc=dy*ct+dz*st;const s=F*cam.z/zc;return{x:W/2+lat*s,y:hz-yc*s,s}};
 
   // ---------- estado ----------
-  const STRK=['finish','fk','pen','pass','long','cross','combo'].includes(K);let strike=null;
+  const STRK=['finish','fk','pen','pass','long','cross','combo','chip'].includes(K);let strike=null;
   let loftSel=(K==='long'||K==='cross')?2:(K==='pass'?0:1),shotInfo=null,gkInfo={antic:0},gotT=-9,hdTapT=-9,hdMiss=false,reflexT=0;NM.intc=null;NM.grade=null;NM.why='';
   let phase='intro',T=0,tIntro=0,owner=(K==='fk'||K==='pen'||K==='header'||GK)?null:me,kicked=null,kickT=0,aim=null,lastAim=null,curl=0,ended=null,banner=null,ts=1,prePath=null,shotLive=false,gkReact=0,gkDive=0,headed=false,flightLog=[];
   const sp2=()=>Math.hypot(ball.vx,ball.vd);
@@ -168,7 +172,7 @@ function nssMoment(o){
    const G={ux,ud,power,curve,contact,len,raw,lsel:AL0.lsel,loft:AL0.loft,dip:AL0.dip,chip:!!AL0.chip};if(strike)applyContact(G,strike.cp||{x:0,y:0});return G;
   }
   // ponto de contato: embaixo sobe, em cima sai rasteiro/caindo, nos lados faz curva
-  function applyContact(g,cp){g.cx=cp.x;g.cy=cp.y;const ax=Math.abs(cp.x);g.curve=ax<.22?0:ax>.68?-Math.sign(cp.x)*1:clamp(cp.x*1.15,-1,1);g.ctype=ax>.68?'TRIVELA':ax>=.22?'EFEITO':cp.y>.3?'POR CIMA':cp.y<-.3?'RASTEIRA':'COLOCADA';if(g.ctype==='COLOCADA'){g.contact=Math.min(1,(g.contact||1)+.1)}
+  function applyContact(g,cp){g.cx=cp.x;g.cy=cp.y;const ax=Math.abs(cp.x);g.curve=ax<.22?0:ax>.68?-Math.sign(cp.x)*1:clamp(cp.x*1.15,-1,1);g.ctype=ax>.68?'TRIVELA':ax>=.22?'EFEITO':cp.y>.45?'CAVADINHA':cp.y>.2?'POR CIMA':cp.y<-.3?'RASTEIRA':'COLOCADA';if(g.ctype==='CAVADINHA')g.lsel=2;if(g.ctype==='COLOCADA'){g.contact=Math.min(1,(g.contact||1)+.1)}
    if(!g.chip){g.loft=clamp(g.loft+cp.y*.17,.01,.75);if(cp.y<-.35){g.dip=(g.dip||0)+3.5;g.loft=Math.max(.01,g.loft-.03)}if(cp.y>.4&&g.lsel<2&&g.loft>.3)g.lsel=2;if(cp.y<-.4&&g.loft<.08)g.lsel=0}}
   // puxada curta = rasteiro; média = meia altura; longa = forte e alto; além do máximo = cavadinha
   function autoLoft(raw,header){const p=clamp(raw,.12,1);
@@ -187,13 +191,16 @@ function nssMoment(o){
    const p=g.power;const ps=isPassK()&&!header;
    const mn=header?7:ps?6:10,mx=header?19:ps?27:33;const speed=mn+(mx-mn)*p;
    const sk=ps?clamp(PASK*.7+skill*.3,.1,1):skill;
-   const base=header?.16:ps?.08:.13;
-   const err=noise?(Math.random()*2-1)*base*(1-.62*sk)*(1.15-.3*COMP)*(1.35-.55*g.contact):0;
+   const base=header?.14:ps?.07:.09;const prec=g.ctype==='COLOCADA'?.3:g.ctype==='CAVADINHA'?.5:1;
+   const err=noise?(Math.random()*2-1)*base*prec*(1-.62*sk)*(1.15-.3*COMP)*(1.35-.55*g.contact):0;
    const loft=g.loft!=null?g.loft:loftOf(p,header);
    const spin=-g.curve*1.6*(.35+.65*TEC);
    const L0=ps?14:Math.max(6,Math.hypot(ball.x,ball.d));const tf=clamp(L0/(speed*.9),.3,1.3);
    const ang=Math.atan2(g.ux,-g.ud)-spin*tf*.4+err;
-   const hs=speed*(1-loft*.35),vh=speed*(.05+loft*.62);
+   let hs=speed*(1-loft*.35),vh=speed*(.05+loft*.62);
+   if(g.ctype==='CAVADINHA'&&!header&&!ps&&g.ud<-.2){const ang0=Math.atan2(g.ux,-g.ud);const D=Math.max(6,ball.d/Math.cos(ang0));const t=clamp(.85+D*.03,1.1,1.6);const hG=.7+(p-.4)*5.2;vh=(hG-.11+.5*9.8*t*t)/t;hs=D/t*1.02;
+    return{type:'kick',vx:Math.sin(ang0+err)*hs,vd:-Math.cos(ang0+err)*hs,vh,spin:0,p,loft:.7,err,speed:Math.hypot(hs,vh),dip:0,base}}
+   if(g.ctype==='COLOCADA')hs*=.95;
    const dip=g.dip!=null?g.dip:(K==='fk'?[0,5,7][loftSel]:0);
    return{type:header?'header':'kick',vx:Math.sin(ang)*hs,vd:-Math.cos(ang)*hs,vh,spin,p,loft,err,speed,dip,base}}
   function goalCross(b){const sp=simPath(b,2.2);const q=sp.p.find(z=>z.d<=0);return{q,p:sp.p}}
@@ -247,7 +254,7 @@ function nssMoment(o){
    if(miss){g.power*=.45;g.contact=.25;g.loft=Math.max(.01,(g.loft||.1)*.5);banner={txt:'FURADA!',ok:false,t:0,tmp:true}}
    else{applyContact(g,cp);const ae=Math.abs(e);g.power=clamp(g.power*(1-.32*ae),.12,1);g.loft=clamp((g.loft||.1)-e*.12,.01,.8);g.contact=clamp((g.contact||1)*(1-.55*ae),.2,1);
     banner={txt:g.ctype||'CHUTE',ok:true,t:0,tmp:true};SFX.tone({f:880,dur:.1,gain:.08})}
-   if(c.m)passTo(c.m,g);else doShot(g,false)}
+   NM.lastCT=g.ctype;NM.lastP=g.power;if(c.m)passTo(c.m,g);else doShot(g,false)}
   function drawContact(){if(!CT)return;const p=ctPos();
    ctx.fillStyle='rgba(6,20,10,.55)';ctx.fillRect(0,0,W,H);
    // faixa de grama e zona ideal
@@ -261,7 +268,7 @@ function nssMoment(o){
    ctx.strokeStyle='#111';ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y,r,0,7);ctx.stroke();
    // guias
    ctx.font="900 16px 'Saira Condensed',sans-serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='rgba(0,0,0,.6)';const t1='ONDE VOCÊ VAI BATER NA BOLA?';ctx.strokeText(t1,W/2,p.y-p.r*1.9);ctx.fillStyle='#ffe23c';ctx.fillText(t1,W/2,p.y-p.r*1.9);
-   ctx.font="800 12px 'Saira Condensed',sans-serif";const t2='meio: colocada · embaixo: por cima · em cima: rasteira',t3='lado: efeito · ponta da bola: trivela';ctx.strokeText(t2,W/2,gy+24);ctx.fillStyle='#fff';ctx.fillText(t2,W/2,gy+24);ctx.strokeText(t3,W/2,gy+42);ctx.fillText(t3,W/2,gy+42)}
+   ctx.font="800 12px 'Saira Condensed',sans-serif";const t2='meio: colocada · em cima: rasteira · embaixo: por cima',t3='bem embaixo: cavadinha · lado: efeito · ponta: trivela';ctx.strokeText(t2,W/2,gy+24);ctx.fillStyle='#fff';ctx.fillText(t2,W/2,gy+24);ctx.strokeText(t3,W/2,gy+42);ctx.fillText(t3,W/2,gy+42)}
   // conduzir: toque no gramado empurra a bola até lá (ou segura, se tocar na própria bola)
   function carryTo(sx,sy){const w=unproj(sx,sy);if(!w)return;const dx=w.x-ball.x,dd=w.d-ball.d,L=Math.hypot(dx,dd);
    if(L<1.1){banner={txt:'DOMINADA',ok:true,t:0,tmp:true};SFX.touch();return}
@@ -362,6 +369,7 @@ function nssMoment(o){
   function stepKeeper(dt){
    const bd=Math.max(.1,ball.d);
    if(K==='pen'&&!kicked){gk.x=Math.sin(T*2.2)*.25;return}
+   if(gk.rush&&!shotLive){gk.x+=clamp(ball.x*.35-gk.x,-2*dt,2*dt);return}
    if(!shotLive||kicked==='touch'){const tx=clamp(ball.x*(3/Math.max(4,Math.hypot(ball.x,bd))),-2.8,2.8);const td=clamp(.8+(ball.d<14&&K!=='fk'&&K!=='header'?(14-ball.d)*.22:0),.6,4);gk.x+=clamp(tx-gk.x,-3*dt,3*dt);gk.d+=clamp(td-gk.d,-3*dt,3*dt)}
    else{if(gkReact>0){gkReact-=dt;return}
     if(K==='pen'&&gk.penT!=null){const tc=(ball.d-gk.d)/(-ball.vd||-1);const v=4.4;gk.x+=clamp(gk.penT-gk.x,-v*dt,v*dt);if(!gkDive)gkDive=Math.sign(gk.penT-gk.x)||(ch(.5)?1:-1);if(Math.abs(gk.penT)<.4)gkDive=0;return}
@@ -775,7 +783,7 @@ function nssMoment(o){
    if(K==='header'){if(headed)return;if(hdWin()){headNow();return}if(T-hdTapT>.3){hdTapT=T;hdMiss=true;banner={txt:'AINDA NÃO!',ok:false,t:0,tmp:true}}return}
    if(K==='fk'||K==='pen'||owner!==me)return;
    if(isPassK()||K==='finish'){const m=pickMate(p.x,p.y);if(m){passTo(m,null);return}}
-   carryTo(p.x,p.y)}
+   if(K==='dribble')carryTo(p.x,p.y)}
   cv.addEventListener('pointerdown',e=>{e.preventDefault();SFX.ctx();if(!SFX.loop)SFX.startLoop();try{cv.setPointerCapture(e.pointerId)}catch(_){}const p=pt(e);
    if(CT){const q=ctPos();const dx=(p.x-q.x)/q.r,dy=(p.y-q.y)/q.r,L=Math.hypot(dx,dy);if(L<1.25){const k=L>1?1/L:1;ctFire({x:clamp(dx*k,-1,1),y:clamp(dy*k,-1,1)},0,false)}return}
    if(strike&&p.x<90&&p.y>40&&p.y<74){exitStrike();return}
@@ -795,7 +803,7 @@ function nssMoment(o){
    const g=readShotGesture(a);if(!g)return;
    if(K==='header'){lastAim=g;if(hdWin())headNow();return}
    if(!canAim())return;
-   if(g.raw<.26&&owner===me&&K!=='fk'&&K!=='pen'){const L=1.6+g.raw*13,v=Math.sqrt(2*3.2*L)+.6;ball.vx=g.ux*v;ball.vd=g.ud*v;ball.vh=0;ball.spin=0;owner=null;kicked='touch';kickT=T;tapFx('touch');return}
+   if(g.raw<.26&&owner===me&&K==='dribble'){const L=1.6+g.raw*13,v=Math.sqrt(2*3.2*L)+.6;ball.vx=g.ux*v;ball.vd=g.ud*v;ball.vh=0;ball.spin=0;owner=null;kicked='touch';kickT=T;tapFx('touch');return}
    const m=assistMate(g);startContact(g,m)
    S.tips=S.tips||{};S.tips.nssm=(S.tips.nssm||0)+1};
   cv.addEventListener('pointerup',up);cv.addEventListener('pointercancel',()=>{drag=null;aim=null;curlLast=null});
@@ -839,6 +847,6 @@ IO_UI.penalty=async function(o){const save=o.mode==='save';const sk=k=>typeof sk
  const last=NM.last||'';const res=save?(r.ok?'defesa':/fora/i.test(last)?'fora':'gol'):(r.ok?'gol':/segurou|Espalmou/.test(last)?'defesa':'fora');return{goal:res==='gol',res}};
 
 // ---------- tabela e assistência nos jogos ----------
-const _rcNM=runChance;runChance=async function(c){if(c.type==='combo'){const sk=k=>typeof skillOf==='function'?skillOf(k):.6;return(await nssMoment({...c,kind:'combo',title:c.planned?'Tabela na entrada da área!':'Jogada de tabela',skill:sk('PAS')*.5+sk('FIN')*.5,keeper:c.planned?.4:.55,okTxt:'Gol de tabela!'})).ok}return _rcNM(c)};
+const _rcNM=runChance;runChance=async function(c){if(c.type==='chip'){const sk=k=>typeof skillOf==='function'?skillOf(k):.6;return(await nssMoment({...c,kind:'chip',title:'O goleiro saiu do gol!',skill:sk('FIN'),keeper:c.planned?.4:.55,okTxt:'GOL DE COBERTURA!'})).ok}if(c.type==='combo'){const sk=k=>typeof skillOf==='function'?skillOf(k):.6;return(await nssMoment({...c,kind:'combo',title:c.planned?'Tabela na entrada da área!':'Jogada de tabela',skill:sk('PAS')*.5+sk('FIN')*.5,keeper:c.planned?.4:.55,okTxt:'Gol de tabela!'})).ok}return _rcNM(c)};
 IO_UI.chance=async c=>runChance(c);
-const _ctNM=chanceType;chanceType=function(e){const t=_ctNM(e);if(!e.fk&&['finish','dribble'].includes(t)&&['ATA','SA','MEI','MC','PE','PD','ME','MD'].includes(S.pos)&&ch(.28))return'combo';return t};
+const _ctNM=chanceType;chanceType=function(e){const t=_ctNM(e);if(t==='finish'&&!e.fk&&ch(.25))return'chip';if(!e.fk&&['finish','dribble'].includes(t)&&['ATA','SA','MEI','MC','PE','PD','ME','MD'].includes(S.pos)&&ch(.28))return'combo';return t};
