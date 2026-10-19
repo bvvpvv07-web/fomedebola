@@ -5331,7 +5331,7 @@ function nssMoment(o){
    const G={ux,ud,power,curve,contact,len,raw,lsel:AL0.lsel,loft:AL0.loft,dip:AL0.dip,chip:!!AL0.chip};if(strike)applyContact(G,strike.cp||{x:0,y:0});return G;
   }
   // ponto de contato: embaixo sobe, em cima sai rasteiro/caindo, nos lados faz curva
-  function applyContact(g,cp){g.cx=cp.x;g.cy=cp.y;g.curve=clamp(cp.x*1.1,-1,1);
+  function applyContact(g,cp){g.cx=cp.x;g.cy=cp.y;const ax=Math.abs(cp.x);g.curve=ax<.22?0:ax>.68?-Math.sign(cp.x)*1:clamp(cp.x*1.15,-1,1);g.ctype=ax>.68?'TRIVELA':ax>=.22?'EFEITO':cp.y>.3?'POR CIMA':cp.y<-.3?'RASTEIRA':'COLOCADA';if(g.ctype==='COLOCADA'){g.contact=Math.min(1,(g.contact||1)+.1)}
    if(!g.chip){g.loft=clamp(g.loft+cp.y*.17,.01,.75);if(cp.y<-.35){g.dip=(g.dip||0)+3.5;g.loft=Math.max(.01,g.loft-.03)}if(cp.y>.4&&g.lsel<2&&g.loft>.3)g.lsel=2;if(cp.y<-.4&&g.loft<.08)g.lsel=0}}
   // puxada curta = rasteiro; média = meia altura; longa = forte e alto; além do máximo = cavadinha
   function autoLoft(raw,header){const p=clamp(raw,.12,1);
@@ -5405,26 +5405,26 @@ function nssMoment(o){
   // ===== CONTATO (MSS): depois de mirar, uma bola atravessa a tela; toque no ponto e na hora certa =====
   let CT=null;const CTD=1.25;
   function startContact(g,m){CT={g,m,t0:performance.now()};aim=null;SFX.tone({f:420,f2:760,dur:.12,gain:.06,type:'triangle'})}
-  function ctPos(){const k=(performance.now()-CT.t0)/1000/CTD;const r=Math.min(W,H)*.13;return{k,x:-r+(W+2*r)*k,y:H*.62,r}}
+  function ctPos(){const k=Math.min(1,(performance.now()-CT.t0)/260);const r=Math.min(W,H)*.2*(.6+.4*k);return{k:.5,x:W/2,y:H*.55,r,a:k}}
   function ctFire(cp,e,miss){const c=CT;CT=null;const g=c.g;
    if(miss){g.power*=.45;g.contact=.25;g.loft=Math.max(.01,(g.loft||.1)*.5);banner={txt:'FURADA!',ok:false,t:0,tmp:true}}
    else{applyContact(g,cp);const ae=Math.abs(e);g.power=clamp(g.power*(1-.32*ae),.12,1);g.loft=clamp((g.loft||.1)-e*.12,.01,.8);g.contact=clamp((g.contact||1)*(1-.55*ae),.2,1);
-    banner={txt:ae<.15?'PERFEITO!':ae<.4?'BOM TOQUE':e<0?'CEDO!':'TARDE!',ok:ae<.4,t:0,tmp:true};if(ae<.15){SFX.tone({f:880,dur:.12,gain:.1});shake(2,.15)}}
+    banner={txt:g.ctype||'CHUTE',ok:true,t:0,tmp:true};SFX.tone({f:880,dur:.1,gain:.08})}
    if(c.m)passTo(c.m,g);else doShot(g,false)}
-  function drawContact(){if(!CT)return;const p=ctPos();if(p.k>1){ctFire(null,1,true);return}
+  function drawContact(){if(!CT)return;const p=ctPos();
    ctx.fillStyle='rgba(6,20,10,.55)';ctx.fillRect(0,0,W,H);
    // faixa de grama e zona ideal
    const gy=p.y+p.r*1.05;const gg=ctx.createLinearGradient(0,gy-30,0,gy+40);gg.addColorStop(0,'#4ea83a');gg.addColorStop(1,'#3b8a2e');ctx.fillStyle=gg;ctx.fillRect(0,gy-6,W,46);
-   const zw=W*.09;ctx.fillStyle='rgba(125,255,154,.22)';ctx.fillRect(W/2-zw,p.y-p.r*1.5,zw*2,p.r*3);ctx.strokeStyle='rgba(255,226,60,.9)';ctx.lineWidth=3;ctx.setLineDash([6,6]);ctx.beginPath();ctx.moveTo(W/2,p.y-p.r*1.6);ctx.lineTo(W/2,p.y+p.r*1.6);ctx.stroke();ctx.setLineDash([]);
+
    // bola grande rolando
    ctx.fillStyle='rgba(0,0,0,.3)';ctx.beginPath();ctx.ellipse(p.x,gy+2,p.r*.9,p.r*.18,0,0,7);ctx.fill();
    const r=p.r,rot=p.k*9;const g2=ctx.createRadialGradient(p.x-r*.35,p.y-r*.35,r*.1,p.x,p.y,r);g2.addColorStop(0,'#fff');g2.addColorStop(1,'#cfd3d8');ctx.fillStyle=g2;ctx.beginPath();ctx.arc(p.x,p.y,r,0,7);ctx.fill();
    ctx.save();ctx.beginPath();ctx.arc(p.x,p.y,r,0,7);ctx.clip();ctx.fillStyle='#1b1b1b';const pent=(cx,cy,rr,a0)=>{ctx.beginPath();for(let i=0;i<5;i++){const a=a0+i*Math.PI*2/5;ctx.lineTo(cx+Math.cos(a)*rr,cy+Math.sin(a)*rr)}ctx.closePath();ctx.fill()};
-   pent(p.x+Math.cos(rot)*r*.2,p.y+Math.sin(rot)*r*.2,r*.3,rot);for(let i=0;i<5;i++){const a=rot+i*1.2566;pent(p.x+Math.cos(a)*r*.92,p.y+Math.sin(a)*r*.92,r*.25,a)}ctx.restore();
+   pent(p.x,p.y,r*.3,-Math.PI/2);for(let i=0;i<5;i++){const a=-Math.PI/2+Math.PI/5+i*1.2566;pent(p.x+Math.cos(a)*r*.92,p.y+Math.sin(a)*r*.92,r*.25,a)}ctx.restore();
    ctx.strokeStyle='#111';ctx.lineWidth=3;ctx.beginPath();ctx.arc(p.x,p.y,r,0,7);ctx.stroke();
    // guias
-   ctx.font="900 16px 'Saira Condensed',sans-serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='rgba(0,0,0,.6)';const t1='TOQUE NA BOLA NO MEIO';ctx.strokeText(t1,W/2,p.y-p.r*1.9);ctx.fillStyle='#ffe23c';ctx.fillText(t1,W/2,p.y-p.r*1.9);
-   ctx.font="800 12px 'Saira Condensed',sans-serif";const t2='embaixo: sobe  ·  em cima: rasteira  ·  no lado: curva';ctx.strokeText(t2,W/2,gy+28);ctx.fillStyle='#fff';ctx.fillText(t2,W/2,gy+28)}
+   ctx.font="900 16px 'Saira Condensed',sans-serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=4;ctx.strokeStyle='rgba(0,0,0,.6)';const t1='ONDE VOCÊ VAI BATER NA BOLA?';ctx.strokeText(t1,W/2,p.y-p.r*1.9);ctx.fillStyle='#ffe23c';ctx.fillText(t1,W/2,p.y-p.r*1.9);
+   ctx.font="800 12px 'Saira Condensed',sans-serif";const t2='meio: colocada · embaixo: por cima · em cima: rasteira',t3='lado: efeito · ponta da bola: trivela';ctx.strokeText(t2,W/2,gy+24);ctx.fillStyle='#fff';ctx.fillText(t2,W/2,gy+24);ctx.strokeText(t3,W/2,gy+42);ctx.fillText(t3,W/2,gy+42)}
   // conduzir: toque no gramado empurra a bola até lá (ou segura, se tocar na própria bola)
   function carryTo(sx,sy){const w=unproj(sx,sy);if(!w)return;const dx=w.x-ball.x,dd=w.d-ball.d,L=Math.hypot(dx,dd);
    if(L<1.1){banner={txt:'DOMINADA',ok:true,t:0,tmp:true};SFX.touch();return}
@@ -5831,7 +5831,7 @@ function nssMoment(o){
    if(!strike&&!GL&&bp){ctx.strokeStyle='rgba(255,255,255,.5)';ctx.lineWidth=2.5;ctx.setLineDash([4,6]);ctx.beginPath();ctx.moveTo(aim.cx,aim.cy);ctx.lineTo(bp.x,bp.y);ctx.stroke();ctx.setLineDash([]);ctx.fillStyle='rgba(255,255,255,.9)';ctx.beginPath();ctx.arc(aim.cx,aim.cy,8,0,7);ctx.fill()}
    // seta no gramado seguindo a trajetória (curva junto com o efeito)
    const Lm=(hd?2:1.6)+g.power*(isPassK()?9.5:7.5);const pts=[{x:b0.x,d:b0.d}];let acc=0;
-   pts[0].h=b0.h;for(let i=0;i<sp.length&&acc<Lm;i++){const q=sp[i],l=pts[pts.length-1];const st=Math.hypot(q.x-l.x,q.d-l.d);if(st<.25)continue;acc+=st;pts.push({x:q.x,d:q.d,h:q.h})}
+   pts[0].h=0;{const n0=Math.ceil(Lm/.5);for(let i=1;i<=n0;i++){const t=Math.min(Lm,i*.5);pts.push({x:b0.x+g.ux*t,d:b0.d+g.ud*t,h:0})}}
    {let c0=0,i0=0;for(let i=1;i<pts.length;i++){c0+=Math.hypot(pts[i].x-pts[i-1].x,pts[i].d-pts[i-1].d);if(c0>=.5){i0=i;break}}if(pts.length-i0>=3)pts.splice(0,i0)}
    if(!strike&&pts.length>=3){const n=pts.length,hw0=.17,hw1=.24,hh=.5,hl=1;
     const dirAt=i=>{const a=pts[Math.max(0,i-1)],b=pts[Math.min(n-1,i+1)];const dx=b.x-a.x,dd=b.d-a.d,L=Math.hypot(dx,dd)||1;return[dx/L,dd/L]};
@@ -5842,9 +5842,7 @@ function nssMoment(o){
     const draw=(h,col,stroke)=>{const q=poly.map(([x,d,hh2])=>proj(x,d,h<0?0:h+(hh2||0),.4));if(q.some(v=>!v))return false;ctx.beginPath();q.forEach((v,i)=>i?ctx.lineTo(v.x,v.y):ctx.moveTo(v.x,v.y));ctx.closePath();if(col){ctx.fillStyle=col;ctx.fill()}if(stroke){ctx.strokeStyle=stroke;ctx.lineWidth=2;ctx.stroke()}return true};
     const t0=proj(b0.x,b0.d,0),t1=proj(tx,td,0);
     if(GL){draw(-1,'rgba(0,0,0,.22)');
-     // cone de precisão (linhas pontilhadas verde-limão)
-     const[u0x,u0d]=dirAt(0);const spr=.06+(1-skill)*.16+Math.max(0,g.power-.8)*.25;ctx.setLineDash([3,7]);ctx.lineWidth=2.5;ctx.strokeStyle='rgba(210,255,80,.95)';
-     for(const sg of[-1,1]){const ca2=Math.cos(sg*spr),sa2=Math.sin(sg*spr);const vx=u0x*ca2-u0d*sa2,vd=u0x*sa2+u0d*ca2;ctx.beginPath();let pen=false;for(let i=1;i<=14;i++){const q=proj(b0.x+vx*i*1.7,b0.d+vd*i*1.7,.02,.5);if(!q){pen=false;continue}pen?ctx.lineTo(q.x,q.y):ctx.moveTo(q.x,q.y);pen=true}ctx.stroke()}ctx.setLineDash([])}
+}
     else if(t0&&t1){const hot=g.power>.88;
      ctx.save();ctx.translate(0,Math.max(3,(t0.s||20)*.06));draw(.06,hot?'#b8461c':'#c48a00');ctx.restore();
      const gr=ctx.createLinearGradient(t0.x,t0.y,t1.x,t1.y);gr.addColorStop(0,hot?'#ffb36b':'#ffe766');gr.addColorStop(1,hot?'#ff5a2a':'#ffc61a');draw(.06,gr,'rgba(120,80,0,.35)');
@@ -5857,10 +5855,10 @@ function nssMoment(o){
     if(bp2){const r=.11*bp2.s*1.32;ctx.strokeStyle='rgba(255,255,255,.65)';ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(bp2.x,bp2.y);ctx.lineTo(aim.cx,aim.cy);ctx.stroke();ctx.fillStyle='#fff';ctx.beginPath();ctx.arc(aim.cx,aim.cy,9,0,7);ctx.fill();
      ctx.lineWidth=7;ctx.strokeStyle='rgba(0,0,0,.35)';ctx.beginPath();ctx.arc(bp2.x,bp2.y,r,0,7);ctx.stroke();ctx.strokeStyle=g.power>.86?'#ff5a2a':g.power>.6?'#ffd21f':'#7dff9a';ctx.lineCap='round';ctx.beginPath();ctx.arc(bp2.x,bp2.y,r,-Math.PI/2,-Math.PI/2+g.power*Math.PI*2);ctx.stroke()}}
    // alvo discreto na boca do gol
-   const end=sp[endI];if(strike){}else if(end&&!isPassK()&&end.d<=0.05){const t=proj(end.x,0,end.h);if(t){const inG=Math.abs(end.x)<3.66&&end.h<2.44;target(t,Math.max(7,t.s*.22),inG?'#ffd21f':'#ff5a4a')}}
+   const end=sp[endI];if(true){}else if(end&&!isPassK()&&end.d<=0.05){const t=proj(end.x,0,end.h);if(t){const inG=Math.abs(end.x)<3.66&&end.h<2.44;target(t,Math.max(7,t.s*.22),inG?'#ffd21f':'#ff5a4a')}}
    else if(end&&mate){const t=proj(end.x,end.d,0);if(t)target(t,Math.max(7,t.s*.35),'#8fd3ff')}
    // tipo do chute, pequeno, perto do dedo
-   {const lb=hd?'CABEÇADA':shotType(g);ctx.font="800 12px 'Saira Condensed',sans-serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.6)';const ly=clamp(aim.cy+30,20,H-14);ctx.strokeText(lb,aim.cx,ly);ctx.fillStyle=g.power>.88?'#ffb36b':'#fff6c0';ctx.fillText(lb,aim.cx,ly);
+   if(false){const lb=hd?'CABEÇADA':shotType(g);ctx.font="800 12px 'Saira Condensed',sans-serif";ctx.textAlign='center';ctx.textBaseline='middle';ctx.lineWidth=3;ctx.strokeStyle='rgba(0,0,0,.6)';const ly=clamp(aim.cy+30,20,H-14);ctx.strokeText(lb,aim.cx,ly);ctx.fillStyle=g.power>.88?'#ffb36b':'#fff6c0';ctx.fillText(lb,aim.cx,ly);
     if(g.power>.97){ctx.font='16px sans-serif';ctx.fillText('⚡',aim.cx+ctx.measureText(lb).width/2+14,ly)}}
   }
   function target(t,r,c){ctx.strokeStyle='rgba(0,0,0,.55)';ctx.lineWidth=5;ctx.beginPath();ctx.arc(t.x,t.y,r,0,7);ctx.stroke();ctx.strokeStyle=c;ctx.lineWidth=3;ctx.beginPath();ctx.arc(t.x,t.y,r,0,7);ctx.stroke();ctx.beginPath();ctx.moveTo(t.x-r*1.5,t.y);ctx.lineTo(t.x-r*.5,t.y);ctx.moveTo(t.x+r*.5,t.y);ctx.lineTo(t.x+r*1.5,t.y);ctx.moveTo(t.x,t.y-r*1.5);ctx.lineTo(t.x,t.y-r*.5);ctx.moveTo(t.x,t.y+r*.5);ctx.lineTo(t.x,t.y+r*1.5);ctx.stroke()}
@@ -5942,7 +5940,7 @@ function nssMoment(o){
    if(isPassK()||K==='finish'){const m=pickMate(p.x,p.y);if(m){passTo(m,null);return}}
    carryTo(p.x,p.y)}
   cv.addEventListener('pointerdown',e=>{e.preventDefault();SFX.ctx();if(!SFX.loop)SFX.startLoop();try{cv.setPointerCapture(e.pointerId)}catch(_){}const p=pt(e);
-   if(CT){const q=ctPos();const dx=(p.x-q.x)/q.r,dy=(p.y-q.y)/q.r,L=Math.hypot(dx,dy);const e=clamp((q.x-W/2)/(W*.32),-1,1);if(L<1.5){const k=L>1?1/L:1;ctFire({x:clamp(dx*k,-1,1),y:clamp(dy*k,-1,1)},e,false)}else ctFire(null,1,true);return}
+   if(CT){const q=ctPos();const dx=(p.x-q.x)/q.r,dy=(p.y-q.y)/q.r,L=Math.hypot(dx,dy);if(L<1.25){const k=L>1?1/L:1;ctFire({x:clamp(dx*k,-1,1),y:clamp(dy*k,-1,1)},0,false)}return}
    if(strike&&p.x<90&&p.y>40&&p.y<74){exitStrike();return}
    if(strike){const bp=proj(ball.x,ball.d,ball.h+.11);if(bp){const r=.11*bp.s;const dx=(p.x-bp.x)/r,dy=(p.y-bp.y)/r,L=Math.hypot(dx,dy);if(L<1.45){const k=L>1?1/L:1;strike.cp={x:clamp(dx*k,-1,1),y:clamp(dy*k,-1,1)};strike.hit=true;SFX.touch()}}return}
    if(GK&&(shotAt||phase!=='play')&&gkTarget)return;
@@ -6108,7 +6106,7 @@ const COACH={n:'Professor Tião',r:'Coordenador da peneira',ic:'🧢'};
 const PEN_ST_OUT=[
  {k:'pass',ic:'🎯',n:'Passe',at:'PAS',how:['<b>Puxe para trás</b> mirando no companheiro (anel azul) e solte; depois toque na bola no meio.','Quando ele recebe, <b>você passa a controlar ele</b> e segue a jogada.','Passe para quem está atrás da última linha de defesa é <b>impedimento</b>.'],tip:'Passe, lançamento e cruzamento usam esse mesmo gesto nos jogos.'},
  {k:'dribble',ic:'⚡',n:'Drible',at:'DRI',how:['O tempo para enquanto você decide.','<b>Puxada curta</b> é um toque na bola: ela rola alguns metros e você vai atrás. Desvie dos marcadores.','Chegou na área? Pode chutar ou tocar para o companheiro.'],tip:'Cedo demais ele lê o drible; tarde demais ele toma a bola. Sincronia é tudo.'},
- {k:'finish',ic:'🥅',n:'Finalização',at:'FIN',how:['O tempo <b>para</b> enquanto você decide. <b>Puxe o dedo para trás</b> e solte: a seta amarela mostra direção e força.','Aí uma bola grande passa pela tela: <b>toque nela quando chegar no meio</b>. Embaixo ela sobe, em cima sai rasteira, no lado curva.','Puxada curta só conduz a bola. Mire num companheiro para tocar e seguir a jogada.'],tip:'Nos jogos, cada lance desses pode virar gol de verdade na súmula.'},
+ {k:'finish',ic:'🥅',n:'Finalização',at:'FIN',how:['O tempo <b>para</b> enquanto você decide. <b>Puxe o dedo para trás</b>: a seta amarela mostra para onde vai e a força.','Ao soltar, aparece a bola grande: <b>toque onde vai bater</b>. Meio: colocada. Embaixo: por cima. Em cima: rasteira. Lado: efeito. Ponta: trivela.','Puxada curta só conduz a bola. Mire num companheiro para tocar e seguir a jogada.'],tip:'Nos jogos, cada lance desses pode virar gol de verdade na súmula.'},
  {k:'header',ic:'🤯',n:'Cabeçada',at:'FIS',how:['O cruzamento vem lá da ponta.','<b>Mire antes</b>: puxe o dedo para trás e solte.','Quando a bola entrar no anel e aparecer <b>TOQUE!</b>, toque na tela. Quanto mais perto, melhor a cabeçada.'],tip:'Escanteio e cruzamento viram gol pra quem sobe no tempo certo.'},
  {k:'fk',ic:'🌀',n:'Falta',at:'FIN',how:['<b>Puxe para trás</b> mirando por fora da barreira e solte.','Na bola grande, <b>toque no lado</b>: ela curva e contorna a barreira. Em cima, ela cai mais.','Toque bem no meio da tela: cedo ou tarde demais, o chute sai torto.'],tip:'Quem bate bem falta pode pedir a cobrança ao treinador.'},
 ];
