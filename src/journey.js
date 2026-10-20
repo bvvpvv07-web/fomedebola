@@ -206,3 +206,29 @@ if(typeof retireShow==='function'){const _rsJ=retireShow;retireShow=async functi
 // livro da carreira no painel do jogador
 const _ohpJ=openHubPanel;openHubPanel=function(k){_ohpJ(k);if(k!=='jogador')return;const b=document.getElementById('ppB');const st=S.story;if(!b||!st||!st.log.length)return;
  b.insertAdjacentHTML('beforeend',`<section class="card book"><div class="eyebrow">📖 Sua história</div>${st.log.slice().reverse().map(c=>`<details class="bk"><summary><span>${c.ic||'📖'}</span><b>Cap. ${c.n} · ${esc(c.title)}</b><small>${c.age} anos</small></summary><p>${esc(c.txt)}</p></details>`).join('')}</section>`)};
+
+// ---------- PENEIRA: quem escolhe o lugar é o seu empresário (e o seu talento), não você ----------
+function agentVenue(){const ag=S.agent||'normal';const tal=(S.pot-75)/12+((S.attrs&&fit(S.attrs,S.pos))-55)/25;
+ const base={tubarao:.85,normal:.15,pai:-.55}[ag]??0;const x=base+(isNaN(tal)?0:tal)+randn()*.4;
+ return x>.7?'grande':x>-.35?'regional':'festival'}
+function agentVenueTxt(v){const ag=AGENTS[S.agent]||AGENTS.normal;const home=countryClubs(NATS[S.nat].home).sort((a,b)=>b.s-a.s);
+ const big=home[0],mid=home[Math.min(home.length-1,Math.round(home.length*.45))],small=home[home.length-1];
+ const who=S.agent==='tubarao'?'O Tubarão':S.agent==='pai'?'Seu pai':'A agência';
+ const T={grande:{tubarao:`${who} ligou direto pro coordenador do ${big.n}: "Tenho um moleque que vocês precisam ver." Conseguiu uma vaga na peneira dos grandes.`,normal:`${who} viu seus números e arriscou: mandou seu vídeo pro ${big.n}. Responderam no mesmo dia. Peneira de clube grande.`,pai:`${who} insistiu tanto no portão do ${big.n} que o roupeiro arrumou uma vaga. Ninguém acreditou.`},
+  regional:{tubarao:`${who} queria o ${big.n}, mas não rolou. Conseguiu a peneira regional, com clubes como o ${mid.n} assistindo.`,normal:`${who} achou mais seguro começar pela peneira regional. Olheiros de clubes como o ${mid.n} vão estar lá.`,pai:`${who} pegou o carro da família e te inscreveu na peneira regional. Clubes como o ${mid.n} mandam olheiro.`},
+  festival:{tubarao:`${who} sumiu por uma semana. Quando voltou, só tinha vaga no festival de escolinhas.`,normal:`${who} achou que você ainda é cru: melhor aparecer no festival de escolinhas, com menos pressão.`,pai:`${who} te inscreveu no festival de escolinhas do bairro. Clubes como o ${small.n} costumam aparecer.`}};
+ return T[v][S.agent]||T[v].normal}
+{const _rp=renderPeneira;renderPeneira=function(){if(PEN.step!==0)return _rp();
+ if(!PEN.venue)PEN.venue=agentVenue();const v=VENUES[PEN.venue];const ag=AGENTS[S.agent]||AGENTS.normal;
+ penShell(`<section class="card" style="display:grid;gap:12px"><div class="row" style="gap:10px;align-items:center"><span class="cc-av sm">${ag.ic}</span><div><div class="eyebrow">Seu empresário decidiu</div><b>${esc(ag.n)}</b></div></div>
+  <h2 class="h2">${esc(v.n)}</h2><p style="margin:0">${esc(agentVenueTxt(PEN.venue))}</p>
+  <div class="beh" style="cursor:default"><b>${esc(v.crowd)}</b><span>${esc(v.d)}</span></div>
+  <p class="muted" style="margin:0;font-size:13px">Você não escolhe onde vai: quem abre a porta é o empresário, e o seu talento pesa. Daqui pra frente, quem decide os clubes é o seu desempenho. Se arrebentar, um olheiro maior pode aparecer. Se for mal, o empresário te encaixa num clube menor.</p>
+  <button class="btn wide" id="penGo">Bora pra peneira</button></section>`);
+ document.getElementById('penGo').onclick=()=>{PEN.score-=v.diff*.4;PEN.step=1;renderPeneira()}}}
+// o desempenho manda: brilhou → sobe de nível de olheiro; foi mal num gigante → cai
+{const _pr=peneiraResult;peneiraResult=function(...a){try{if(!PEN.adj){PEN.adj=true;const sc=PEN.score,v=PEN.venue;
+  if(sc>=82&&v!=='grande'){PEN.venue=v==='festival'?'regional':'grande';PEN.log.push({txt:v==='festival'?'Um olheiro de clube médio estava escondido no festival e anotou seu nome.':'Um olheiro de clube grande estava na arquibancada da regional. Seu desempenho chamou ele.',delta:0})}
+  else if(sc<36&&v==='grande'){PEN.venue='regional';PEN.log.push({txt:'Os gigantes não ficaram com você, mas seu empresário te encaixou na lista de clubes médios.',delta:0})}
+  else if(sc<30&&v==='regional'){PEN.venue='festival';PEN.log.push({txt:'Os clubes médios passaram. Seu empresário correu atrás dos clubes pequenos.',delta:0})}}}catch(e){}return _pr.apply(this,a)}}
+{const _sp=startPeneira;startPeneira=async function(){PEN.adj=false;PEN.venue=null;return _sp()}}

@@ -25,7 +25,7 @@ function localGet(cid){try{return JSON.parse(localStorage.getItem('fdb3_'+cid)||
 function localDel(cid){try{localStorage.removeItem('fdb3_'+cid);const ix=localIndex();delete ix[cid];localStorage.setItem(LOCAL_IDX,JSON.stringify(ix))}catch(e){}}
 function buildBody(phase){
  S.phase=phase;S.pauseId=PAUSE?PAUSE.id:null;
- const data=JSON.stringify({v:3,S,W,clubs:CLUBS.map(c=>[c.id,c.l,Math.round(c.s*10)/10]),req:REQ,renew:RENEW,renewMsg:RENEW_MSG});
+ const data=JSON.stringify({v:3,S,W,clubs:CLUBS.map(c=>[c.id,c.l,Math.round(c.s*10)/10]),cp2:1,req:REQ,renew:RENEW,renewMsg:RENEW_MSG});
  const c=S.club?CLUB[S.club]:null;const L=S.done?legacy():null;
  return{meta:{cid:S.cid,name:S.name,nat:S.nat,pos:S.pos,age:S.age,club:c?c.n:'',ovr:S.ovr,peak:S.peak,phase,done:!!S.done,tier:L?L.tier:null,pts:L?L.pts:null,year:S.year,updated:Date.now()},data};
 }
@@ -52,7 +52,7 @@ async function loadSave(cid){
  if(!body)body=localGet(cid);
  if(!body)return false;
  const o=JSON.parse(body.data);
- buildClubs();for(const[id,l,s]of o.clubs)if(CLUB[id]){CLUB[id].l=l;CLUB[id].s=s}
+ buildClubs();for(const[id,l,s]of o.clubs)if(CLUB[id]){CLUB[id].l=l;CLUB[id].s=o.cp2?s:clubPower(s)}
  W=o.W;S=o.S;if(POS_ALIAS[S.pos])S.pos=POS_ALIAS[S.pos];for(const s of (W.stars||[]))if(POS_ALIAS[s.pos])s.pos=POS_ALIAS[s.pos];REQ=o.req||{};RENEW=o.renew||null;RENEW_MSG=o.renewMsg||'';
  PAUSE=S.pauseId?EV.find(e=>e.id===S.pauseId)||null:null;if(PAUSE){try{PAUSE._d=PAUSE.d()}catch(e){PAUSE=null}}
  EVRES=null;LASTR=[];TAB='jogos';CLOUD.screen='game';

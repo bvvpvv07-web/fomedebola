@@ -10,7 +10,7 @@ function activeProfile(){const p=profiles();return p.list.find(x=>x.id===p.activ
 // ---------- salvar com perfil ----------
 function buildBody(phase){
  S.phase=phase;S.pauseId=PAUSE?PAUSE.id:null;if(!S.profile)S.profile=activeProfile().id;
- const data=JSON.stringify({v:3,S,W,clubs:CLUBS.map(c=>[c.id,c.l,Math.round(c.s*10)/10]),req:REQ,renew:RENEW,renewMsg:RENEW_MSG});
+ const data=JSON.stringify({v:3,S,W,clubs:CLUBS.map(c=>[c.id,c.l,Math.round(c.s*10)/10]),cp2:1,req:REQ,renew:RENEW,renewMsg:RENEW_MSG});
  const c=S.club?CLUB[S.club]:null;const L=S.done?legacy():null;
  return{meta:{cid:S.cid,name:S.name,nat:S.nat,pos:S.pos,age:S.age,club:c?c.n:'',clubId:S.club,ovr:S.ovr,peak:S.peak,phase,done:!!S.done,tier:L?L.tier:null,pts:L?L.pts:null,year:S.year,fast:!!S.fast,titles:(S.titles||[]).length,profile:S.profile,updated:Date.now()},data};
 }

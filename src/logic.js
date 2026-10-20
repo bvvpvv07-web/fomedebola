@@ -26,8 +26,8 @@ const CLUBS=[];const CLUB={};
 function mkAbbr(n){return ABBR[n]||n.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z]/g,'').slice(0,3).toUpperCase()}
 function buildClubs(){
  CLUBS.length=0;for(const k in CLUB)delete CLUB[k];
- for(const l in CLUB_SRC)for(const row of CLUB_SRC[l].split(';')){const[n,s,c1,c2,uf]=row.split('|');const c={id:n,n,s:+s,base:+s,l,c1,c2,uf:uf||null,a:mkAbbr(n),country:LG[l].c};CLUBS.push(c);CLUB[n]=c}
- for(const conf in EXT_SRC)for(const row of EXT_SRC[conf].split(';')){const[n,s,c1,c2]=row.split('|');CLUB[n]={id:n,n,s:+s,base:+s,l:null,ext:conf,c1,c2,a:mkAbbr(n)}}
+ for(const l in CLUB_SRC)for(const row of CLUB_SRC[l].split(';')){const[n,s0,c1,c2,uf]=row.split('|');const s=clubPower(+s0);const c={id:n,n,s,base:s,l,c1,c2,uf:uf||null,a:mkAbbr(n),country:LG[l].c};CLUBS.push(c);CLUB[n]=c}
+ for(const conf in EXT_SRC)for(const row of EXT_SRC[conf].split(';')){const[n,s0,c1,c2]=row.split('|');const s=clubPower(+s0);CLUB[n]={id:n,n,s,base:s,l:null,ext:conf,c1,c2,a:mkAbbr(n)}}
 }
 buildClubs();
 const getClub=id=>CLUB[id];
@@ -74,6 +74,8 @@ function newCareer(o){
 const D=()=>DIFF[S.diff];
 const club=()=>CLUB[S.club];
 const lg=()=>LG[club().l];
+// gigantes mais fortes: abre a distância no topo (Real Madrid, Barça, City, PSG, Bayern…)
+function clubPower(v){return Math.round((v>78?v+(v-78)*.32:v)*10)/10}
 function roleFor(ovr,str,age){const d=ovr-str;if(d>=-1)return'Titular';if(d>=-5)return'Rotação';if(d>=-11||age>19)return'Reserva';return'Base'}
 function wageFor(c,ovr){const wm=c.l?LG[c.l].wm:.4;return Math.max(1,Math.round(((Math.max(ovr,46)-45)**2)/10*wm*(c.s/80)))}
 const BEH={
@@ -308,7 +310,7 @@ function autoShootout(o){
 }
 
 // ================== PARTIDAS ==================
-function quickScore(sh,sa,adv=2){const d=sh+adv-sa;return[poisson(1.3*Math.exp(d/19)),poisson(1.18*Math.exp(-d/19))]}
+function quickScore(sh,sa,adv=2){const d=sh+adv-sa;return[poisson(1.3*Math.exp(d/17.5)),poisson(1.18*Math.exp(-d/17.5))]}
 function participation(kind,o){
  const st=S.st;
  if(st.injLeft>0)return{play:false,why:'lesionado'};
@@ -335,7 +337,7 @@ async function playMine(o,io){
  const usS=base+(part.play?(perf-base)*imp*(part.min/90):(part.role==='Titular'?-.8:0));
  const adv=o.neutral?0:(o.home?2.2:-2.2);
  const d=usS-o.them.s+adv;
- const gu0=poisson(1.3*Math.exp(d/19)),gt0=poisson(1.18*Math.exp(-d/19));
+ const gu0=poisson(1.3*Math.exp(d/17.5)),gt0=poisson(1.18*Math.exp(-d/17.5));
  const P=POS[S.pos];
  const share=part.play?clamp(P.sg*clamp(1+(perf-base)/18,.4,1.7)*(part.min/90),0,.45):0;
  const ashare=part.play?clamp(P.sa*clamp(1+(perf-base)/18,.4,1.7)*(part.min/90),0,.4):0;
@@ -356,7 +358,7 @@ async function playMine(o,io){
   const pc=(['VOL','ZAG'].includes(S.pos)?.2:.1)+(55-S.life.disc)/400;
   if(ch(clamp(pc,.03,.4))){y=1;tl.push({m:mMine(),t:'y'})}
   if(ch(clamp(.012+(55-S.life.disc)/1500,.004,.05))){r=1;y=0;tl.push({m:mMine(),t:'r'})}
-  const pI=(S.perks&&S.perks.prep?.8:1)*P.inj/34*(1.55-S.life.corpo/100)*(S.age>29?1+(S.age-29)*.07:1)*D().inj*(part.min/90)+st.injRisk/30;
+  const pI=(S.perks&&S.perks.prep?.8:1)*(typeof rpgHas==='function'&&rpgHas('pulmao')?.75:1)*P.inj/34*(1.55-S.life.corpo/100)*(S.age>29?1+(S.age-29)*.07:1)*D().inj*(part.min/90)+st.injRisk/30;
   if(ch(pI)){const sev=rnd();inj=sev<.7?RI(1,3):sev<.95?RI(4,10):RI(14,30);tl.push({m:mMine(),t:'inj',n:inj})}
   if(!part.start)tl.push({m:onFrom,t:'in'});
  }
@@ -777,7 +779,7 @@ function endSeason(){
  }
  if(myMove){if(myMove.dir==='up')titles.push(...(rank===1&&LG[myMove.to]?[]:[]))}
  // força dos clubes varia
- for(const c of CLUBS){const tierPull=LG[c.l].tier===1?0:-.4;c.s=clamp(Math.round((c.s+(c.base-c.s)*.12+randn()*1.1+tierPull)*10)/10,45,92)}
+ for(const c of CLUBS){const tierPull=LG[c.l].tier===1?0:-.4;c.s=clamp(Math.round((c.s+(c.base-c.s)*.22+randn()*.9+tierPull*(c.base>=78?0:1))*10)/10,45,96)}
  // ---- estrelas reais envelhecem ----
  const y=S.year+1;
  for(const s of W.stars){const age=y-s.born;s.r+=age<=23?RI(0,2):age<=28?RI(-1,1):age<=31?-RI(0,2):-RI(1,3);if(s.pos==='GOL'&&age<=34)s.r+=1}

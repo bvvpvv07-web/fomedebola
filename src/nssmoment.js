@@ -57,7 +57,8 @@ function nssMoment(o){
   const P=[];const mk=(team,x,d,ex={})=>{const p={team,x,d,vx:0,vd:0,ph:Math.random()*6,sp:6,jump:0,num:0,fall:0,...ex};P.push(p);return p};
   let me=null,gk=null;const ball={x:0,d:0,h:0,vx:0,vd:0,vh:0,spin:0,rot:0};
   let tmax=10,tag='Lance',hint='';const side=ch(.5)?1:-1;
-  const mySp=6.2+VEL*1.8;
+  const RP=k=>typeof rpgHas==='function'&&rpgHas(k);
+  const mySp=6.2+VEL*1.8+(RP('arranque')?.8:0);
   let nI=0;const NUMS=[7,8,10,11,17,19,20,21,23];
   const mate=(x,d,ex)=>mk('mate',x,d,{sp:6.3,num:NUMS[(nI++)%NUMS.length],...ex});
   const opp=(x,d,ex)=>mk('opp',x,d,{sp:(5.3+Math.random()*.5)*spdMul,num:[2,3,4,5,6,14,15][P.length%7],...ex});
@@ -381,7 +382,7 @@ function nssMoment(o){
    return{tx,th,v,spin:-curve,chip,label,p}}
   function errOf(it){const pr=G.press||0;const dd=Math.hypot(ball.x,ball.d);
    let sx=(.12+.95*(1-FIN))*(1+1.1*pr)*(.55+dd/24)*(1+1.8*Math.max(0,it.p-.82))*(1+Math.abs(it.spin)*.08);
-   if(it.p<.42)sx*=.65;if(pl)sx*=.85;if(K==='pen')sx*=.8;if(it.chip)sx*=.8;return{sx,sh:sx*.55}}
+   if(it.p<.42)sx*=.65;if(pl)sx*=.85;if(RP('pe'))sx*=.82;if(K==='pen')sx*=.8;if(it.chip)sx*=.8;return{sx,sh:sx*.55}}
   function shoot(g,by){by=by||me;const it=shotIntent(g);const e=errOf(it);let tx=it.tx+gauss()*e.sx,th=Math.max(.08,it.th+gauss()*e.sh);
    const from={x:ball.x,d:ball.d,h:Math.max(ball.h,g.header?1.75:0)};let s;
    if(it.chip){const t=clamp(.75+ball.d*.035,1,1.45);s=solveLob(from,tx,-.4,clamp(.8+(1-it.p)*1.2,.9,2.2),t);ball.spin=0}
@@ -399,7 +400,8 @@ function nssMoment(o){
    const pr=G.press||0;let ang=(g?(.015+.07*(1-PAS)):(.008+.04*(1-PAS)))*(1+pr)*gauss();
    // assistência: puxa a direção do gesto em direção ao companheiro, sem ser infalível
    let ux=(lp.x-from.x)/L,ud=(lp.d-from.d)/L;
-   if(g){const a=.5+.35*PAS;let gx=g.dir.x*(1-a)+ux*a,gd=g.dir.d*(1-a)+ud*a;const gl=Math.hypot(gx,gd)||1;ux=gx/gl;ud=gd/gl}
+   if(RP('visao'))ang*=.75;
+   if(g){const a=.5+.35*PAS+(RP('visao')?.12:0);let gx=g.dir.x*(1-a)+ux*a,gd=g.dir.d*(1-a)+ud*a;const gl=Math.hypot(gx,gd)||1;ux=gx/gl;ud=gd/gl}
    const c=Math.cos(ang),s=Math.sin(ang);[ux,ud]=[ux*c-ud*s,ux*s+ud*c];
    if(lofted){let t=.55+L/24;let lp2=lp;for(let i=0;i<3;i++){lp2=lead(m,t);t=.55+Math.hypot(lp2.x-from.x,lp2.d-from.d)/24}const L2=Math.hypot(lp2.x-from.x,lp2.d-from.d);ux=(lp2.x-from.x)/L2*(g?1:1);ud=(lp2.d-from.d)/L2;if(g){const a=.5+.35*PAS;let gx=g.dir.x*(1-a)+ux*a,gd=g.dir.d*(1-a)+ud*a;const gl=Math.hypot(gx,gd)||1;ux=gx/gl;ud=gd/gl}m.run={x:lp2.x,d:lp2.d};lp=lp2;const ex=(g?(.3+1.6*(1-PAS))*(1+pr):(.2+.9*(1-PAS)))*gauss();const LL=Math.hypot(lp.x-from.x,lp.d-from.d);const tx=from.x+ux*LL+ex*.6,td=from.d+ud*LL+ex*.4;
     const r=solveLob({x:from.x,d:from.d,h:0},tx,td,K==='cross'?1.7:1.1,t);ball.vx=r.vx;ball.vd=r.vd;ball.vh=r.vh}
@@ -415,7 +417,7 @@ function nssMoment(o){
   function dribbleMove(dir){const q=P.filter(z=>z.team==='opp'&&!z.wall&&z.fall<=0).sort((a,b)=>dist(a,me)-dist(b,me))[0];
    carry(me.x+dir.x*5,me.d+dir.d*5,true);if(!q||dist(q,me)>3.2)return;
    const toQ={x:(q.x-me.x),d:(q.d-me.d)};const L=Math.hypot(toQ.x,toQ.d)||1;const cosA=(toQ.x*dir.x+toQ.d*dir.d)/L;const ang=Math.acos(clamp(cosA,-1,1));
-   const p=clamp(.32+.5*DRI+(ang>.8?.12:-.1)-(G.press||0)*.1,.15,.92);
+   const p=clamp(.32+.5*DRI+(ang>.8?.12:-.1)-(G.press||0)*.1+(RP('drible')?.12:0),.15,.94);
    if(ch(p)){q.fall=.9;q.fallDir=Math.sign(dir.x||1);flash('DRIBLOU!',true);SFX.tone({f:660,dur:.1,gain:.08});G.grace=.8}
    else{tackle(q)}}
   function tackle(q){G.tk++;if(ch(.5)){const a=R(-1.4,1.4);G.owner=null;ball.vx=Math.sin(a)*R(4,7);ball.vd=Math.cos(a)*R(3,6);ball.vh=R(0,1.4);me.fall=.35;contest('tackle','DIVIDIDA!')}
@@ -511,7 +513,7 @@ function nssMoment(o){
      else if(G.st==='CONTEST'&&p===ctOpp){tx=ball.x+ball.vx*.3;td=ball.d+ball.vd*.3;vm=p.sp}
      else if(p===presser){const gx=-carrier.x,gd=-carrier.d,gl=Math.hypot(gx,gd)||1;const close=dist(p,carrier);
       tx=carrier.x+gx/gl*(close<2?.9:1.1);td=carrier.d+gd/gl*(close<2?.9:1.1);vm=p.sp*(close<3?.7:.95);
-      if(close<1.15&&G.grace<=0&&G.t>=G.nextTk&&G.st==='POSSESSION'){G.nextTk=G.t+.75;const pk=(.3+.32*(1-DRI))*(G.carry?.8:1);if(ch(pk))tackle(p);else{p.fall=.6;p.fallDir=Math.sign(p.x-me.x||1)}}}
+      if(close<1.15&&G.grace<=0&&G.t>=G.nextTk&&G.st==='POSSESSION'){G.nextTk=G.t+.75;const pk=(.3+.32*(1-DRI))*(G.carry?.8:1)*(RP('drible')?.82:1);if(ch(pk))tackle(p);else{p.fall=.6;p.fallDir=Math.sign(p.x-me.x||1)}}}
      else role(p);
     }
     if(p.shooter)continue;
