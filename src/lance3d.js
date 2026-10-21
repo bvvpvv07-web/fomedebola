@@ -38,7 +38,7 @@ function l3dResult(o,res){const K=o.kind||'finish';const GK=K==='keeper';const i
  if(GK){ok=o.pen?(res.kind==='save'||res.kind==='claim'):!res.goal;NM.last=res.goal?'Foi no canto.':ok?(o.okTxt||'DEFENDEU!'):'Pra fora!'}
  else{ok=!!res.goal||(train&&isPassK&&res.chain>=1);
   if(res.goal){if(isPassK||o.ast){if(res.heroGoal)NM.selfGoal=true}else if(!res.heroGoal&&res.heroAssist&&K!=='pen')NM.dmAssist=true}
-  NM.last=ok?(o.okTxt||'GOL!'):K==='pen'?(res.kind==='save'||res.kind==='claim'?'O goleiro segurou.':'Pra fora!'):isPassK?'Interceptado.':res.kind==='save'||res.kind==='claim'?'O goleiro pegou.':'Pra fora!'}
+  NM.last=ok?(o.okTxt||'GOL!'):res.kind==='off'?'Impedimento.':K==='pen'?(res.kind==='save'||res.kind==='claim'?'O goleiro segurou.':'Pra fora!'):isPassK?'Interceptado.':res.kind==='save'||res.kind==='claim'?'O goleiro pegou.':'Pra fora!'}
  const perfect=ok&&!!(res.fk||res.header||res.chain>=2||(GK&&res.dived&&res.kind==='save')||res.caught);NM.grade=ok?(perfect?92:78):40;NM.why='Lance jogado';
  return{ok,perfect,grade:NM.grade}}
 async function lance3dPlay(o){
