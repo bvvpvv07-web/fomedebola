@@ -364,28 +364,38 @@ async function playMine(o,io){
  }
  // lances para dar tensão
  const nf=RI(4,8);for(let i=0;i<nf;i++){const us=ch(clamp(.5+d/40,.2,.8));const mine=us&&part.play&&ch(.3);tl.push({m:mine?mMine():RI(1,90),t:'c',us,mine,w:mine?S.name:us?scorerFrom(usR,S.name):scorerFrom(thR)})}
+ {const nDM=io.matchDecision&&part.play&&(typeof lancesWanted!=='function'||lancesWanted(!!o.live))?(o.live?RI(1,2):(ch(.6)?1:0)):0;for(let i=0;i<nDM;i++){const m=mMine();if(m)tl.push({m,t:'dm'})}}
  tl.sort((a,b)=>a.m-b.m);
  const live=o.live&&io.live?await io.live.start({o,us:o.us,them:o.them,home:o.home,neutral:o.neutral,agg:o.agg,part}):null;
  let gu=0,gt=0,myG=0,myA=0,penNote=null,fkNote=false;const scorers=[];
  let interN=0;
  for(let e of tl){
   if(live)await live.until(e.m);
-  if(io.chance&&part.play&&interN<(live?3:2)&&onPitch(e.m)&&(typeof lancesWanted!=='function'||lancesWanted(live))){
+  if(io.chance&&part.play&&interN<(live?4:3)&&onPitch(e.m)&&(typeof lancesWanted!=='function'||lancesWanted(live))){
    let c=null;
    if(e.t==='g'&&e.us&&e.mine)c={type:chanceType(e),planned:true};
    else if(e.t==='g'&&e.us&&e.ast&&typeof assistType==='function')c={type:assistType(),planned:true,ast:true};
-   else if(e.t==='c'&&e.us&&e.mine&&ch(.6))c={type:chanceType(e),planned:false};
-   else if(e.t==='c'&&e.us&&!e.mine&&S.pos!=='GOL'&&typeof assistType==='function'&&ch(.22))c={type:assistType(),planned:false,ast:true};
+   else if(e.t==='c'&&e.us&&e.mine&&ch(.75))c={type:chanceType(e),planned:false};
+   else if(e.t==='c'&&e.us&&!e.mine&&S.pos!=='GOL'&&typeof assistType==='function'&&ch(.3))c={type:assistType(),planned:false,ast:true};
    else if(S.pos==='GOL'&&!e.us&&(e.t==='g'||e.t==='c')&&ch(e.t==='g'?.75:.35))c={type:'reflex',planned:e.t==='g'};
    if(c){interN++;if(live){live.flash(c.type==='reflex'?'⚠️ Perigo no seu gol!':c.ast?'⚡ Você tem a bola pra criar…':'⚡ A bola é sua…');await sleep(S.liveSpeed===3?600:1400)}
     const ok=await io.chance({...c,comp:o.comp,min:e.m});if(live)live.redraw();
+    const asst=!!NM.dmAssist;NM.dmAssist=false;
+    if(ok&&asst&&!c.ast&&c.type!=='reflex'){e={...e,t:'g',ast:true,mine:false,w:scorerFrom(usR,S.name)}}else
     if(c.type==='reflex'){if(e.t==='g'&&ok)e={...e,t:'gks'};else if(e.t==='c'&&!ok)e={...e,t:'g'};else if(e.t==='c'&&ok)e={...e,t:'gks'}}
     else if(c.ast){if(e.t==='g'&&!ok)e={...e,t:'c',ast:false};else if(e.t==='c'&&ok)e={...e,t:'g',ast:true,mine:false}}
     else if(e.t==='g'&&!ok)e={...e,t:'c',fk:false,missed:true};
     else if(e.t==='c'&&ok)e={...e,t:'g',w:S.name,mine:true}}
   }
   let feed=null;
-  if(e.t==='g'){if(e.us){gu++;if(e.mine)myG++;if(e.ast)myA++;if(e.fk)fkNote=true}else gt++;scorers.push({m:e.m,w:e.w,us:e.us});feed={...e,gu,gt}}
+  if(e.t==='dm'){if(onPitch(e.m)&&!r&&io.matchDecision){if(live){live.flash('🧠 Momento de decisão!');await sleep(S.liveSpeed===3?500:1100)}
+    const d=await io.matchDecision({comp:o.comp,min:e.m,gu,gt});if(live)live.redraw();
+    if(d){if(d.y){if(y){r=1;y=0}else y=1}if(d.r){r=1;y=0}if(d.inj)inj=Math.max(inj,d.inj);
+     if(d.goal){gu++;myG++;scorers.push({m:e.m,w:S.name,us:true});feed={t:'g',us:true,mine:true,w:S.name,m:e.m,gu,gt}}
+     else if(d.assist){const w=scorerFrom(usR,S.name);gu++;if(!d.teamOnly)myA++;scorers.push({m:e.m,w,us:true});feed={t:'g',us:true,ast:!d.teamOnly,w,m:e.m,gu,gt}}}}
+   e={...e,t:'skip'}}
+  if(e.t==='skip'){}
+  else if(e.t==='g'){if(e.us){gu++;if(e.mine)myG++;if(e.ast)myA++;if(e.fk)fkNote=true}else gt++;scorers.push({m:e.m,w:e.w,us:e.us});feed={...e,gu,gt}}
   else if(e.t==='pf'){
    if(onPitch(e.m)&&S.taker.pen&&S.pos!=='GOL'){
     if(live)live.flash('PÊNALTI PRA VOCÊS! A bola é sua.');

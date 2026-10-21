@@ -43,15 +43,33 @@ faceSVG=function(face,shirt,shirt2,opt={}){
 // ---------- camisa (costas) com nome e número ----------
 const NAT_KIT={BRA:['#ffd21f','#0a8a3a'],ARG:['#8cc4ea','#ffffff'],URU:['#5aa9e6','#ffffff'],COL:['#ffd21f','#1d3f9e'],FRA:['#1d3f9e','#ffffff'],ESP:['#c8102e','#ffd21f'],ENG:['#ffffff','#1d2b6e'],POR:['#c8102e','#0a7a3a'],GER:['#ffffff','#151515'],NED:['#ff7a1a','#ffffff'],ITA:['#1f5fbf','#ffffff'],BEL:['#c8102e','#151515'],CRO:['#ffffff','#c8102e'],MAR:['#c8102e','#0a7a3a'],SEN:['#ffffff','#0a8a3a'],NGA:['#0a8a3a','#ffffff'],JPN:['#1d3f9e','#ffffff'],KOR:['#c8102e','#151515'],USA:['#ffffff','#1d2b6e'],MEX:['#0a7a3a','#ffffff']};
 function crKit(){const c=CR.heart&&CLUB[CR.heart];if(c)return[c.c1||'#ff7a2b',c.c2||'#fff'];return NAT_KIT[CR.nat]||['#ff7a2b','#ffffff']}
-function jerseySVG(c1,c2,name,num,cls=''){const nm=(name||'').trim().split(/\s+/).slice(-1)[0].toUpperCase().slice(0,12)||'SEU NOME';const n=String(num||'');const ink=typeof pickInk==='function'?pickInk(c1):c2;
- const light=(()=>{const h=(c1||'#555').replace('#','');const v=parseInt(h.length===3?h.split('').map(x=>x+x).join(''):h,16);return((v>>16&255)*.3+(v>>8&255)*.59+(v&255)*.11)>165})();const txt=light?(c2&&c2.toLowerCase()!=='#ffffff'?c2:'#151515'):(c2||'#fff');
- return`<svg class="jersey2 ${cls}" viewBox="0 0 240 250" aria-label="Camisa ${esc(nm)} ${esc(n)}"><defs><linearGradient id="jsh" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".22"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/><stop offset="1" stop-color="#000" stop-opacity=".22"/></linearGradient></defs>
- <path d="M74 16l46 12 46-12 56 30-20 50-26-12v164H64V84L38 96 18 46z" fill="${c1}" stroke="rgba(0,0,0,.35)" stroke-width="3" stroke-linejoin="round"/>
- <path d="M18 46l20 50 26-12" fill="none" stroke="${c2}" stroke-width="5" opacity=".9"/><path d="M222 46l-20 50-26-12" fill="none" stroke="${c2}" stroke-width="5" opacity=".9"/>
- <path d="M96 22q24 14 48 0" fill="none" stroke="${c2}" stroke-width="6"/>
- <path d="M74 16l46 12 46-12 56 30-20 50-26-12v164H64V84L38 96 18 46z" fill="url(#jsh)"/>
- <text x="120" y="76" text-anchor="middle" font-family="Saira Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="${nm.length>8?20:24}" letter-spacing="2" fill="${txt}">${esc(nm)}</text>
- <text x="120" y="190" text-anchor="middle" font-family="Saira Condensed,Arial Narrow,sans-serif" font-weight="900" font-size="${n.length>1?104:116}" fill="${txt}" stroke="${light?'rgba(0,0,0,.15)':'rgba(0,0,0,.35)'}" stroke-width="3" paint-order="stroke">${esc(n)}</text></svg>`}
+let JS_ID=0;
+function jerseySVG(c1,c2,name,num,cls=''){const id='j'+(++JS_ID);const nm=(name||'').trim().split(/\s+/).slice(-1)[0].toUpperCase().slice(0,12)||'SEU NOME';const n=String(num||'');
+ const hx=c=>{const h=(c||'#555').replace('#','');return parseInt(h.length===3?h.split('').map(x=>x+x).join(''):h,16)};const lum=c=>{const v=hx(c);return(v>>16&255)*.3+(v>>8&255)*.59+(v&255)*.11};
+ const shade=(c,f)=>{const v=hx(c);const m=x=>Math.max(0,Math.min(255,Math.round(x*f)));return`rgb(${m(v>>16&255)},${m(v>>8&255)},${m(v&255)})`};
+ const light=lum(c1)>165;const trim=Math.abs(lum(c1)-lum(c2||'#fff'))<40?(light?'#151515':'#ffffff'):(c2||'#fff');const txt=trim;const out=lum(txt)>140?'rgba(0,0,0,.55)':'rgba(255,255,255,.6)';
+ const body='M70 26 Q96 18 104 16 Q120 30 136 16 Q144 18 170 26 L220 52 Q226 56 224 62 L204 108 Q201 114 194 112 L176 104 L178 226 Q178 236 168 238 Q120 246 72 238 Q62 236 62 226 L64 104 L46 112 Q39 114 36 108 L16 62 Q14 56 20 52 Z';
+ return`<svg class="jersey2 ${cls}" viewBox="0 0 240 252" aria-label="Camisa ${esc(nm)} ${esc(n)}"><defs>
+ <linearGradient id="${id}b" x1="0" y1="0" x2="1" y2=".6"><stop offset="0" stop-color="${shade(c1,1.18)}"/><stop offset=".45" stop-color="${c1}"/><stop offset="1" stop-color="${shade(c1,.68)}"/></linearGradient>
+ <linearGradient id="${id}n" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${txt}"/><stop offset="1" stop-color="${lum(txt)>140?shade(txt,.82):shade(txt,1.4)}"/></linearGradient>
+ <pattern id="${id}m" width="5" height="5" patternUnits="userSpaceOnUse"><circle cx="1.5" cy="1.5" r=".9" fill="#000" opacity=".09"/><circle cx="4" cy="4" r=".7" fill="#fff" opacity=".07"/></pattern>
+ <clipPath id="${id}c"><path d="${body}"/></clipPath><filter id="${id}s" x="-20%" y="-20%" width="140%" height="140%"><feDropShadow dx="0" dy="1.5" stdDeviation="1.2" flood-opacity=".35"/></filter>
+ <path id="${id}a" d="M66 92 Q120 74 174 92"/></defs>
+ <path d="${body}" fill="url(#${id}b)"/>
+ <g clip-path="url(#${id}c)">
+  <rect width="240" height="252" fill="url(#${id}m)"/>
+  <path d="M64 104 L72 238 L60 238 L54 104Z" fill="${trim}" opacity=".9"/><path d="M176 104 L168 238 L180 238 L186 104Z" fill="${trim}" opacity=".9"/>
+  <path d="M16 62 L36 108 L46 112 L26 58Z" fill="${trim}" opacity=".95"/><path d="M224 62 L204 108 L194 112 L214 58Z" fill="${trim}" opacity=".95"/>
+  <path d="M90 40 Q110 120 92 238" stroke="#000" stroke-opacity=".10" stroke-width="16" fill="none"/><path d="M150 44 Q132 130 152 238" stroke="#000" stroke-opacity=".08" stroke-width="12" fill="none"/>
+  <path d="M120 30 Q126 130 118 240" stroke="#fff" stroke-opacity=".08" stroke-width="22" fill="none"/>
+  <path d="M60 228 Q120 240 180 228" stroke="#000" stroke-opacity=".18" stroke-width="10" fill="none"/>
+  <path d="M70 30 L36 108 M170 30 L204 108" stroke="${shade(c1,.55)}" stroke-opacity=".5" stroke-width="1.4" stroke-dasharray="3 3" fill="none"/>
+ </g>
+ <path d="M104 16 Q120 30 136 16 Q130 14 120 22 Q110 14 104 16Z" fill="${shade(c1,.5)}"/><path d="M102 15 Q120 33 138 15" fill="none" stroke="${trim}" stroke-width="6" stroke-linecap="round"/>
+ <path d="${body}" fill="none" stroke="rgba(0,0,0,.45)" stroke-width="2.4" stroke-linejoin="round"/>
+ <text font-family="Saira Condensed,Arial Narrow,sans-serif" font-weight="800" font-size="${nm.length>9?19:23}" letter-spacing="2.5" fill="url(#${id}n)" text-anchor="middle" filter="url(#${id}s)"><textPath href="#${id}a" startOffset="50%">${esc(nm)}</textPath></text>
+ <text x="120" y="196" text-anchor="middle" font-family="Saira Condensed,Arial Narrow,sans-serif" font-weight="900" font-size="${n.length>1?100:112}" fill="url(#${id}n)" stroke="${out}" stroke-width="5" paint-order="stroke" stroke-linejoin="round" filter="url(#${id}s)">${esc(n)}</text>
+ <text x="120" y="196" text-anchor="middle" font-family="Saira Condensed,Arial Narrow,sans-serif" font-weight="900" font-size="${n.length>1?100:112}" fill="none" stroke="${lum(txt)>140?'rgba(255,255,255,.35)':'rgba(255,255,255,.25)'}" stroke-width="1.2">${esc(n)}</text></svg>`}
 
 // ---------- CRIAÇÃO EM ETAPAS (uma tela pra cada coisa, sem rolagem) ----------
 const CW_STEPS=[['nome','Como vão te chamar?'],['numero','Qual é a sua camisa?'],['pais','De onde você é?'],['rosto','Monte seu rosto'],['time','Time do coração'],['posicao','Onde você joga?'],['dificuldade','Qual o desafio?'],['ritmo','Como você quer jogar?']];
