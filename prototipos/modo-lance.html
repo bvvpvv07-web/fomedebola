@@ -80,6 +80,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .m-title span{color:var(--accent)}
 .m-sub{margin:4px 0 0;font-weight:600;font-size:14px;color:#d7eadc;max-width:44ch}
 .m-tabs{display:flex;gap:6px;margin:2px 0 10px;padding:4px;border-radius:14px;background:rgba(0,0,0,.3);border:1px solid rgba(255,255,255,.1)}
+.m-env{display:flex;align-items:center;gap:6px;margin:8px 0 2px;font-size:13px;color:#cfe3d4}.m-env span{margin-right:4px;font-weight:700}.m-env button{flex:1;height:34px;border-radius:10px;border:1px solid rgba(255,255,255,.18);background:rgba(0,0,0,.25);color:#eef2e4;font:700 14px inherit}.m-env button.on{background:#ff7a1a;color:#1d0c02;border-color:#ff7a1a}
 .m-tab{flex:1;height:38px;border:0;border-radius:10px;background:transparent;font-family:var(--f-display);font-weight:900;font-style:italic;font-size:17px;text-transform:uppercase;color:#cfe3d4}
 .m-tab.on{background:linear-gradient(180deg,#ff9640,#ef5f0e);color:#1b0b00}
 .m-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px;flex:1;min-height:0;align-content:end;overflow:hidden}
@@ -155,6 +156,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
   <div class="m-head"><span class="m-eye">Fome de Bola · protótipo</span><h1 class="m-title">Modo <span>Lance</span></h1>
    <p class="m-sub">Estilingue pra mirar, toque na bola pra dar efeito. Toque, lançamento, cruzamento, chute e falta. Escolha um cenário.</p></div>
   <div class="m-tabs" role="tablist"><button class="m-tab on" data-t="atk" role="tab">⚽ Atacar</button><button class="m-tab" data-t="gk" role="tab">🧤 Goleiro</button></div>
+  <div class="m-env"><span>Campo</span><button class="on" data-env="stadium">🏟️ Estádio</button><button data-env="prison">🔒 Presídio</button></div>
   <div class="m-grid" id="mGrid"></div>
   <div class="m-how"><div><b>1 · Estilingue</b>Puxe da bola pra trás. A seta mostra a força.</div><div id="howMid"><b>2 · Toque na bola</b>Lado: curva. Embaixo: sobe. Em cima: rasteira.</div><div><b>3 · Câmera</b>Arraste fora da bola pra girar. 🎥 troca o ângulo.</div></div>
  </div>
@@ -190,6 +192,7 @@ function bx(w,h,d,m,cast=true){const o=new T.Mesh(new T.BoxGeometry(w,h,d),m);o.
 // Faixas de corte são planos separados (borda nítida) com uma textura de grão pequena e repetida (nítida de perto).
 // As linhas são geometria de verdade, 12 cm de largura, com as medidas oficiais: nítidas em qualquer distância.
 const MAXANI=renderer.capabilities.getMaxAnisotropy();
+const PITCH={};const _pc0=scene.children.length;
 (function pitch(){
  const gc=document.createElement('canvas');gc.width=gc.height=256;const gx=gc.getContext('2d');gx.fillStyle='#e2e2e2';gx.fillRect(0,0,256,256);
  for(let i=0;i<14000;i++){const v=(186+Math.random()*69)|0;gx.fillStyle=`rgb(${v},${v},${v})`;const x=Math.random()*256,y=Math.random()*256;gx.fillRect(x,y,1,2+Math.random()*3);gx.fillRect((x+128)%256,(y+128)%256,1,1)}
@@ -219,11 +222,12 @@ const MAXANI=renderer.capabilities.getMaxAnisotropy();
   for(const sx of[-1,1]){if(end)arc(sx*34,105,1,Math.PI,Math.PI+sx*Math.PI/2,12);else arc(sx*34,0,1,0,-sx*Math.PI/2,12)}}
  arc(0,52.5,9.15,0,Math.PI*2,120,true);disc(0,52.5,.11);
  const lg=new T.BufferGeometry();lg.setAttribute('position',new T.Float32BufferAttribute(pos,3));lg.setIndex(idx);lg.computeVertexNormals();
- const lm=new T.Mesh(lg,new T.MeshLambertMaterial({color:'#f3f6f0',polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-4}));lm.receiveShadow=true;scene.add(lm);
+ const lm=new T.Mesh(lg,new T.MeshLambertMaterial({color:'#f3f6f0',polygonOffset:true,polygonOffsetFactor:-2,polygonOffsetUnits:-4}));lm.receiveShadow=true;scene.add(lm);PITCH.lm=lm;
  // bandeirinhas de escanteio
  for(const fx of[-34,34])for(const fz of[0,105]){const pole=new T.Mesh(new T.CylinderGeometry(.025,.025,1.55,8),lam('#f2f2f2'));pole.position.set(fx,.78,fz);pole.castShadow=true;scene.add(pole);
   const fl=new T.Mesh(new T.PlaneGeometry(.42,.3),new T.MeshLambertMaterial({color:'#ff7a1a',side:T.DoubleSide}));fl.position.set(fx-Math.sign(fx)*.21,1.38,fz);scene.add(fl)}
 })();
+PITCH.objs=scene.children.slice(_pc0);
 // ---------- gol ----------
 // Traves brilhantes com junta arredondada, suportes curvos atrás, rede de fios em losango que segue o caimento do suporte
 // e estufa onde a bola encosta (e balança depois do gol).
@@ -282,7 +286,7 @@ function updNet(){const pr=NET.press,rp=NET.rip;const act=pr.length||rp;if(!act&
 // ---------- estádio, placas e torcida ----------
 // Estádio fechado: placas em volta do campo, dois anéis de arquibancada nos quatro lados (cantos fechados), faixa escura
 // de circulação entre os anéis, cobertura com fileira de luz na borda e quatro torres de refletor. Torcida em instâncias.
-const STAD={};
+const STAD={};const _sc0=scene.children.length;
 (function stadium(){
  const ad=document.createElement('canvas');ad.width=1024;ad.height=64;const ax=ad.getContext('2d');
  const words=['FOME DE BOLA','MODO LANCE','⚽ AO VIVO','CRAQUE DA RODADA'];for(let i=0;i<8;i++){ax.fillStyle=i%2?'#ff7a1a':'#ffffff';ax.fillRect(i*128,0,128,64);ax.fillStyle=i%2?'#ffffff':'#ff7a1a';ax.font='900 italic 30px "Saira Condensed",Impact,sans-serif';ax.textAlign='center';ax.textBaseline='middle';ax.fillText(words[i%4],i*128+64,34)}
@@ -315,6 +319,7 @@ const STAD={};
  STAD.recolor=(home,home2,away)=>{const pal=[home,home,home,home2,home,'#ffffff','#1d2b4a','#ffd23c',home,'#56606a'];seats.forEach((s,i)=>{const end=s[3];const c=end===3&&Math.random()<.55?away:Math.random()<.12?'#56606a':pick(pal);body.setColorAt(i,C.set(c))});body.instanceColor.needsUpdate=true};
  STAD.recolor('#ff7a1a','#ffffff','#2f6fe0');
 })();
+STAD.objs=scene.children.slice(_sc0);
 // ---------- bola ----------
 const ballTex=(()=>{const c=document.createElement('canvas');c.width=512;c.height=256;const x=c.getContext('2d');x.fillStyle='#fbfbfb';x.fillRect(0,0,512,256);x.fillStyle='#16191c';
  const pent=(cx,cy,r,a)=>{x.beginPath();for(let i=0;i<5;i++){const t=a+i*Math.PI*2/5;x.lineTo(cx+Math.cos(t)*r,cy+Math.sin(t)*r)}x.closePath();x.fill()};
@@ -323,6 +328,9 @@ const ballM=new T.Mesh(new T.SphereGeometry(BR,28,18),new T.MeshLambertMaterial(
 const ballSh=new T.Mesh(new T.CircleGeometry(BR*1.1,20),new T.MeshBasicMaterial({color:'#000',transparent:true,opacity:.28,depthWrite:false}));ballSh.rotation.x=-Math.PI/2;scene.add(ballSh);
 // ---------- jogadores em bloco ----------
 const SKINS=['#f2c9a0','#e3b088','#c99368','#a36b45','#7a4a2c','#f6d7bd'],HAIRS=['#1a120c','#2a1a10','#5a3a1e','#d6a640','#8a5a2b','#111111'];
+function stripeTex(a,b){const c=document.createElement('canvas');c.width=64;c.height=64;const x=c.getContext('2d');for(let i=0;i<8;i++){x.fillStyle=i%2?b:a;x.fillRect(0,i*8,64,8)}const t=new T.CanvasTexture(c);t.magFilter=T.NearestFilter;return t}
+function numTexS(n,a,b){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');for(let i=0;i<8;i++){x.fillStyle=i%2?b:a;x.fillRect(0,i*16,128,16)}
+ x.fillStyle='#f4f1e8';x.fillRect(22,30,84,64);x.strokeStyle='#151515';x.lineWidth=4;x.strokeRect(22,30,84,64);x.fillStyle='#151515';x.font='900 52px "Saira Condensed",Impact,sans-serif';x.textAlign='center';x.textBaseline='middle';x.fillText(String(n),64,64);return new T.CanvasTexture(c)}
 function numTex(n,bg,fg){const c=document.createElement('canvas');c.width=c.height=128;const x=c.getContext('2d');x.fillStyle=bg;x.fillRect(0,0,128,128);x.fillStyle=fg;x.font='900 78px "Saira Condensed",Impact,sans-serif';x.textAlign='center';x.textBaseline='middle';x.lineWidth=6;x.strokeStyle='rgba(0,0,0,.18)';x.strokeText(String(n),64,70);x.fillText(String(n),64,70);return new T.CanvasTexture(c)}
 // Esqueleto: g (posição e rumo) → root (centro de massa: queda, giro do mergulho) → quadril/joelho, cintura → ombro/cotovelo, pescoço.
 const HIP=.95,THIGH=.32,SHIN=.36;
@@ -334,9 +342,10 @@ function makePlayer(o){
   const K=new T.Group();K.position.y=-THIGH;const sc=bx(.19,.29,.2,so);sc.position.y=-.14;const bt=bx(.22,.1,.32,bo,false);bt.position.set(0,-.31,-.05);K.add(sc,bt);L.add(th,K);root.add(L);legs.push(L);knees.push(K)}
  const shorts=bx(.56,.27,.34,lam(o.shorts));shorts.position.y=-.21;root.add(shorts);
  const up=new T.Group();up.position.y=-.07;root.add(up);
- const nt=numTex(o.num,o.shirt,o.shirt2);const tm=[sh,sh,sh,sh,new T.MeshLambertMaterial({map:nt}),sh];const torso=new T.Mesh(new T.BoxGeometry(.62,.58,.36),tm);torso.castShadow=true;torso.position.y=.26;up.add(torso);
- const trim=bx(.64,.06,.38,lam(o.shirt2),false);trim.position.y=-.02;up.add(trim);
- for(const s of[-1,1]){const A=new T.Group();A.position.set(s*.41,.5,0);const sl=bx(.18,.24,.22,sh,false);sl.position.y=-.1;
+ const shT=o.stripe?new T.MeshLambertMaterial({map:stripeTex(o.stripe[0],o.stripe[1])}):sh;const slM=o.tee?lam(o.tee):sh;
+ const nt=o.stripe?numTexS(o.num,o.stripe[0],o.stripe[1]):numTex(o.num,o.shirt,o.shirt2);const tm=[shT,shT,shT,shT,new T.MeshLambertMaterial({map:nt}),shT];const torso=new T.Mesh(new T.BoxGeometry(.62,.58,.36),tm);torso.castShadow=true;torso.position.y=.26;up.add(torso);
+ const trim=bx(.64,.06,.38,lam(o.trim||o.shirt2),false);trim.position.y=-.02;up.add(trim);
+ for(const s of[-1,1]){const A=new T.Group();A.position.set(s*.41,.5,0);const sl=bx(.18,.24,.22,slM,false);sl.position.y=-.1;
   const E=new T.Group();E.position.y=-.22;const fa=bx(.16,.3,.19,o.gk?lam(o.glove||'#ffd23c'):sk,false);fa.position.y=-.14;const hd=new T.Object3D();hd.position.y=-.3;E.add(fa,hd);A.add(sl,E);up.add(A);arms.push(A);elbows.push(E);hands.push(hd)}
  const neck=new T.Group();neck.position.y=.58;up.add(neck);
  const head=bx(.58,.54,.54,sk);head.position.y=.27;neck.add(head);
@@ -435,9 +444,101 @@ const LINO=(()=>{const p=makePlayer({shirt:'#f3e21b',shirt2:'#151515',shorts:'#1
  const fl=new T.Group();const st=new T.Mesh(new T.CylinderGeometry(.02,.02,.66,6),lam('#e8e8e8'));st.position.y=-.2;fl.add(st);
  const cl=new T.Mesh(new T.PlaneGeometry(.36,.27),new T.MeshLambertMaterial({map:new T.CanvasTexture(c),side:T.DoubleSide}));cl.position.set(0,-.4,-.19);cl.rotation.y=Math.PI/2;fl.add(cl);
  p.hands[1].add(fl);p.pos.set(35.6,0,30);p.face=Math.PI/2;p.g.visible=false;return p})();
-function stepLino(dt){const l=LINO;const on=S.mode==='play'&&S.role==='atk';l.g.visible=on&&Math.hypot(cam.position.x-l.pos.x,cam.position.z-l.pos.z)>4.5;if(!on)return;const b=S.ball.p;l.a.look=b;l.faceBall=true;
+function stepLino(dt){const l=LINO;const on=S.mode==='play'&&S.role==='atk'&&S.env!=='prison';l.g.visible=on&&Math.hypot(cam.position.x-l.pos.x,cam.position.z-l.pos.z)>4.5;if(!on)return;const b=S.ball.p;l.a.look=b;l.faceBall=true;
  if(S.state==='result')slow(l,dt,8);else steer(l,new T.Vector3(35.6,0,clamp(Math.min(offLine(),b.z),2,HALF)),7,dt);
  setFacing(l,-1,0,dt,8);animPlayer(l,dt,S.now)}
+// ===================== PRESÍDIO =====================
+// Pátio de terra batida dentro da cadeia: sem torcida, mureta pichada, alambrado com concertina, pavilhões com
+// janelas gradeadas, muralha com guaritas e policiais de farda azul, boina e cassetete em volta do campo.
+const ENV={cur:'stadium',prison:null,guards:[]};
+const SKY={stadium:{bg:scene.background,fog:['#b7d3ea',150,320],hemi:['#ffffff','#4d8a35',.6],sun:['#fff6e0',.82]}};
+function concreteTex(w,h,base,drips){const c=document.createElement('canvas');c.width=w;c.height=h;const x=c.getContext('2d');x.fillStyle=base;x.fillRect(0,0,w,h);
+ for(let i=0;i<w*h/60;i++){x.fillStyle=Math.random()<.5?'rgba(0,0,0,.06)':'rgba(255,255,255,.05)';x.fillRect(Math.random()*w,Math.random()*h,1+Math.random()*2,1+Math.random()*2)}
+ for(let i=0;i<(drips||14);i++){const sx=Math.random()*w,sh=h*(.25+Math.random()*.6);const g=x.createLinearGradient(0,0,0,sh);g.addColorStop(0,'rgba(40,36,30,.28)');g.addColorStop(1,'rgba(40,36,30,0)');x.fillStyle=g;x.fillRect(sx,0,3+Math.random()*10,sh)}
+ return c}
+function buildPrison(){const G=new T.Group();G.visible=false;scene.add(G);
+ const add=(m,x,y,z)=>{m.position.set(x,y,z);G.add(m);return m};
+ const inst=(geo,mat,list,cast)=>{const im=new T.InstancedMesh(geo,mat,list.length);list.forEach((m,i)=>im.setMatrixAt(i,m));im.castShadow=!!cast;G.add(im);return im};
+ const MX=(x,y,z,rx=0,ry=0,rz=0)=>new T.Matrix4().compose(new T.Vector3(x,y,z),new T.Quaternion().setFromEuler(new T.Euler(rx,ry,rz)),new T.Vector3(1,1,1));
+ // chão de barro: grão fino repetido + manchas grandes (barro molhado e poeira) nas cores dos vértices
+ const dc=document.createElement('canvas');dc.width=dc.height=256;const dx=dc.getContext('2d');dx.fillStyle='#a3683f';dx.fillRect(0,0,256,256);
+ for(let i=0;i<9000;i++){const v=Math.random();dx.fillStyle=v<.35?'rgba(70,38,18,.22)':v<.7?'rgba(196,140,92,.2)':'rgba(120,72,40,.25)';dx.fillRect(Math.random()*256,Math.random()*256,1+Math.random()*2.5,1+Math.random()*2.5)}
+ for(let i=0;i<70;i++){dx.fillStyle=pick(['#cdb59a','#8f8578','#e2d3bd','#6e5b4a']);dx.beginPath();dx.arc(Math.random()*256,Math.random()*256,.8+Math.random()*1.8,0,7);dx.fill()}
+ for(let i=0;i<6;i++){dx.strokeStyle='rgba(60,32,16,.25)';dx.lineWidth=1;dx.beginPath();let px=Math.random()*256,py=Math.random()*256;dx.moveTo(px,py);for(let k=0;k<6;k++){px+=R(-14,14);py+=R(-14,14);dx.lineTo(px,py)}dx.stroke()}
+ const dtx=new T.CanvasTexture(dc);dtx.wrapS=dtx.wrapT=T.RepeatWrapping;dtx.anisotropy=MAXANI;dtx.repeat.set(81/3.2,123/3.2);
+ const gg=new T.PlaneGeometry(81,123,54,82);const col=[];const pa=gg.attributes.position;
+ const blobs=[];for(let i=0;i<28;i++)blobs.push([R(-38,38),R(-60,60),R(3,11),R(-.3,.2)]);
+ for(let i=0;i<pa.count;i++){const X=pa.getX(i),Y=pa.getY(i);let k=1;for(const [bx_,by,r,a] of blobs){const d=Math.hypot(X-bx_,Y-by);if(d<r)k+=a*(1-d/r)}
+  const z=52.5-Y;const wear=Math.exp(-(X*X/80+(z-8)**2/40))*.16+Math.exp(-(X*X/80+(z-97)**2/40))*.16+Math.exp(-(X*X/120+(z-52.5)**2/90))*.08;k=k*(1+wear)+R(-.035,.035);col.push(k,k*.97,k*.93)}
+ gg.setAttribute('color',new T.Float32BufferAttribute(col,3));
+ const ground=new T.Mesh(gg,new T.MeshLambertMaterial({map:dtx,vertexColors:true}));ground.rotation.x=-Math.PI/2;ground.receiveShadow=true;add(ground,0,.002,52.5);
+ const yard=new T.Mesh(new T.PlaneGeometry(320,340),lam('#7b746a'));yard.rotation.x=-Math.PI/2;yard.receiveShadow=true;add(yard,0,-.02,52);
+ for(let i=0;i<8;i++){const pz=new T.Mesh(new T.CircleGeometry(R(.6,1.7),18),new T.MeshLambertMaterial({color:'#4b3a2c',transparent:true,opacity:.5,depthWrite:false}));pz.rotation.x=-Math.PI/2;pz.scale.set(1,R(.5,.9),1);add(pz,R(-33,33),.004,R(3,100))}
+ // mureta pichada no lugar das placas (a bola bate nela do mesmo jeito)
+ const mc=concreteTex(1024,64,'#8d877c',30);const mx=mc.getContext('2d');const words=['PAVILHÃO 4','FÉ EM DEUS','SAUDADE MÃE','PAZ','LIBERDADE','RAIO 2','FUTEBOL É VIDA','JESUS'];
+ mx.textAlign='center';mx.textBaseline='middle';for(let i=0;i<8;i++){mx.font=`900 ${R(22,32)|0}px "Saira Condensed",Impact,sans-serif`;mx.fillStyle=pick(['rgba(30,30,30,.7)','rgba(150,30,25,.65)','rgba(25,60,140,.6)','rgba(240,240,230,.55)']);mx.save();mx.translate(i*128+64,34);mx.rotate(R(-.08,.08));mx.fillText(words[i],0,0);mx.restore()}
+ const mtx=new T.CanvasTexture(mc);mtx.wrapS=T.RepeatWrapping;mtx.anisotropy=MAXANI;
+ for(const [x,z,len,rot] of[[0,-4.5,80,0],[0,109.5,80,0],[-37.5,52.5,114,1],[37.5,52.5,114,1]]){const t=mtx.clone();t.needsUpdate=true;t.repeat.set(len/40,1);const b=bx(len,1,.3,new T.MeshLambertMaterial({map:t}),false);b.receiveShadow=true;if(rot)b.rotation.y=Math.PI/2;add(b,x,.5,z)}
+ // alambrado com concertina no topo
+ const fc=document.createElement('canvas');fc.width=fc.height=64;const fx=fc.getContext('2d');fx.strokeStyle='#cfd2d4';fx.lineWidth=2.4;fx.beginPath();
+ for(const [a,b,c,d] of[[0,32,32,0],[32,0,64,32],[64,32,32,64],[32,64,0,32]]){fx.moveTo(a,b);fx.lineTo(c,d)}fx.stroke();
+ const ft=new T.CanvasTexture(fc);ft.wrapS=ft.wrapT=T.RepeatWrapping;ft.anisotropy=MAXANI;
+ const posts=[],rings=[];const wireM=lam('#a2a8ac');
+ const fence=(x1,z1,x2,z2)=>{const L=Math.hypot(x2-x1,z2-z1),ry=Math.atan2(-(z2-z1),x2-x1);const t=ft.clone();t.needsUpdate=true;t.repeat.set(L/.8,5/.8);
+  const f=new T.Mesh(new T.PlaneGeometry(L,5),new T.MeshLambertMaterial({map:t,transparent:true,alphaTest:.35,side:T.DoubleSide}));f.rotation.y=ry;add(f,(x1+x2)/2,2.5,(z1+z2)/2);
+  const n=Math.ceil(L/4);for(let i=0;i<=n;i++){const k=i/n;posts.push(MX(x1+(x2-x1)*k,2.8,z1+(z2-z1)*k))}
+  const m=Math.ceil(L/.5);for(let i=0;i<m;i++){const k=i/m;rings.push(MX(x1+(x2-x1)*k,5.7,z1+(z2-z1)*k,R(-.4,.4),ry+Math.PI/2+R(-.3,.3),R(-.4,.4)))}};
+ fence(-40.5,-8,-40.5,113);fence(40.5,-8,40.5,113);fence(-40.5,-8,40.5,-8);fence(-40.5,113,40.5,113);
+ // pavilhões dos lados: fachada com janelas gradeadas e roupa pendurada
+ const wc=concreteTex(512,384,'#a39d92',26);const wx=wc.getContext('2d');
+ for(let r=0;r<4;r++)for(let k=0;k<6;k++){const X=22+k*82,Y=34+r*86;wx.fillStyle='#1d1f22';wx.fillRect(X,Y,44,40);wx.fillStyle='#6f7377';for(let b=0;b<5;b++)wx.fillRect(X+3+b*9.5,Y,3,40);wx.fillRect(X,Y+18,44,3);
+  if(Math.random()<.35){wx.fillStyle=pick(['#e8e2d0','#d14a3a','#2f5fae','#e0c45a','#ff7a1a']);wx.fillRect(X+6,Y+26,R(8,22),R(10,14))}
+  wx.fillStyle='rgba(30,26,22,.35)';wx.fillRect(X-3,Y+42,50,4)}
+ const wt=new T.CanvasTexture(wc);wt.wrapS=T.RepeatWrapping;wt.anisotropy=MAXANI;
+ const blockM=lam('#8a8479'),roofM=lam('#5c5953');
+ for(const sx of[-1,1]){const t=wt.clone();t.needsUpdate=true;t.repeat.set(150/24,1);const fac=new T.Mesh(new T.PlaneGeometry(150,18),new T.MeshLambertMaterial({map:t}));fac.rotation.y=-sx*Math.PI/2;add(fac,sx*48,9,52.5);
+  add(bx(16,18,150,blockM,false),sx*56.05,9,52.5);add(bx(17,.6,151,roofM,false),sx*56,18.3,52.5);
+  for(const z of[10,52,95])add(new T.Mesh(new T.CylinderGeometry(1.4,1.4,2.2,12),lam('#3f6fa6')),sx*56,19.7,z)}
+ // muralha atrás dos gols, com concertina e guaritas
+ const mwt=new T.CanvasTexture(concreteTex(512,128,'#b2ac9f',36));mwt.wrapS=T.RepeatWrapping;mwt.repeat.set(4,1);
+ for(const z of[-17,122]){add(bx(130,9,1.2,new T.MeshLambertMaterial({map:mwt}),false),0,4.5,z);for(let i=0;i<180;i++)rings.push(MX(-64+i*.72,9.4,z,R(-.3,.3),R(-.3,.3),0))}
+ const legs=[];const tower=(x,z)=>{for(const a of[-1,1])for(const b of[-1,1])legs.push(MX(x+a*1.5,6,z+b*1.5));
+  add(bx(4.4,2.8,4.4,lam('#d8d2c2'),false),x,13.4,z);add(bx(4.5,.9,4.5,lam('#26303a'),false),x,13.9,z);
+  const rf=new T.Mesh(new T.ConeGeometry(3.6,1.6,4),lam('#7a3b2a'));rf.rotation.y=Math.PI/4;add(rf,x,15.6,z);
+  const sd=z<50?1:-1;const sl=new T.Mesh(new T.CylinderGeometry(.35,.5,.8,10),lam('#2b2f33'));sl.rotation.x=sd*1.2;add(sl,x,15,z+sd*1.6)};
+ tower(-44,-14);tower(44,-14);tower(-44,119);tower(44,119);
+ inst(new T.CylinderGeometry(.06,.06,5.6,6),lam('#6f7377'),posts,true);inst(new T.TorusGeometry(.32,.02,4,10),wireM,rings,false);inst(new T.BoxGeometry(.3,12,.3),lam('#5e6266'),legs,false);
+ // postes de luz do pátio
+ for(const [x,z] of[[-39,20],[39,20],[-39,85],[39,85]]){add(bx(.25,11,.25,lam('#6a6e72'),false),x,5.5,z);add(bx(1.6,.35,.8,new T.MeshBasicMaterial({color:'#fff1c9'}),false),x-Math.sign(x)*.7,11,z)}
+ ENV.prison=G;return G}
+// policiais: farda azul, calça comprida, boina, distintivo e cassetete na mão
+function makeGuard(x,z){const p=makePlayer({shirt:'#2a4fa8',shirt2:'#18306e',trim:'#111111',shorts:'#1c3266',socks:'#1c3266',boot:'#0d0d0d',num:'',team:'ref',skin:pick(SKINS),hair:pick(HAIRS),style:'buzz',sp:3});
+ const pants=lam('#1c3266');p.legs.forEach(L=>{L.children[0].material=pants});
+ const torso=p.up.children[0];if(torso&&Array.isArray(torso.material)){const c=document.createElement('canvas');c.width=c.height=128;const g=c.getContext('2d');g.fillStyle='#2a4fa8';g.fillRect(0,0,128,128);g.fillStyle='#f2f2f2';g.textAlign='center';g.textBaseline='middle';g.font='900 27px "Saira Condensed",Impact,sans-serif';g.fillText('POLÍCIA',64,52);g.font='800 19px "Saira Condensed",Impact,sans-serif';g.fillText('PENAL',64,80);torso.material=torso.material.slice();torso.material[4]=new T.MeshLambertMaterial({map:new T.CanvasTexture(c)})}
+ const belt=bx(.64,.08,.4,lam('#111111'),false);belt.position.y=-.03;p.up.add(belt);
+ const bm=lam('#141a2e');const beret=new T.Mesh(new T.CylinderGeometry(.36,.34,.12,14),bm);beret.position.set(.05,.62,0);beret.rotation.z=.2;p.neck.add(beret);
+ const droop=bx(.2,.09,.4,bm,false);droop.position.set(.27,.58,0);droop.rotation.z=.45;p.neck.add(droop);
+ const badge=bx(.09,.09,.02,lam('#e2b93b'),false);badge.position.set(-.15,.6,-.31);p.neck.add(badge);
+ const bat=new T.Group();const stick=new T.Mesh(new T.CylinderGeometry(.04,.048,.74,8),lam('#0e0e0e'));stick.position.y=-.3;bat.add(stick);
+ const grip=new T.Mesh(new T.CylinderGeometry(.03,.03,.15,8),lam('#0e0e0e'));grip.rotation.z=Math.PI/2;grip.position.set(.07,-.06,0);bat.add(grip);bat.rotation.x=-1.05;bat.rotation.z=-.35;p.hands[1].add(bat);
+ p.pos.set(x,0,z);p.home=new T.Vector3(x,0,z);p.g.visible=false;p.patrol={t:R(0,4),tgt:p.home.clone()};return p}
+function ensureGuards(){if(ENV.guards.length)return;for(const [x,z] of[[-37.4,16],[37.4,30],[-37.4,64],[37.4,82],[-11,-6.3],[12.5,-6.6],[-5,111.4],[8,111.6]])ENV.guards.push(makeGuard(x,z))}
+function stepGuards(dt){if(S.env!=='prison')return;const b=S.ball.p;for(const g of ENV.guards){g.g.visible=Math.hypot(cam.position.x-g.pos.x,cam.position.z-g.pos.z)>3;g.a.look=b;g.faceBall=true;
+  const P=g.patrol;P.t-=dt;if(P.t<=0){P.t=R(3,7);const side=Math.abs(g.home.x)>30;P.tgt=g.home.clone().add(new T.Vector3(side?0:R(-4,4),0,side?R(-6,6):0))}
+  if(Math.hypot(P.tgt.x-g.pos.x,P.tgt.z-g.pos.z)>.4){steer(g,P.tgt,1.3,dt);setFacing(g,g.vel.x,g.vel.z,dt,6)}else{slow(g,dt,6);setFacing(g,b.x-g.pos.x,b.z-g.pos.z,dt,4)}
+  animPlayer(g,dt,S.now)}}
+// troca estádio ↔ presídio
+function setEnv(env){env=env==='prison'?'prison':'stadium';S.env=env;if(ENV.cur===env)return;ENV.cur=env;const pr=env==='prison';
+ if(pr){if(!ENV.prison)buildPrison();ensureGuards()}
+ for(const o of STAD.objs)o.visible=!pr;for(const o of PITCH.objs)if(o!==PITCH.lm)o.visible=!pr;if(ENV.prison)ENV.prison.visible=pr;for(const g of ENV.guards)g.g.visible=pr;
+ const lm=PITCH.lm.material;lm.color.set(pr?'#ece2cb':'#f3f6f0');lm.transparent=pr;lm.opacity=pr?.55:1;lm.needsUpdate=true;
+ if(pr){if(!SKY.prison){const c=document.createElement('canvas');c.width=2;c.height=256;const x=c.getContext('2d');const g=x.createLinearGradient(0,0,0,256);g.addColorStop(0,'#5d6772');g.addColorStop(.6,'#9ca4ab');g.addColorStop(1,'#cfd0cc');x.fillStyle=g;x.fillRect(0,0,2,256);SKY.prison=new T.CanvasTexture(c)}
+  scene.background=SKY.prison;scene.fog.color.set('#aaaeb0');scene.fog.near=110;scene.fog.far=280;hemi.color.set('#e8ecf0');hemi.groundColor.set('#7a5a3e');hemi.intensity=.68;sun.color.set('#f2eee2');sun.intensity=.6}
+ else{const k=SKY.stadium;scene.background=k.bg;scene.fog.color.set(k.fog[0]);scene.fog.near=k.fog[1];scene.fog.far=k.fog[2];hemi.color.set(k.hemi[0]);hemi.groundColor.set(k.hemi[1]);hemi.intensity=k.hemi[2];sun.color.set(k.sun[0]);sun.intensity=k.sun[1]}}
+// coletes: laranja contra listrado; goleiros de cinza
+const PRISON_KITS={us:{shirt:'#ff7a1a',shirt2:'#1d1d1d',trim:'#c95a12',tee:'#d9d3c5',shorts:'#7d776c',socks:'#7d776c'},
+ them:{shirt:'#f1f1f1',shirt2:'#151515',stripe:['#f1f1f1','#161616'],trim:'#161616',tee:'#b6b0a6',shorts:'#57544e',socks:'#57544e'},
+ gk:{shirt:'#8b9096',shirt2:'#26292d',trim:'#26292d',shorts:'#3a3d42',socks:'#8b9096',glove:'#e3e3e3'}};
 // linha do impedimento no chão (só enquanto você mira) e anel vermelho em quem está impedido
 const offM=new T.Mesh(new T.PlaneGeometry(68,.13),new T.MeshBasicMaterial({color:'#4fd2ff',transparent:true,opacity:.55,depthWrite:false}));offM.rotation.x=-Math.PI/2;offM.position.y=.016;offM.renderOrder=2;offM.visible=false;scene.add(offM);
 const offRG=new T.RingGeometry(.42,.56,24),offRMat=new T.MeshBasicMaterial({color:'#ff3b3b',transparent:true,opacity:.9,depthWrite:false});
@@ -490,8 +591,9 @@ function predict(src,secs){const b={p:src.p.clone(),v:src.v.clone(),w:src.w.clon
 const S={mode:'menu',state:'idle',scen:null,players:[],mates:[],opps:[],gk:null,carrier:null,kicker:null,ball:{p:new T.Vector3(0,BR,30),v:new T.Vector3(),w:new T.Vector3(),real:true},
  aim:null,header:false,chain:0,flightT:0,path:null,pathT:0,result:null,score:{g:0,n:0},ch:null,gkPlan:null,touches:[],lastPos:null,slow:1,firstShot:false};
 // ===================== CENÁRIOS =====================
-let OUR={shirt:'#ff6a12',shirt2:'#ffffff',shorts:'#ffffff',socks:'#ff6a12'};let THEM={shirt:'#2f6fe0',shirt2:'#ffffff',shorts:'#13285a',socks:'#2f6fe0'},GKC={shirt:'#c6f03c',shirt2:'#1b2a10',shorts:'#1b2a10',socks:'#c6f03c',gk:true,glove:'#ffffff'};
-let GKU={shirt:'#20c4bd',shirt2:'#0b2626',shorts:'#0b2626',socks:'#20c4bd',gk:true,glove:'#ffffff'};
+const KIT0={OUR:{shirt:'#ff6a12',shirt2:'#ffffff',shorts:'#ffffff',socks:'#ff6a12'},THEM:{shirt:'#2f6fe0',shirt2:'#ffffff',shorts:'#13285a',socks:'#2f6fe0'},GKC:{shirt:'#c6f03c',shirt2:'#1b2a10',shorts:'#1b2a10',socks:'#c6f03c',gk:true,glove:'#ffffff'},GKU:{shirt:'#20c4bd',shirt2:'#0b2626',shorts:'#0b2626',socks:'#20c4bd',gk:true,glove:'#ffffff'}};
+let OUR={...KIT0.OUR},THEM={...KIT0.THEM},GKC={...KIT0.GKC};
+let GKU={...KIT0.GKU};
 const flip=()=>Math.random()<.5?-1:1;
 const SC={
  // times completos nos lances com bola rolando: P = companheiro, O = adversário (bloco 4-4-2), F = atacante deles esperando o contra-ataque
@@ -848,7 +950,7 @@ function reachPoint(p,vmax,reachH){if(!S.path)return null;const v0=p.vel.length(
 const HALF=52.5;
 function offLine(){const zs=[];for(const o of S.opps)zs.push(o.pos.z);if(S.gk&&!S.gk.mine)zs.push(S.gk.pos.z);zs.sort((a,b)=>a-b);return Math.min(zs.length>1?zs[1]:0,HALF)}
 function offPos(m,L,bz){return m.pos.z<Math.min(L,bz)-.2}
-function offAllowed(){return S.role==='atk'&&!S.pen&&!(S.scen==='escanteio'&&S.chain===0)}
+function offAllowed(){return S.env!=='prison'&&S.role==='atk'&&!S.pen&&!(S.scen==='escanteio'&&S.chain===0)}
 function defLine(){let z=1e9;for(const o of S.opps){if(o.wall||o===S.gk)continue;z=Math.min(z,o.pos.z)}return z===1e9?9:Math.max(z,5)}
 function segDist(p,a,b){const abx=b.x-a.x,abz=b.z-a.z,L2=abx*abx+abz*abz||1;const t=clamp(((p.x-a.x)*abx+(p.z-a.z)*abz)/L2,0,1);return Math.hypot(a.x+abx*t-p.x,a.z+abz*t-p.z)}
 // altura da linha de zaga pra cada posição da bola
@@ -1118,13 +1220,14 @@ function buildMenu(){let best=0,bestG=0;try{best=+localStorage.getItem('ml_best'
  else g.innerHTML=ATK.map(card).join('')+`<button class="m-card ch" data-k="__ch"><span class="ic">🏆</span><b>Desafio · 8 lances</b><small>Cenários sorteados. Quantos gols você faz?${best?` Recorde: ${best}.`:''}</small></button>`;
  $('howMid').innerHTML=MTAB==='gk'?'<b>Goleiro</b>Arraste pro lado do chute. Pulou antes? Ele bate no outro canto.':'<b>2 · Toque na bola</b>Lado: curva. Embaixo: sobe. Em cima: rasteira.';
  g.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{sfxUnlock();S.score={g:0,n:0};const k=b.dataset.k;if(k==='__ch')return startCh('atk');if(k==='__gk')return startCh('gk');if(k==='__pen')return startCh('pen');S.ch=null;startScen(k)})}
+document.querySelectorAll('.m-env [data-env]').forEach(b=>b.onclick=()=>{const pr=b.dataset.env==='prison';document.querySelectorAll('.m-env [data-env]').forEach(x=>x.classList.toggle('on',x===b));setEnv(b.dataset.env);OUR={...KIT0.OUR,...(pr?PRISON_KITS.us:{})};THEM={...KIT0.THEM,...(pr?PRISON_KITS.them:{})};GKU={...KIT0.GKU,...(pr?PRISON_KITS.gk:{}),gk:true};GKC={...KIT0.GKC,...(pr?PRISON_KITS.gk:{}),gk:true}});
 document.querySelectorAll('.m-tab').forEach(t=>t.onclick=()=>{MTAB=t.dataset.t;try{localStorage.setItem('ml_tab',MTAB)}catch(e){}buildMenu()});
 buildMenu();
 // ===================== MODO EMBUTIDO (dentro da carreira do Fome de Bola) =====================
 // O jogo abre este motor num iframe e manda {type:'ml-play',cfg}; no fim devolve {type:'ml-result',res}.
 const EMBED=!!window.ML_EMBED;S.embed=EMBED;
-function applyCfg(c){if(c.us)OUR={...OUR,...c.us};if(c.them)THEM={...THEM,...c.them};if(c.gkUs)GKU={...GKU,...c.gkUs};
- S.heroCfg=c.hero||null;S.noiseK=c.noiseK??1;S.gkK=c.gkK??0;S.shNoise=c.shNoise??1;S.myGkK=c.myGkK??1;if(c.crowd)STAD.recolor(...c.crowd)}
+function applyCfg(c){const pr=c.env==='prison';setEnv(c.env);OUR={...KIT0.OUR,...(pr?PRISON_KITS.us:{}),...(c.us||{})};THEM={...KIT0.THEM,...(pr?PRISON_KITS.them:{}),...(c.them||{})};GKU={...KIT0.GKU,...(pr?PRISON_KITS.gk:{}),...(c.gkUs||{}),gk:true};GKC={...KIT0.GKC,...(pr?PRISON_KITS.gk:{}),...(c.gkThem||{}),gk:true};
+ S.heroCfg=c.hero||null;S.noiseK=c.noiseK??1;S.gkK=c.gkK??0;S.shNoise=c.shNoise??1;S.myGkK=c.myGkK??1;if(c.crowd&&!pr)STAD.recolor(...c.crowd)}
 function embedRes(kind){const gk=S.role==='gk';return{kind,goal:kind==='goal',role:S.role,heroGoal:kind==='goal'&&!gk&&S.lastKicker===S.hero,heroAssist:kind==='goal'&&!gk&&S.lastKicker!==S.hero&&S.heroPassed,
  chain:S.chain,fk:!!S.fkKick,header:S.lastLabel==='CABEÇADA',caught:!!S.caught,dived:gk&&!!S.gkUsed,pen:!!S.pen}}
 function embedSend(res){S.embedDone=true;try{parent.postMessage({type:'ml-result',res},'*')}catch(e){}}
@@ -1155,7 +1258,7 @@ function update(rdt){
    if(S.state==='flight'||S.state==='result')stepAI(dt);
 }
   else{if(S.role==='gk')gkWait(rdt);if(S.role==='atk'&&S.state!=='idle'&&!S.introOpen&&!S.header)liveAI(rdt);else idleAI(rdt)}
-  stepLino(rdt)
+  stepLino(rdt);stepGuards(rdt)
   if(Math.abs(S.yawVel)>.01&&!(gest&&gest.type==='orbit')){S.camYaw+=S.yawVel*rdt;S.yawVel*=Math.exp(-3.5*rdt)}
   if(S.dbgCam){cam.position.copy(S.dbgCam.pos);cam.lookAt(S.dbgCam.look)}else updCam(rdt)}
  // visuais

@@ -30,31 +30,45 @@ body{background-color:var(--pitch);background-image:repeating-linear-gradient(18
 .tab{font-size:15px}
 .toast{border-radius:16px}
 .ovwrap{border-radius:22px}
+/* botões de sair e voltar com texto, sempre no canto esquerdo */
+.ph .menu{width:auto;display:inline-flex;align-items:center;gap:4px;padding:0 13px 0 9px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);color:var(--chalk);font:800 14px/1 var(--f-body)}
+.ph .menu .mi{font-size:24px;line-height:.8;margin-top:-3px;color:var(--accent)}
+.ph .menu:active{transform:translateY(1px)}
+.pp-x{width:auto;display:inline-flex;align-items:center;gap:5px;padding:0 15px 0 10px;border-radius:999px;font:800 15px/1 var(--f-body);color:var(--chalk);background:var(--panel)}
+.pp-x span{font-size:26px;line-height:.8;margin-top:-3px;color:var(--accent)}
 
 /* ---------- tablet ---------- */
 @media (min-width:700px){
  body{font-size:16px}
  .wrap{max-width:840px;padding-left:24px;padding-right:24px}
  .ph-in,.htop-in{max-width:840px;padding-left:24px;padding-right:24px}
- .ovwrap{max-width:600px;padding:26px}
+ /* janelas largas: o conteúdo se espalha, as escolhas ficam lado a lado */
+ .ovwrap{max-width:min(880px,94vw);padding:28px 32px}
+ .ovwrap .choices{grid-template-columns:repeat(auto-fit,minmax(260px,1fr))}
+ .ovwrap.decpop{display:grid;grid-template-columns:170px minmax(0,1fr);column-gap:26px;row-gap:6px;text-align:left;align-items:start}
+ .ovwrap.decpop>.dp-top{grid-column:1/-1}
+ .ovwrap.decpop>.dp-ic{grid-column:1;grid-row:2/span 2;display:grid;place-items:center;height:170px;margin:0;font-size:92px;border-radius:20px;background:radial-gradient(80% 80% at 50% 30%,rgba(238,242,228,.14),transparent 70%),var(--pitch);border:1px solid var(--line)}
+ .ovwrap.decpop>.dp-t,.ovwrap.decpop>.dp-d{grid-column:2;text-align:left}
+ .ovwrap.decpop>.dp-t{align-self:end;margin-top:4px}
+ .ovwrap.decpop>.choices,.ovwrap.decpop>#dpR{grid-column:1/-1}
  .sheet{max-width:840px}
- .pp-b{max-width:860px}
+ .pp-b{max-width:none;padding-left:24px;padding-right:24px}
+ .pp-h{padding-left:24px;padding-right:24px}
  .toast{max-width:520px}
  .bnav{width:520px!important}
 }
-/* criação do jogador vira um cartão no meio da tela em telas maiores */
+/* criação do jogador ocupa a tela toda, com o conteúdo mais largo */
 @media (min-width:700px){
- body .cw{top:24px;bottom:24px;max-width:680px;border-radius:28px;border:1px solid var(--line-2);box-shadow:0 30px 80px rgba(0,0,0,.5)}
- body .cw-grid,body .cw-opts,body .cw-cards,body .cw-sum{max-width:540px}
- body .cw-in,body .cw-sel,body .cw-note{max-width:460px}
+ body .cw{max-width:none}
+ body .cw-grid,body .cw-opts,body .cw-cards,body .cw-sum{max-width:760px}
+ body .cw-in,body .cw-sel,body .cw-note{max-width:560px}
 }
 /* ---------- computador ---------- */
 @media (min-width:1100px){
  .wrap,.ph-in,.htop-in{max-width:920px}
- .ovwrap{max-width:640px}
- /* páginas antigas (jogos, tabela, copas…) abrem como uma folha no meio da tela */
- #panel{background:rgba(4,12,8,.66);backdrop-filter:blur(3px)}
- #panel .pp{width:min(980px,calc(100% - 64px));height:calc(100dvh - 48px);margin:24px auto;border-radius:24px;overflow:hidden;border:1px solid var(--line-2);background:var(--pitch);box-shadow:0 30px 80px rgba(0,0,0,.55)}
- #panel .pp-h{padding-top:12px}
+ .ovwrap{max-width:min(980px,90vw)}
+ /* páginas antigas (jogos, tabela, copas…) em tela cheia */
+ .pp-h{padding-left:32px;padding-right:32px}
+ .pp-b{max-width:1240px;padding-left:32px;padding-right:32px}
 }
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}

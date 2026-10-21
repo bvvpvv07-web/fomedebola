@@ -128,7 +128,7 @@ function finishDraft(){newCareer({name:CR.name.trim(),num:CR.num,nat:CR.nat,pos:
 function header(){
  const c=S.club?CLUB[S.club]:null;const nat=NATS[S.nat];
  const sub=c?`${c.n}${S.loan?' (emprestado)':''} · ${LG[c.l].n}`:'Sem clube · peneira';
- return`<header class="ph"><div class="ph-in"><button class="menu" onclick="goHome()" aria-label="Início">☰</button>${c?shieldHTML(c):`<span class="flagbox">${nat.f}</span>`}
+ return`<header class="ph"><div class="ph-in"><button class="menu" onclick="askHome()" aria-label="Sair para o início"><span class="mi">‹</span><span class="ml">Sair</span></button>${c?shieldHTML(c):`<span class="flagbox">${nat.f}</span>`}
  <div class="who"><b>${esc(S.name)} <span style="color:var(--muted);font-weight:600">#${S.shirt}</span>${S.captain?' <span class="tag sel" style="vertical-align:3px">C</span>':''}</b><span>${nat.f} ${S.age} anos · ${POS[S.pos].n} · ${esc(sub)}</span></div>
  <div class="ovr"><b class="mono">${S.ovr}</b><small>OVR</small></div></div></header>`;
 }

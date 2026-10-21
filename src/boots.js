@@ -102,7 +102,7 @@ function btPaint(id){return new Promise(res=>{const e=btEntry(id);let c=btColors
   host.querySelectorAll('[data-p1]').forEach(x=>x.onclick=()=>{c=[x.dataset.p1,c[1],c[2]];draw()});host.querySelectorAll('[data-p2]').forEach(x=>x.onclick=()=>{c=[c[0],x.dataset.p2,c[2]];draw()});
   host.querySelector('#ptOk').onclick=()=>{S.din-=.002;e.c1=c[0];e.c2=c[1];host.remove();res(true)};host.querySelector('#ptX').onclick=()=>{host.remove();res(false)}};draw()})}
 // cor da chuteira vai pro seu jogador no 3D
-if(typeof l3dCfg==='function'){const _lc=l3dCfg;l3dCfg=function(o){const cfg=_lc(o);try{if(S.boot&&S.bootLeft>0&&cfg.hero){const[c1]=btColors(S.boot);cfg.hero.boot=c1}}catch(e){}return cfg}}
+if(typeof l3dCfg==='function'){const _lc=l3dCfg;l3dCfg=function(o){const cfg=_lc(o);try{if(S.boot&&S.bootLeft>0&&cfg.hero&&cfg.env!=='prison'){const[c1]=btColors(S.boot);cfg.hero.boot=c1}}catch(e){}return cfg}}
 {const st=document.createElement('style');st.textContent=`
 .btsvg{display:block;filter:drop-shadow(0 4px 3px rgba(0,0,0,.4))}
 .bt-hero{display:grid;gap:8px;padding:14px;border-radius:var(--r-lg);background:radial-gradient(90% 70% at 50% 18%,color-mix(in srgb,var(--t) 30%,transparent),transparent 70%),var(--panel);border:2px solid var(--t);color:var(--chalk)}

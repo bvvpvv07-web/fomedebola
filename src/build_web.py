@@ -3,7 +3,7 @@ _eh=open('/home/claude/modo-lance/modo-lance.html').read()
 open('lance_html.js','w').write('// gerado pelo build a partir de modo-lance.html (motor 3D do Modo Lance)\nconst L3D_HTML='+_j.dumps(_eh).replace('</','<\\/')+';\n')
 import json,os,shutil
 OUT='/home/claude/web'
-FILES='data.js logic.js youth.js ui.js fx.js minigames.js nss.js nss2.js fast.js gallery.js agent.js youth_ui.js flow.js moments.js dyn.js onescreen.js cards.js swipe.js nssmoment.js decide.js lance_html.js lance3d.js youthflow.js journey.js torcida.js v5.js prison.js rpg.js camp.js webcloud.js cloud.js home.js ui2.js vidaplus.js mg2.js boots.js skilltree.js bitmenu.js'.split()
+FILES='data.js logic.js youth.js ui.js fx.js minigames.js nss.js nss2.js fast.js gallery.js agent.js youth_ui.js flow.js moments.js dyn.js onescreen.js cards.js swipe.js nssmoment.js decide.js lance_html.js lance3d.js youthflow.js journey.js torcida.js v5.js prison.js rpg.js camp.js webcloud.js cloud.js home.js ui2.js vidaplus.js mg2.js boots.js skilltree.js bitmenu.js newspaper.js retire.js'.split()
 css=''.join(open(f).read() for f in ['base.css','extra.css','extra2.css','extra3.css','extra4.css','theme.css'])
 am=json.load(open('assets/map.json'))
 cfg={'url':'https://dwrvpzmfhprazbkmmhqh.supabase.co','key':'sb_publishable_NlDnuy7PDBwiGnygbSkNFA_E5m6TkAG'}
@@ -20,7 +20,7 @@ head='''<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Fome de Bola">
 <meta property="og:title" content="Fome de Bola"><meta property="og:description" content="Simulador de carreira no futebol: da peneira à Bola de Ouro."><meta property="og:image" content="og.png"><meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Saira+Condensed:wght@600;700;800;900&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Saira+Condensed:wght@600;700;800;900&family=Playfair+Display:wght@700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,600&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 '''
 if os.path.exists(OUT):shutil.rmtree(OUT)
 os.makedirs(OUT)

@@ -4,7 +4,7 @@ let PANEL=null;
 function panelHost(){let h=document.getElementById('panel');if(!h){h=document.createElement('div');h.id='panel';h.hidden=true;document.body.appendChild(h)}return h}
 function openPanelHTML(title,html,after){
  const h=panelHost();h.hidden=false;document.body.classList.add('noscroll');
- h.innerHTML=`<div class="pp"><div class="pp-h"><button class="pp-x" id="ppX" aria-label="Voltar">←</button><b>${title}</b></div><div class="pp-b" id="ppB">${html}</div></div>`;
+ h.innerHTML=`<div class="pp"><div class="pp-h"><button class="pp-x" id="ppX" aria-label="Voltar"><span>‹</span>Voltar</button><b>${title}</b></div><div class="pp-b" id="ppB">${html}</div></div>`;
  document.getElementById('ppX').onclick=closePanel;if(after)after(document.getElementById('ppB'));
 }
 function openPanelNode(title,node,key){

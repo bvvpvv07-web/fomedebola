@@ -16,8 +16,8 @@ function blMeHTML(){if(!S)return'';const c=S.club&&CLUB[S.club];const fc=c?[c.c1
  return`<div class="bl-me"><div class="bl-av">${faceSVG(S.face||{preset:0},fc[0],fc[1])}</div><div class="bl-mi"><b>${esc(S.name)}</b><span>${esc(POS[S.pos].n)}${c?' · '+esc(c.n):''} · ${S.age} anos</span></div><div class="bl-mm"><b>${money(S.din)}</b><span>📅 ${S.tempo||0} dia${S.tempo===1?'':'s'} livre${S.tempo===1?'':'s'}</span></div></div>`}
 function blDraw(keep,back){const h=blHost();const p=BL.stack[BL.stack.length-1];const prevB=document.getElementById('blB');const sc=keep&&prevB?prevB.scrollTop:back?(p._sc||0):0;
  h.hidden=false;document.body.classList.add('bl-open');
- h.innerHTML=`<div class="blp ${p.col||''}"><div class="blp-h"><button class="blp-x" id="blX" aria-label="${BL.stack.length>1?'Voltar':'Fechar'}">${BL.stack.length>1?'‹':'✕'}</button><b>${esc(p.t)}</b></div>${blMeHTML()}<div class="blp-b" id="blB">${p.html()}</div></div>`;
- document.getElementById('blX').onclick=()=>BL.stack.length>1?blBack():blClose();
+ h.innerHTML=`<div class="blp ${p.col||''}"><div class="blp-h"><button class="blp-x" id="blX" aria-label="${BL.stack.length>1?'Voltar':'Voltar ao início'}"><span>‹</span>${BL.stack.length>1?'Voltar':'Início'}</button><b>${esc(p.t)}</b>${BL.stack.length>1?'<button class="blp-home" id="blH" aria-label="Fechar e voltar ao início">✕</button>':''}</div>${blMeHTML()}<div class="blp-b" id="blB">${p.html()}</div></div>`;
+ document.getElementById('blX').onclick=()=>BL.stack.length>1?blBack():blClose();const bh=document.getElementById('blH');if(bh)bh.onclick=()=>blClose();
  const b=document.getElementById('blB');b.scrollTop=sc;try{if(p.bind)p.bind(b)}catch(e){console.error(e)}}
 // fechar páginas antigas (Jogos, Tabela…) volta pro menu
 {const _cp=closePanel;closePanel=function(...a){const r=_cp.apply(this,a);if(BL.susp&&BL.stack.length){BL.susp=false;blDraw(true)}return r}}
@@ -30,6 +30,8 @@ function blResult(o){return new Promise(res=>{const h=blPop2();const opts=o.opts
   ${opts.map(([k,t])=>`<button class="bl-pill" data-o="${k}">${esc(t)}</button>`).join('')}${o.btn!==null||!opts.length?`<button class="bl-pill" data-o="ok">${esc(o.btn||'Ok')}</button>`:''}${o.alt||opts.length?`<button class="bl-pill alt" data-o="alt">${esc(o.alt||'Fechar')}</button>`:''}</div></div>`;
  h.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{h.remove();res(b.dataset.o)});
  h.onclick=e=>{if(e.target===h){h.remove();res('x')}}})}
+// sair pro início sempre pergunta antes (o jogo fica salvo)
+async function askHome(){try{if(S&&!S.done&&typeof blResult==='function'){const r=await blResult({ic:'🏠',title:'Sair da carreira?',txt:'Seu progresso fica salvo. Você volta pro menu inicial e pode continuar depois de onde parou.',btn:'Salvar e sair',alt:'Continuar jogando'});if(r!=='ok')return;if(BL.stack.length){const h=blHost();h.hidden=true;h.innerHTML='';BL.stack=[];BL.susp=false;document.body.classList.remove('bl-open')}}}catch(e){console.error(e)}goHome()}
 function blWarn(t){try{toast({ic:'⛔',title:t,ms:2200})}catch(e){}}
 
 // ---------- linhas ----------
@@ -222,9 +224,12 @@ body.blhub .ph .shield,body.blhub .ph .flagbox{display:none}body.blhub .ph .who 
 #blp{position:fixed;inset:0;z-index:18;background:var(--pitch);background-image:repeating-linear-gradient(180deg,var(--pitch) 0 72px,var(--pitch-2) 72px 144px)}#blp[hidden]{display:none}
 .blp{--c:var(--accent);height:100%;display:flex;flex-direction:column;max-width:600px;margin:0 auto;background:transparent}
 .blp.vida,.blp.rel{--c:var(--c-vida)}.blp.comp{--c:var(--c-comp)}.blp.shop{--c:var(--c-loja)}.blp.tree{--c:var(--c-treino)}.blp.crime{--c:var(--c-crime)}
-.blp-h{position:relative;display:grid;place-items:center;min-height:58px;padding:calc(6px + env(safe-area-inset-top,0px)) 60px 6px;background:var(--c);color:var(--ink)}
-.blp-h b{font:900 italic clamp(21px,6.4vw,28px)/1 var(--f-display);text-align:center;text-transform:uppercase;letter-spacing:.01em}
-.blp-x{position:absolute;left:12px;top:50%;transform:translateY(-50%);width:40px;height:40px;border-radius:50%;border:2px solid var(--ink);background:rgba(255,255,255,.22);color:var(--ink);font:900 22px/1 var(--f-body);display:grid;place-items:center}
+.blp-h{display:grid;grid-template-columns:auto minmax(0,1fr) auto;align-items:center;gap:12px;min-height:60px;padding:calc(8px + env(safe-area-inset-top,0px)) 12px 8px;background:var(--c);color:var(--ink)}
+.blp-h b{grid-column:2;font:900 italic clamp(21px,6.2vw,30px)/1 var(--f-display);text-transform:uppercase;letter-spacing:.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;padding-right:2px}
+.blp-x{grid-column:1;display:inline-flex;align-items:center;gap:5px;height:42px;padding:0 15px 0 10px;border-radius:999px;border:2px solid var(--ink);background:rgba(255,255,255,.3);color:var(--ink);font:800 15px/1 var(--f-body);white-space:nowrap}
+.blp-x span{font-size:26px;line-height:.8;margin-top:-3px}
+.blp-home{grid-column:3;width:42px;height:42px;border-radius:50%;border:2px solid var(--ink);background:rgba(255,255,255,.3);color:var(--ink);font:900 18px/1 var(--f-body);display:grid;place-items:center}
+.blp-x:active,.blp-home:active{transform:translateY(1px);background:rgba(255,255,255,.45)}
 .bl-me{display:flex;align-items:center;gap:10px;padding:9px 14px;background:rgba(5,16,10,.55);border-bottom:1px solid var(--line)}.bl-av{width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--panel-2);border:2px solid var(--c);flex:0 0 auto}.bl-av svg,.bl-av img{width:100%;height:100%;display:block}
 .bl-mi{display:grid;min-width:0}.bl-mi b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bl-mi span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bl-mm{margin-left:auto;display:grid;justify-items:end}.bl-mm b{font:600 17px var(--f-mono);color:var(--gold)}.bl-mm span{font-size:11.5px;color:var(--muted)}
@@ -263,10 +268,23 @@ body.bl-open{overflow:hidden}
  .bl-stats{grid-template-columns:repeat(3,1fr);gap:6px 20px}.bl-st{font-size:12.5px}.bl-st b{font-size:12px}
  .bl-nb span{width:54px;height:54px;font-size:25px;border-radius:16px}.bl-nb b{font-size:12.5px}
  .bl-go{width:92px;height:92px;margin-top:-38px}.bl-go b{font-size:13px;max-width:76px}
- #blp{display:grid;place-items:center;padding:24px;background:rgba(4,12,8,.72);backdrop-filter:blur(3px)}
- .blp{width:min(640px,100%);height:min(100%,980px);border-radius:24px;overflow:hidden;border:1px solid var(--line-2);background:var(--pitch);background-image:repeating-linear-gradient(180deg,var(--pitch) 0 72px,var(--pitch-2) 72px 144px);box-shadow:0 30px 80px rgba(0,0,0,.55)}
- .blp-h{padding-top:6px}
- .blp-b{padding:12px 14px 28px;gap:8px}
+ /* painéis ocupam a tela toda: linhas em colunas, nada de folha estreita no meio */
+ .blp{max-width:none;width:100%}
+ .blp-h{min-height:68px;padding:10px 24px;gap:16px}.blp-h b{font-size:32px}
+ .bl-me{padding:10px 24px}
+ .blp-b{padding:18px 24px 36px;gap:10px;grid-template-columns:repeat(auto-fill,minmax(300px,1fr))}
+ .blp-b>:not(.blr):not(.bl-row2){grid-column:1/-1}
+ .blp-b>.bl-sec{margin:14px 2px 0}
+ .blr{min-height:72px}
+ .bl-pop{width:min(780px,100%)}
+ .bl-popb{grid-template-columns:minmax(0,1fr) minmax(0,1.15fr);align-items:center;justify-items:stretch;gap:12px 22px;padding:22px 24px;text-align:left}
+ .bl-popb>*{grid-column:2}
+ .bl-popb>.bl-pic,.bl-popb>.bl-psvg{grid-column:1;grid-row:1/span 12;align-self:stretch;display:grid;place-items:center;min-height:200px;border-radius:16px;background:radial-gradient(80% 80% at 50% 30%,rgba(238,242,228,.14),transparent 70%),var(--pitch)}
+ .bl-popb>.bl-pic{font-size:96px}
+ .bl-popb:not(:has(>.bl-pic,>.bl-psvg)){grid-template-columns:minmax(0,1fr);text-align:center}
+ .bl-popb:not(:has(>.bl-pic,>.bl-psvg))>*{grid-column:1}
+ .bl-popb .bl-chips{justify-content:flex-start}
+ .bl-poph{font-size:28px;padding:14px 24px}
 }
 /* ---------- computador: mesa de técnico ---------- */
 @media (min-width:1100px){
@@ -288,10 +306,10 @@ body.bl-open{overflow:hidden}
  .bl-go.hot{box-shadow:0 5px 0 #8a140d}
  .bl-nb{min-width:0;grid-template-columns:auto minmax(0,1fr);grid-template-rows:auto auto;justify-items:start;align-items:center;column-gap:14px;row-gap:2px;padding:10px 14px;border-radius:var(--r-lg);background:var(--panel);border:1px solid var(--line);text-align:left}
  .bl-nb:hover{border-color:var(--c)}.bl-nb span{grid-row:1/span 2;width:48px;height:48px}.bl-nb b{font:800 italic 19px/1 var(--f-display);text-transform:uppercase}.bl-nb small{display:block;font-size:12px;color:var(--muted);line-height:1.25}
- #blp{place-items:stretch end;padding:0}
- .blp{width:560px;height:100%;max-width:none;margin:0;border-radius:0;border:0;border-left:1px solid var(--line-2);animation:bldrawer .22s cubic-bezier(.2,1,.3,1) both}
- @keyframes bldrawer{from{transform:translateX(40px);opacity:0}}
- .blp-b{padding:14px 18px 32px}
+ .blp{animation:blin .2s cubic-bezier(.2,1,.3,1) both}
+ @keyframes blin{from{transform:translateY(14px);opacity:0}}
+ .blp-h,.bl-me{padding-left:32px;padding-right:32px}
+ .blp-b{padding:22px 32px 44px;gap:12px;grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
  .bl-optmenu{top:64px;right:400px}
 }`;document.head.appendChild(st)}
 // a dica antiga ("Tudo numa tela") não vale mais

@@ -33,6 +33,8 @@ function l3dCfg(o){const ctx=L3D.ctx||{};const us=ctx.us||club()||null,them=ctx.
   title:`${o.min?o.min+"' · ":''}${o.comp||tag}`,head:o.title&&!/^(finish|pass|keeper)$/.test(o.title)?o.title:tag,desc:null,
   noiseK:clamp(1.45-.9*sk,.5,1.3),gkK:clamp((kp-.45)*4,-1,1),myGkK:.85+.3*sk,shNoise:clamp(1.6-(((them&&them.s)||70)-50)/50,.75,1.4),
   crowd:[U.shirt,U.shirt2,Tm.shirt]}}
+// no presídio o lance é no pátio: chão de barro, coletes laranja × listrado, policiais em volta e sem torcida
+{const _cfg=l3dCfg;l3dCfg=function(o){const c=_cfg(o);try{if(o.env==='prison'||(typeof inPrison==='function'&&inPrison())||/presídio|prisão|pátio/i.test(o.comp||'')){c.env='prison';delete c.us;delete c.them;delete c.gkUs;c.crowd=null;if(c.hero)c.hero.boot='#e9e6df'}}catch(e){}return c}}
 function l3dResult(o,res){const K=o.kind||'finish';const GK=K==='keeper';const isPassK=['pass','long','cross'].includes(K);const train=/Peneira|Treino/i.test(o.comp||'');
  NM.netHit=null;NM.intc=null;NM.dmAssist=false;NM.selfGoal=false;let ok;
  if(GK){ok=o.pen?(res.kind==='save'||res.kind==='claim'):!res.goal;NM.last=res.goal?'Foi no canto.':ok?(o.okTxt||'DEFENDEU!'):'Pra fora!'}

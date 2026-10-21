@@ -128,3 +128,85 @@ const _accF=acceptOffer;acceptOffer=function(o){_accF(o);if(S.prisonFired&&S.clu
 {const _genP=genOffers;genOffers=function(lf){if(inPrison()&&S.prisonFired)return[];return _genP(lf)}}
 {const _asP=afterSeason;afterSeason=function(){if(inPrison()&&S.prisonFired&&S.club===S.prisonFired.club&&!S.agreed){toast({ic:'🔒',title:'Sem clube',txt:'Você segue preso. Nenhum clube liga enquanto você estiver lá dentro.',ms:3600});S.agentUses=AGENT_QUOTA[S.agent]||3;return startPreseason()}return _asP()}}
 {const _hdP=header;header=function(){let h=_hdP();try{if(S.prisonFired&&S.club===S.prisonFired.club){const c=CLUB[S.club];const tag=inPrison()?'Sem clube · preso':S.agreed&&CLUB[S.agreed.club]?`Sem clube · acertado com ${CLUB[S.agreed.club].n}`:'Sem clube';h=h.replace(`${c.n}${S.loan?' (emprestado)':''} · ${LG[c.l].n}`,esc(tag)).replace(shieldHTML(c),`<span class="flagbox">${NATS[S.nat].f}</span>`)}}catch(e){}return h}}
+
+// ================== COPA DO PAVILHÃO: o campeonato interno do presídio ==================
+// Seis times da cadeia em pontos corridos (5 rodadas, uma por semana) e final entre os dois primeiros.
+// Seu jogo é no pátio: 2 lances (3 na final). No 3D é chão de barro, colete laranja × colete listrado e policiais em volta.
+// Passou a semana sem jogar? A rodada é simulada. Campeão ganha respeito e um jogo a menos de pena.
+const PCUP_T=[
+ {id:'p4',n:'Pavilhão 4',a:'#ff7a1a',b:'#ff7a1a',s:1.1,me:true},{id:'r2',n:'Raio 2',a:'#f1f1f1',b:'#161616',s:1.55},{id:'ab',n:'Ala B',a:'#2f5fae',b:'#16336e',s:1.25},
+ {id:'cz',n:'Cozinha FC',a:'#e8e2d0',b:'#c0392b',s:1.0},{id:'g7',n:'Galeria 7',a:'#2e8b57',b:'#123d26',s:1.35},{id:'sg',n:'Seguro',a:'#8b9096',b:'#3a3d42',s:.9}];
+function pcT(id){return PCUP_T.find(t=>t.id===id)}
+function pcPois(l){const L=Math.exp(-l);let k=0,p=1;do{k++;p*=Math.random()}while(p>L);return k-1}
+function pcIdx(){const C=S.prison&&S.prison.cup;return C?(S.prison.week||0)-C.w0:0}
+function pcNew(){const P=S.prison;const ids=PCUP_T.map(t=>t.id);const a=ids.slice();const rounds=[];
+ for(let r=0;r<5;r++){const pr=[];for(let i=0;i<3;i++)pr.push(r%2?[a[5-i],a[i]]:[a[i],a[5-i]]);rounds.push(pr);a.splice(1,0,a.pop())}
+ S.prisonCupEd=(S.prisonCupEd||0)+1;P.cup={ed:S.prisonCupEd,w0:P.week||0,rounds,res:[],tab:Object.fromEntries(ids.map(id=>[id,{j:0,v:0,e:0,d:0,gp:0,gc:0,pts:0}])),fin:null,done:false,champ:null,myG:0,note:null}}
+function pcSorted(){const C=S.prison.cup;return PCUP_T.map(t=>({...t,...C.tab[t.id]})).sort((x,y)=>y.pts-x.pts||(y.gp-y.gc)-(x.gp-x.gc)||y.gp-x.gp||(x.me?-1:y.me?1:0))}
+function pcPairs(i){const C=S.prison.cup;if(i<5)return C.rounds[i];if(!C.fin){const s=pcSorted();C.fin=[s[0].id,s[1].id]}return[C.fin]}
+function pcStr(id){return id==='p4'?clamp(.9+(S.prison.resp||0)/120+(S.ovr-60)/70,.8,2.2):pcT(id).s}
+function pcResolve(i,mine){const P=S.prison,C=P.cup;if(C.res[i])return C.res[i];const out=[];
+ for(const [a,b] of pcPairs(i)){const me=a==='p4'||b==='p4';let ga,gb,my=0,pen=null;
+  if(me&&mine){const us=a==='p4';ga=us?mine.g:mine.og;gb=us?mine.og:mine.g;my=mine.myG;if(i===5&&ga===gb)pen=(mine.penWin?us:!us)?'a':'b'}
+  else{ga=pcPois(pcStr(a)*.95);gb=pcPois(pcStr(b)*.85);if(i===5&&ga===gb)pen=ch(.5)?'a':'b'}
+  out.push({a,b,ga,gb,my,pen});
+  if(i<5)for(const [x,gx,gy] of[[a,ga,gb],[b,gb,ga]]){const t=C.tab[x];t.j++;t.gp+=gx;t.gc+=gy;if(gx>gy){t.v++;t.pts+=3}else if(gx===gy){t.e++;t.pts++}else t.d++}
+  if(me&&!mine){const us=a==='p4';C.note=`Você não entrou em campo na ${i===5?'final':(i+1)+'ª rodada'}: Pavilhão 4 ${us?ga:gb} × ${us?gb:ga} ${pcT(us?b:a).n}.`}}
+ C.res[i]=out;C.myG+=out.reduce((s,r)=>s+(r.my||0),0);
+ if(i===5){const f=out[0];const w=f.ga>f.gb||(f.ga===f.gb&&f.pen==='a')?f.a:f.b;C.champ=w;C.done=true;
+  if(w==='p4'){P.resp=clamp((P.resp||0)+20,0,100);P.left=Math.max(1,P.left-1);S.prisonCups=(S.prisonCups||0)+1;try{blog('🏆',`Campeão da Copa do Pavilhão (${C.ed}ª edição)`)}catch(e){}}}
+ return out}
+function pcSync(){const P=S.prison;if(!P||!(P.left>0))return;if(!P.cup||(P.cup.done&&pcIdx()>5))pcNew();const k=pcIdx();for(let i=0;i<Math.min(k,6);i++)if(!P.cup.res[i])pcResolve(i,null)}
+function pcBadge(t,big){const st=t.id!=='p4';return`<span class="pcb ${big?'big':''}" style="--a:${t.a};--b:${t.b}" data-s="${st?1:0}"></span>`}
+function pcHTML(){const P=S.prison,C=P.cup;if(!C)return'';const i=pcIdx();const sorted=pcSorted();const myPair=i<=5?pcPairs(i).find(([a,b])=>a==='p4'||b==='p4'):null;const r=C.res[i];
+ const stage=i<5?`Rodada ${i+1} de 5`:i===5?'Final':'Encerrada';
+ let main='';
+ if(i<=5&&myPair&&!r){const opp=pcT(myPair[0]==='p4'?myPair[1]:myPair[0]);main=`<div class="pc-m"><div class="pc-t">${pcBadge(pcT('p4'),1)}<b>Pavilhão 4</b><small>colete laranja</small></div><span class="pc-x">×</span><div class="pc-t">${pcBadge(opp,1)}<b>${esc(opp.n)}</b><small>colete listrado</small></div></div>
+  <button class="btn wide pc-go" id="pcGo">⚽ ${i===5?'Jogar a final':'Jogar no pátio'}</button><p class="pc-note">${i===5?'Três lances valendo a taça.':'Dois lances. Se passar a semana sem jogar, o jogo é simulado.'}</p>`}
+ else if(r){const m=r.find(x=>x.a==='p4'||x.b==='p4');if(m){const us=m.a==='p4';const g=us?m.ga:m.gb,og=us?m.gb:m.ga;const opp=pcT(us?m.b:m.a);const w=g>og||(g===og&&m.pen===(us?'a':'b'));
+   main=`<div class="pc-done ${w?'w':g===og?'e':'l'}"><b>${w?(i===5?'CAMPEÃO!':'Vitória'):g===og?'Empate':'Derrota'}</b><span class="mono">Pavilhão 4 ${g} × ${og} ${esc(opp.n)}${m.pen?' (pên.)':''}</span><small>${m.my?`${m.my} gol${m.my>1?'s':''} seu${m.my>1?'s':''}`:'Você não marcou'} · próxima rodada na semana que vem</small></div>`}
+  else if(i===5){const f=r[0];main=`<div class="pc-done e"><b>Final sem o Pavilhão 4</b><span class="mono">${esc(pcT(f.a).n)} ${f.ga} × ${f.gb} ${esc(pcT(f.b).n)}</span><small>Campeão: ${esc(pcT(C.champ).n)}</small></div>`}}
+ else if(i===5&&!myPair){const f=pcPairs(5)[0];main=`<div class="pc-done e"><b>Seu time ficou fora da final</b><span class="mono">${esc(pcT(f[0]).n)} × ${esc(pcT(f[1]).n)}</span><small>A final é nesta semana.</small></div>`}
+ if(C.done&&C.champ==='p4')main=`<div class="pc-champ"><span>🏆</span><div><b>Campeão da Copa do Pavilhão</b><small>+20 de respeito e um jogo a menos de pena. Nova edição na semana que vem.</small></div></div>`+main;
+ const last=C.res.length?C.res[C.res.length-1]:null;const li=C.res.length-1;
+ return`<section class="pcup"><div class="pc-h"><span class="pc-tr">🏆</span><div><b>Copa do Pavilhão</b><small>${C.ed}ª edição · ${stage}</small></div><span class="chip">${S.prisonCups?`${S.prisonCups} título${S.prisonCups>1?'s':''}`:'Valendo respeito'}</span></div>
+  ${C.note?`<p class="pc-warn">${esc(C.note)}</p>`:''}${main}
+  <table class="pc-tab"><thead><tr><th>#</th><th>Time</th><th>J</th><th>SG</th><th>P</th></tr></thead><tbody>${sorted.map((t,k)=>`<tr class="${t.me?'me':''} ${k<2?'fin':''}"><td class="mono">${k+1}</td><td>${pcBadge(t)} ${esc(t.n)}</td><td class="mono">${t.j}</td><td class="mono">${t.gp-t.gc>0?'+':''}${t.gp-t.gc}</td><td class="mono"><b>${t.pts}</b></td></tr>`).join('')}</tbody></table>
+  ${last?`<div class="pc-res"><small>${li===5?'Final':`${li+1}ª rodada`}</small>${last.map(x=>`<div class="${x.a==='p4'||x.b==='p4'?'me':''}"><span>${esc(pcT(x.a).n)}</span><b class="mono">${x.ga} × ${x.gb}${x.pen?' p':''}</b><span>${esc(pcT(x.b).n)}</span></div>`).join('')}</div>`:''}
+  <p class="pc-foot">Os dois primeiros fazem a final · Seus gols na copa: <b>${C.myG}</b></p></section>`}
+async function pcPlay(){const P=S.prison;pcSync();const C=P.cup;const i=pcIdx();if(i>5||C.res[i])return;const pair=pcPairs(i).find(([a,b])=>a==='p4'||b==='p4');if(!pair)return;
+ const opp=pcT(pair[0]==='p4'?pair[1]:pair[0]);let myG=0,ast=0;const N=i===5?3:2;const sk=clamp(.5+(S.ovr-60)/90+(S.life&&S.life.corpo?(S.life.corpo-50)/400:0),.35,.9);
+ for(let k=0;k<N;k++){const kind=pick(['finish','dribble','finish','pass']);const r=await nssMoment({kind,comp:'Copa do Pavilhão',env:'prison',title:k===0?`${i===5?'Final':(i+1)+'ª rodada'} · Pavilhão 4 × ${opp.n}`:k===N-1?'Último lance':'Mais um lance',skill:sk,keeper:.3+opp.s*.08,planned:true,min:k===0?RI(4,35):k===N-1?RI(70,89):RI(40,65)});
+  if(r&&r.ok){if(kind==='pass')ast++;else myG++}}
+ const g=myG+ast+pcPois(.35+(P.resp||0)/220),og=pcPois(opp.s*.85);let penWin=null;
+ if(i===5&&g===og){const r=await nssMoment({kind:'pen',comp:'Copa do Pavilhão',env:'prison',title:'Final empatada: pênalti decisivo',skill:sk,keeper:.4,planned:true});penWin=!!(r&&r.ok)}
+ C.note=null;pcResolve(i,{g,og,myG,penWin});const w=g>og||(g===og&&penWin);
+ const dr=w?(i===5?0:4):g===og?1:-2;P.resp=clamp((P.resp||0)+dr+myG*2,0,100);const chips=applyFx(w?{cab:3}:g===og?{}:{cab:-2});if(dr+myG*2)chips.unshift([`${dr+myG*2>0?'+':'−'}${Math.abs(dr+myG*2)} Respeito`,dr+myG*2>0?'up':'down']);
+ if(i===5&&w)chips.unshift(['🏆 Campeão','up'],['−1 jogo de pena','up']);
+ try{await blResult({ic:w?(i===5?'🏆':'⚽'):g===og?'🤝':'😤',title:w?(i===5?'Campeão da Copa do Pavilhão!':'Vitória no pátio'):g===og?'Empate no pátio':'Derrota no pátio',txt:`Pavilhão 4 ${g} × ${og} ${opp.n}${g===og&&i===5?' (decidido no pênalti)':''}. ${myG?`Você fez ${myG}.`:'Você não marcou.'}${ast?` ${ast} assistência${ast>1?'s':''}.`:''}`,chips})}catch(e){}
+ renderPrison()}
+{const _rp=renderPrison;renderPrison=function(...a){try{pcSync()}catch(e){console.error(e)}const r=_rp.apply(this,a);try{
+  const ph=$app.querySelector('.jph .ph-in');if(ph&&!ph.querySelector('.menu'))ph.insertAdjacentHTML('afterbegin','<button class="menu" onclick="askHome()" aria-label="Sair para o início"><span class="mi">‹</span><span class="ml">Sair</span></button>');
+  const jh=$app.querySelector('.jwrap > .jhead'),ja=$app.querySelector('.jwrap > .jacts');
+  if(jh&&ja&&S.prison.cup){const g=document.createElement('div');g.className='jgrid';jh.before(g);const ca=document.createElement('div');ca.className='jcol';ca.append(jh,ja);g.insertAdjacentHTML('beforeend',pcHTML());g.append(ca);
+   const b=document.getElementById('pcGo');if(b)b.onclick=()=>{b.disabled=true;pcPlay().catch(e=>{console.error(e);renderPrison()})}}}catch(e){console.error(e)}return r}}
+{const st=document.createElement('style');st.textContent=`
+body.jail .ph .menu{margin-right:8px}@media (max-width:699px){body.jail .jph .jbadge{display:none}}
+.jgrid{display:grid;gap:12px;align-items:start}.jcol{display:grid;gap:10px;align-content:start}
+.pcup{display:grid;gap:10px;padding:14px;border-radius:16px;background:linear-gradient(180deg,#3f3a33,#302d29);border:1px solid #6a5a45;box-shadow:inset 0 3px 0 #ff7a1a}
+.pc-h{display:flex;align-items:center;gap:10px}.pc-h>div{display:grid;flex:1}.pc-h b{font:900 italic 22px/1 var(--f-display);text-transform:uppercase}.pc-h small{color:#c9b8a3;font-size:12.5px}.pc-tr{font-size:30px}
+.pcb{display:inline-block;width:14px;height:14px;border-radius:50%;vertical-align:-2px;background:var(--a);border:2px solid #1d1c1a}.pcb[data-s="1"]{background:repeating-linear-gradient(0deg,var(--a) 0 3px,var(--b) 3px 6px)}
+.pcb.big{width:44px;height:44px;border-width:3px}.pcb.big[data-s="1"]{background:repeating-linear-gradient(0deg,var(--a) 0 6px,var(--b) 6px 12px)}
+.pc-m{display:grid;grid-template-columns:1fr auto 1fr;align-items:center;gap:8px;padding:12px 8px;border-radius:14px;background:radial-gradient(90% 120% at 50% 100%,rgba(181,108,60,.55),transparent 70%),#2a2724;border:1px solid #5a5045}
+.pc-t{display:grid;justify-items:center;gap:4px;text-align:center}.pc-t b{font-size:15px}.pc-t small{font-size:11.5px;color:#c9b8a3}.pc-x{font:900 italic 26px var(--f-display);color:#ffb27a}
+.pc-go{background:linear-gradient(180deg,#ff8a2a,#e0661a)!important;color:#1d0c02!important}.pc-note{margin:-2px 0 0;font-size:12.5px;color:#c9b8a3;text-align:center}
+.pc-done{display:grid;gap:3px;padding:10px 12px;border-radius:12px;background:#2a2724;border-left:4px solid #8b9096}.pc-done.w{border-color:var(--good)}.pc-done.l{border-color:var(--bad)}.pc-done b{font:900 italic 20px var(--f-display);text-transform:uppercase}.pc-done small{color:#c9b8a3}
+.pc-champ{display:flex;gap:12px;align-items:center;padding:12px;border-radius:12px;background:linear-gradient(90deg,rgba(242,196,67,.25),transparent);border:1px solid var(--gold)}.pc-champ>span{font-size:38px}.pc-champ div{display:grid}.pc-champ b{color:var(--gold);font-size:16px}.pc-champ small{color:#e6dcc8}
+.pc-warn{margin:0;padding:8px 10px;border-radius:10px;background:rgba(255,90,74,.12);border:1px solid rgba(255,90,74,.4);font-size:13px}
+.pc-tab{width:100%;border-collapse:collapse;font-size:13.5px}.pc-tab th{font:600 11.5px var(--f-body);color:#c9b8a3;text-align:left;padding:4px 6px;border-bottom:1px solid #5a5045}.pc-tab th:nth-child(n+3),.pc-tab td:nth-child(n+3){text-align:right}
+.pc-tab td{padding:6px;border-bottom:1px solid rgba(255,255,255,.06)}.pc-tab tr.fin td:first-child{box-shadow:inset 3px 0 0 #ffb27a}.pc-tab tr.me td{background:rgba(255,122,26,.16);font-weight:800}
+.pc-res{display:grid;gap:4px}.pc-res small{color:#c9b8a3;font-size:12px}.pc-res div{display:grid;grid-template-columns:1fr auto 1fr;gap:8px;font-size:13px;padding:4px 8px;border-radius:8px;background:rgba(0,0,0,.18)}.pc-res div span:last-child{text-align:right}.pc-res div.me{background:rgba(255,122,26,.16)}
+.pc-foot{margin:0;font-size:12.5px;color:#c9b8a3}
+@media (min-width:700px){.jwrap{max-width:none!important;padding-left:24px!important;padding-right:24px!important}.jgrid{grid-template-columns:minmax(0,1fr) minmax(0,1.1fr)}.jgrid>.pcup{order:2}.jacts{grid-template-columns:repeat(2,minmax(0,1fr))!important}.jcell{height:230px}}
+@media (min-width:1100px){.jwrap{padding-left:32px!important;padding-right:32px!important}.jgrid{grid-template-columns:minmax(0,1fr) minmax(0,1fr)}}
+`;document.head.appendChild(st)}
