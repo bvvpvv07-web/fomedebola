@@ -16,8 +16,8 @@ addEventListener('message',e=>{const d=e.data||{};if(!L3D.frame||e.source!==L3D.
 function l3dScene(o){const K=o.kind||'finish';
  if(K==='keeper')return o.pen?'gkPen':pick(['gkShot','gkShot','gkFk']);
  if(K==='pen')return'penalti';if(K==='fk')return'falta';if(K==='chip')return'mano';if(K==='combo')return'tabela';if(K==='header')return'cabeca';
- if(K==='long')return'lanca';if(K==='cross')return pick(['cruz','cruz','escanteio']);
- if(K==='pass')return o.planned?'contra':pick(['contra','tabela','area']);
+ if(K==='long')return pick(['lanca','lanca','saida']);if(K==='cross')return pick(['cruz','cruz','escanteio']);
+ if(K==='pass')return o.planned?pick(['contra','saida']):pick(['contra','saida','tabela','area']);
  if(K==='dribble')return pick(['mano','area','contra']);
  return o.planned?pick(['mano','area','contra']):pick(['area','longe','contra'])}
 const L3D_HAIR={buzz:'buzz',lateral:'quiff',quiff:'quiff',afro:'afro',cacheado:'afro',long:'long',dreads:'long',moicano:'quiff',coque:'long',bald:'bald'};
