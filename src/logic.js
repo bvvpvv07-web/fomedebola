@@ -310,7 +310,7 @@ function autoShootout(o){
 }
 
 // ================== PARTIDAS ==================
-function quickScore(sh,sa,adv=2){const d=sh+adv-sa;return[poisson(1.3*Math.exp(d/17.5)),poisson(1.18*Math.exp(-d/17.5))]}
+function quickScore(sh,sa,adv=2){const d=sh+adv-sa;return[poisson(1.3*Math.exp(d/19)),poisson(1.18*Math.exp(-d/19))]}
 function participation(kind,o){
  const st=S.st;
  if(st.injLeft>0)return{play:false,why:'lesionado'};
@@ -337,7 +337,7 @@ async function playMine(o,io){
  const usS=base+(part.play?(perf-base)*imp*(part.min/90):(part.role==='Titular'?-.8:0));
  const adv=o.neutral?0:(o.home?2.2:-2.2);
  const d=usS-o.them.s+adv;
- const gu0=poisson(1.3*Math.exp(d/17.5)),gt0=poisson(1.18*Math.exp(-d/17.5));
+ const gu0=poisson(1.3*Math.exp(d/19)),gt0=poisson(1.18*Math.exp(-d/19));
  const P=POS[S.pos];
  const share=part.play?clamp(P.sg*clamp(1+(perf-base)/18,.4,1.7)*(part.min/90),0,.45):0;
  const ashare=part.play?clamp(P.sa*clamp(1+(perf-base)/18,.4,1.7)*(part.min/90),0,.4):0;
@@ -406,7 +406,7 @@ async function playMine(o,io){
   if(live&&feed)await live.event(feed,gu,gt);
  }
  if(live)await live.until(90);
- if(part.play&&kind==='club'){if(inj){if(inj>=14){S.pot=clamp(S.pot-RI(1,3),40,99);S.life.corpo=clamp(S.life.corpo-8,0,100)}st.injLeft+=inj;st.injLog.push(inj)}if(r)st.suspLeft+=1;if(y){st.yellows++;if(st.yellows%5===0)st.suspLeft+=1}}
+ if(part.play&&kind==='club'){if(inj){if(inj>=14){S.pot=clamp(S.pot-RI(1,3),40,99);S.life.corpo=clamp(S.life.corpo-8,0,100)}st.injLeft+=inj;st.injLog.push(inj)}if(r)st.suspLeft+=1;if(y){st.yellows++;if(st.yellows%campYel()===0)st.suspLeft+=1}}
  else if(part.play&&inj){st.injLeft+=inj;st.injLog.push(inj)}
  if(!part.play){if(st.injLeft>0&&part.why==='lesionado')st.injLeft--;else if(kind==='club'&&st.suspLeft>0&&part.why==='suspenso')st.suspLeft--}
  else if(st.injLeft>0&&!inj)st.injLeft--;
@@ -422,7 +422,7 @@ function isDecisive(it){
  if(it.k==='ko'){const c=st.comps[it.cid];if(!c||!c.alive)return false;const rd=c.rounds[c.stage];return!!rd&&(S.fast?rd.n==='Final':/Final|Semifinal/.test(rd.n))}
  if(it.k==='lg'){const L=LG[st.lg];const last=st.rounds.length-1;if(L.po)return it.r===last;const left=st.rounds.length-it.r;if(left>(S.fast?1:3))return false;
   const t=sortTable(st.table);const i=t.findIndex(x=>x.id===me.id);if(i<0)return false;const p=t[i].p,m=3*left;const near=k=>k>=0&&k<t.length&&k!==i&&Math.abs(t[k].p-p)<=m;
-  if(i===0?near(1):near(0))return true;const up=L.prev?LG[L.prev].down:0;if(up&&(i<up?near(up):near(up-1)))return true;const dn=L.down||0;if(dn&&(i>=t.length-dn?near(t.length-dn-1):near(t.length-dn)))return true;return false}
+  if(i===0?near(1):near(0))return true;const up=L.prev?campAutoUp(st.lg):0;if(up&&(i<up?near(up):near(up-1)))return true;const dn=L.down||0;if(dn&&(i>=t.length-dn?near(t.length-dn-1):near(t.length-dn)))return true;return false}
  if(it.k==='yl'){const c=st.comps.yl;return!!c&&it.i===c.opps.length-1}
  return false;
 }
@@ -430,7 +430,7 @@ function leagueOutcome(it){
  const st=S.st;const me=club();const L=LG[st.lg];if(L.po)return{};const t=sortTable(st.table);const i=t.findIndex(x=>x.id===me.id);if(i<0)return{};
  const left=st.rounds.length-1-it.r;const m=3*left;const p=t[i].p;const stat=`${p} pontos · ${t[i].v} vitórias`;
  const o={stat};if(i===0&&t[1]&&p-t[1].p>m)o.title=true;
- const up=L.prev?LG[L.prev].down:0;if(up&&i<up&&t[up]&&p-t[up].p>m)o.up=true;
+ const up=L.prev?campAutoUp(st.lg):0;if(up&&i<up&&t[up]&&p-t[up].p>m)o.up=true;
  const dn=L.down||0;if(dn&&left===0&&i>=t.length-dn)o.down=true;return o;
 }
 function blockEnd(st){const ms=[];st.cal.forEach((it,i)=>{if(it.k!=='ev'&&it.k!=='debut')ms.push(i)});const n=ms.length;const cuts=[1,2,3].map(k=>ms[Math.floor(n*k/4)-1]+1);cuts.push(st.cal.length);return cuts.find(c=>c>st.idx)||st.cal.length}
@@ -527,7 +527,7 @@ function buildSeason(){
  if(cc){
   const I=CONT_INFO[cc];const parts=contParticipants(cc);if(!parts.includes(me.id))parts.push(me.id);
   const comp={id:'cont',code:cc,n:I.n,ic:I.ic,t:'cont',pts:I.pts,kind:I.kind,pool:parts,stage:0,alive:true,path:[],gm:[],lpPts:0,grp:null,
-   rounds:(I.kind==='lp'&&I.po<99?[{n:'Playoff',legs:2,po:true}]:[]).concat(I.ko.map(n=>({n,legs:2}))).concat([{n:I.fin,legs:cc==='CCC'?1:1,neutral:true}])};
+   rounds:((I.kind==='lp'&&I.po<99)||cc==='SUD'?[{n:'Playoff',legs:2,po:true}]:[]).concat(I.ko.map(n=>({n,legs:2}))).concat([{n:I.fin,legs:cc==='CCC'?1:1,neutral:true}])};
   st.comps.cont=comp;
   if(I.kind==='lp'){const opps=shuffle(oppPool(parts,me.id)).slice(0,I.m);comp.gm=opps.map((o,i)=>({opp:o.id,home:i%2===0}));comp.gm.forEach((_,i)=>items.push([.08+.42*(i/(I.m-1)),{k:'grp',cid:'cont',i}]))}
   else if(I.kind==='grp'){const op=shuffle(oppPool(parts,me.id));const g=[me.id,...op.slice(0,3).map(x=>x.id)];comp.grp=g;comp.gtab={};g.forEach(id=>comp.gtab[id]={id,p:0,j:0,gp:0,gc:0});
@@ -630,8 +630,8 @@ async function processItem(it,io){
   const res=mkRes(comp.n,comp.kind==='grp'?`Grupo · ${it.i+1}ª rodada`:`Fase de liga · ${it.i+1}ª rodada`,h,a,gh,ga,r,g.home,null,'cont');comp.path.push(res);
   if(it.i===comp.gm.length-1){
    const I=CONT_INFO[comp.code];
-   if(comp.kind==='lp'){if(comp.lpPts>=I.top){comp.stage=comp.rounds[0].po?1:0;res.note=`${comp.lpPts} pts: direto pras oitavas`}else if(comp.lpPts>=I.po&&comp.rounds[0].po){comp.stage=0;res.note=`${comp.lpPts} pts: vai pro playoff`}else{comp.alive=false;comp.out='Fase de liga';res.note=`${comp.lpPts} pts: eliminado`}}
-   else{const t=sortTable(comp.gtab);const pos=t.findIndex(x=>x.id===me.id)+1;comp.gpos=pos;if(pos<=I.adv){comp.stage=0;res.note=`${pos}º do grupo: classificado`}else{comp.alive=false;comp.out='Fase de grupos';res.note=`${pos}º do grupo: eliminado`}}
+   if(comp.kind==='lp')campLP(comp,res,I,me);
+   else campGrp(comp,res,I,me);
   }
   return res;
  }
@@ -751,9 +751,8 @@ function endSeason(){
  // ---- mundo: classificações de todas as ligas ----
  const order={};
  for(const l in LG){
-  if(l===me.l){order[l]=table.map(x=>x.id);continue}
-  const cl=leagueClubs(l);const noise=LG[l].tier>=2?4:3.4;
-  order[l]=cl.map(c=>({id:c.id,v:c.s+randn()*noise})).sort((a,b)=>b.v-a.v).map(x=>x.id);
+  if(l===me.l){order[l]=table.map(x=>x.id);W.tables=W.tables||{};W.tables[l]={y:S.year,rows:table.map(r=>({id:r.id,p:r.p,j:r.j,v:r.v,e:r.e,d:r.d,gp:r.gp,gc:r.gc}))};continue}
+  order[l]=campSimOrder(l);
  }
  for(const l in order)order[l].forEach((id,i)=>W.pos[id]=i+1);
  for(const l in LG)W.champ[l]=order[l][0];
@@ -772,11 +771,7 @@ function endSeason(){
  }
  // ---- acesso e rebaixamento ----
  const moves=[];let myMove=null;
- for(const l in LG){const Lx=LG[l];if(!Lx.next||!Lx.down)continue;
-  const down=order[l].slice(-Lx.down),up=order[Lx.next].slice(0,Lx.down);
-  for(const id of down){CLUB[id].l=Lx.next;moves.push([id,'down',Lx.next]);if(id===me.id)myMove={dir:'down',to:Lx.next}}
-  for(const id of up){CLUB[id].l=l;moves.push([id,'up',l]);if(id===me.id)myMove={dir:'up',to:l}}
- }
+ {const mv=campMoves(order,me,st);moves.push(...mv.moves);myMove=mv.my}
  if(myMove){if(myMove.dir==='up')titles.push(...(rank===1&&LG[myMove.to]?[]:[]))}
  // força dos clubes varia
  for(const c of CLUBS){const tierPull=LG[c.l].tier===1?0:-.4;c.s=clamp(Math.round((c.s+(c.base-c.s)*.22+randn()*.9+tierPull*(c.base>=78?0:1))*10)/10,45,96)}
@@ -834,7 +829,7 @@ function endSeason(){
  const fakeLg=k=>{const out=[];const pool=leagueClubs(me.l).filter(c=>c.id!==me.id).sort((a,b)=>b.s-a.s).slice(0,6);for(let i=0;i<k;i++){const c=pick(pool);const rr=roster(c.id).filter(p=>p.pos!=='GOL');out.push({n:pick(rr).n,f:FLAG[c.country]||COUNTRY[c.country].f,club:c.id})}return out};
  const lgRiv=f=>{const a=inLg(f);return a.length>=2?a:a.concat(fakeLg(3-a.length))};
  const rivalTop=(L.tier===1?(L.lp>=8?22:18):15)+randn()*4+(W.stars.some(s=>CLUB[s.club]&&CLUB[s.club].l===me.l&&s.pos==='ATA'&&s.r>=87)?5:0);
- const artWin=S.pos!=='GOL'&&lgS.g>=rivalTop&&lgS.g>=8;
+ const artWin=S.pos!=='GOL'&&(S.campRecap&&S.campRecap.race&&S.campRecap.race.gl[0]?!!S.campRecap.race.gl[0].me:lgS.g>=rivalTop&&lgS.g>=8);
  if(S.pos!=='GOL'&&lgS.g>=Math.max(10,rivalTop-6)){const c=mkCer({k:'art',ic:'artilheiro',title:`Artilheiro da ${L.n}`,sub:'Quem mais fez gols no campeonato',stat:`Você: ${lgS.g} gols`},artWin,lgRiv(s=>['ATA','SA','PE','PD','PON'].includes(s.pos)));cer.push(c)}
  if(artWin)awards.push({t:'artilheiro',n:`Artilheiro da ${L.n}`,d:`${lgS.g} gols`});
  const posWin=lgS.j>=20&&nota>=7.2&&ch(clamp(.35+(nota-7.2)*1.2+(S.ovr-me.s)/20,.15,.9));
