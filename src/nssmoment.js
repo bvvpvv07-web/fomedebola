@@ -146,8 +146,8 @@ function nssMoment(o){
   const dist=(a,b)=>Math.hypot(a.x-b.x,a.d-b.d);
   const spd=()=>Math.hypot(ball.vx,ball.vd);
 
-  const myLook=(typeof FACES!=='undefined'&&S.face&&!S.face.photo)?FACES[S.face.preset||0]:null;
-  const meP=me||(GK?gk:null);if(meP&&myLook){meP.skin=myLook.skin;meP.hairC=myLook.hair;meP.hs=myLook.style;meP.band=myLook.band;meP.beard=myLook.beard}
+  const myLook=(typeof faceLook==='function'&&S.face&&!S.face.photo)?faceLook(S.face):null;
+  const meP=me||(GK?gk:null);if(meP&&myLook){meP.skin=myLook.skin;meP.hairC=myLook.hair;meP.hs=myLook.vstyle||myLook.style;meP.band=myLook.band;meP.beard=myLook.beard}
   if(meP&&S.boots&&S.boots.c)meP.boot=S.boots.c;
   const surname=(S.name||'').trim().split(/\s+/).slice(-1)[0].toUpperCase().slice(0,10);
   // texturas prontas
@@ -280,11 +280,11 @@ function nssMoment(o){
    // cabeça em bloco
    const hq=vbox(T,p.x,p.d,1.01,.6,.54,.56,skin);
    const st=p.hs||'buzz';const hh=st==='afro'?.22:st==='quiff'?.15:.09,hw=st==='afro'?.7:.62;
-   vbox(T,p.x,p.d,1.57,hw,st==='afro'?.64:.56,hh,hair);
+   if(st!=='bald')vbox(T,p.x,p.d,1.57,hw,st==='afro'?.64:.56,hh,hair);
    if(st==='quiff'&&!facing)vbox(T,p.x,p.d-.14*cam.dir,1.66,.36,.18,.11,hair);
-   if(!facing){vbox(T,p.x,p.d+.275*cam.dir,st==='long'?.85:1.17,hw,.03,st==='long'?.72:.4,hair)}
+   if(!facing&&st!=='bald'){vbox(T,p.x,p.d+.275*cam.dir,st==='long'?.85:1.17,hw,.03,st==='long'?.72:.4,hair)}
    else if(hq&&pr.s>7){const e1=onQuad(hq,.3,.55),e2=onQuad(hq,.7,.55);const es=Math.max(1.5,Math.abs(hq[1].x-hq[0].x)*.1);ctx.fillStyle='#161616';ctx.fillRect(e1.x-es/2,e1.y-es,es,es*1.5);ctx.fillRect(e2.x-es/2,e2.y-es,es,es*1.5);
-    vbox(T,p.x,p.d-.28*cam.dir,1.47,hw,.03,.1,hair);if(p.beard){const b=onQuad(hq,.5,.12);ctx.fillStyle=hair;ctx.fillRect(b.x-es*2,b.y-es,es*4,es*1.6)}}
+    if(st!=='bald')vbox(T,p.x,p.d-.28*cam.dir,1.47,hw,.03,.1,hair);if(p.beard){const b=onQuad(hq,.5,.12);ctx.fillStyle=hair;ctx.fillRect(b.x-es*2,b.y-es,es*4,es*1.6)}}
    if(p.band&&!facing)vbox(T,p.x,p.d,1.45,.64,.58,.06,'#ffffff');
   }
   function drawBall(){const p=proj(ball.x,ball.d,ball.h+.22);if(!p)return;const r=Math.max(4.5,.22*p.s);

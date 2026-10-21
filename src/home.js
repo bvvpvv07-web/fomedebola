@@ -129,5 +129,5 @@ function renderProfile(){
 }
 
 // ---------- BOOT ----------
-renderIntro();
+setTimeout(()=>renderIntro(),0);
 initCloud().then(()=>{const h=(location.hash||'').replace('#','');if(h.startsWith('share.'))openShared(h.slice(6))});
