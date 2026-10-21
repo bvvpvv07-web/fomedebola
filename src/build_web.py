@@ -3,7 +3,7 @@ _eh=open('/home/claude/modo-lance/modo-lance.html').read()
 open('lance_html.js','w').write('// gerado pelo build a partir de modo-lance.html (motor 3D do Modo Lance)\nconst L3D_HTML='+_j.dumps(_eh).replace('</','<\\/')+';\n')
 import json,os,shutil
 OUT='/home/claude/web'
-FILES='data.js logic.js youth.js ui.js fx.js minigames.js nss.js nss2.js fast.js gallery.js agent.js youth_ui.js flow.js moments.js dyn.js onescreen.js cards.js swipe.js nssmoment.js decide.js lance_html.js lance3d.js youthflow.js journey.js torcida.js v5.js prison.js rpg.js camp.js webcloud.js cloud.js home.js ui2.js'.split()
+FILES='data.js logic.js youth.js ui.js fx.js minigames.js nss.js nss2.js fast.js gallery.js agent.js youth_ui.js flow.js moments.js dyn.js onescreen.js cards.js swipe.js nssmoment.js decide.js lance_html.js lance3d.js youthflow.js journey.js torcida.js v5.js prison.js rpg.js camp.js webcloud.js cloud.js home.js ui2.js vidaplus.js mg2.js boots.js skilltree.js bitmenu.js'.split()
 css=''.join(open(f).read() for f in ['base.css','extra.css','extra2.css','extra3.css','extra4.css'])
 am=json.load(open('assets/map.json'))
 cfg={'url':'https://dwrvpzmfhprazbkmmhqh.supabase.co','key':'sb_publishable_NlDnuy7PDBwiGnygbSkNFA_E5m6TkAG'}

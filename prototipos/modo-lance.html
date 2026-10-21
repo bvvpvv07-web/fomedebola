@@ -529,7 +529,7 @@ const SC={
 const ATK=['saida','contra','cruz','lanca','falta','faltaLat','area','penalti','escanteio','mano','tabela','longe'],GKS=['gkPen','gkShot','gkFk'];
 const CH_LIST=ATK;
 // o seu jogador (carreira): rosto, cabelo e número de verdade
-function heroLook(num){const h=S.heroCfg;return h?{num:h.num||num,skin:h.skin||pick(SKINS),hair:h.hair||pick(HAIRS),style:h.style,beard:h.beard,band:h.band}:{num,skin:pick(SKINS),hair:pick(HAIRS)}}
+function heroLook(num){const h=S.heroCfg;return h?{num:h.num||num,skin:h.skin||pick(SKINS),hair:h.hair||pick(HAIRS),style:h.style,beard:h.beard,band:h.band,boot:h.boot}:{num,skin:pick(SKINS),hair:pick(HAIRS)}}
 function P(kind,x,z,num,run){const hero=kind==='hero'||(kind==='me'&&!(SC[S.scen]||{}).heroMate);const p=makePlayer({...OUR,team:'us',...(hero?heroLook(num):{num,skin:pick(SKINS),hair:pick(HAIRS)})});if(hero)S.hero=p;p.pos.set(x,0,z);p.home=new T.Vector3(x,0,z);if(run)p.run=new T.Vector3(run[0],0,run[1]);setFacingNow(p,-x*.2,-z);S.players.push(p);S.mates.push(p);if(kind==='me')S.carrier=p;return p}
 function O(x,z,markIdx,role){const p=makePlayer({...THEM,num:[2,3,4,5,6,8,7,10,11,9,14,15,16,17][S.opps.length%14],team:'them',skin:pick(SKINS),hair:pick(HAIRS),sp:6.3});p.pos.set(x,0,z);p.home=new T.Vector3(x,0,z);p.markIdx=markIdx;p.role0=role||null;setFacingNow(p,0,1);S.players.push(p);S.opps.push(p);return p}
 function F(x,z){return O(x,z,0,'f')}

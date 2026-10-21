@@ -358,7 +358,7 @@ async function playMine(o,io){
   const pc=(['VOL','ZAG'].includes(S.pos)?.2:.1)+(55-S.life.disc)/400;
   if(ch(clamp(pc,.03,.4))){y=1;tl.push({m:mMine(),t:'y'})}
   if(ch(clamp(.012+(55-S.life.disc)/1500,.004,.05))){r=1;y=0;tl.push({m:mMine(),t:'r'})}
-  const pI=(S.perks&&S.perks.prep?.8:1)*(typeof rpgHas==='function'&&rpgHas('pulmao')?.75:1)*P.inj/34*(1.55-S.life.corpo/100)*(S.age>29?1+(S.age-29)*.07:1)*D().inj*(part.min/90)+st.injRisk/30;
+  const pI=(S.perks&&S.perks.prep?.8:1)*(typeof rpgInjK==='function'?rpgInjK():typeof rpgHas==='function'&&rpgHas('pulmao')?.75:1)*(typeof blInjK==='function'?blInjK():1)*P.inj/34*(1.55-S.life.corpo/100)*(S.age>29?1+(S.age-29)*.07:1)*D().inj*(part.min/90)+st.injRisk/30;
   if(ch(pI)){const sev=rnd();inj=sev<.7?RI(1,3):sev<.95?RI(4,10):RI(14,30);tl.push({m:mMine(),t:'inj',n:inj})}
   if(!part.start)tl.push({m:onFrom,t:'in'});
  }
