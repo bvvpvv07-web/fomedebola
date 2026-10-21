@@ -72,7 +72,7 @@ function jerseySVG(c1,c2,name,num,cls=''){const id='j'+(++JS_ID);const nm=(name|
  <text x="120" y="196" text-anchor="middle" font-family="Saira Condensed,Arial Narrow,sans-serif" font-weight="900" font-size="${n.length>1?100:112}" fill="none" stroke="${lum(txt)>140?'rgba(255,255,255,.35)':'rgba(255,255,255,.25)'}" stroke-width="1.2">${esc(n)}</text></svg>`}
 
 // ---------- CRIAÇÃO EM ETAPAS (uma tela pra cada coisa, sem rolagem) ----------
-const CW_STEPS=[['nome','Como vão te chamar?'],['numero','Qual é a sua camisa?'],['pais','De onde você é?'],['rosto','Monte seu rosto'],['time','Time do coração'],['posicao','Onde você joga?'],['dificuldade','Qual o desafio?'],['ritmo','Como você quer jogar?']];
+const CW_STEPS=[['nome','Como vão te chamar?'],['numero','Qual é a sua camisa?'],['pais','De onde você é?'],['rosto','Monte seu rosto'],['time','Time do coração'],['posicao','Onde você joga?'],['dificuldade','Qual o desafio?'],['lances','Como você joga os lances?'],['ritmo','Como você quer jogar?']];
 let CWI=0,CWDIR=1,CWTAB='pele';
 const NUM_TXT={1:'Camisa de goleiro raiz.',2:'Lateral que apoia.',3:'Zagueiro xerife.',4:'Zagueiro de respeito.',5:'Volante cão de guarda.',6:'Lateral de pé bom.',7:'Ponta que dribla todo mundo.',8:'Meia de muito fôlego.',9:'Centroavante: vive de gol.',10:'A camisa do craque. Pesa.',11:'Ponta veloz.',12:'Camisa da torcida.',13:'Pra quem não tem medo de azar.',14:'Camisa de lenda holandesa.',17:'Moderno e decisivo.',19:'Garoto prodígio.',20:'Camisa de quem chega pra jogar.',21:'Craque de seleção.',22:'Camisa de reserva que vira titular.',23:'Camisa de astro.',30:'Começo humilde.',77:'Diferentão.',99:'Ousado.'};
 renderCreate=function(){
@@ -110,8 +110,9 @@ renderCreate=function(){
    ${POS_ORDER.map(q=>`<button class="pbtn ${CR.pos===q?'on':''}" data-pos="${q}" style="left:${POS[q].x}%;top:${POS[q].y}%">${q}</button>`).join('')}</div>
   <div class="cw-posinfo"><b>${esc(p.n)}</b><small>Mais pesam: ${Object.entries(p.w).sort((a,b)=>b[1]-a[1]).slice(0,3).map(([q,v])=>`${ATTR_NAME[q]} ${Math.round(v*100)}%`).join(' · ')}</small></div>`}
  if(k==='dificuldade'){const ic={amador:'🌱',pro:'⚽',lenda:'👑'};body=`<div class="cw-cards">${Object.entries(DIFF).map(([q,v])=>`<button class="cw-card ${CR.diff===q?'on':''}" data-diff="${q}"><span>${ic[q]||'⚽'}</span><div><b>${esc(v.n)}</b><small>${esc(v.d)}</small></div></button>`).join('')}</div>`}
+ if(k==='lances'){const m=CR.lanceMode||'jogar';body=`<div class="cw-cards"><button class="cw-card ${m==='jogar'?'on':''}" data-l3="jogar"><span>🎮</span><div><b>Jogar os lances</b><small>Campo em 3D: você puxa o estilingue, escolhe onde bater na bola, passa, cruza, chuta e defende como goleiro.</small></div></button><button class="cw-card ${m==='decidir'?'on':''}" data-l3="decidir"><span>🧠</span><div><b>Só decisão</b><small>Você lê o lance e escolhe a jogada. O resultado sai dos seus atributos. Mais rápido.</small></div></button></div><p class="cw-note">Dá pra trocar quando quiser na carreira, no menu ⋯ do início.</p>`}
  if(k==='ritmo'){body=`<div class="cw-cards"><button class="cw-card ${CR.fast!==false?'on':''}" data-fast="1"><span>⚡</span><div><b>Rápido</b><small>Temporada em 4 blocos. Só as finais ao vivo. Uma carreira em poucos minutos.</small></div></button><button class="cw-card ${CR.fast===false?'on':''}" data-fast="0"><span>🗓️</span><div><b>Completo</b><small>Semana a semana: dias livres, lances em todo jogo, mata-mata ao vivo.</small></div></button></div>
-  <div class="cw-sum">${faceSVG(CR.face,kit[0],kit[1])}<div><b>${esc(CR.name||'Sem nome')} <span class="mono">#${CR.num}</span></b><small>${NATS[CR.nat].f} ${esc(POS[CR.pos].n)} · ${esc(DIFF[CR.diff].n)}${CR.heart&&CLUB[CR.heart]?' · ♥ '+esc(CLUB[CR.heart].n):''}</small></div></div>`}
+  <div class="cw-sum">${faceSVG(CR.face,kit[0],kit[1])}<div><b>${esc(CR.name||'Sem nome')} <span class="mono">#${CR.num}</span></b><small>${NATS[CR.nat].f} ${esc(POS[CR.pos].n)} · ${esc(DIFF[CR.diff].n)}${CR.lanceMode==='decidir'?' · 🧠 Decisão':' · 🎮 Lances 3D'}${CR.heart&&CLUB[CR.heart]?' · ♥ '+esc(CLUB[CR.heart].n):''}</small></div></div>`}
  const last=CWI===CW_STEPS.length-1;
  $app.innerHTML=`<div class="cw"><div class="cw-top"><button class="cw-back" id="cwB" aria-label="Voltar">←</button><div class="cw-dots">${CW_STEPS.map((_,i)=>`<i class="${i<CWI?'done':i===CWI?'on':''}"></i>`).join('')}</div><span class="cw-cnt mono">${CWI+1}/${CW_STEPS.length}</span></div>
  <div class="cw-body ${CWDIR>0?'in-r':'in-l'}"><div class="eyebrow">Criação · passo ${CWI+1}</div><h2 class="cw-h">${esc(title)}</h2>${body}</div>
@@ -138,8 +139,9 @@ renderCreate=function(){
  $('[data-pos]').forEach(b=>b.onclick=()=>{CR.pos=b.dataset.pos;CWDIR=0;renderCreate()});
  $('[data-diff]').forEach(b=>b.onclick=()=>{CR.diff=b.dataset.diff;CWDIR=0;renderCreate()});
  $('[data-fast]').forEach(b=>b.onclick=()=>{CR.fast=b.dataset.fast==='1';CWDIR=0;renderCreate()});
+ $('[data-l3]').forEach(b=>b.onclick=()=>{CR.lanceMode=b.dataset.l3;CWDIR=0;renderCreate()});
 };
-{const _fd=finishDraft;finishDraft=function(...a){const f=CR.face;const r=_fd.apply(this,a);try{if(S&&f)S.face=f}catch(e){}return r}}
+{const _fd=finishDraft;finishDraft=function(...a){const f=CR.face;const r=_fd.apply(this,a);try{if(S&&f)S.face=f;if(S)S.lanceMode=CR.lanceMode||'jogar'}catch(e){}return r}}
 
 // ---------- TELA INICIAL NOVA ----------
 const HOME_TAG=['Da peneira à Bola de Ouro.','Lances jogáveis: chute, passe, drible e cavadinha.','Champions, Libertadores, Copa do Mundo.','Fama, dinheiro, polêmica… e até prisão.','Seu empresário abre as portas. Seu futebol decide.'];

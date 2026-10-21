@@ -1,3 +1,6 @@
+import json as _j
+_eh=open('/home/claude/modo-lance/modo-lance.html').read()
+open('lance_html.js','w').write('// gerado pelo build a partir de modo-lance.html (motor 3D do Modo Lance)\nconst L3D_HTML='+_j.dumps(_eh).replace('</','<\\/')+';\n')
 css=open('base.css').read()+open('extra.css').read()+open('extra2.css').read()+open('extra3.css').read()+open('extra4.css').read()
 import json,os
 am=json.load(open('assets/map.json')) if os.path.exists('assets/map.json') else {'B':{},'T':{}}
@@ -7,7 +10,7 @@ if pubset is not None:
   for s in ('B','T'):
     for k,v in am[s].items():
       if v not in pubset: am[s][k]='data:image/webp;base64,'+base64.b64encode(open('assets/'+v,'rb').read()).decode()
-js='const ASSET_B='+json.dumps(am['B'])+';const ASSET_T='+json.dumps(am['T'])+';\n'+open('data.js').read()+'\n'+open('logic.js').read()+'\n'+open('youth.js').read()+'\n'+open('ui.js').read()+'\n'+open('fx.js').read()+'\n'+open('minigames.js').read()+'\n'+open('nss.js').read()+'\n'+open('nss2.js').read()+'\n'+open('fast.js').read()+'\n'+open('gallery.js').read()+'\n'+open('agent.js').read()+'\n'+open('youth_ui.js').read()+'\n'+open('flow.js').read()+'\n'+open('moments.js').read()+'\n'+open('dyn.js').read()+'\n'+open('onescreen.js').read()+'\n'+open('cards.js').read()+'\n'+open('swipe.js').read()+'\n'+open('nssmoment.js').read()+'\n'+open('youthflow.js').read()+'\n'+open('journey.js').read()+'\n'+open('torcida.js').read()+'\n'+open('v5.js').read()+'\n'+open('prison.js').read()+'\n'+open('cloud.js').read()+'\n'+open('home.js').read()
+js='const ASSET_B='+json.dumps(am['B'])+';const ASSET_T='+json.dumps(am['T'])+';\n'+open('data.js').read()+'\n'+open('logic.js').read()+'\n'+open('youth.js').read()+'\n'+open('ui.js').read()+'\n'+open('fx.js').read()+'\n'+open('minigames.js').read()+'\n'+open('nss.js').read()+'\n'+open('nss2.js').read()+'\n'+open('fast.js').read()+'\n'+open('gallery.js').read()+'\n'+open('agent.js').read()+'\n'+open('youth_ui.js').read()+'\n'+open('flow.js').read()+'\n'+open('moments.js').read()+'\n'+open('dyn.js').read()+'\n'+open('onescreen.js').read()+'\n'+open('cards.js').read()+'\n'+open('swipe.js').read()+'\n'+open('nssmoment.js').read()+'\n'+open('decide.js').read()+'\n'+open('lance_html.js').read()+'\n'+open('lance3d.js').read()+'\n'+open('youthflow.js').read()+'\n'+open('journey.js').read()+'\n'+open('torcida.js').read()+'\n'+open('v5.js').read()+'\n'+open('prison.js').read()+'\n'+open('rpg.js').read()+'\n'+open('camp.js').read()+'\n'+open('cloud.js').read()+'\n'+open('home.js').read()+'\n'+open('ui2.js').read()
 head='''<meta charset="utf-8">
 <title>Fome de Bola</title>
 <meta name="claude:viewport-fit-sides" content="cover">

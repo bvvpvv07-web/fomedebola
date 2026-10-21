@@ -380,10 +380,10 @@ async function playMine(o,io){
    else if(S.pos==='GOL'&&!e.us&&(e.t==='g'||e.t==='c')&&ch(e.t==='g'?.75:.35))c={type:'reflex',planned:e.t==='g'};
    if(c){interN++;if(live){live.flash(c.type==='reflex'?'⚠️ Perigo no seu gol!':c.ast?'⚡ Você tem a bola pra criar…':'⚡ A bola é sua…');await sleep(S.liveSpeed===3?600:1400)}
     const ok=await io.chance({...c,comp:o.comp,min:e.m});if(live)live.redraw();
-    const asst=!!NM.dmAssist;NM.dmAssist=false;
+    const asst=!!NM.dmAssist;NM.dmAssist=false;const selfG=!!NM.selfGoal;NM.selfGoal=false;
     if(ok&&asst&&!c.ast&&c.type!=='reflex'){e={...e,t:'g',ast:true,mine:false,w:scorerFrom(usR,S.name)}}else
     if(c.type==='reflex'){if(e.t==='g'&&ok)e={...e,t:'gks'};else if(e.t==='c'&&!ok)e={...e,t:'g'};else if(e.t==='c'&&ok)e={...e,t:'gks'}}
-    else if(c.ast){if(e.t==='g'&&!ok)e={...e,t:'c',ast:false};else if(e.t==='c'&&ok)e={...e,t:'g',ast:true,mine:false}}
+    else if(c.ast){if(e.t==='g'&&!ok)e={...e,t:'c',ast:false};else if(ok&&selfG)e={...e,t:'g',ast:false,mine:true,w:S.name};else if(e.t==='c'&&ok)e={...e,t:'g',ast:true,mine:false}}
     else if(e.t==='g'&&!ok)e={...e,t:'c',fk:false,missed:true};
     else if(e.t==='c'&&ok)e={...e,t:'g',w:S.name,mine:true}}
   }
