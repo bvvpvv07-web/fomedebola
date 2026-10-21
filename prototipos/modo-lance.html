@@ -162,6 +162,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 <script>
 (()=>{
 'use strict';
+if(!window.THREE){try{if(window.ML_EMBED)parent.postMessage({type:'ml-fail'},'*')}catch(e){}return}
 const T=THREE;const $=id=>document.getElementById(id);
 const clamp=(v,a,b)=>Math.max(a,Math.min(b,v)),lerp=(a,b,t)=>a+(b-a)*t,R=(a,b)=>a+Math.random()*(b-a),pick=a=>a[(Math.random()*a.length)|0];
 const gauss=()=>{let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)};

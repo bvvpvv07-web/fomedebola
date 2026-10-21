@@ -6,11 +6,11 @@
 const L3D={frame:null,ready:null,_ready:null,_res:null,ctx:null,failed:false};
 function lanceMode(){return(S&&S.lanceMode)||'jogar'}
 function l3dBoot(){if(L3D.ready)return L3D.ready;
- L3D.ready=new Promise((res,rej)=>{L3D._ready=res;const f=document.createElement('iframe');f.className='l3d';f.title='Lance em 3D';
-  f.srcdoc='<script>window.ML_EMBED=1<\/script>'+L3D_HTML;document.body.appendChild(f);L3D.frame=f;setTimeout(()=>rej(new Error('lance3d: timeout')),25000)});
+ L3D.ready=new Promise((res,rej)=>{L3D._ready=res;L3D._fail=rej;const f=document.createElement('iframe');f.className='l3d';f.title='Lance em 3D';
+  f.srcdoc='<script>window.ML_EMBED=1<\/script>'+L3D_HTML;document.body.appendChild(f);L3D.frame=f;setTimeout(()=>rej(new Error('lance3d: timeout')),15000)});
  L3D.ready.catch(()=>{L3D.failed=true});return L3D.ready}
 addEventListener('message',e=>{const d=e.data||{};if(!L3D.frame||e.source!==L3D.frame.contentWindow)return;
- if(d.type==='ml-ready'&&L3D._ready)L3D._ready();
+ if(d.type==='ml-ready'&&L3D._ready)L3D._ready();if(d.type==='ml-fail'&&L3D._fail)L3D._fail(new Error('lance3d: three.js não carregou'));
  if(d.type==='ml-result'&&L3D._res){const r=L3D._res;L3D._res=null;L3D.frame.classList.remove('on');document.body.classList.remove('l3d-on');r(d.res||{skip:true})}});
 // cena do motor pra cada tipo de lance
 function l3dScene(o){const K=o.kind||'finish';
