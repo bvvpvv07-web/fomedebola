@@ -1,0 +1,60 @@
+/* ================== IDENTIDADE VISUAL: prancheta de várzea à noite ==================
+   Gramado listrado no fundo, cards de prancheta com contorno de giz, o laranja do colete só pra ação,
+   dourado só pra glória (títulos, prêmios, raridade). Cada área do menu tem a sua cor, usada como faixa.
+   Tipos: Saira Condensed (títulos e botões), Barlow (texto e rótulos, sem caixa alta), IBM Plex Mono só em números.
+   Layout: celular em coluna; tablet com mais respiro e duas colunas no início; computador como mesa de técnico
+   (conteúdo à esquerda, painel de controle à direita, menus em gaveta lateral). */
+:root{
+ --pitch:#0b2117;--pitch-2:#0f2a1d;--panel:#143424;--panel-2:#1b4532;--panel-3:#245a41;
+ --line:rgba(238,242,228,.12);--line-2:rgba(238,242,228,.24);
+ --chalk:#eef2e4;--muted:#a3b7a6;--dim:#72907c;
+ --accent:#ff7a2b;--accent-2:#ff9a52;--accent-ink:#1d0c02;--gold:#f2c443;--bad:#ff5a4a;--good:#8be08a;--blue:#7cc4ff;
+ --c-vida:#ff7aa8;--c-comp:#f2c443;--c-loja:#6fd0ff;--c-treino:#8be08a;--c-crime:#ff5a4a;
+ --r-lg:18px;--r-md:12px;--r-sm:8px;
+ --ink:#10170f;
+}
+body{background-color:var(--pitch);background-image:repeating-linear-gradient(180deg,var(--pitch) 0 72px,var(--pitch-2) 72px 144px)}
+::selection{background:var(--accent);color:var(--accent-ink)}
+:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+/* rótulos em caixa baixa, números em mono */
+.eyebrow{font-family:var(--f-body);font-size:12.5px;font-weight:600;letter-spacing:.01em;text-transform:none;color:var(--muted)}
+.tag{font-family:var(--f-body);font-size:11.5px;font-weight:800;letter-spacing:.02em;text-transform:none;padding:3px 9px;border-radius:999px;line-height:1.3}
+.chip{font-family:var(--f-body);font-size:12.5px;font-weight:700;padding:3px 9px;border-radius:999px;font-variant-numeric:tabular-nums;line-height:1.35}
+.card{border-radius:var(--r-lg);border-color:var(--line)}
+.btn{border-radius:var(--r-md);box-shadow:0 3px 0 rgba(0,0,0,.28)}
+.btn.ghost{box-shadow:none}
+.btn:not(.ghost):not([disabled]):active{box-shadow:0 1px 0 rgba(0,0,0,.28)}
+.choice{border-radius:var(--r-md)}
+.tabs{border-radius:var(--r-md)}
+.tab{font-size:15px}
+.toast{border-radius:16px}
+.ovwrap{border-radius:22px}
+
+/* ---------- tablet ---------- */
+@media (min-width:700px){
+ body{font-size:16px}
+ .wrap{max-width:840px;padding-left:24px;padding-right:24px}
+ .ph-in,.htop-in{max-width:840px;padding-left:24px;padding-right:24px}
+ .ovwrap{max-width:600px;padding:26px}
+ .sheet{max-width:840px}
+ .pp-b{max-width:860px}
+ .toast{max-width:520px}
+ .bnav{width:520px!important}
+}
+/* criação do jogador vira um cartão no meio da tela em telas maiores */
+@media (min-width:700px){
+ body .cw{top:24px;bottom:24px;max-width:680px;border-radius:28px;border:1px solid var(--line-2);box-shadow:0 30px 80px rgba(0,0,0,.5)}
+ body .cw-grid,body .cw-opts,body .cw-cards,body .cw-sum{max-width:540px}
+ body .cw-in,body .cw-sel,body .cw-note{max-width:460px}
+}
+/* ---------- computador ---------- */
+@media (min-width:1100px){
+ .wrap,.ph-in,.htop-in{max-width:920px}
+ .ovwrap{max-width:640px}
+ /* páginas antigas (jogos, tabela, copas…) abrem como uma folha no meio da tela */
+ #panel{background:rgba(4,12,8,.66);backdrop-filter:blur(3px)}
+ #panel .pp{width:min(980px,calc(100% - 64px));height:calc(100dvh - 48px);margin:24px auto;border-radius:24px;overflow:hidden;border:1px solid var(--line-2);background:var(--pitch);box-shadow:0 30px 80px rgba(0,0,0,.55)}
+ #panel .pp-h{padding-top:12px}
+}
+@media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms!important;animation-iteration-count:1!important;transition-duration:.01ms!important}}

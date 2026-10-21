@@ -1,7 +1,7 @@
 import json as _j
 _eh=open('/home/claude/modo-lance/modo-lance.html').read()
 open('lance_html.js','w').write('// gerado pelo build a partir de modo-lance.html (motor 3D do Modo Lance)\nconst L3D_HTML='+_j.dumps(_eh).replace('</','<\\/')+';\n')
-css=open('base.css').read()+open('extra.css').read()+open('extra2.css').read()+open('extra3.css').read()+open('extra4.css').read()
+css=open('base.css').read()+open('extra.css').read()+open('extra2.css').read()+open('extra3.css').read()+open('extra4.css').read()+open('theme.css').read()
 import json,os
 am=json.load(open('assets/map.json')) if os.path.exists('assets/map.json') else {'B':{},'T':{}}
 import base64

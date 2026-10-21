@@ -122,15 +122,18 @@ function skPage(){return{t:'Árvore de habilidades',col:'tree',html:()=>{const R
 // card antigo do início não aparece mais (o nível fica no Treino)
 rpgCardHTML=function(){return''};
 {const st=document.createElement('style');st.textContent=`
-.sk-head{display:flex;gap:12px;align-items:center;padding:12px;border-radius:16px;background:#fff;color:#22324a}.sk-head .rpg-lv{flex:0 0 auto}.sk-hm{flex:1;display:grid;gap:4px;min-width:0}.sk-ht{display:flex;justify-content:space-between;gap:8px}.sk-ht span{color:#6b7a90;font-size:13px}.sk-hm small{color:#6b7a90}
-.sk-help{margin:8px 2px;font-size:12.5px;color:#cfd6c8}
-.sk-tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 2px 8px;scrollbar-width:none;min-height:80px}.sk-tab{flex:0 0 auto}.sk-tabs::-webkit-scrollbar{display:none}
-.sk-tab{flex:0 0 auto;display:grid;justify-items:center;gap:1px;min-width:78px;padding:8px 6px;border-radius:14px;border:2px solid transparent;background:rgba(255,255,255,.08);color:#fff}.sk-tab span{font-size:22px}.sk-tab b{font-size:11.5px}.sk-tab small{font-size:10.5px;color:#cfd6c8}
-.sk-tab.on{background:#fff;color:#22324a;border-color:var(--c)}.sk-tab.on small{color:#6b7a90}
-.sk-br{display:grid;gap:10px}.sk-bh{display:flex;gap:10px;align-items:center;padding:10px 12px;border-radius:14px;background:var(--c);color:#111}.sk-bh>span{font-size:28px}.sk-bh b{font:900 italic 22px var(--f-display);text-transform:uppercase}.sk-bh small{display:block;font-weight:700;opacity:.75}
-.sk-tier{display:grid;gap:6px;padding:10px;border-radius:14px;background:#fff;color:#22324a}.sk-tier.shut{background:#e9edf1}
-.sk-th{display:flex;align-items:baseline;gap:8px}.sk-th b{font:900 italic 20px var(--f-display);color:#22324a;min-width:26px}.sk-th span{font-size:12px;font-weight:700;color:#6b7a90}.sk-th small{margin-left:auto;font-size:11.5px;color:#6b7a90;text-align:right}
-.sk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}.sk-br,.sk-tier{grid-template-columns:minmax(0,1fr);min-width:0}.sk-th small{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-.sk-n{display:grid;gap:2px;align-content:start;text-align:left;padding:8px 9px;border-radius:12px;border:2px solid #dde3ea;background:#f6f8fa;color:#22324a;font:inherit;min-height:58px}
-.sk-n b{font-size:13px;line-height:1.15}.sk-n small{font-size:11px;color:#6b7a90;line-height:1.2}.sk-n em{font-style:normal;font-size:10.5px;font-weight:700;color:#b5452a}
-.sk-n.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 22%,#fff)}.sk-n.can{border-color:#f2a516;background:#fff6dc;box-shadow:0 2px 0 #f2a516}.sk-n.lock{opacity:.6}.sk-n.key{border-style:double;border-width:4px}`;document.head.appendChild(st)}
+.sk-head{display:flex;gap:12px;align-items:center;padding:12px 14px;border-radius:var(--r-lg);background:var(--panel-2);border:1px solid var(--line)}.sk-head .rpg-lv{flex:0 0 auto}.sk-hm{flex:1;display:grid;gap:5px;min-width:0}.sk-ht{display:flex;justify-content:space-between;gap:8px;align-items:baseline}.sk-ht b{font-size:16px}.sk-ht span{color:var(--muted);font-size:13px}.sk-hm small{color:var(--muted)}
+.sk-help{margin:4px 2px;font-size:13px;color:var(--muted)}
+.sk-tabs{display:flex;gap:6px;overflow-x:auto;padding:2px 0 6px;scrollbar-width:none;min-height:82px}.sk-tabs::-webkit-scrollbar{display:none}
+.sk-tab{flex:0 0 auto;display:grid;justify-items:center;gap:1px;min-width:80px;padding:8px 6px;border-radius:var(--r-md);border:2px solid var(--line);background:var(--panel);color:var(--chalk);font:inherit}.sk-tab span{font-size:22px}.sk-tab b{font-size:12px}.sk-tab small{font:600 11px var(--f-mono);color:var(--muted)}
+.sk-tab.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 18%,var(--panel))}
+.sk-br{display:grid;gap:8px;grid-template-columns:minmax(0,1fr);min-width:0}.sk-bh{display:flex;gap:10px;align-items:center;padding:10px 14px;border-radius:var(--r-md);background:var(--c);color:var(--ink)}.sk-bh>span{font-size:28px}.sk-bh b{font:900 italic 24px/1 var(--f-display);text-transform:uppercase}.sk-bh small{display:block;font-weight:700;opacity:.8}
+.sk-tier{display:grid;gap:8px;grid-template-columns:minmax(0,1fr);min-width:0;padding:10px;border-radius:var(--r-md);background:var(--panel);border:1px solid var(--line)}.sk-tier.shut{background:rgba(20,52,36,.55)}
+.sk-th{display:flex;align-items:baseline;gap:10px}.sk-th b{font:900 italic 20px var(--f-display);min-width:28px;color:var(--c)}.sk-th span{font-size:12.5px;font-weight:700;color:var(--chalk)}.sk-th small{margin-left:auto;font-size:12px;color:var(--muted);text-align:right;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.sk-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+.sk-n{display:grid;gap:3px;align-content:start;text-align:left;padding:9px 10px;border-radius:10px;border:1px solid var(--line-2);background:rgba(5,16,10,.35);color:var(--chalk);font:inherit;min-height:60px}
+.sk-n b{font-size:13.5px;line-height:1.15}.sk-n small{font-size:11.5px;color:var(--muted);line-height:1.25}.sk-n em{font-style:normal;font-size:11px;font-weight:700;color:var(--gold)}
+.sk-n.on{border-color:var(--c);background:color-mix(in srgb,var(--c) 22%,transparent)}.sk-n.on small{color:var(--chalk)}
+.sk-n.can{border-color:var(--accent);background:color-mix(in srgb,var(--accent) 14%,transparent);box-shadow:0 0 0 1px var(--accent)}.sk-n.lock{opacity:.55}.sk-n.key{border-width:2px}
+@media (min-width:700px){.sk-grid{grid-template-columns:repeat(3,minmax(0,1fr))}}
+`;document.head.appendChild(st)}
