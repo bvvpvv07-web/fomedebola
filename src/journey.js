@@ -110,13 +110,13 @@ function coachTour(key,steps){
  const list=steps.filter(s=>document.querySelector(s.sel));if(!list.length)return;S.tips[key]=true;
  let i=0;const host=document.createElement('div');host.id='tour';document.body.appendChild(host);TOUR=host;
  const close=()=>{host.remove();TOUR=null;removeEventListener('resize',draw)};
- function draw(){const s=list[i];const el=document.querySelector(s.sel);if(!el){i++;if(i>=list.length)return close();return draw()}
+ function draw(){if(!host.isConnected||TOUR!==host){removeEventListener('resize',draw);if(TOUR===host)TOUR=null;return}const s=list[i];if(!s)return close();const el=document.querySelector(s.sel);if(!el){i++;if(i>=list.length)return close();return draw()}
   el.scrollIntoView({block:'nearest'});const r=el.getBoundingClientRect();const pad=6;
   const top=r.bottom+12+180<innerHeight?r.bottom+12:Math.max(12,r.top-12-190);
   host.innerHTML=`<div class="tr-hole" style="left:${r.left-pad}px;top:${r.top-pad}px;width:${r.width+pad*2}px;height:${r.height+pad*2}px"></div>
   <div class="tr-bub" style="top:${top}px"><div class="tr-h"><span class="cc-av sm">${COACH.ic}</span><b>${esc(s.t)}</b><small>${i+1}/${list.length}</small></div><p>${s.d}</p>
   <div class="tr-act"><button class="lnk" id="trSkip">Pular tutorial</button><button class="btn small" id="trNx">${i===list.length-1?'Entendi!':'Próximo'}</button></div></div>`;
-  document.getElementById('trNx').onclick=()=>{i++;if(i>=list.length)close();else draw()};document.getElementById('trSkip').onclick=close}
+  const nx=host.querySelector('#trNx'),sk=host.querySelector('#trSkip');if(nx)nx.onclick=()=>{i++;if(i>=list.length)close();else draw()};if(sk)sk.onclick=close}
  addEventListener('resize',draw);setTimeout(draw,60);
 }
 const TOUR_HUB=[

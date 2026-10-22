@@ -22,7 +22,8 @@ function rcMask(sur,cols,rows){try{sur=rcNorm(sur);const one=`OBRIGADO, ${sur}`;
  L.forEach((t,li)=>{const w=rcLineW(t)*kx;let x=Math.floor((cols-w)/2);const yy=y0+li*8*sy;for(const ch of t){const g=rcGlyph(ch);for(let r=0;r<7;r++)for(let c=0;c<g[r].length;c++)if(g[r][c]==='1')for(let a=0;a<sy;a++)for(let b=0;b<kx;b++){const R_=yy+r*sy+a,C_=x+c*kx+b;if(R_>=0&&R_<rows&&C_>=0&&C_<cols)m[R_*cols+C_]=true}x+=(g[0].length+1)*kx}});
  return m}catch(e){return null}}
 function rcShade(h,k){try{h=String(h).replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h,16);const f=v=>Math.round(clamp(k<0?v*(1+k):v+(255-v)*k,0,255)).toString(16).padStart(2,'0');return'#'+f(n>>16&255)+f(n>>8&255)+f(n&255)}catch(e){return h}}
-function rcFace(x,y,w,c1,c2){try{return faceSVG(S.face||{preset:0},c1,c2).replace('<svg class="facesvg" ','<svg ').replace('<svg ',`<svg x="${x}" y="${y}" width="${w}" height="${w}" `)}catch(e){return''}}
+function rcFace(x,y,w,c1,c2,opt){try{const f=S.face||{preset:0};if(f.photo){const id='rcph'+Math.floor(Math.random()*1e6);return`<clipPath id="${id}"><circle cx="${x+w/2}" cy="${y+w/2}" r="${w*.42}"/></clipPath><image href="${f.photo}" x="${x}" y="${y}" width="${w}" height="${w}" clip-path="url(#${id})" preserveAspectRatio="xMidYMid slice"${opt&&opt.bronze?' filter="url(#rcBzF)"':''}/>`}
+ return faceSVG(f,c1,c2,opt||{}).replace('<svg class="facesvg" ','<svg ').replace('<svg ',`<svg x="${x}" y="${y}" width="${w}" height="${w}" `)}catch(e){return''}}
 // cena 1: o estádio
 let RC_ASP=1;
 function rcStadiumSVG(c1,c2){const asp=RC_ASP,wide=asp>=1;const W=wide?1000:620,H=Math.round(clamp(W/asp,520,1150));
@@ -72,7 +73,7 @@ function rcChart(card){const h=card.history||[];if(h.length<2)return'';const W=6
 function rcBars(card){const h=card.history||[];if(!h.length)return'';const gk=card.pos==='GOL';const v=h.map(x=>gk?(x.cs||0):(x.g||0));const mx=Math.max(1,...v);
  return`<div class="rc-bars" aria-label="${gk?'Jogos sem sofrer gol':'Gols'} por temporada">${h.map((x,i)=>{const c=rcClubOf(x.club,card);return`<div class="rc-bar" title="${x.age} anos: ${v[i]}"><i style="height:${Math.max(3,v[i]/mx*100)}%;background:${c.c1||'#ff7a2b'};animation-delay:${(.2+i*.05).toFixed(2)}s"></i><small>${x.age}</small></div>`}).join('')}</div>`}
 // cena 6: estátua ou camisa aposentada
-function rcStatueSVG(c){const f=rcFace(70,8,80,'#888','#ccc');return`<svg class="rc-statue" viewBox="0 0 220 330" aria-hidden="true"><defs><linearGradient id="rcBz" x1="0" x2="1"><stop offset="0" stop-color="#5e3f1a"/><stop offset=".42" stop-color="#d29d55"/><stop offset=".6" stop-color="#b07a3a"/><stop offset="1" stop-color="#4f3415"/></linearGradient>
+function rcStatueSVG(c){const f=rcFace(70,8,80,'#888','#ccc',{bronze:true});return`<svg class="rc-statue" viewBox="0 0 220 330" aria-hidden="true"><defs><linearGradient id="rcBz" x1="0" x2="1"><stop offset="0" stop-color="#5e3f1a"/><stop offset=".42" stop-color="#d29d55"/><stop offset=".6" stop-color="#b07a3a"/><stop offset="1" stop-color="#4f3415"/></linearGradient>
  <filter id="rcBzF" color-interpolation-filters="sRGB"><feColorMatrix type="matrix" values=".27 .53 .1 0 .3  .19 .37 .07 0 .17  .09 .18 .03 0 .05  0 0 0 1 0"/></filter></defs>
  <rect x="36" y="262" width="148" height="62" rx="4" fill="#7d838a"/><rect x="26" y="252" width="168" height="14" rx="3" fill="#a3a8ae"/><rect x="58" y="280" width="104" height="30" rx="3" fill="#c9a24a"/>
  <text x="110" y="301" text-anchor="middle" font-family="Saira Condensed,Impact,sans-serif" font-weight="900" font-size="19" fill="#3a2a0e">${esc(rcSur().toUpperCase())} ${S.shirt||S.num||''}</text>
@@ -83,7 +84,7 @@ function rcStatueSVG(c){const f=rcFace(70,8,80,'#888','#ccc');return`<svg class=
   <path d="M84 192 L78 248 L98 248 L106 200 Z"/><path d="M136 192 L142 248 L122 248 L114 200 Z"/>
   <path d="M74 244 L100 244 L100 254 L70 254 Z"/><path d="M120 244 L146 244 L150 254 L120 254 Z"/>
   <circle cx="44" cy="238" r="14" opacity=".95"/></g>
- <g filter="url(#rcBzF)">${f}</g></svg>`}
+ ${f}</svg>`}
 function rcShirtSVG(c1,c2,num,name){return`<svg class="rc-shirt" viewBox="0 0 260 280" aria-hidden="true"><rect x="6" y="6" width="248" height="268" rx="10" fill="#3a2a1a"/><rect x="18" y="18" width="224" height="244" rx="4" fill="#f3efe6"/>
  <path d="M80 50 L110 40 Q130 56 150 40 L180 50 L222 82 L204 116 L184 104 L184 232 L76 232 L76 104 L56 116 L38 82 Z" fill="${c1}" stroke="rgba(0,0,0,.25)" stroke-width="2"/>
  <text x="130" y="112" text-anchor="middle" font-family="Saira Condensed,Impact,sans-serif" font-weight="800" font-size="20" fill="${c2}" letter-spacing="2">${esc(String(name).toUpperCase())}</text>

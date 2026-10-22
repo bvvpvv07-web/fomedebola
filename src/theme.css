@@ -29,7 +29,18 @@ body{background-color:var(--pitch);background-image:repeating-linear-gradient(18
 .tabs{border-radius:var(--r-md)}
 .tab{font-size:15px}
 .toast{border-radius:16px}
+/* sem desfoque atrás de barras quase opacas: no iPad o blur custa caro a cada rolagem */
+.ph,.topnav,.htop,.bl-dock,.bnav,.cut-txt{-webkit-backdrop-filter:none!important;backdrop-filter:none!important}
+.ph{background:#0c2318!important}
+/* tutorial: botões do tamanho do dedo */
+.tr-act{gap:10px}.tr-act .lnk{min-height:42px;padding:0 12px;font-size:14px}.tr-act .btn.small{min-height:44px;padding:0 20px;font-size:16px}
+.tr-bub{max-width:420px}
+/* avisos descem abaixo do cabeçalho pra não cobrir Sair e Opções */
+#toasts{top:calc(64px + env(safe-area-inset-top,0px))}
+body.l3d-on #toasts,body.rc-open #toasts{top:calc(10px + env(safe-area-inset-top,0px))}
 .ovwrap{border-radius:22px}
+/* listas em grade dentro de áreas com rolagem: cada linha do tamanho do conteúdo (sem achatar filtros e abas) */
+.pp-b{grid-auto-rows:max-content}
 /* botões de sair e voltar com texto, sempre no canto esquerdo */
 .ph .menu{width:auto;display:inline-flex;align-items:center;gap:4px;padding:0 13px 0 9px;border-radius:999px;border:1px solid var(--line-2);background:var(--panel);color:var(--chalk);font:800 14px/1 var(--f-body)}
 .ph .menu .mi{font-size:24px;line-height:.8;margin-top:-3px;color:var(--accent)}

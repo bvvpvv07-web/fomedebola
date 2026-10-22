@@ -14,12 +14,12 @@ addEventListener('message',e=>{const d=e.data||{};if(!L3D.frame||e.source!==L3D.
  if(d.type==='ml-result'&&L3D._res){const r=L3D._res;L3D._res=null;L3D.frame.classList.remove('on');document.body.classList.remove('l3d-on');r(d.res||{skip:true})}});
 // cena do motor pra cada tipo de lance
 function l3dScene(o){const K=o.kind||'finish';
- if(K==='keeper')return o.pen?'gkPen':pick(['gkShot','gkShot','gkFk']);
- if(K==='pen')return'penalti';if(K==='fk')return'falta';if(K==='chip')return'mano';if(K==='combo')return'tabela';if(K==='header')return'cabeca';
- if(K==='long')return pick(['lanca','lanca','saida']);if(K==='cross')return pick(['cruz','cruz','escanteio']);
- if(K==='pass')return o.planned?pick(['contra','saida']):pick(['contra','saida','tabela','area']);
- if(K==='dribble')return pick(['mano','area','contra']);
- return o.planned?pick(['mano','area','contra']):pick(['area','longe','contra'])}
+ if(K==='keeper')return o.pen?'gkPen':pick(['gkShot','gkShot','gkFk','gkMano','gkCab']);
+ if(K==='pen')return'penalti';if(K==='fk')return'falta';if(K==='chip')return'mano';if(K==='combo')return'tabela';if(K==='header')return pick(['cabeca','cabeca','voleio']);
+ if(K==='long')return pick(['lanca','lanca','saida','contra3']);if(K==='cross')return pick(['cruz','cruz','escanteio','escCurto','lateral']);
+ if(K==='pass')return o.planned?pick(['contra','saida','contra3']):pick(['contra','saida','tabela','area','contra3','pivo']);
+ if(K==='dribble')return pick(['mano','area','contra','pivo','lateral']);
+ return o.planned?pick(['mano','area','contra','rebote','voleio']):pick(['area','longe','contra','rebote','voleio','pivo'])}
 const L3D_HAIR={buzz:'buzz',lateral:'quiff',quiff:'quiff',afro:'afro',cacheado:'afro',long:'long',dreads:'long',moicano:'quiff',coque:'long',bald:'bald'};
 function l3dDist(a,b){const p=h=>{h=(h||'#000').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h,16)||0;return[n>>16&255,n>>8&255,n&255]};const x=p(a),y=p(b);return Math.hypot(x[0]-y[0],x[1]-y[1],x[2]-y[2])}
 function l3dKit(c){const c1=(c&&c.c1)||'#ff6a12',c2=(c&&c.c2)||'#ffffff';return{shirt:c1,shirt2:c2,shorts:l3dDist(c1,c2)>120?c2:'#1b1f24',socks:c1}}
@@ -40,7 +40,7 @@ function l3dResult(o,res){const K=o.kind||'finish';const GK=K==='keeper';const i
  if(GK){ok=o.pen?(res.kind==='save'||res.kind==='claim'):!res.goal;NM.last=res.goal?'Foi no canto.':ok?(o.okTxt||'DEFENDEU!'):'Pra fora!'}
  else{ok=!!res.goal||(train&&isPassK&&res.chain>=1);
   if(res.goal){if(isPassK||o.ast){if(res.heroGoal)NM.selfGoal=true}else if(!res.heroGoal&&res.heroAssist&&K!=='pen')NM.dmAssist=true}
-  NM.last=ok?(o.okTxt||'GOL!'):res.kind==='off'?'Impedimento.':K==='pen'?(res.kind==='save'||res.kind==='claim'?'O goleiro segurou.':'Pra fora!'):isPassK?'Interceptado.':res.kind==='save'||res.kind==='claim'?'O goleiro pegou.':'Pra fora!'}
+  NM.last=ok?(o.okTxt||'GOL!'):res.kind==='off'?'Impedimento.':res.kind==='tackle'?'Desarmado.':res.kind==='block'?'Bloqueado.':K==='pen'?(res.kind==='save'||res.kind==='claim'?'O goleiro segurou.':'Pra fora!'):isPassK?'Interceptado.':res.kind==='save'||res.kind==='claim'?'O goleiro pegou.':'Pra fora!'}
  const perfect=ok&&!!(res.fk||res.header||res.chain>=2||(GK&&res.dived&&res.kind==='save')||res.caught);NM.grade=ok?(perfect?92:78):40;NM.why='Lance jogado';
  return{ok,perfect,grade:NM.grade}}
 async function lance3dPlay(o){
@@ -56,7 +56,7 @@ async function lance3dPlay(o){
 // guarda os dois times do jogo atual pras cores
 {const _pm=playMine;playMine=async function(o,io){L3D.ctx={us:o&&o.us,them:o&&o.them};try{return await _pm(o,io)}finally{L3D.ctx=null}}}
 // pré-carrega o 3D quando a carreira está aberta e o modo é jogar
-{const _rh=renderHub;renderHub=function(...a){const r=_rh.apply(this,a);try{if(lanceMode()==='jogar'&&!L3D.ready)setTimeout(()=>{l3dBoot().catch(()=>{})},1500)}catch(e){}return r}}
+{const _rh=renderHub;renderHub=function(...a){const r=_rh.apply(this,a);try{if(lanceMode()==='jogar'&&!L3D.ready&&!L3D._sched){L3D._sched=true;const go=()=>{if(!L3D.ready)l3dBoot().catch(()=>{})};setTimeout(()=>{if(window.requestIdleCallback)requestIdleCallback(go,{timeout:5000});else go()},1500)}}catch(e){}return r}}
 {const st=document.createElement('style');st.textContent=`.l3d{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:9999;display:none;background:#0d1f15}.l3d.on{display:block}body.l3d-on{overflow:hidden}`;document.head.appendChild(st)}
 // peneira: o técnico explica do jeito certo pra cada modo
 if(typeof coachCard==='function'){const _cc=coachCard;coachCard=function(st,...a){if(lanceMode()==='jogar'&&!L3D.failed){try{toast({ic:COACH.ic,title:COACH.n,txt:st.k==='keeper'?`Estação de ${st.n.toLowerCase()}: arraste pro lado do chute pra voar.`:`Estação de ${st.n.toLowerCase()}: puxe da bola pra trás e toque nela pra dar efeito.`,ms:2600})}catch(e){}return Promise.resolve()}return _cc(st,...a)}}

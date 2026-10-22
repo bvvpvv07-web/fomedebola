@@ -4,10 +4,15 @@ let LIVE_USED=false;
 // ---------- toast ----------
 function toast(o){
  let host=document.getElementById('toasts');if(!host){host=document.createElement('div');host.id='toasts';document.body.appendChild(host)}
- const el=document.createElement('div');el.className='toast '+(o.kind||'');
- el.innerHTML=`${o.ic?`<span class="tic">${o.ic}</span>`:''}<div><b>${esc(o.title||'')}</b>${o.txt?`<span>${esc(o.txt)}</span>`:''}${o.chips&&o.chips.length?`<div class="chipsrow">${o.chips.map(([t,k])=>`<span class="chip ${k}">${esc(t)}</span>`).join('')}</div>`:''}</div>`;
- host.appendChild(el);el.onclick=()=>el.remove();
- setTimeout(()=>{el.classList.add('out');setTimeout(()=>el.remove(),400)},o.ms||3200);
+ // avisos iguais em sequência (ex.: vários "Nível N!") viram um só, e nunca mais de 2 na tela
+ const grp=o.group||(/^Nível \d+!?$/.test(o.title||'')?'lvl':null);let el=grp?host.querySelector(`.toast[data-g="${grp}"]`):null;
+ if(el){clearTimeout(el._t1);clearTimeout(el._t2);el.classList.remove('out');el._n=(el._n||1)+1}else{el=document.createElement('div');el._n=1;host.appendChild(el)}
+ el.className='toast '+(o.kind||'');if(grp)el.dataset.g=grp;
+ const extra=grp==='lvl'&&el._n>1?`+${el._n} pontos de habilidade. Vá em Treino → Árvore.`:o.txt;
+ el.innerHTML=`${o.ic?`<span class="tic">${o.ic}</span>`:''}<div><b>${esc(o.title||'')}</b>${extra?`<span>${esc(extra)}</span>`:''}${o.chips&&o.chips.length?`<div class="chipsrow">${o.chips.map(([t,k])=>`<span class="chip ${k}">${esc(t)}</span>`).join('')}</div>`:''}</div>`;
+ el.onclick=()=>el.remove();
+ const all=[...host.querySelectorAll('.toast:not(.out)')];if(all.length>2)all.slice(0,all.length-2).forEach(x=>x.remove());
+ el._t1=setTimeout(()=>{el.classList.add('out');el._t2=setTimeout(()=>el.remove(),400)},o.ms||3200);
 }
 // ---------- pop-up de decisão ----------
 function choicePopup(m){

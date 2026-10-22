@@ -172,16 +172,23 @@ function blHub(){const w=$app.querySelector('.wrap');document.body.classList.rem
  const md=w.querySelector(':scope > .matchday, :scope > .blockcard');if(md&&!S.st.done&&!PAUSE)md.insertAdjacentHTML('afterend',blFeedHTML());
  // topo: saldo e opções
  const ph=$app.querySelector('.ph .ph-in');if(ph&&!ph.querySelector('.bl-money')){const ov=ph.querySelector('.ovr');ov.insertAdjacentHTML('beforebegin',`<div class="bl-money"><small>Saldo</small><b>${money(S.din)}</b></div>`);
-  if(!S.st.done&&!PAUSE)ov.insertAdjacentHTML('afterend','<button class="bl-gear" id="blGear" aria-label="Opções">⚙️</button>')}
+  ov.insertAdjacentHTML('afterend','<button class="bl-gear" id="blGear" aria-label="Opções">⚙️</button>')}
+ // com evento pendente ou temporada encerrada não existe o menu antigo: monta um menor com o que ainda vale
+ if(!document.getElementById('dockM')){const m=document.createElement('div');m.className='dockmenu';m.id='dockM';m.hidden=true;
+  m.innerHTML=`<div class="livemode"><span class="eyebrow">Jogada</span>${[['jogar','🎮 Jogar'],['decidir','🧠 Decidir']].map(([k,n])=>`<button class="lmbtn ${(S.lanceMode||'jogar')===k?'on':''}" data-l3m2="${k}">${n}</button>`).join('')}</div><button class="dmi" id="fastAll3">🏁 Simular até a aposentadoria</button>`;
+  $app.appendChild(m);m.querySelectorAll('[data-l3m2]').forEach(b=>b.onclick=()=>{S.lanceMode=b.dataset.l3m2;try{saveNow('lanceMode')}catch(e){}m.querySelectorAll('[data-l3m2]').forEach(x=>x.classList.toggle('on',x===b))});
+  const fa=m.querySelector('#fastAll3');fa.onclick=()=>{m.hidden=true;if(PAUSE){try{resolveOption(PAUSE,autoOption(PAUSE))}catch(e){}PAUSE=null;EVRES=null}fastForward()}}
  const dm=document.getElementById('dockM');if(dm){dm.hidden=true;dm.classList.add('bl-optmenu');document.body.appendChild(dm)}
  const dock=document.createElement('div');dock.id='blDock';dock.className='bl-dock';dock.innerHTML=blStatsHTML()+blNavHTML();$app.appendChild(dock);
+ // o fim da página nunca fica escondido atrás da barra de baixo
+ try{if(getComputedStyle(dock).position==='fixed')w.style.setProperty('padding-bottom',(dock.offsetHeight+18)+'px','important')}catch(e){}
  const gear=document.getElementById('blGear');if(gear&&dm)gear.onclick=e=>{e.stopPropagation();dm.hidden=!dm.hidden;if(!dm.hidden){const r=gear.getBoundingClientRect();dm.style.top=(r.bottom+6)+'px'}};
  if(dm)document.addEventListener('click',function off(e){if(!dm.isConnected){document.removeEventListener('click',off);return}if(!dm.hidden&&!dm.contains(e.target)&&e.target!==gear)dm.hidden=true});
  document.getElementById('blStats').onclick=()=>openHubPanel('jogador');
  dock.querySelectorAll('[data-bl]').forEach(b=>b.onclick=()=>{const k=b.dataset.bl;blOpen(k==='vida'?vidaPage():k==='comp'?compPage():k==='loja'?lojaPage():treinoPage())});
  document.getElementById('blGo').onclick=()=>{const g=blGoInfo();if(g.dis){const ev=$app.querySelector('.ev');if(ev)ev.scrollIntoView({behavior:'smooth'});return}const el=document.getElementById(g.el);if(el)el.click()};
 }
-{const _rh=renderHub;renderHub=function(...a){const r=_rh.apply(this,a);try{const dm=document.querySelectorAll('body > .bl-optmenu');dm.forEach(x=>{if(x!==document.getElementById('dockM'))x.remove()});blHub()}catch(e){console.error(e)}return r}}
+{const _rh=renderHub;renderHub=function(...a){const r=_rh.apply(this,a);try{document.querySelectorAll('body > .bl-optmenu').forEach(x=>x.remove());blHub()}catch(e){console.error(e)}return r}}
 {const _sh=shell;shell=function(...a){document.body.classList.remove('blhub');document.querySelectorAll('body > .bl-optmenu').forEach(x=>x.remove());return _sh.apply(this,a)}}
 // tour do início explica o menu novo
 if(typeof TOUR_HUB!=='undefined'){TOUR_HUB.length=0;TOUR_HUB.push(
@@ -233,7 +240,7 @@ body.blhub .ph .shield,body.blhub .ph .flagbox{display:none}body.blhub .ph .who 
 .bl-me{display:flex;align-items:center;gap:10px;padding:9px 14px;background:rgba(5,16,10,.55);border-bottom:1px solid var(--line)}.bl-av{width:40px;height:40px;border-radius:50%;overflow:hidden;background:var(--panel-2);border:2px solid var(--c);flex:0 0 auto}.bl-av svg,.bl-av img{width:100%;height:100%;display:block}
 .bl-mi{display:grid;min-width:0}.bl-mi b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.bl-mi span{font-size:12px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .bl-mm{margin-left:auto;display:grid;justify-items:end}.bl-mm b{font:600 17px var(--f-mono);color:var(--gold)}.bl-mm span{font-size:11.5px;color:var(--muted)}
-.blp-b{flex:1;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:10px 10px calc(28px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start}.blp-b>*{min-width:0}
+.blp-b{flex:1;overflow-y:auto;overflow-x:hidden;overscroll-behavior:contain;padding:10px 10px calc(28px + env(safe-area-inset-bottom,0px));display:grid;grid-template-columns:minmax(0,1fr);gap:6px;align-content:start;grid-auto-rows:max-content}.blp-b>*{min-width:0}
 .blr{display:flex;align-items:center;gap:12px;width:100%;min-height:64px;padding:10px 14px;border:1px solid var(--line);border-radius:var(--r-md);background:var(--panel);color:var(--chalk);text-align:left;font:inherit}
 .blr:hover{border-color:var(--line-2)}.blr:active{background:var(--panel-2)}.blr[aria-disabled=true]{background:rgba(20,52,36,.55)}.blr[aria-disabled=true] .blr-ic,.blr[aria-disabled=true] .blr-m b,.blr[aria-disabled=true] .blr-m small{opacity:.55}.blr.warn{box-shadow:inset 4px 0 0 var(--c-crime)}.blr.static{min-height:52px}
 .blr-ic{flex:0 0 36px;font-size:28px;line-height:1;text-align:center}.blr-m{display:grid;gap:2px;min-width:0;flex:1}.blr-m b{font-size:16px;font-weight:700}.blr-m small{font-size:13px;color:var(--muted);line-height:1.3}.blr-m em{font-style:normal;font-size:12px;font-weight:700;color:var(--bad)}
