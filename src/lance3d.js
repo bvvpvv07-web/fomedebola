@@ -80,3 +80,32 @@ async function lance3dPlay(o){
 {const st=document.createElement('style');st.textContent=`.l3d{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:9999;display:none;background:#0d1f15}.l3d.on{display:block}body.l3d-on{overflow:hidden}`;document.head.appendChild(st)}
 // peneira: o técnico explica do jeito certo pra cada modo
 if(typeof coachCard==='function'){const _cc=coachCard;coachCard=function(st,...a){if(lanceMode()==='jogar'&&!L3D.failed){try{toast({ic:COACH.ic,title:COACH.n,txt:st.k==='keeper'?`Estação de ${st.n.toLowerCase()}: arraste pro lado do chute pra voar.`:`Estação de ${st.n.toLowerCase()}: puxe da bola pra trás e toque nela pra dar efeito.`,ms:2600})}catch(e){}return Promise.resolve()}return _cc(st,...a)}}
+// ================== PARTIDA COMPLETA EM 3D ==================
+// Com a opção ligada (⚙️ › Partida), cada jogo em que você entra em campo vira uma partida 11 contra 11 de 2 tempos de 1,5 min:
+// joystick, passe, lançamento, chute, desarme. "Time todo" (o controle troca pro mais perto da bola, igual DLS) ou
+// "Só meu jogador" (você é o seu craque). O placar, os gols, as assistências e os desarmes voltam pra carreira.
+// Na apresentação dá pra "Simular" aquele jogo e seguir com os lances de sempre.
+function fullMode(){const v=S&&S.fullMatch;if(v==='off'||lanceMode()!=='jogar'||L3D.failed)return null;return v==='solo'?'solo':'team'}
+function l3dLine(side,nat){const B={G:[],D:[],M:[],A:[]};const bk={GOL:'G',ZAG:'D',LD:'D',LE:'D',LAT:'D',VOL:'M',MC:'M',MEI:'M',ME:'M',MD:'M',PE:'A',PD:'A',PON:'A',SA:'A',ATA:'A'};
+ let ros=[];try{ros=sideRoster(side,nat)||[]}catch(e){}const seen=new Set();for(const p of ros){if(!p||!p.n||p.n===S.name||seen.has(p.n))continue;seen.add(p.n);(B[bk[p.pos]||'M']).push(p.n)}return B}
+async function l3dFullMatch(x){const o=x.o,ctrl=fullMode();if(!ctrl)return{skip:true};
+ if(!L3D.frame||!L3D._loaded){try{toast({ic:'🏟️',title:'Partida completa',txt:'Montando o estádio…',ms:1600})}catch(e){}}
+ await l3dBoot();L3D._loaded=true;const base=l3dCfg({kind:'finish'});let at={};try{at=CA()}catch(e){}
+ const nat=o.kind==='nat';const dk={amador:-.07,pro:0,lenda:.07}[S.diff]||0;
+ const cfg={mode:'match',ctrl,us:base.us,them:base.them,gkUs:base.gkUs,hero:base.hero,crowd:base.crowd,env:base.env,heroPos:S.pos,heroName:S.name,heroAttrs:at,
+  usName:o.us.n,themName:o.them.n,usAbbr:mkAbbr(o.us.n),themAbbr:mkAbbr(o.them.n),usS:o.us.s,themS:o.them.s,diffK:dk,penTaker:!!(S.taker&&S.taker.pen),
+  names:{us:l3dLine(o.us,nat),them:l3dLine(o.them)},startMin:x.startMin|0,pre:[x.preU|0,x.preT|0],comp:[o.comp,o.label].filter(Boolean).join(' · '),xg:[1.3*Math.exp(x.d/19),1.18*Math.exp(-x.d/19)],halfLen:90};
+ L3D.frame.classList.add('on');document.body.classList.add('l3d-on');
+ const res=await new Promise(r=>{L3D._res=r;L3D.frame.contentWindow.postMessage({type:'ml-play',cfg},'*')});
+ return res}
+// o ⚙️ guarda o jeito de controlar escolhido dentro da partida
+addEventListener('message',e=>{const d=e.data||{};if(!L3D.frame||e.source!==L3D.frame.contentWindow)return;if(d.type==='ml-ctrl'&&S&&(d.ctrl==='team'||d.ctrl==='solo')){S.fullMatch=d.ctrl;try{saveNow('fullMatch')}catch(_){}}});
+{const _pm2=playMine;playMine=async function(o,io){if(io&&io!==IO_AUTO&&io.chance&&!io.fullMatch&&fullMode())io={...io,fullMatch:x=>l3dFullMatch(x)};return _pm2(o,io)}}
+// linha "Partida" no menu de opções
+function fmRowHTML(){const v=S.fullMatch||'team';return`<div class="livemode" id="fmRow"><span class="eyebrow">Partida</span>${[['off','⚡ Lances'],['team','🎮 Time todo'],['solo','⭐ Só eu']].map(([k,n])=>`<button class="lmbtn ${v===k?'on':''}" data-fm="${k}">${n}</button>`).join('')}</div>`}
+function fmBind(root){root.querySelectorAll('[data-fm]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();S.fullMatch=b.dataset.fm;try{saveNow('fullMatch')}catch(e){}root.querySelectorAll('[data-fm]').forEach(x=>x.classList.toggle('on',x===b))})}
+function fmEnsureRow(){const m=document.getElementById('dockM');if(!m||!S||m.querySelector('#fmRow'))return;const j=m.querySelector('[data-l3m],[data-l3m2]');const row=j?j.closest('.livemode'):null;if(row)row.insertAdjacentHTML('afterend',fmRowHTML());else m.insertAdjacentHTML('afterbegin',fmRowHTML());fmBind(m)}
+{const _rh2=renderHub;renderHub=function(...a){const r=_rh2.apply(this,a);try{fmEnsureRow();setTimeout(()=>{try{fmEnsureRow()}catch(e){}},0)}catch(e){}
+  // primeira vez: avisa que existe
+  try{if(S&&!S.fullMatchTold&&fullMode()&&!S.youth){S.fullMatchTold=1;setTimeout(()=>{try{toast({ic:'🏟️',title:'Partida completa em 3D',txt:'Agora você joga o jogo inteiro: joystick, passe e chute. Troque em ⚙️ › Partida.',ms:5200})}catch(e){}},900)}}catch(e){}
+  return r}}
