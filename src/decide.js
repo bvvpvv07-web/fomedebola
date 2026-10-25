@@ -86,6 +86,14 @@ const DM_LANCE={
   {ic:'🚀',t:'Chute de longe com efeito',d:'O meia acerta uma pancada de fora da área, a bola vem fazendo curva.',o:[
    {t:'Espalmar pra escanteio',a:'REF',b:.6,ok:'Espalmou por cima do travessão. Escanteio.',bad:'A curva enganou e a bola entrou.'},
    {t:'Tentar encaixar',a:'REF',b:.45,perf:true,ok:'Encaixou firme! Nada de rebote.',bad:'A bola escapou das mãos e entrou.'}]}],
+ tackle:[
+  {ic:'🛡️',t:'O atacante vem pra cima',d:'Contra-ataque deles. Ele conduz rápido e só você está entre ele e o gol.',o:[
+   {t:'Dar o bote quando a bola sair do pé',a:'DEF',b:.5,perf:true,ok:'Esperou o toque mais longo e tirou limpo. Desarme!',bad:'Ele puxou pro lado e passou.',last:'Driblado.'},
+   {t:'Acompanhar e fechar o chute',a:'VEL',b:.55,ok:'Foi junto, de frente, e ele chutou em você.',bad:'Ele cortou pro meio e bateu no canto.',last:'Passou por você.'},
+   {t:'Dar o carrinho',a:'FIS',b:.4,ok:'Carrinho perfeito, só na bola!',bad:'Chegou atrasado e derrubou. Falta perigosa.',last:'Falta.'}]},
+  {ic:'✂️',t:'Vão tocar pro centroavante',d:'O ponta deles vai cruzar rasteiro pro atacante que você marca.',o:[
+   {t:'Antecipar e cortar a linha do passe',a:'DEF',b:.5,perf:true,ok:'Leu o passe e cortou na frente dele!',bad:'Antecipou cedo demais e ele ficou livre.',last:'Ficou livre.'},
+   {t:'Ficar colado no atacante',a:'FIS',b:.55,ok:'Grudou nele e ele nem conseguiu finalizar.',bad:'Ele girou em cima de você e chutou.',last:'Girou e chutou.'}]}],
  keeperPen:[{ic:'🧤',t:'Pênalti contra',d:'O batedor ajeita a bola e olha pro seu canto esquerdo.',o:[
    {t:'Pular no canto que ele olhou',a:'REF',b:.32,ok:'Ele bateu onde olhou e você voou junto. DEFENDEU!',bad:'Era blefe. Ele bateu do outro lado.',last:'Foi no canto.'},
    {t:'Pular no outro canto',a:'REF',b:.32,ok:'Você leu o blefe e espalmou! DEFENDEU!',bad:'Ele bateu exatamente onde olhou.',last:'Foi no canto.'},
@@ -154,20 +162,20 @@ function dmPopup(sc,ctx){return new Promise(res=>{
   R.innerHTML=`<div class="dm-res ${out.good?'good':'bad'}"><b>${esc(out.big)}</b><p>${esc(ok?o.ok:o.bad)}</p>${out.chips&&out.chips.length?`<div class="chipsrow">${out.chips.map(([t,k])=>`<span class="chip ${k}">${esc(t)}</span>`).join('')}</div>`:''}</div><button class="btn wide" id="dmOk" style="margin-top:10px">Continuar</button>`;
   document.getElementById('dmOk').onclick=()=>{$ov.hidden=true;$ov.innerHTML='';res({o,ok,out})}})})}
 // ---------- substitui o lance jogável ----------
-async function decisionMoment(o){const K=o.kind||'finish';const GK=K==='keeper';
+async function decisionMoment(o){const K=o.kind||'finish';const DEF=K==='tackle';const GK=K==='keeper'||DEF;
  NM.netHit=null;NM.intc=null;NM.last='';NM.grade=null;NM.why='';NM.dmAssist=false;
- let pool=GK?(o.pen?DM_LANCE.keeperPen:DM_LANCE.keeper):(DM_LANCE[K]||DM_LANCE.finish);
+ let pool=DEF?DM_LANCE.tackle:GK?(o.pen?DM_LANCE.keeperPen:DM_LANCE.keeper):(DM_LANCE[K]||DM_LANCE.finish);
  const sc=pick(pool);
  // conselho do adversário: goleiro bom e lance não planejado ficam mais difíceis
  const bonus=(o.planned?.08:-.04)-((o.keeper??.45)-.45)*.3+((o.skill??.6)-.6)*.25+(/Peneira|Treino|Pelada|Pátio/i.test(o.comp||'')?.08:0);
  const isPassK=['pass','long','cross'].includes(K);
- const r=await dmPopup(sc,{comp:o.comp,min:o.min,title:o.title&&!/^(finish|pass|keeper)$/.test(o.title)?o.title:sc.t,tag:GK?'Defesa':({pass:'Passe',long:'Lançamento',cross:'Cruzamento',dribble:'Drible',header:'Cabeçada',fk:'Falta',pen:'Pênalti',chip:'Cobertura',combo:'Tabela'})[K]||'Finalização',bonus,
+ const r=await dmPopup(sc,{comp:o.comp,min:o.min,title:o.title&&!/^(finish|pass|keeper)$/.test(o.title)?o.title:sc.t,tag:DEF?'Desarme':GK?'Defesa':({pass:'Passe',long:'Lançamento',cross:'Cruzamento',dribble:'Drible',header:'Cabeçada',fk:'Falta',pen:'Pênalti',chip:'Cobertura',combo:'Tabela'})[K]||'Finalização',bonus,
   resolve:(op,ok)=>{const ast=!!op.ast&&!GK;let big;
-   if(GK)big=ok?'DEFENDEU!':'GOL DELES';else if(ok)big=ast||isPassK&&!op.mine?'ASSISTÊNCIA!':'GOOOL!';else big=K==='pen'?(op.last==='Pra fora!'?'PRA FORA!':'DEFENDEU!'):'NÃO DEU';
+   if(DEF)big=ok?'DESARMOU!':'PASSOU';else if(GK)big=ok?'DEFENDEU!':'GOL DELES';else if(ok)big=ast||isPassK&&!op.mine?'ASSISTÊNCIA!':'GOOOL!';else big=K==='pen'?(op.last==='Pra fora!'?'PRA FORA!':'DEFENDEU!'):'NÃO DEU';
    return{big,good:ok,chips:ok?[[op.perf?'Jogada de craque':'Boa escolha','up']]:[['Faltou pouco','down']]}}});
  const ok=r.ok;const op=r.o;
  if(ok&&op.ast&&!GK&&!isPassK&&o.kind!=='pen')NM.dmAssist=true; // vira assistência em vez de gol seu
- NM.last=ok?(GK?(o.okTxt||'DEFENDEU!'):(o.okTxt||'GOL!')):(op.last||(GK?'Foi no canto.':K==='pen'?'O goleiro segurou.':isPassK?'Interceptado.':'Pra fora!'));
+ NM.last=ok?(DEF?(o.okTxt||'DESARMOU!'):GK?(o.okTxt||'DEFENDEU!'):(o.okTxt||'GOL!')):(op.last||(GK?'Foi no canto.':K==='pen'?'O goleiro segurou.':isPassK?'Interceptado.':'Pra fora!'));
  const perfect=ok&&(!!op.perf||op.p<.4);NM.grade=ok?(perfect?92:76):40;NM.why=op.t;
  try{if(typeof tele==='function');}catch(e){}
  return{ok,perfect,grade:NM.grade}}

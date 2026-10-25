@@ -44,12 +44,12 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
 .edg.off span{background:#d42a2a}
 #chainB{font-size:14px;padding:2px 9px;border-radius:999px;background:var(--gold);color:#1a1200;text-shadow:none}
 /* tela da bola */
-#contact{position:absolute;inset:0;z-index:8;display:grid;grid-template-rows:auto 1fr auto;align-items:center;justify-items:center;padding:calc(16px + env(safe-area-inset-top,0px)) 16px calc(18px + env(safe-area-inset-bottom,0px));background:radial-gradient(circle at 50% 50%,rgba(20,60,34,.82),rgba(5,14,9,.94));animation:fadeIn .18s ease both}
+#contact{position:absolute;left:0;right:0;bottom:0;z-index:8;display:grid;grid-template-rows:auto auto auto;gap:8px;align-items:center;justify-items:center;padding:34px 16px calc(14px + env(safe-area-inset-bottom,0px));background:linear-gradient(180deg,rgba(5,14,9,0) 0%,rgba(5,14,9,.8) 24%,rgba(5,14,9,.95) 100%);animation:fadeIn .18s ease both}
 @keyframes fadeIn{from{opacity:0}}
 .ct-head{text-align:center;display:grid;gap:2px}
-.ct-head b{font-family:var(--f-display);font-weight:900;font-style:italic;font-size:30px;text-transform:uppercase;letter-spacing:.02em}
+.ct-head b{font-family:var(--f-display);font-weight:900;font-style:italic;font-size:24px;text-transform:uppercase;letter-spacing:.02em}
 .ct-head span{font-weight:700;color:#cfe8d5;font-size:14px}
-.ct-stage{position:relative;width:min(78vw,52vh,380px);aspect-ratio:1;max-width:100%}
+.ct-stage{position:relative;width:min(50vw,30vh,250px);aspect-ratio:1;max-width:100%;margin:24px 0 22px}
 #ctBall{width:100%;height:100%;display:block;touch-action:none;cursor:crosshair;animation:ballIn .32s cubic-bezier(.2,1.4,.4,1) both;filter:drop-shadow(0 22px 26px rgba(0,0,0,.55))}
 @keyframes ballIn{from{transform:scale(.4) rotate(-40deg);opacity:0}}
 .ct-tag{position:absolute;font-weight:800;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:#cfe8d5;white-space:nowrap}
@@ -156,7 +156,7 @@ button:focus-visible{outline:3px solid var(--gold);outline-offset:2px}
  <div id="menu">
   <div class="m-head"><span class="m-eye">Fome de Bola · protótipo</span><h1 class="m-title">Modo <span>Lance</span></h1>
    <p class="m-sub">Estilingue pra mirar, toque na bola pra dar efeito. Toque, lançamento, cruzamento, chute e falta. Escolha um cenário.</p></div>
-  <div class="m-tabs" role="tablist"><button class="m-tab on" data-t="atk" role="tab">⚽ Atacar</button><button class="m-tab" data-t="gk" role="tab">🧤 Goleiro</button></div>
+  <div class="m-tabs" role="tablist"><button class="m-tab on" data-t="atk" role="tab">⚽ Atacar</button><button class="m-tab" data-t="gk" role="tab">🧤 Goleiro</button><button class="m-tab" data-t="def" role="tab">🛡️ Defender</button></div>
   <div class="m-env"><span>Campo</span><button class="on" data-env="stadium">🏟️ Estádio</button><button data-env="prison">🔒 Presídio</button></div>
   <div class="m-grid" id="mGrid"></div>
   <div class="m-how"><div><b>1 · Estilingue</b>Puxe da bola pra trás. A seta mostra a força.</div><div id="howMid"><b>2 · Toque na bola</b>Lado: curva. Embaixo: sobe. Em cima: rasteira.</div><div><b>3 · Câmera</b>Arraste fora da bola pra girar. 🎥 troca o ângulo.</div></div>
@@ -643,6 +643,14 @@ const SC={
   O(-5,29);O(6,30.5);F(-2,54);F(4,58);F(-10,60);K()}},
  pivo:{n:'De costas',ic:'🔙',d:'De costas pro gol, zagueiro colado. Gire ou faça o pivô.',build(){const x0=R(-4,4);const me=P('me',x0,19.5,9);P('m',x0-10,24,10);P('m',x0+10,23,7);P('m',x0+2,31,8);P('m',-22,28,11);P('m',22,29,2);P('m',-6,50,4);P('m',8,50,3);
   O(x0+.3,17.6,0);O(x0-7,14.5);O(x0+7,15);O(-14,18);O(14,18.5);O(x0-3,26);O(x0+5,27);F(-3,42);K();me.face=Math.atan2(-(x0*.1),-(1));setFacingNow(me,0,1)}},
+ // modo defesa
+ desarme:{def:true,n:'Desarme',ic:'🛡️',d:'O atacante vem pra cima. Dê o bote na hora certa.',build(){const x0=R(-8,8);KD();DH(x0*.55,R(21,23));AT(x0,R(29,32),9,true);AT(x0+(x0>0?-13:13),27,11);AT(x0+(x0>0?7:-7),36,10);DF(x0+(x0>0?-9:9),16.5);DF(-x0*.4,11.5)}},
+ corte:{def:true,n:'Corte',ic:'✂️',d:'Vão tocar pro atacante na área. Leia o passe e corte.',build(){const s=flip();KD();AT(24*s,R(23,27),7,true);const r=AT(6*s,21.5,9);r.runTo=new T.Vector3(-1.2*s,0,R(8.5,10.5));S.runner=r;DH(7.4*s,20);AT(-15*s,24,11);DF(-9*s,14.5);DF(-1.5*s,12.5)},
+  after(){S.carrier.plan={passAt:R(1.1,2),shootZ:-1,feintAt:99,side:1}}},
+ faltaLonge:{n:'Falta de longe',ic:'🎯',d:'Falta de muito longe. Pancada ou curva por cima da barreira.',build(){const bx0=R(-9,9),bz0=R(28,33);setFK(bx0,bz0,4);P('m',-4,12,9,[-3,7]);P('m',5,13,11,[3,8]);P('m',-12,15,7,[-9,9]);P('m',12.5,16,8,[10,10]);P('m',-20,34,2);P('m',-6,55,4);P('m',8,55,3);
+  O(-3.4,11,1);O(4.2,12,2);O(-11.2,14,3);O(11.6,15,4);F(-4,48);K()}},
+ tiroMeta:{n:'Saída do goleiro',ic:'🧤',d:'Tiro de meta. Você é o goleiro: saia jogando ou dê o chutão.',build(){P('me',R(-4,4),99.6,1,null,{shirt:GKU.shirt,shirt2:GKU.shirt2,shorts:GKU.shorts,socks:GKU.socks,glove:'#ffffff'});P('m',-13,95,3);P('m',13,95.5,4);P('m',-28,86,6);P('m',28,85,2);P('m',-5,84,5);P('m',6,80,8);P('m',-18,70,11);P('m',18,69,7);P('m',0,64,10);P('m',-6,56,9);
+  O(-9,90);O(9,91);O(0,86.5);O(-22,82);O(22,81);O(-7,76);O(8,75);O(-14,66);O(14,65);O(0,60);K()}},
  // modo goleiro: você é o goleiro
  gkPen:{gk:true,m:'Pênalti',n:'Defenda o pênalti',ic:'🧤',d:'Arraste pro lado do chute.',build(){S.pen=true;S.fk=true;KU().pos.set(0,0,.35);S.ballSpot=new T.Vector3(0,BR,11);SH(0,13.3,9);A(-6.5,18.5);A(7,19);D(-4.5,18.5);D(5,19.5);A(-13,18);A(13,18.5);D(-10.5,19);D(11,20);A(1.5,22.5);D(-1,23)}},
  gkShot:{gk:true,m:'Chute de fora',n:'Defenda o chute',ic:'🧤',d:'Chute de fora da área.',build(){const x0=R(-9,9),z0=R(18.5,24);KU();SH(x0,z0,10);D(x0*.7+R(-1.5,1.5),z0-4.5);A(x0+R(-9,9),14);D(R(-6,6),11);A(-14,12);A(13,13);D(-12.5,11);D(12,12);A(x0+(x0>0?-9:9),z0+5);D(x0+(x0>0?-6:6),z0+2.5);A(-20,24)}},
@@ -651,11 +659,11 @@ const SC={
   after(){const sh=S.shooter;if(!sh)return;S.header=true;S.gkT0=R(.65,.95);sh.jump=0;const g=new T.Vector3(-sh.pos.x,0,-sh.pos.z).normalize();S.ball.p.set(sh.pos.x+g.x*.45+g.z*.35,2.05,sh.pos.z+g.z*.45-g.x*.35)}},
  gkFk:{gk:true,m:'Falta',n:'Defenda a falta',ic:'🧤',d:'Barreira sua, cobrança deles.',build(){S.fk=true;const x0=R(-8,8),z0=R(21,26);KU();setFKgk(x0,z0,4);A(-4,12.5);A(5,13.5);D(-3.4,11.5);D(4.2,12.5);A(-10,14);A(11,15);D(-9.4,13.5);D(10.4,14.2);A(-20,22)}},
 };
-const ATK=['saida','contra','contra3','cruz','lanca','falta','faltaLat','area','penalti','escanteio','escCurto','mano','tabela','longe','cabeca','voleio','rebote','lateral','pivo'],GKS=['gkPen','gkShot','gkFk','gkMano','gkCab'];
-const CH_LIST=ATK.filter(k=>k!=='cabeca'&&k!=='voleio');
+const ATK=['saida','contra','contra3','cruz','lanca','falta','faltaLat','faltaLonge','area','penalti','escanteio','escCurto','mano','tabela','longe','cabeca','voleio','rebote','lateral','pivo','tiroMeta'],GKS=['gkPen','gkShot','gkFk','gkMano','gkCab'],DEFS=['desarme','corte'];
+const CH_LIST=ATK.filter(k=>k!=='cabeca'&&k!=='voleio'&&k!=='tiroMeta');
 // o seu jogador (carreira): rosto, cabelo e número de verdade
 function heroLook(num){const h=S.heroCfg;return h?{num:h.num||num,skin:h.skin||pick(SKINS),hair:h.hair||pick(HAIRS),style:h.style,beard:h.beard,band:h.band,boot:h.boot}:{num,skin:pick(SKINS),hair:pick(HAIRS)}}
-function P(kind,x,z,num,run){const hero=kind==='hero'||(kind==='me'&&!(SC[S.scen]||{}).heroMate);const p=makePlayer({...OUR,team:'us',...(hero?heroLook(num):{num,skin:pick(SKINS),hair:pick(HAIRS)})});if(hero)S.hero=p;p.pos.set(x,0,z);p.home=new T.Vector3(x,0,z);if(run)p.run=new T.Vector3(run[0],0,run[1]);setFacingNow(p,-x*.2,-z);S.players.push(p);S.mates.push(p);if(kind==='me')S.carrier=p;return p}
+function P(kind,x,z,num,run,kit){const hero=kind==='hero'||(kind==='me'&&!(SC[S.scen]||{}).heroMate);const p=makePlayer({...OUR,...(kit||{}),team:'us',...(hero?heroLook(num):{num,skin:pick(SKINS),hair:pick(HAIRS)})});if(hero)S.hero=p;p.pos.set(x,0,z);p.home=new T.Vector3(x,0,z);if(run)p.run=new T.Vector3(run[0],0,run[1]);setFacingNow(p,-x*.2,-z);S.players.push(p);S.mates.push(p);if(kind==='me')S.carrier=p;return p}
 function O(x,z,markIdx,role){const p=makePlayer({...THEM,num:[2,3,4,5,6,8,7,10,11,9,14,15,16,17][S.opps.length%14],team:'them',skin:pick(SKINS),hair:pick(HAIRS),sp:6.3});p.pos.set(x,0,z);p.home=new T.Vector3(x,0,z);p.markIdx=markIdx;p.role0=role||null;setFacingNow(p,0,1);S.players.push(p);S.opps.push(p);return p}
 function F(x,z){return O(x,z,0,'f')}
 function K(){const p=makePlayer({...GKC,num:1,team:'them',skin:pick(SKINS),hair:pick(HAIRS),sp:5});p.pos.set(0,0,1.2);setFacingNow(p,0,1);S.players.push(p);S.gk=p;return p}
@@ -671,30 +679,31 @@ function setFKgk(x,z,n){const dir=new T.Vector3(-x,0,-z).normalize();SH(x-dir.x*
 function setFK(x,z,n){S.fk=true;const dir=new T.Vector3(-x,0,-z).normalize();const me=P('me',x-dir.x*1.3+.5*dir.z,z-dir.z*1.3,10);S.ballSpot=new T.Vector3(x,BR,z);
  const wc=new T.Vector3(x,0,z).addScaledVector(dir,9.15);const perp=new T.Vector3(-dir.z,0,dir.x);const near=Math.sign(x||1)*.35;
  for(let i=0;i<n;i++){const k=(i-(n-1)/2)*.62+near*(n>2?1:0);const w=O(wc.x+perp.x*k,wc.z+perp.z*k);w.wall=true;setFacingNow(w,dir.x,-dir.z)}}
-function clearScene(){S.volley=false;S.lastVolley=false;S.volHero=null;S.press=0;S.pressWarn=false;S.hero=null;S.passTo=null;S.offSet=null;S.camF=null;S.heroPassed=false;S.headHero=null;for(const p of S.players)disposePlayer(p);S.players=[];S.mates=[];S.opps=[];S.gk=null;S.carrier=null;S.fk=false;S.shooter=null;S.pen=false;S.gkOut=false;S.role='atk';S.gkEarly=0;S.gkUsed=false;S.gkT=0;S.fkKick=false;S.ballSpot=null;S.held=null;S.caught=false;S.lastKicker=null;S.plant=null;S.kickUV=null;S.receiver=null;S.aimMate=null;S.path=null;S.gkPlan=null;clearEdges()}
+function clearScene(){S.defs=[];S.atks=[];S.runner=null;S.defT=0;S.touch=0;S.passT=0;S.volley=false;S.lastVolley=false;S.volHero=null;S.press=0;S.pressWarn=false;S.hero=null;S.passTo=null;S.offSet=null;S.camF=null;S.heroPassed=false;S.headHero=null;for(const p of S.players)disposePlayer(p);S.players=[];S.mates=[];S.opps=[];S.gk=null;S.carrier=null;S.fk=false;S.shooter=null;S.pen=false;S.gkOut=false;S.role='atk';S.gkEarly=0;S.gkUsed=false;S.gkT=0;S.fkKick=false;S.ballSpot=null;S.held=null;S.caught=false;S.lastKicker=null;S.plant=null;S.kickUV=null;S.receiver=null;S.aimMate=null;S.path=null;S.gkPlan=null;clearEdges()}
 function startScen(key){
- clearScene();S.scen=key;const sc=SC[key];S.role=sc.gk?'gk':'atk';sc.build();
+ clearScene();S.scen=key;const sc=SC[key];S.role=sc.gk?'gk':sc.def?'def':'atk';sc.build();
  // marcação: cada defensor marca um companheiro
  const freeM=S.mates.filter(m=>m!==S.carrier);if(S.role==='atk')S.opps.forEach((o,i)=>{if(o.wall)return;if(o.markIdx)o.mark=freeM[o.markIdx-1]||null;else{let best=null,bd=1e9;for(const m of freeM){const d=m.pos.distanceTo(o.pos);if(d<bd){bd=d;best=m}}o.mark=bd<9?best:null}});
  S.chain=0;S.header=false;S.result=null;S.firstShot=false;S.touches=[];assignRoles();
  if(S.ballSpot){S.ball.p.copy(S.ballSpot)}else placeBallAtFeet(S.carrier);
  S.ball.v.set(0,0,0);S.ball.w.set(0,0,0);S.ball.inGoal=false;if(S.role==='atk'){setupShape();assignRoles()}LINO.cele=null;LINO.vel.set(0,0,0);LINO.pos.set(35.6,0,clamp(Math.min(offLine(),S.ball.p.z),2,HALF));if(S.headHero){S.chain=-1;receive(S.headHero,true);S.chain=0;S.headHero=null;$('chainB').hidden=true}S.shotFrom=S.ball.p.clone();S.shooterFrom=S.shooter?S.shooter.pos.clone():null;if(S.gk&&!S.gk.mine)S.gk.pos.copy(gkSpot());if(sc.after)sc.after();
- S.camPan.set(0,0,0);S.zoom=1;S.camYaw=0;S.camTilt=0;S.yawVel=0;S.state=S.role==='gk'?'gkwait':'aim';S.mode='play';S.gkT=S.gkT0||R(1.4,2.2);S.gkT0=0;
+ S.camPan.set(0,0,0);S.zoom=1;S.camYaw=0;S.camTilt=0;S.yawVel=0;S.state=S.role==='gk'?'gkwait':S.role==='def'?'defplay':'aim';S.mode='play';S.gkT=S.gkT0||R(1.4,2.2);S.gkT0=0;
  $('scn').textContent=chLabel()+sc.n;
- $('menu').hidden=true;$('top').hidden=false;$('bCam').hidden=S.role==='gk';$('bAng').hidden=S.role==='gk';$('after').hidden=true;$('banner').className='';$('banner').innerHTML='';
+ $('menu').hidden=true;$('top').hidden=false;$('bCam').hidden=S.role!=='atk';$('bAng').hidden=S.role!=='atk';$('after').hidden=true;$('banner').className='';$('banner').innerHTML='';
  setHint();snapCam();updateScore();sfx('whistle');
 }
 function placeBallAtFeet(p){const fx=-Math.sin(p.face),fz=-Math.cos(p.face);S.ball.p.set(p.pos.x+fx*.58-fz*.24,BR,p.pos.z+fz*.58+fx*.24)}
 function updateScore(){if(S.ch&&S.ch.type==='pen'){const c=S.ch,d=a=>a.map(x=>x?'●':'○').join('');$('score').innerHTML=`<b>${d(c.ku)||'–'}</b>&nbsp;·&nbsp;${d(c.kt)||'–'}`;return}
- $('score').innerHTML=S.role==='gk'?`🧤 <b>${S.score.g}</b>&nbsp;defesa${S.score.g===1?'':'s'} · ${S.score.n}`:`⚽ <b>${S.score.g}</b>&nbsp;gol${S.score.g===1?'':'s'} · ${S.score.n} lance${S.score.n===1?'':'s'}`}
+ $('score').innerHTML=S.role==='def'?`🛡️ <b>${S.score.g}</b>&nbsp;desarme${S.score.g===1?'':'s'} · ${S.score.n}`:S.role==='gk'?`🧤 <b>${S.score.g}</b>&nbsp;defesa${S.score.g===1?'':'s'} · ${S.score.n}`:`⚽ <b>${S.score.g}</b>&nbsp;gol${S.score.g===1?'':'s'} · ${S.score.n} lance${S.score.n===1?'':'s'}`}
 function setHint(){const h=$('hint');
+ if(S.role==='def'&&(S.state==='defplay'||S.state==='defpass')){h.hidden=false;h.innerHTML=S.state==='defpass'?'Passe rolando! <b>Toque</b> pra se jogar na linha da bola.':S.runner&&S.carrier!==S.runner?'Marque o atacante. <b>Toque</b> quando ele tocar pra área.':'<b>Toque</b> pra dar o bote quando a bola sair do pé dele. <b>Arraste</b> pra escolher a direção.';return}
  if(S.role==='gk'&&(S.state==='gkwait'||S.state==='windup'||S.state==='flight')&&!S.gkUsed){h.hidden=false;h.innerHTML='<b>Arraste pro lado</b> que você acha que a bola vai. Pra cima pula alto, pra baixo cai rasteiro. Toque: fica no meio.';return}
  if(S.state==='aim'){h.hidden=false;h.innerHTML=S.press>1.7?'⚠️ Marcação em cima! <b>Toque rápido</b> ou ele rouba a bola.':S.volley?'Bola quicando! <b>Puxe e solte</b> pra pegar de primeira.':S.scen==='rebote'&&S.chain===0&&S.gk&&S.gk.dive?'Rebote! <b>Chute rápido</b> antes de o goleiro levantar.':S.header?'Bola no alto! <b>Puxe o estilingue</b> pra cabecear ou pegar de primeira.':(S.chain?`Recebeu! <b>Puxe da bola pra trás</b> pra tocar, cruzar ou chutar.`:`<b>Puxe a partir da bola pra trás</b> como um estilingue. Arraste fora dela pra <b>girar a câmera</b>.`)}else h.hidden=true}
 // ===================== CÂMERA =====================
 // Baixa e perto, atrás de quem tem a bola. Você pode girar (dois dedos girando / botão direito), inclinar (dois dedos pra cima e pra baixo),
 // dar zoom (pinça / roda) e trocar o ângulo no botão 🎥 (Perto, Média, Alta). Companheiros fora da tela aparecem na borda.
-const CAM_PRE=[{n:'Perto',pitch:20,k:1,yb:-.42},{n:'Média',pitch:30,k:1.12,yb:-.36},{n:'Alta',pitch:47,k:1.25,yb:-.28}];
-S.camPan=new T.Vector3();S.zoom=1;S.camYaw=0;S.camTilt=0;S.camPre=0;try{S.camPre=clamp(+localStorage.getItem('ml_cam')||0,0,2)}catch(e){}
+const CAM_PRE=[{n:'Perto',pitch:22,k:1.12,yb:-.4},{n:'Média',pitch:28,k:1.34,yb:-.34},{n:'Longe',pitch:36,k:1.62,yb:-.28}];
+S.camPan=new T.Vector3();S.zoom=1;S.camYaw=0;S.camTilt=0;S.camPre=1;try{const v=localStorage.getItem('ml_cam2');if(v!=null)S.camPre=clamp(+v,0,2)}catch(e){}
 const camLook=new T.Vector3(0,.8,30),camPos=new T.Vector3(0,20,50);S.camDir=new T.Vector3(0,0,1);
 // atrás das arquibancadas a câmera sobe acima delas
 const camLim=p=>{p.x=clamp(p.x,-70,70);p.z=clamp(p.z,-40,120);p.y=Math.max(p.y,1.2);if(Math.abs(p.x)>37.3)p.y=Math.max(p.y,3.6);const over=Math.max(Math.abs(p.x)-42.5,-6-p.z,0);if(over>0)p.y=Math.max(p.y,2+over*.8+5);return p};
@@ -706,23 +715,24 @@ function anchorCam(o,focus,hdir,pitch,D,xb,yb){_fw.set(-hdir.x*Math.cos(pitch),-
  o.position.set(0,0,0);o.lookAt(_fw);o.updateMatrixWorld();_ray.set(xb,yb,.5).unproject(o).normalize();
  o.position.copy(focus).addScaledVector(_ray,-D);camLim(o.position);o.updateMatrixWorld();return o.position.clone().addScaledVector(_fw,12)}
 function fitDist(focus,hdir,pitch,yb,pts){fitCam.fov=cam.fov;fitCam.aspect=cam.aspect;fitCam.updateProjectionMatrix();const v=new T.Vector3();
- const dmax=S.scen==='escanteio'&&S.chain===0?8:22;for(let D=8.5;D<=dmax;D+=.75){anchorCam(fitCam,focus,hdir,pitch,D,-.1,yb);
+ const dmax=S.scen==='escanteio'&&S.chain===0?9:26;for(let D=10;D<=dmax;D+=.75){anchorCam(fitCam,focus,hdir,pitch,D,-.1,yb);
   let ok=true;for(const p of pts){v.set(p.x,.9,p.z).project(fitCam);if(v.z>1||Math.abs(v.x)>.86||v.y>(cam.aspect>1.2?.62:.72)||v.y<-.8){ok=false;break}}if(ok)return D}return dmax}
 function camGoal(){
  const b=S.ball.p;
  // modo goleiro: câmera alta atrás do gol, olhando o batedor por cima do seu goleiro
  if(S.role==='gk'&&S.shotFrom){const o=S.shooterFrom||S.shotFrom,d=new T.Vector3(o.x,0,o.z).normalize(),r=new T.Vector3(-d.z,0,d.x);
-  const pos=o.clone().addScaledVector(d,S.pen?4.4:4.8).addScaledVector(r,o.x<0?1.4:-1.4);pos.y=S.pen?3.3:S.fk?4.6:3.8;return{pos,look:new T.Vector3(S.shotFrom.x*.12,1.05,.4)}}const flying=S.state==='flight'||S.state==='result';const pitch=camPitch(),pre=CAM_PRE[S.camPre];
+  const pos=o.clone().addScaledVector(d,S.pen?5.6:6.4).addScaledVector(r,o.x<0?1.6:-1.6);pos.y=S.pen?4:S.fk?5.4:4.7;return{pos,look:new T.Vector3(S.shotFrom.x*.12,1.05,.4)}}const flying=S.state==='flight'||S.state==='result';const pitch=camPitch(),pre=CAM_PRE[S.camPre];
  let focus,D,yb,xb=S.pen?-.04:-.1;
  if(flying){focus=new T.Vector3(b.x,Math.min(b.y,4)*.6+.3,b.z);if(S.receiver)focus.lerp(new T.Vector3(S.receiver.pos.x,.8,S.receiver.pos.z),.3);
   // gol: depois de um instante a câmera vai pra frente de quem fez, pra ver a comemoração
   if(S.result==='goal'&&S.lastKicker&&S.now-S.resT>.9){const k=S.lastKicker,o=fitCam;o.fov=cam.fov;o.aspect=cam.aspect;o.updateProjectionMatrix();
    const fc=new T.Vector3(k.pos.x,1,k.pos.z).add(S.camPan);const look=anchorCam(o,fc,new T.Vector3(-Math.sin(k.face),0,-Math.cos(k.face)),11*DEG,7.5*S.zoom,0,-.08);return{look,pos:o.position.clone()}}
-  if(S.held)focus.lerp(new T.Vector3(S.held.pos.x,1,S.held.pos.z),.5);D=11;yb=-.12;xb=0}
+  if(S.held)focus.lerp(new T.Vector3(S.held.pos.x,1,S.held.pos.z),.5);D=14;yb=-.12;xb=0}
  else{
   // atrás da bola, olhando pra onde estão os companheiros à frente (ou o gol). Enquadra quem está num cone à frente;
   // quem fica de fora aparece na borda da tela.
   const tg=[];const bd=Math.hypot(b.x,b.z);const corner=S.scen==='escanteio'&&S.chain===0;if(corner)tg.push(new T.Vector3(0,0,10));else if(!S.pen)for(const m of S.mates){if(m===S.carrier)continue;const dm=Math.hypot(m.pos.x-b.x,m.pos.z-b.z);if(dm<34&&(Math.hypot(m.pos.x,m.pos.z)<bd+4||(m.pos.z<18&&Math.abs(m.pos.x)<21)))tg.push(m.pos)}
+  if(S.role==='def'){if(S.hero)tg.push(S.hero.pos);if(S.runner&&S.runner!==S.carrier)tg.push(S.runner.pos)}
   const goalIn=!corner&&(!tg.length||(Math.abs(b.x)<16&&b.z<40));if(goalIn)tg.push(new T.Vector3(0,0,0));
   // dentro da área (ou de cabeça) a câmera olha pro gol
   const inBox=b.z<19&&Math.abs(b.x)<21;
@@ -744,7 +754,7 @@ const camFov=()=>cam.aspect<1?60:44;
 function updCam(dt){const f=camFov();if(cam.fov!==f){cam.fov=f;cam.updateProjectionMatrix()}const hold=S.state==='drag'||S.state==='contact'||S.state==='kicking'||(S.state==='windup'&&S.role==='atk');const g=hold&&S.camF?S.camF:camGoal();S.camF=hold?g:null;const k=1-Math.exp(-dt*(S.state==='flight'?3.4:4.2));camLook.lerp(g.look,k);camPos.lerp(g.pos,k);
  cam.position.copy(camPos);if(S.shake>0){S.shake-=dt;cam.position.x+=R(-.2,.2)*S.shake*3;cam.position.y+=R(-.2,.2)*S.shake*3}cam.lookAt(camLook);
  sun.position.set(camLook.x-22,48,camLook.z+26);sun.target.position.copy(camLook);}
-function setCamPre(i,show){S.camPre=(i+3)%3;S.camTilt=0;try{localStorage.setItem('ml_cam',String(S.camPre))}catch(e){}if(show){const t=$('camT');t.textContent='Câmera '+CAM_PRE[S.camPre].n.toLowerCase();t.hidden=false;clearTimeout(setCamPre.t);setCamPre.t=setTimeout(()=>t.hidden=true,1300)}}
+function setCamPre(i,show){S.camPre=(i+3)%3;S.camTilt=0;try{localStorage.setItem('ml_cam2',String(S.camPre))}catch(e){}if(show){const t=$('camT');t.textContent='Câmera '+CAM_PRE[S.camPre].n.toLowerCase();t.hidden=false;clearTimeout(setCamPre.t);setCamPre.t=setTimeout(()=>t.hidden=true,1300)}}
 // companheiros fora da tela: bolinha na borda com o número, apontando pra ele
 const edgeEls=new Map();
 function updEdges(){const box=$('edges');const show=S.mode==='play'&&(S.state==='aim'||S.state==='drag');if(!show){box.hidden=true;return}box.hidden=false;
@@ -768,7 +778,15 @@ function showArrow(dir,power,y){const L=1.3+power*4.4;
  arrowEdge.position.y=.03;arrowFill.position.y=.05;arrowG.add(arrowEdge,arrowFill);
  arrowG.position.set(S.ball.p.x,y,S.ball.p.z);arrowG.rotation.y=Math.atan2(-dir.x,-dir.z);arrowG.visible=true;
  return new T.Vector3(S.ball.p.x+dir.x*(L+.7),y,S.ball.p.z+dir.z*(L+.7))}
-function hideArrow(){S.aimMate=null;arrowG.visible=false;$('pct').hidden=true;$('tgt').hidden=true;S.players.forEach(p=>p.ring.visible=false)}
+// ---------- prévia da trajetória: pontinhos no caminho da bola (no chute só o começo, no passe até o companheiro) ----------
+const TRJ=(()=>{const n=48;const m=new T.InstancedMesh(new T.SphereGeometry(.075,8,6),new T.MeshBasicMaterial({color:'#ffffff',transparent:true,opacity:.92,depthWrite:false}),n);m.count=0;m.frustumCulled=false;m.renderOrder=4;scene.add(m);return{m,n,M:new T.Matrix4(),q:new T.Quaternion(),sv:new T.Vector3(),pv:new T.Vector3()}})();
+function showTraj(dir,power,u,v,label){if(!dir||S.role!=='atk')return;const hd=!!S.header;S.noNoise=true;const k=kickVelocity(dir,power,u,v,hd);S.noNoise=false;
+ const b={p:S.ball.p.clone(),v:k.vel.clone(),w:k.w.clone()};if(!hd&&!S.volley)b.p.y=BR;if(S.volley)b.v.multiplyScalar(1.05);
+ const shot=/CHUTE|FALTA|PÊNALTI|CABE/.test(label||'');const tmax=shot?.5:1.7;const path=predict(b,tmax+.05);let i=0;const R_=TRJ;
+ for(const q of path){if(q.t>tmax||i>=R_.n||q.z<0)break;const sc=1-.45*(q.t/tmax);R_.pv.set(q.x,Math.max(q.y,.06),q.z);R_.sv.set(sc,sc,sc);R_.M.compose(R_.pv,R_.q,R_.sv);R_.m.setMatrixAt(i++,R_.M)}
+ R_.m.count=i;R_.m.instanceMatrix.needsUpdate=true;R_.m.material.color.set(shot?'#ffd23c':'#ffffff')}
+function hideTraj(){TRJ.m.count=0}
+function hideArrow(){hideTraj();S.aimMate=null;arrowG.visible=false;$('pct').hidden=true;$('tgt').hidden=true;S.players.forEach(p=>p.ring.visible=false)}
 // ===================== ENTRADA (estilingue / câmera) =====================
 const ray=new T.Raycaster(),ndc=new T.Vector2();
 function groundAt(cx,cy,h=0){const r=canvas.getBoundingClientRect();ndc.set(((cx-r.left)/r.width)*2-1,-((cy-r.top)/r.height)*2+1);ray.setFromCamera(ndc,cam);const o=new T.Vector3();return ray.ray.intersectPlane(new T.Plane(new T.Vector3(0,1,0),-h),o)?o:null}
@@ -781,14 +799,16 @@ S.yawVel=0;
 const orbitK=()=>2.3/Math.min(innerWidth,innerHeight);
 canvas.addEventListener('pointerdown',e=>{if(S.mode!=='play')return;canvas.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});sfxUnlock();S.yawVel=0;
  if(S.role==='gk'){gest={type:'gk',sx:e.clientX,sy:e.clientY,done:false};return}
+ if(S.role==='def'){gest={type:'def',sx:e.clientX,sy:e.clientY};return}
  if(ptrs.size===2){const[a,b]=[...ptrs.values()];const cx=(a.x+b.x)/2,cy=(a.y+b.y)/2;gest={type:'multi',d0:Math.hypot(a.x-b.x,a.y-b.y),a0:Math.atan2(b.y-a.y,b.x-a.x),z0:S.zoom,y0:S.camYaw,last:groundAt(cx,cy)};hideArrow();if(S.state==='drag'){S.state='aim';S.aim=null}return}
  if(e.button===2){gest={type:'pan',last:groundAt(e.clientX,e.clientY)};return}
- const bs=toScreen(S.ball.p);const near=Math.hypot(e.clientX-bs.x,e.clientY-bs.y)<Math.max(64,Math.min(innerWidth,innerHeight)*.12);
+ const bs=toScreen(S.ball.p);const near=Math.hypot(e.clientX-bs.x,e.clientY-bs.y)<Math.max(86,Math.min(innerWidth,innerHeight)*.17);
  if(S.state==='aim'&&near&&!e.shiftKey){gest={type:'sling',sx:bs.x,sy:bs.y};S.state='drag'}
  else gest={type:'orbit',lx:e.clientX,ly:e.clientY,lt:e.timeStamp,moved:0}});
 function panBy(g0,g1){if(!g0||!g1||g1.distanceTo(camPos)>140)return;const d=g0.clone().sub(g1);d.y=0;if(d.length()>4)d.setLength(4);S.camPan.add(d);S.camPan.x=clamp(S.camPan.x,-40,40);S.camPan.z=clamp(S.camPan.z,-30,60);camLook.add(d);camPos.add(d);cam.position.copy(camPos);cam.lookAt(camLook)}
 canvas.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});if(!gest)return;
  if(gest.type==='gk'){const dx=e.clientX-gest.sx,dy=e.clientY-gest.sy;if(!gest.done&&Math.hypot(dx,dy)>140){gest.done=true;userDive(dx,dy)}return}
+ if(gest.type==='def'){const h=S.hero;if(!h)return;const len=Math.hypot(e.clientX-gest.sx,e.clientY-gest.sy);if(len<24){hideArrow();return}const g=groundAt(e.clientX,e.clientY);if(!g)return;const d=new T.Vector3(g.x-h.pos.x,0,g.z-h.pos.z);if(d.lengthSq()<.01)return;d.normalize();gest.tgt=g;showArrow(d,.55,.02);arrowG.position.set(h.pos.x,.02,h.pos.z);return}
  if(gest.type==='multi'){if(ptrs.size!==2)return;const[a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);S.zoom=clamp(gest.z0*gest.d0/Math.max(20,d),.5,1.8);
   S.camYaw=gest.y0-wrapA(Math.atan2(b.y-a.y,b.x-a.x)-gest.a0);const g1=groundAt((a.x+b.x)/2,(a.y+b.y)/2);panBy(gest.last,g1);gest.last=groundAt((a.x+b.x)/2,(a.y+b.y)/2);return}
  if(gest.type==='orbit'){const dx=e.clientX-gest.lx,dy=e.clientY-gest.ly,dt=Math.max(1,e.timeStamp-gest.lt)/1000;const dyaw=-dx*orbitK();S.camYaw+=dyaw;
@@ -797,6 +817,7 @@ canvas.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;ptrs.
  if(gest.type==='sling')slingMove(e.clientX,e.clientY)});
 const endPtr=e=>{if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);if(!gest)return;
  if(gest.type==='gk'){if(!gest.done){const dx=e.clientX-gest.sx,dy=e.clientY-gest.sy;Math.hypot(dx,dy)>16?userDive(dx*1.15,dy*1.15):userDive(0,0)}if(ptrs.size===0)gest=null;return}
+ if(gest.type==='def'){const len=Math.hypot(e.clientX-gest.sx,e.clientY-gest.sy);defLunge(len>=24?gest.tgt:null);hideArrow()}
  if(gest.type==='sling'&&S.state==='drag'){slingRelease()}
  if(gest.type==='orbit'){if(e.timeStamp-gest.lt>80)S.yawVel=0;S.yawVel=clamp(S.yawVel,-5,5)}
  if(ptrs.size===0)gest=null};
@@ -806,13 +827,17 @@ function slingMove(x,y){const bp=S.ball.p;const h=S.header?bp.y:S.volley?bp.y*.5
  const power=clamp((len-14)/(Math.min(innerWidth,innerHeight)*.36),0,1);
  if(!gp||len<14){hideArrow();S.aim=null;return}
  const dir=new T.Vector3(bp.x-gp.x,0,bp.z-gp.z);if(dir.lengthSq()<1e-4){hideArrow();return}dir.normalize();
+ // ímã: mirando num companheiro, a seta puxa pra onde ele vai estar quando a bola chegar
+ {const l0=aimLabel(dir,power);if(l0.mate){const m=l0.mate;const d=Math.hypot(m.pos.x-bp.x,m.pos.z-bp.z);const spd=Math.max(8,4+34*Math.pow(power,1.2));const t=Math.min(1.4,d/spd);
+  const dd=new T.Vector3(m.pos.x+m.vel.x*t-bp.x,0,m.pos.z+m.vel.z*t-bp.z).normalize();if(dd.angleTo(dir)<14*DEG)dir.lerp(dd,.75).normalize()}}
  S.aim={dir,power};const tip=showArrow(dir,power,S.header?.06:.02);
  const ts=toScreen(tip);const pc=$('pct');pc.hidden=false;pc.textContent=Math.round(power*100)+'%';pc.style.transform=`translate(${ts.x}px,${ts.y}px) translate(-50%,-50%)`;
  // quem a seta está procurando
  S.players.forEach(p=>p.ring.visible=false);const tg=$('tgt');const lab=aimLabel(dir,power);S.aimMate=lab.mate||null;
  if(lab.mate){lab.mate.ring.visible=true;const s2=toScreen(lab.mate.pos.clone().setY(2.6));tg.hidden=false;const io=!!lab.mate.isOff;tg.className='lbl'+(io?' off':'');tg.textContent=io?'IMPEDIDO':lab.t;tg.style.transform=`translate(${s2.x}px,${s2.y}px) translate(-50%,-100%)`}
  else if(lab.t){const s2=toScreen(new T.Vector3(0,GH+.9,0));tg.hidden=false;tg.className='lbl shot';tg.textContent=lab.t;tg.style.transform=`translate(${s2.x}px,${s2.y}px) translate(-50%,-100%)`}
- else tg.hidden=true}
+ else tg.hidden=true;
+ showTraj(dir,power,0,0,lab.t)}
 function aimLabel(dir,power){const b=S.ball.p;let best=null,ba=13*DEG;
  // mirando dentro do gol (de perto) é chute, mesmo com companheiro na frente
  if(dir.z<-.05&&b.z<36){const gx=b.x+dir.x*(-b.z/dir.z);if(Math.abs(gx)<GW+.8){const gd=Math.hypot(gx-b.x,b.z);let pm=null;
@@ -829,12 +854,12 @@ function slingRelease(){if(!S.aim||S.aim.power<.07){hideArrow();S.state='aim';re
 function ctUV(e){const r=$('ctBall').getBoundingClientRect();const cx=r.left+r.width/2,cy=r.top+r.height/2,rad=r.width/2*(100/110);return{u:(e.clientX-cx)/rad,v:-(e.clientY-cy)/rad}}
 function effectTxt(u,v){const side=Math.abs(u)<.14?'sem curva':`curva pra ${u>0?'esquerda':'direita'} ${Math.abs(u)>.6?'forte':Math.abs(u)>.32?'média':'leve'}`;
  const hgt=S.header?(v>.25?'cabeçada pra baixo':v<-.25?'cabeçada por cima':'cabeçada reta'):v>.5?'rasteira':v>.15?'baixa, quicando':v>-.15?(Math.abs(u)<.14&&S.aim&&S.aim.power>.7?'chapada, a bola dança':'reta, meia altura'):v>-.45?'por cima':v>-.75?'lançamento alto':'cavadinha';return`${side} · ${hgt}`}
-function openContact(){S.state='contact';const c=$('contact');c.hidden=false;$('ctAct').textContent=S.aim.label.charAt(0)+S.aim.label.slice(1).toLowerCase();$('ctPow').textContent=`Força ${Math.round(S.aim.power*100)}%`;$('ctInfo').textContent='Toque onde quer bater na bola';$('ctMark').setAttribute('opacity','0');$('hint').hidden=true;sfx('tick')}
-$('ctBall').addEventListener('pointermove',e=>{if(S.state!=='contact')return;const{u,v}=ctUV(e);if(Math.hypot(u,v)>1.05)return;$('ctMark').setAttribute('transform',`translate(${u*100} ${-v*100})`);$('ctMark').setAttribute('opacity','1');$('ctInfo').textContent=effectTxt(u,v)});
+function openContact(){S.state='contact';const c=$('contact');c.hidden=false;$('ctAct').textContent=S.aim.label.charAt(0)+S.aim.label.slice(1).toLowerCase();$('ctPow').textContent=`Força ${Math.round(S.aim.power*100)}%`;$('ctInfo').textContent='Toque onde quer bater na bola';$('ctMark').setAttribute('opacity','0');$('hint').hidden=true;showTraj(S.aim.dir,S.aim.power,0,0,S.aim.label);sfx('tick')}
+$('ctBall').addEventListener('pointermove',e=>{if(S.state!=='contact')return;const{u,v}=ctUV(e);if(Math.hypot(u,v)>1.05)return;$('ctMark').setAttribute('transform',`translate(${u*100} ${-v*100})`);$('ctMark').setAttribute('opacity','1');$('ctInfo').textContent=effectTxt(u,v);showTraj(S.aim.dir,S.aim.power,u,v,S.aim.label)});
 $('ctBall').addEventListener('pointerup',e=>{if(S.state!=='contact')return;let{u,v}=ctUV(e);const d=Math.hypot(u,v);if(d>1.12)return;if(d>1){u/=d;v/=d}
  $('ctMark').setAttribute('transform',`translate(${u*100} ${-v*100})`);$('ctMark').setAttribute('opacity','1');$('ctInfo').textContent=effectTxt(u,v);S.state='kicking';
  setTimeout(()=>{$('contact').hidden=true;startKick(u,v)},140)});
-$('ctBack').onclick=()=>{$('contact').hidden=true;S.state='aim';S.passTo=null;setHint()};
+$('ctBack').onclick=()=>{$('contact').hidden=true;hideTraj();S.state='aim';S.passTo=null;setHint()};
 // ===================== CHUTE =====================
 // u: lado (+ direita da bola), v: altura (+ em cima). Lado direito → curva pra esquerda e vice-versa. Embaixo sobe, em cima vai rasteira.
 // u: lado (+ direita da bola), v: altura (+ em cima). Lado direito → gira anti-horário visto de cima → curva pra esquerda.
@@ -853,7 +878,7 @@ function kickVelocity(dir,power,u,v,header){
  const side=u*62*sp*(header?.2:1),vert=(v>0?-v*45:v*v*68)*sp*(header?.3:1);
  return{vel,w:new T.Vector3(0,side,0).addScaledVector(right,vert)}}
 // preparação do chute: o jogador dá o passo (ou a corrida da falta) e a bola só sai no contato do pé
-function startKick(u,v){const p=S.carrier,a=S.aim;if(!p||!a){S.state='aim';return}
+function startKick(u,v){hideTraj();const p=S.carrier,a=S.aim;if(!p||!a){S.state='aim';return}
  const d=a.dir;S.kickUV={u,v};S.state='windup';p.face=Math.atan2(-d.x,-d.z);p.kickT=S.now;
  if(S.header){p.kickKind='head';p.kickTc=.26;p.jump=.6;S.kickAt=S.now+.26}
  else if(S.volley){p.kickKind='foot';p.kickTc=.2;S.kickAt=S.now+.2;S.plant=null}
@@ -925,6 +950,74 @@ function stepGK(dt){const gk=S.gk;if(!gk)return;const b=S.ball.p;gk.a.look=b;
   if((Math.abs(dx)>.75||pl.y>1.95)&&tl<.52&&tl>0){startDive(gk,dx,pl.y,tl);return}
   gk.faceBall=true;steer(gk,new T.Vector3(pl.x,0,gk.pos.z),4.8,dt);setFacing(gk,b.x-gk.pos.x,b.z-gk.pos.z,dt,9);return}
  gk.faceBall=true;steer(gk,gkSpot(),S.state==='flight'?4.6:3.2,dt);setFacing(gk,b.x-gk.pos.x,b.z-gk.pos.z,dt,8)}
+// ===================== MODO DEFESA =====================
+// Você é o zagueiro. O atacante vem conduzindo (a bola sai do pé a cada toque); o seu jogador acompanha sozinho, de frente,
+// entre ele e o gol. Toque na hora certa pra dar o bote (arraste pra escolher a direção). Com a bola longe do pé dele o bote
+// quase sempre sai; colado no pé, ele protege, passa por você ou cava a falta. No "corte" eles tocam pro atacante na área:
+// leia o passe e se jogue na linha da bola. Se ele chegar a chutar, o seu goleiro (do computador) tenta salvar.
+function KD(){const p=makePlayer({...GKU,team:'us',num:1,skin:pick(SKINS),hair:pick(HAIRS),sp:5});p.pos.set(0,0,1.2);setFacingNow(p,0,-1);S.players.push(p);S.gk=p;return p}
+function DH(x,z){const p=makePlayer({...OUR,team:'us',...heroLook(4)});S.hero=p;p.pos.set(x,0,z);p.home=p.pos.clone();setFacingNow(p,0,-1);S.players.push(p);S.defs.push(p);return p}
+function DF(x,z){const p=makePlayer({...OUR,num:[2,3,5,6,14][S.defs.length%5],team:'us',skin:pick(SKINS),hair:pick(HAIRS)});p.pos.set(x,0,z);p.home=p.pos.clone();setFacingNow(p,0,-1);S.players.push(p);S.defs.push(p);return p}
+function AT(x,z,num,car){const p=makePlayer({...THEM,num,team:'them',skin:pick(SKINS),hair:pick(HAIRS),sp:6.3});p.pos.set(x,0,z);p.home=p.pos.clone();setFacingNow(p,-x*.1,-z);S.players.push(p);S.atks.push(p);if(car)S.carrier=p;return p}
+function defBallAt(a,lead){const fx=-Math.sin(a.face),fz=-Math.cos(a.face);S.ball.p.set(a.pos.x+fx*lead,BR,a.pos.z+fz*lead)}
+function defShoot(a){if(S.state!=='defplay'||!a)return;S.carrier=a;const sh=aiShot();S.aim={dir:sh.dir,power:sh.pw,label:'CHUTE'};S.shotFrom=S.ball.p.clone();startKick(sh.u,sh.v);setHint()}
+function defPass(a,r){const b=S.ball.p;const d0=Math.hypot(r.pos.x-b.x,r.pos.z-b.z);const t=d0/15;const tg=new T.Vector3(r.pos.x+r.vel.x*t*.9,0,r.pos.z+r.vel.z*t*.9);
+ const dir=new T.Vector3(tg.x-b.x,0,tg.z-b.z).normalize();const p=clamp(Math.pow(Math.max(.05,(Math.min(21,Math.hypot(tg.x-b.x,tg.z-b.z)*.95+8))/.93-4)/34,1/1.2),.28,.68);
+ S.noNoise=true;const k=kickVelocity(dir,p,0,.55,false);S.noNoise=false;S.ball.v.copy(k.vel);S.ball.w.copy(k.w);S.ball.v.y=Math.max(0,S.ball.v.y);a.kickT=S.now;a.kickTc=.24;a.kickKind='foot';a.face=Math.atan2(-dir.x,-dir.z);
+ S.carrier=null;S.state='defpass';S.passT=0;S.path=predict(S.ball,2.5);sfx('kick',.4);setHint()}
+function defLunge(tgt){const h=S.hero;if(!h||h.lunge||h.down>0||!(S.state==='defplay'||S.state==='defpass')||S.introOpen)return;const b=S.ball.p;
+ if(!tgt){if(S.state==='defpass'&&S.path){let best=null,bd=1e9;for(const q of S.path){if(q.t>1.2)break;const d=Math.hypot(q.x-h.pos.x,q.z-h.pos.z)-q.t*6;if(d<bd){bd=d;best=q}}tgt=best?new T.Vector3(best.x,0,best.z):new T.Vector3(b.x,0,b.z)}
+  else{const a=S.carrier;tgt=new T.Vector3(b.x+(a?a.vel.x*.18:0),0,b.z+(a?a.vel.z*.18:0))}}
+ const dx=tgt.x-h.pos.x,dz=tgt.z-h.pos.z,L=Math.hypot(dx,dz)||1;const dist=clamp(L,1.3,3.8);
+ let win=false;const K=S.myGkK||1;
+ if(S.state==='defplay'&&S.carrier){const a=S.carrier;const ab=Math.hypot(b.x-a.pos.x,b.z-a.pos.z),hb=Math.hypot(b.x-h.pos.x,b.z-h.pos.z);win=hb<3.9&&Math.random()<clamp((ab>.85?.84:.2)*(.85+.25*K),.08,.95)}
+ else if(S.state==='defpass'&&S.path){win=S.path.some(q=>q.t<1.3&&Math.hypot(q.x-h.pos.x,q.z-h.pos.z)-.8<=9.2*Math.max(0,q.t-.1))&&Math.random()<.9}
+ h.lunge={x:dx/L,z:dz/L,t:0,dur:dist/9.2+.1,win};h.face=Math.atan2(-dx/L,-dz/L);h.g.rotation.y=h.face;h.kickT=S.now;h.kickTc=.3;h.kickKind='foot';h.vel.set(0,0,0);sfx('dive');hideArrow()}
+function defWin(kind,dir){const b=S.ball;S.carrier=null;b.v.set(dir.x*7+R(-2.5,2.5),R(.4,1.6),dir.z*7+R(-1,3.5));b.w.set(0,0,0);S.state='flight';S.flightT=0;S.lastKicker=null;sfx('touch');endPlay(kind)}
+function defAI(dt){const h=S.hero,b=S.ball.p,K=S.myGkK||1;S.defT+=dt;
+ for(const p of S.players){p.a.look=b;if(p.jump>0)p.jump=Math.max(0,p.jump-dt)}
+ const a=S.carrier;
+ // ---- atacante com a bola
+ if(a&&S.state==='defplay'){const pl=a.plan||(a.plan={feintAt:R(.5,1.6),shootZ:R(13,18.5),side:flip()});
+  if(pl.shootNow!=null){pl.shootNow-=dt;slow(a,dt,8);defBallAt(a,.55);if(pl.shootNow<=0){pl.shootNow=null;return defShoot(a)}}
+  else{const dh=h?Math.hypot(h.pos.x-a.pos.x,h.pos.z-a.pos.z):99;let tgt;
+   if(pl.passAt!=null&&S.runner&&S.defT>pl.passAt){defBallAt(a,.6);return defPass(a,S.runner)}
+   if(a.feint>0){a.feint-=dt;tgt=new T.Vector3(a.pos.x+pl.side*5,0,a.pos.z-2.2)}
+   else{a.fcd=(a.fcd||0)-dt;if(a.fcd<=0&&dh<3.4&&S.defT>pl.feintAt&&!(h&&h.lunge)){a.feint=.55;a.feinted=true;a.fcd=R(1.1,1.8);pl.side=(h&&h.pos.x>a.pos.x)?-1:1}
+    tgt=new T.Vector3(clamp(a.pos.x*.7,-9,9),0,pl.passAt!=null?Math.max(a.pos.z-3,18):6)}
+   const beaten=h&&(h.down>0||h.pos.z>a.pos.z+.4);steer(a,tgt,(a.feint>0?7:beaten?6.6:pl.passAt!=null?3.2:5.4)/Math.max(.75,K*.92+.08),dt);setFacing(a,a.vel.x||0,a.vel.z||-1,dt,9);
+   // condução: a bola vai e volta do pé a cada toque
+   S.touch+=dt*(1+a.vel.length()/12);const ph=(S.touch%.9)/.9;S.defWin=Math.hypot(b.x-a.pos.x,b.z-a.pos.z)>.85;defBallAt(a,.48+1.05*Math.pow(Math.sin(ph*Math.PI),5));
+   // só chuta com a linha livre (ou já em cima do gol)
+   const clear=!h||h.down>0||h.pos.z>a.pos.z-.3||segDist(h.pos,b,new T.Vector3(0,0,0))>1.3;
+   if(a.pos.z<pl.shootZ&&Math.abs(a.pos.x)<17&&!(h&&h.lunge)&&(clear||a.pos.z<10.5))return defShoot(a)}}
+ // ---- passe rolando (corte)
+ if(S.state==='defpass'){S.passT+=dt;const prev=b.clone();const n=4;for(let i=0;i<n;i++)stepBall(S.ball,dt/n);
+  const r=S.runner;if(r&&Math.hypot(b.x-r.pos.x,b.z-r.pos.z)<1.05&&b.y<1.3){S.ball.v.set(0,0,0);S.ball.w.set(0,0,0);S.carrier=r;r.plan={shootNow:R(.18,.3)};S.state='defplay';defBallAt(r,.55);flash('DOMINOU!');setHint()}
+  else if(Math.abs(b.x)>34||b.z<0||b.z>106||(S.ball.v.lengthSq()<.2&&S.passT>.8)){S.state='flight';S.flightT=0;endPlay('lost')}
+  // de pé na linha do passe também corta
+  else for(const d of S.defs){if(d.down>0)continue;const rr=d===h&&h.lunge&&h.lunge.t>.1?(h.lunge.win?1.15:.5):.38;if(Math.hypot(b.x-d.pos.x,b.z-d.pos.z)<rr&&b.y<1.1){defWin(d===h?'corte':'block',new T.Vector3(-(S.ball.v.x),0,-(S.ball.v.z)).normalize());return}}}
+ // ---- o seu zagueiro
+ if(h){if(h.lunge){const L=h.lunge;L.t+=dt;const sp=L.t<.1?2:9.2;h.pos.x+=L.x*sp*dt;h.pos.z+=L.z*sp*dt;h.vel.set(L.x*sp,0,L.z*sp);h.ready=0;
+   const fx=h.pos.x+L.x*.55,fz=h.pos.z+L.z*.55;
+   if(L.t>.1&&S.state==='defplay'&&a&&Math.hypot(fx-b.x,fz-b.z)<1.05){
+    if(L.win)return defWin('desarme',new T.Vector3(L.x,0,L.z));
+    h.lunge=null;h.down=.85;if(Math.random()<.42){S.state='flight';S.flightT=0;S.lastKicker=null;return endPlay('falta')}
+    a.feint=.5;a.feinted=true;(a.plan||{}).side=Math.sign(a.pos.x-h.pos.x)||1;flash('PASSOU!');return}
+   if(L.t>=L.dur){if(L.win&&S.state==='defplay'&&a&&Math.hypot(fx-b.x,fz-b.z)<1.9)return defWin('desarme',new T.Vector3(L.x,0,L.z));h.lunge=null;h.down=.8}}
+  else if(h.down>0){h.down-=dt;slow(h,dt,14);h.ready=0}
+  else{const mk=S.runner&&S.carrier!==S.runner;const t=mk?S.runner:a;if(t){const gl=Math.hypot(t.pos.x,t.pos.z)||1;const gx=-t.pos.x/gl,gz=-t.pos.z/gl;const gap=mk?1.8:3.1;
+    const g=new T.Vector3(t.pos.x+gx*gap,0,t.pos.z+gz*gap);h.faceBall=true;steer(h,g,(mk?5.6:4.9)*(.9+.15*K),dt);setFacing(h,b.x-h.pos.x,b.z-h.pos.z,dt,9);h.ready=.8}}}
+ // ---- os outros: zagueiros fecham o meio, atacantes atacam o espaço
+ for(const d of S.defs){if(d===h)continue;let near=null,nd=1e9;for(const o of S.atks){if(o===a)continue;const q=Math.hypot(o.pos.x-d.pos.x,o.pos.z-d.pos.z);if(q<nd){nd=q;near=o}}
+  const g=near?new T.Vector3(near.pos.x*.85,0,Math.max(3,near.pos.z-1.6)):d.home;d.faceBall=true;steer(d,g,4.6,dt);setFacing(d,b.x-d.pos.x,b.z-d.pos.z,dt,6);d.ready=.5}
+ for(const o of S.atks){if(o===a)continue;let g;if(o.runTo)g=o.runTo;else g=new T.Vector3(o.home.x*.6,0,Math.max(8,(a?a.pos.z:o.home.z)-4));steer(o,g,o===S.runner?6:4.4,dt);if(o.vel.length()>.5)setFacing(o,o.vel.x,o.vel.z,dt,6);else setFacing(o,b.x-o.pos.x,b.z-o.pos.z,dt,6)}
+ stepGK(dt);separate()}
+const DRING=(()=>{const m=new T.Mesh(new T.RingGeometry(.34,.46,28),new T.MeshBasicMaterial({color:'#3cff7a',transparent:true,opacity:.0,depthWrite:false}));m.rotation.x=-Math.PI/2;m.renderOrder=3;scene.add(m);return m})();
+function defRing(){const on=S.mode==='play'&&S.role==='def'&&S.state==='defplay'&&S.carrier&&!S.introOpen&&!(S.runner&&S.carrier!==S.runner);if(!on){DRING.material.opacity=0;return}const b=S.ball.p;DRING.position.set(b.x,.03,b.z);
+ DRING.material.color.set(S.defWin?'#3cff7a':'#ffffff');DRING.material.opacity=S.defWin?.95:.35;const k=S.defWin?1.25:1;DRING.scale.set(k,k,k)}
+function defFlight(dt){const b=S.ball.p;for(const p of S.players){p.a.look=b;if(p===S.gk)continue;if(p.lunge){p.lunge=null;p.down=.6}slow(p,dt,7)}stepGK(dt);separate()}
+const RES_DEF={desarme:['DESARMOU!','good'],corte:['CORTOU!','good'],block:['BLOQUEOU!','good'],falta:['FALTA!','bad'],goal:['GOL DELES','bad']};
 // ===================== MODO GOLEIRO =====================
 // O batedor deles escolhe um canto e uma altura e mira de verdade (a física é a mesma); erra às vezes como qualquer um.
 // Se você pular antes do chute, ele vê e bate no outro canto.
@@ -1148,7 +1241,7 @@ function moveTeams(dt){const b=S.ball.p,flying=S.state==='flight';
    const gap=clamp(1+lb*.04,1,3);tgt=new T.Vector3(m.pos.x+toG.x*gap+toB.x/lb*.8,0,m.pos.z+toG.z*gap+toB.z/lb*.8)}
   else{const h=o.home||o.pos;tgt=new T.Vector3(lerp(h.x,B.x,.3),0,clamp(Math.min(h.z,B.z-6),3,h.z))}
   o.faceBall=o.pos.distanceTo(tgt)<3;steer(o,tgt,o.sp*.88,dt);if(o.faceBall)setFacing(o,b.x-o.pos.x,b.z-o.pos.z,dt,7)}}
-function stepAI(dt){
+function stepAI(dt){if(S.role==='def'&&S.state!=='result'){defFlight(dt);return}
  const b=S.ball.p;
  for(const p of S.players){p.a.look=b;if(p.jump>0)p.jump=Math.max(0,p.jump-dt)}
  if(S.state==='result'){resultAI(dt);stepGK(dt);separate();return}
@@ -1156,7 +1249,7 @@ function stepAI(dt){
 function separate(){const P2=S.players;for(let i=0;i<P2.length;i++)for(let j=i+1;j<P2.length;j++){const a=P2[i],b=P2[j];if(a.wall||b.wall||a===S.gk||b===S.gk)continue;const dx=b.pos.x-a.pos.x,dz=b.pos.z-a.pos.z,L=Math.hypot(dx,dz);if(L>0&&L<.9){const f=(.9-L)*.5;a.pos.x-=dx/L*f;a.pos.z-=dz/L*f;b.pos.x+=dx/L*f;b.pos.z+=dz/L*f}}}
 // depois do lance: gol → quem fez sai comemorando e o time vai junto; o outro time lamenta. Errou → mão na cabeça.
 function resultAI(dt){const k=S.lastKicker,goal=S.result==='goal';
- if(S.role==='gk'&&k&&k.team==='them'){if(goal){if(!k.celeTo)k.celeTo=new T.Vector3(clamp(k.pos.x+(k.pos.x<0?-10:10),-30,30),0,k.pos.z+4);if(k.pos.distanceTo(k.celeTo)>.8){steer(k,k.celeTo,6.2,dt);k.cele='air'}else{slow(k,dt);k.cele='arms'}}else{slow(k,dt,7);if(S.now-S.resT>.5)k.cele='head'}}
+ if((S.role==='gk'||S.role==='def')&&k&&k.team==='them'){if(goal){if(!k.celeTo)k.celeTo=new T.Vector3(clamp(k.pos.x+(k.pos.x<0?-10:10),-30,30),0,k.pos.z+4);if(k.pos.distanceTo(k.celeTo)>.8){steer(k,k.celeTo,6.2,dt);k.cele='air'}else{slow(k,dt);k.cele='arms'}}else{slow(k,dt,7);if(S.now-S.resT>.5)k.cele='head'}}
  for(const m of S.mates){m.ready=0;m.faceBall=false;
   if(goal&&k){if(m===k){if(!k.celeTo)k.celeTo=new T.Vector3(clamp(k.pos.x+(k.pos.x<0?-9:9),-30,30),0,Math.max(4,k.pos.z-3));const d=k.pos.distanceTo(k.celeTo);if(d>.8){steer(k,k.celeTo,6.4,dt);k.cele='air'}else{slow(k,dt);k.cele='arms';setFacing(k,-k.pos.x,30-k.pos.z,dt,4)}}
    else{const d=m.pos.distanceTo(k.pos);if(d>1.8){steer(m,k.pos,5.6,dt);m.cele=d<6?'arms':null}else{slow(m,dt,10);m.cele='arms'}}}
@@ -1189,6 +1282,8 @@ function checkContacts(prev){const b=S.ball,p=b.p;
   if(S.gkPlan&&S.gkPlan.claim&&Math.hypot(p.x-gk.pos.x,p.z-gk.pos.z)<1.15&&p.y<2.8&&S.flightT>.2){S.held=gk;gk.hold=true;b.v.set(0,0,0);b.w.set(0,0,0);return endPlay('claim')}}
  // interceptação
  for(const o of S.opps){if(o.wall)continue;if(S.flightT<.12)continue;const reachH=1.9+(o.jump>0?.5:0);const rr=o.block&&p.y<1.05?.95:.62;if(Math.hypot(p.x-o.pos.x,p.z-o.pos.z)<rr&&p.y<reachH){if(S.flightT<.35&&!o.block){if(o.tried)continue;o.tried=true;if(Math.random()<.5)continue}if(p.y>1.3)o.jump=.6;S.interBy=o;deflect(b,o);return endPlay(o.block?'block':'inter')}}
+ // defesa: os seus zagueiros bloqueiam o chute
+ if(S.role==='def'){for(const d of S.defs){if(S.flightT<.08)break;if(!d.btry&&Math.hypot(p.x-d.pos.x,p.z-d.pos.z)<.55&&p.y<1.9){d.btry=true;if(Math.random()<.55){deflect(b,d);return endPlay('block')}}}}
  // recepção
  // chute forte indo pro gol passa pelos companheiros (ninguém "domina" o próprio chute)
  const bs=b.v.length(),shotOn=(/CHUTE|FALTA|PÊNALTI|CABE/.test(S.lastLabel||'')&&bs>12&&b.v.z<0)||bs>18;
@@ -1196,7 +1291,7 @@ function checkContacts(prev){const b=S.ball,p=b.p;
   if(dxz<1.05&&p.y<1.05)return receive(m,false);
   if(dxz<1.15&&p.y>=1.05&&p.y<2.7)return receive(m,true)}
  // bola parou
- if(b.v.lengthSq()<.1&&p.y<=BR+.01&&S.flightT>.6){if(S.role==='gk')return endPlay('lost');let best=null,bd=1e9;for(const q of S.players){if(q===S.gk)continue;const d=Math.hypot(q.pos.x-p.x,q.pos.z-p.z);if(d<bd){bd=d;best=q}}if(best&&best.team==='us')return receive(best,false);return endPlay('lost')}
+ if(b.v.lengthSq()<.1&&p.y<=BR+.01&&S.flightT>.6){if(S.role!=='atk')return endPlay('lost');let best=null,bd=1e9;for(const q of S.players){if(q===S.gk)continue;const d=Math.hypot(q.pos.x-p.x,q.pos.z-p.z);if(d<bd){bd=d;best=q}}if(best&&best.team==='us')return receive(best,false);return endPlay('lost')}
  if(S.flightT>(S.role==='gk'?4:7))return endPlay('lost')}
 // bola que bate no corpo: volta fraca, sem atravessar o jogador
 function deflect(b,o){const v=b.v;v.set(-v.x*.18+R(-1.5,1.5),Math.max(0,Math.abs(v.y)*.25)+R(.5,2),-v.z*.22);b.w.multiplyScalar(.2);if(!o.wall&&b.p.y<.9){o.kickT=S.now-.2;o.kickTc=.24;o.kickKind='foot'}sfx('touch')}
@@ -1210,13 +1305,13 @@ const RES={goal:['GOOOL!','good'],save:['DEFENDEU!',''],claim:['O GOLEIRO PEGOU'
 // no modo goleiro o placar é de defesas
 const RES_GK={goal:['GOL DELES','bad'],save:['DEFENDEU!','good'],claim:['DEFENDEU!','good'],wide:['PRA FORA!','good'],over:['POR CIMA!','good'],outside:['PRA FORA!','good'],wall:['NA BARREIRA!','good'],inter:['SALVOU!','good'],lost:['SALVOU!','good'],post:['NA TRAVE!','good'],tackle:['SALVOU!','good'],block:['SALVOU!','good']};
 function chLabel(){const c=S.ch;if(!c)return'';if(c.type==='pen')return`Pênaltis · Você ${c.us}×${c.them} Eles · `;return`${c.type==='gk'?'Defesas':'Desafio'} ${c.i+1}/${c.list.length} · `}
-function endPlay(kind,delay=0){if(S.state==='result')return;S.state='result';S.result=kind;S.resT=S.now;S.score.n++;const gkm=S.role==='gk';
+function endPlay(kind,delay=0){if(S.state==='result')return;S.state='result';S.result=kind;S.resT=S.now;S.score.n++;const gkm=S.role==='gk'||S.role==='def',dfm=S.role==='def';
  if(S.hitPost&&kind!=='goal'&&(kind==='wide'||kind==='over'||kind==='outside'||kind==='lost'))kind='post';S.hitPost=false;
- const good=gkm?kind!=='goal':kind==='goal';if(kind==='off'){LINO.cele='flag';sfx('whistle')}if(good){S.score.g++;if(S.ch)S.ch.g++}
+ const good=dfm?!['goal','falta'].includes(kind):gkm?kind!=='goal':kind==='goal';if(kind==='off'){LINO.cele='flag';sfx('whistle')}if(good){S.score.g++;if(S.ch)S.ch.g++}
  if(S.ch&&S.ch.type==='pen'){if(gkm){S.ch.kt.push(kind==='goal'?1:0);if(kind==='goal')S.ch.them++}else{S.ch.ku.push(kind==='goal'?1:0);if(kind==='goal')S.ch.us++}$('scn').textContent=chLabel()+SC[S.scen].n}
  updateScore();
- const[t,cls]=gkm?RES_GK[kind]:kind==='post'?['NA TRAVE!','']:RES[kind];
- const sub=gkm?(kind==='goal'?'Não deu dessa vez.':kind==='save'||kind==='claim'?(S.caught?'Encaixou!':'Que defesa!'):kind==='wall'?'A barreira segurou.':''):
+ const[t,cls]=dfm&&RES_DEF[kind]?RES_DEF[kind]:gkm?(RES_GK[kind]||['SALVOU!','good']):kind==='post'?['NA TRAVE!','']:RES[kind];
+ const sub=dfm?(kind==='desarme'?'Bote na hora certa.':kind==='corte'?'Leu o passe e cortou.':kind==='block'?'Se jogou na frente do chute.':kind==='falta'?'Chegou atrasado e derrubou. Falta perigosa.':kind==='save'||kind==='claim'?'Ele passou, mas o goleiro salvou.':kind==='goal'?'Ele passou por você e marcou.':'A bola saiu.'):gkm?(kind==='goal'?'Não deu dessa vez.':kind==='save'||kind==='claim'?(S.caught?'Encaixou!':'Que defesa!'):kind==='wall'?'A barreira segurou.':''):
   kind==='goal'?(S.lastVolley?'De primeira, sem deixar cair!':S.chain?`Depois de ${S.chain} passe${S.chain>1?'s':''}. ${S.lastLabel==='CABEÇADA'?'De cabeça!':''}`:S.pen?'Bateu e converteu.':S.fkKick?'Gol de falta!':'Na rede!'):kind==='save'?(S.caught?(S.gk&&S.gk.dive?'Voou e encaixou.':'Encaixou firme.'):'O goleiro voou.'):kind==='inter'?'O zagueiro estava na linha do passe.':kind==='tackle'?'Segurou demais com o marcador colado. Solte mais rápido.':kind==='block'?'O zagueiro se jogou na frente do chute.':kind==='off'?'Ele estava à frente do penúltimo defensor na hora do passe.':kind==='wall'?'Bateu na barreira. Use mais curva.':'';
  setTimeout(()=>{const bn=$('banner');bn.className='show '+cls;bn.innerHTML=`<b>${t}</b>${sub?`<small>${sub}</small>`:''}`;
   if(kind==='goal'){sfx('goal');S.shake=.4;netRipple(S.ball.p,.22);if(!gkm)confetti()}else if(good){confetti();sfx('goal')}else sfx('ooh')},delay*1000);
@@ -1257,9 +1352,10 @@ function buildMenu(){let best=0,bestG=0;try{best=+localStorage.getItem('ml_best'
  document.querySelectorAll('.m-tab').forEach(t=>t.classList.toggle('on',t.dataset.t===MTAB));
  const card=k=>{const v=SC[k];return`<button class="m-card${v.gk?' gk':''}" data-k="${k}"><span class="ic">${v.ic}</span><b>${v.m||v.n}</b><small>${v.d}</small></button>`};
  const g=$('mGrid');
- if(MTAB==='gk')g.innerHTML=GKS.map(card).join('')+`<button class="m-card ch half" data-k="__gk"><span class="ic">🧤</span><b>Série · 6 defesas</b><small>Chutes sorteados.${bestG?` Recorde: ${bestG}.`:''}</small></button><button class="m-card ch" data-k="__pen"><span class="ic">🏆</span><b>Disputa de pênaltis</b><small>Você bate e você defende, alternando. Cinco pra cada lado.</small></button>`;
+ if(MTAB==='def')g.innerHTML=DEFS.map(card).join('');
+ else if(MTAB==='gk')g.innerHTML=GKS.map(card).join('')+`<button class="m-card ch half" data-k="__gk"><span class="ic">🧤</span><b>Série · 6 defesas</b><small>Chutes sorteados.${bestG?` Recorde: ${bestG}.`:''}</small></button><button class="m-card ch" data-k="__pen"><span class="ic">🏆</span><b>Disputa de pênaltis</b><small>Você bate e você defende, alternando. Cinco pra cada lado.</small></button>`;
  else g.innerHTML=ATK.map(card).join('')+`<button class="m-card ch" data-k="__ch"><span class="ic">🏆</span><b>Desafio · 8 lances</b><small>Cenários sorteados. Quantos gols você faz?${best?` Recorde: ${best}.`:''}</small></button>`;
- $('howMid').innerHTML=MTAB==='gk'?'<b>Goleiro</b>Arraste pro lado do chute. Pulou antes? Ele bate no outro canto.':'<b>2 · Toque na bola</b>Lado: curva. Embaixo: sobe. Em cima: rasteira.';
+ $('howMid').innerHTML=MTAB==='def'?'<b>Defesa</b>Toque pra dar o bote quando a bola sair do pé dele. Arraste pra escolher a direção.':MTAB==='gk'?'<b>Goleiro</b>Arraste pro lado do chute. Pulou antes? Ele bate no outro canto.':'<b>2 · Toque na bola</b>Lado: curva. Embaixo: sobe. Em cima: rasteira.';
  g.querySelectorAll('[data-k]').forEach(b=>b.onclick=()=>{sfxUnlock();S.score={g:0,n:0};const k=b.dataset.k;if(k==='__ch')return startCh('atk');if(k==='__gk')return startCh('gk');if(k==='__pen')return startCh('pen');S.ch=null;startScen(k)})}
 document.querySelectorAll('.m-env [data-env]').forEach(b=>b.onclick=()=>{const pr=b.dataset.env==='prison';document.querySelectorAll('.m-env [data-env]').forEach(x=>x.classList.toggle('on',x===b));setEnv(b.dataset.env);OUR={...KIT0.OUR,...(pr?PRISON_KITS.us:{})};THEM={...KIT0.THEM,...(pr?PRISON_KITS.them:{})};GKU={...KIT0.GKU,...(pr?PRISON_KITS.gk:{}),gk:true};GKC={...KIT0.GKC,...(pr?PRISON_KITS.gk:{}),gk:true}});
 document.querySelectorAll('.m-tab').forEach(t=>t.onclick=()=>{MTAB=t.dataset.t;try{localStorage.setItem('ml_tab',MTAB)}catch(e){}buildMenu()});
@@ -1275,7 +1371,7 @@ function embedSend(res){S.embedDone=true;S.paused=true;try{parent.postMessage({t
 function embedPlay(c){S.paused=false;last=performance.now();S.ch=null;S.score={g:0,n:0};S.embedDone=false;applyCfg(c);startScen(c.scen);
  $('scn').textContent=c.title||SC[c.scen].n;$('score').hidden=true;$('bMenu').textContent='Pular';$('bMenu').classList.remove('icon');
  S.introOpen=true;$('intro').hidden=false;$('inMin').textContent=c.min?c.min+"'":'Lance';$('inMin').hidden=!c.min;$('inT').textContent=c.head||SC[c.scen].n;$('inD').textContent=c.desc||SC[c.scen].d;
- $('inHow').textContent=S.role==='gk'?'Arraste pro lado que a bola vai pra mergulhar.':'Puxe da bola pra trás e toque nela pra dar efeito.';$('hint').hidden=true}
+ $('inHow').textContent=S.role==='def'?'Toque na hora certa pra dar o bote. Arraste pra escolher a direção.':S.role==='gk'?'Arraste pro lado que a bola vai pra mergulhar.':'Puxe da bola pra trás e toque nela pra dar efeito.';$('hint').hidden=true}
 if(EMBED){$('inGo').onclick=()=>{sfxUnlock();S.introOpen=false;$('intro').hidden=true;setHint()};$('inSkip').onclick=()=>{$('intro').hidden=true;embedSend({skip:true})};
  addEventListener('message',e=>{const d=e.data||{};if(d.type==='ml-play'){resize();embedPlay(d.cfg||{})}});}
 // ===================== LOOP =====================
@@ -1298,19 +1394,20 @@ function update(rdt){
    if(S.state==='flight'){S.pathT+=dt;if(S.pathT>.25){S.pathT=0;S.path=predict(S.ball,3.5).map(q=>({...q,t:q.t+S.flightT}))}}
    if(S.state==='flight'||S.state==='result')stepAI(dt);
 }
+  else if(S.role==='def'){if(!S.introOpen&&(S.state==='defplay'||S.state==='defpass'))defAI(rdt);else idleAI(rdt)}
   else{if(S.role==='gk')gkWait(rdt);if(S.role==='atk'&&S.state!=='idle'&&!S.introOpen&&!S.header&&!S.volley)liveAI(rdt);else idleAI(rdt)}
   stepLino(rdt);stepGuards(rdt)
   if(Math.abs(S.yawVel)>.01&&!(gest&&gest.type==='orbit')){S.camYaw+=S.yawVel*rdt;S.yawVel*=Math.exp(-3.5*rdt)}
   if(S.dbgCam){cam.position.copy(S.dbgCam.pos);cam.lookAt(S.dbgCam.look)}else updCam(rdt)}
  // visuais
- for(const p of S.players){animPlayer(p,rdt,S.now);p.star.visible=S.mode==='play'&&(S.role==='gk'?p===S.gk&&S.state!=='result':p===S.carrier&&(S.state==='aim'||S.state==='drag'||S.state==='contact'))}
+ for(const p of S.players){animPlayer(p,rdt,S.now);p.star.visible=S.mode==='play'&&(S.role==='def'?p===S.hero&&(S.state==='defplay'||S.state==='defpass'):S.role==='gk'?p===S.gk&&S.state!=='result':p===S.carrier&&(S.state==='aim'||S.state==='drag'||S.state==='contact'))}
  // bola encaixada nas luvas
  if(S.held){const k=S.held;k.g.updateMatrixWorld(true);k.hands[0].getWorldPosition(_hv);k.hands[1].getWorldPosition(_hv2);_hv.add(_hv2).multiplyScalar(.5);
   const fx=-Math.sin(k.face),fz=-Math.cos(k.face);S.ball.p.set(_hv.x+fx*.1,Math.max(BR,_hv.y),_hv.z+fz*.1);S.ball.v.set(0,0,0)}
  const b=S.ball;ballM.position.copy(b.p);const hs=Math.hypot(b.v.x,b.v.z);const moving=S.state==='flight'||S.state==='result';
  if(moving&&!S.held){if(b.p.y<=BR+.01){if(hs>.01)ballM.rotateOnWorldAxis(_hv.set(b.v.z,0,-b.v.x).normalize(),hs*rdt/BR)}
   else{const ws=b.w.length();if(ws>.3)ballM.rotateOnWorldAxis(_hv.copy(b.w).normalize(),Math.min(ws*.8,24)*rdt)}}
- updOffVis();ballSh.position.set(b.p.x,.02,b.p.z);const sh=clamp(1-b.p.y*.15,.35,1);ballSh.scale.set(sh,sh,sh);
+ updOffVis();defRing();ballSh.position.set(b.p.x,.02,b.p.z);const sh=clamp(1-b.p.y*.15,.35,1);ballSh.scale.set(sh,sh,sh);
  updNet();updEdges()}
 function adaptQ(real){if(S.mode!=='play'||S.introOpen||real>.25)return;QUAL.acc+=real;QUAL.n++;QUAL.t+=real;if(QUAL.t<1.5)return;
  const avg=QUAL.acc/QUAL.n;QUAL.acc=0;QUAL.n=0;QUAL.t=0;let d=QUAL.dpr;
@@ -1322,7 +1419,7 @@ function frame(now){const real=(now-last)/1000;const rdt=Math.min(.05,real);last
  update(rdt);renderer.render(scene,cam);adaptQ(real);requestAnimationFrame(frame)}
 showMenu();if(EMBED){S.paused=true;$('menu').hidden=true;try{parent.postMessage({type:'ml-ready'},'*')}catch(e){}}requestAnimationFrame(frame);
 // gancho de teste
-window.__ML={S,LINO,startScen,update,renderer,scene,setEnv:e=>setEnv(e),render:()=>renderer.render(scene,cam),
+window.__defLunge=t=>defLunge(t);window.__ML={S,LINO,startScen,update,renderer,scene,camObj:cam,setEnv:e=>setEnv(e),render:()=>renderer.render(scene,cam),
  kick:(dx,dz,p,u,v)=>{const dir=new T.Vector3(dx,0,dz).normalize();S.aim={dir,power:p,label:aimLabel(dir,p).t||'TOQUE'};kick(u,v)},
  shoot:(dx,dz,p,u,v)=>{const dir=new T.Vector3(dx,0,dz).normalize();S.aim={dir,power:p,label:aimLabel(dir,p).t||'TOQUE'};hideArrow();startKick(u,v)},
  drag:(dx,dz,p)=>{const dir=new T.Vector3(dx,0,dz).normalize();S.aim={dir,power:p};S.state='drag';showArrow(dir,p,.02)},

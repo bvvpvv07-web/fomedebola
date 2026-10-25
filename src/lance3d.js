@@ -13,13 +13,29 @@ addEventListener('message',e=>{const d=e.data||{};if(!L3D.frame||e.source!==L3D.
  if(d.type==='ml-ready'&&L3D._ready)L3D._ready();if(d.type==='ml-fail'&&L3D._fail)L3D._fail(new Error('lance3d: three.js não carregou'));
  if(d.type==='ml-result'&&L3D._res){const r=L3D._res;L3D._res=null;L3D.frame.classList.remove('on');document.body.classList.remove('l3d-on');r(d.res||{skip:true})}});
 // cena do motor pra cada tipo de lance
-function l3dScene(o){const K=o.kind||'finish';
+// cada posição tem os seus lances: zagueiro desarma e sai jogando, lateral cruza, volante lança, meia tabela, ponta dribla, atacante finaliza
+const L3D_POS={
+ GOL:{pass:['tiroMeta'],long:['tiroMeta'],cross:['tiroMeta']},
+ ZAG:{pass:['saida','lanca'],long:['lanca','saida'],cross:['escanteio','cabeca'],finish:['cabeca','escanteio','rebote'],dribble:['saida'],header:['cabeca','escanteio']},
+ LD:{pass:['contra','saida','lateral'],long:['lanca'],cross:['cruz','lateral','escCurto'],finish:['longe','contra'],dribble:['lateral','contra']},
+ LE:{pass:['contra','saida','lateral'],long:['lanca'],cross:['cruz','lateral','escCurto'],finish:['longe','contra'],dribble:['lateral','contra']},
+ VOL:{pass:['saida','lanca','contra'],long:['lanca','saida'],cross:['escanteio'],finish:['longe','faltaLonge','rebote'],dribble:['saida']},
+ MC:{pass:['tabela','contra','lanca'],long:['lanca','contra3'],cross:['escCurto','cruz'],finish:['longe','area','faltaLonge'],dribble:['area','contra']},
+ ME:{pass:['contra','tabela'],long:['lanca'],cross:['cruz','escCurto'],finish:['area','longe'],dribble:['mano','lateral']},
+ MD:{pass:['contra','tabela'],long:['lanca'],cross:['cruz','escCurto'],finish:['area','longe'],dribble:['mano','lateral']},
+ MEI:{pass:['tabela','contra3','area'],long:['lanca'],cross:['escCurto'],finish:['area','longe','voleio','falta'],dribble:['area','pivo','mano']},
+ PE:{pass:['contra3','contra'],long:['contra3'],cross:['cruz','lateral'],finish:['area','mano','contra'],dribble:['mano','lateral','area']},
+ PD:{pass:['contra3','contra'],long:['contra3'],cross:['cruz','lateral'],finish:['area','mano','contra'],dribble:['mano','lateral','area']},
+ SA:{pass:['tabela','pivo','contra3'],long:['contra3'],cross:['cruz'],finish:['area','voleio','rebote','mano'],dribble:['pivo','mano','area']},
+ ATA:{pass:['pivo','tabela'],long:['contra3'],cross:['cruz'],finish:['area','mano','rebote','voleio','pivo'],dribble:['mano','pivo','area'],header:['cabeca','voleio']}};
+function l3dScene(o){const K=o.kind||'finish';const pos=(S&&S.pos)||'ATA';const P=L3D_POS[pos]||{};
+ if(K==='tackle')return pick(['desarme','desarme','corte']);
  if(K==='keeper')return o.pen?'gkPen':pick(['gkShot','gkShot','gkFk','gkMano','gkCab']);
- if(K==='pen')return'penalti';if(K==='fk')return'falta';if(K==='chip')return'mano';if(K==='combo')return'tabela';if(K==='header')return pick(['cabeca','cabeca','voleio']);
- if(K==='long')return pick(['lanca','lanca','saida','contra3']);if(K==='cross')return pick(['cruz','cruz','escanteio','escCurto','lateral']);
- if(K==='pass')return o.planned?pick(['contra','saida','contra3']):pick(['contra','saida','tabela','area','contra3','pivo']);
- if(K==='dribble')return pick(['mano','area','contra','pivo','lateral']);
- return o.planned?pick(['mano','area','contra','rebote','voleio']):pick(['area','longe','contra','rebote','voleio','pivo'])}
+ if(K==='pen')return'penalti';if(K==='fk')return pick(['falta','falta','faltaLonge']);if(K==='chip')return'mano';if(K==='combo')return'tabela';
+ if(K==='header')return pick(P.header||['cabeca','cabeca','voleio']);
+ const base={long:['lanca','lanca','saida','contra3'],cross:['cruz','cruz','escanteio','escCurto','lateral'],pass:o.planned?['contra','saida','contra3']:['contra','saida','tabela','area','contra3','pivo'],dribble:['mano','area','contra','pivo','lateral'],
+  finish:o.planned?['mano','area','contra','rebote','voleio']:['area','longe','contra','rebote','voleio','pivo']}[K]||['area'];
+ const mine=P[K];if(pos==='GOL'&&mine)return pick(mine);return pick(mine&&Math.random()<.75?mine:base)}
 const L3D_HAIR={buzz:'buzz',lateral:'quiff',quiff:'quiff',afro:'afro',cacheado:'afro',long:'long',dreads:'long',moicano:'quiff',coque:'long',bald:'bald'};
 function l3dDist(a,b){const p=h=>{h=(h||'#000').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h,16)||0;return[n>>16&255,n>>8&255,n&255]};const x=p(a),y=p(b);return Math.hypot(x[0]-y[0],x[1]-y[1],x[2]-y[2])}
 function l3dKit(c){const c1=(c&&c.c1)||'#ff6a12',c2=(c&&c.c2)||'#ffffff';return{shirt:c1,shirt2:c2,shorts:l3dDist(c1,c2)>120?c2:'#1b1f24',socks:c1}}
@@ -28,14 +44,18 @@ function l3dCfg(o){const ctx=L3D.ctx||{};const us=ctx.us||club()||null,them=ctx.
  if(l3dDist(U.shirt,Tm.shirt)<110){const alt=them&&l3dDist(U.shirt,them.c2||'#fff')>=110?them.c2:(l3dDist(U.shirt,'#ffffff')>140?'#ffffff':'#151515');Tm={shirt:alt,shirt2:alt==='#ffffff'?'#151515':'#ffffff',shorts:alt,socks:alt}}
  let hero={num:S.num||9};try{const L=faceLook(S.face||{preset:0});hero={num:S.num||9,skin:L.skin,hair:L.hair,style:L3D_HAIR[L.style]||'buzz',beard:!!L.beard,band:!!L.band}}catch(e){}
  const sk=clamp(o.skill??.6,.1,.98),kp=clamp(o.keeper??.45,.1,.9);const sc=l3dScene(o);const GK=sc.startsWith('gk');
- const tag=GK?'Defesa':({pass:'Passe',long:'Lançamento',cross:'Cruzamento',dribble:'Um contra um',header:'Cabeçada',fk:'Falta',pen:'Pênalti',chip:'Cobertura',combo:'Tabela'})[o.kind]||'Finalização';
+ const tag=o.kind==='tackle'?'Desarme':GK?'Defesa':({pass:'Passe',long:'Lançamento',cross:'Cruzamento',dribble:'Um contra um',header:'Cabeçada',fk:'Falta',pen:'Pênalti',chip:'Cobertura',combo:'Tabela'})[o.kind]||'Finalização';
  return{scen:sc,us:U,them:Tm,gkUs:{shirt:'#20c4bd',shirt2:'#0b2626',shorts:'#0b2626',socks:'#20c4bd'},hero,min:o.min||0,
   title:`${o.min?o.min+"' · ":''}${o.comp||tag}`,head:o.title&&!/^(finish|pass|keeper)$/.test(o.title)?o.title:tag,desc:null,
   noiseK:clamp(1.45-.9*sk,.5,1.3),gkK:clamp((kp-.45)*4,-1,1),myGkK:.85+.3*sk,shNoise:clamp(1.6-(((them&&them.s)||70)-50)/50,.75,1.4),
   crowd:[U.shirt,U.shirt2,Tm.shirt]}}
 // no presídio o lance é no pátio: chão de barro, coletes laranja × listrado, policiais em volta e sem torcida
 {const _cfg=l3dCfg;l3dCfg=function(o){const c=_cfg(o);try{if(o.env==='prison'||(typeof inPrison==='function'&&inPrison())||/presídio|prisão|pátio/i.test(o.comp||'')){c.env='prison';delete c.us;delete c.them;delete c.gkUs;c.crowd=null;if(c.hero)c.hero.boot='#e9e6df'}}catch(e){}return c}}
-function l3dResult(o,res){const K=o.kind||'finish';const GK=K==='keeper';const isPassK=['pass','long','cross'].includes(K);const train=/Peneira|Treino/i.test(o.comp||'');
+function l3dResult(o,res){const K=o.kind||'finish';
+ if(K==='tackle'){NM.netHit=null;NM.intc=null;NM.dmAssist=false;NM.selfGoal=false;const won=['desarme','corte','block'].includes(res.kind);const ok=!res.goal&&res.kind!=='falta';
+  NM.last=res.kind==='desarme'?'Desarmou!':res.kind==='corte'?'Cortou!':res.kind==='block'?'Bloqueou!':res.kind==='falta'?'Falta.':res.goal?'Gol deles.':ok?'O goleiro salvou.':'Passou por você.';
+  NM.grade=won?92:ok?62:40;NM.why='Lance de defesa';return{ok,perfect:won,grade:NM.grade}}
+ const GK=K==='keeper';const isPassK=['pass','long','cross'].includes(K);const train=/Peneira|Treino/i.test(o.comp||'');
  NM.netHit=null;NM.intc=null;NM.dmAssist=false;NM.selfGoal=false;let ok;
  if(GK){ok=o.pen?(res.kind==='save'||res.kind==='claim'):!res.goal;NM.last=res.goal?'Foi no canto.':ok?(o.okTxt||'DEFENDEU!'):'Pra fora!'}
  else{ok=!!res.goal||(train&&isPassK&&res.chain>=1);
