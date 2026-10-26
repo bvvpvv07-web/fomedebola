@@ -11,7 +11,7 @@ function l3dBoot(){if(L3D.ready)return L3D.ready;
  L3D.ready.catch(()=>{L3D.failed=true});return L3D.ready}
 addEventListener('message',e=>{const d=e.data||{};if(!L3D.frame||e.source!==L3D.frame.contentWindow)return;
  if(d.type==='ml-ready'&&L3D._ready)L3D._ready();if(d.type==='ml-fail'&&L3D._fail)L3D._fail(new Error('lance3d: three.js não carregou'));
- if(d.type==='ml-result'&&L3D._res){const r=L3D._res;L3D._res=null;L3D.frame.classList.remove('on');document.body.classList.remove('l3d-on');r(d.res||{skip:true})}});
+ if(d.type==='ml-result'&&L3D._res){const r=L3D._res;L3D._res=null;if(!SESS.on){L3D.frame.classList.remove('on');document.body.classList.remove('l3d-on')}r(d.res||{skip:true})}});
 // cena do motor pra cada tipo de lance
 // cada posição tem os seus lances: zagueiro desarma e sai jogando, lateral cruza, volante lança, meia tabela, ponta dribla, atacante finaliza
 const L3D_POS={
@@ -65,14 +65,14 @@ function l3dResult(o,res){const K=o.kind||'finish';
  return{ok,perfect,grade:NM.grade}}
 async function lance3dPlay(o){
  if(!L3D.frame||!L3D._loaded){try{toast({ic:'⚽',title:'Abrindo o lance',txt:'Carregando o campo em 3D…',ms:1600})}catch(e){}}
- await l3dBoot();L3D._loaded=true;const cfg=l3dCfg(o);
+ await l3dBoot();L3D._loaded=true;const cfg=l3dCfg(o);if(SESS.on)cfg.sess=true;
  L3D.frame.classList.add('on');document.body.classList.add('l3d-on');
  const res=await new Promise(r=>{L3D._res=r;L3D.frame.contentWindow.postMessage({type:'ml-play',cfg},'*')});
  return res}
 // liga no lugar do momento de decisão (fica por baixo do XP do rpg.js, que vem depois)
-{const _nmDecide=nssMoment;nssMoment=async function(o){if(lanceMode()!=='jogar'||L3D.failed)return _nmDecide(o);
+{const _nmDecide=nssMoment;nssMoment=async function(o){if(SESS.skipAll)return l3dAuto(o);if(lanceMode()!=='jogar'||L3D.failed)return SESS.on?l3dAuto(o):_nmDecide(o);
   let res;try{res=await lance3dPlay(o)}catch(e){L3D.failed=true;try{toast({ic:'⚠️',title:'Lance 3D indisponível',txt:'Seguindo com os momentos de decisão.',ms:2600})}catch(_){}return _nmDecide(o)}
-  if(!res||res.skip)return _nmDecide(o);return l3dResult(o,res)}}
+  if(!res||res.skip)return SESS.on||SESS.skipAll?l3dAuto(o):_nmDecide(o);return l3dResult(o,res)}}
 // guarda os dois times do jogo atual pras cores
 {const _pm=playMine;playMine=async function(o,io){L3D.ctx={us:o&&o.us,them:o&&o.them};try{return await _pm(o,io)}finally{L3D.ctx=null}}}
 // pré-carrega o 3D quando a carreira está aberta e o modo é jogar
@@ -80,32 +80,57 @@ async function lance3dPlay(o){
 {const st=document.createElement('style');st.textContent=`.l3d{position:fixed;inset:0;width:100%;height:100%;border:0;z-index:9999;display:none;background:#0d1f15}.l3d.on{display:block}body.l3d-on{overflow:hidden}`;document.head.appendChild(st)}
 // peneira: o técnico explica do jeito certo pra cada modo
 if(typeof coachCard==='function'){const _cc=coachCard;coachCard=function(st,...a){if(lanceMode()==='jogar'&&!L3D.failed){try{toast({ic:COACH.ic,title:COACH.n,txt:st.k==='keeper'?`Estação de ${st.n.toLowerCase()}: arraste pro lado do chute pra voar.`:`Estação de ${st.n.toLowerCase()}: puxe da bola pra trás e toque nela pra dar efeito.`,ms:2600})}catch(e){}return Promise.resolve()}return _cc(st,...a)}}
-// ================== PARTIDA COMPLETA EM 3D ==================
-// Com a opção ligada (⚙️ › Partida), cada jogo em que você entra em campo vira uma partida 11 contra 11 de 2 tempos de 1,5 min:
-// joystick, passe, lançamento, chute, desarme. "Time todo" (o controle troca pro mais perto da bola, igual DLS) ou
-// "Só meu jogador" (você é o seu craque). O placar, os gols, as assistências e os desarmes voltam pra carreira.
-// Na apresentação dá pra "Simular" aquele jogo e seguir com os lances de sempre.
-function fullMode(){const v=S&&S.fullMatch;if(v==='off'||lanceMode()!=='jogar'||L3D.failed)return null;return v==='solo'?'solo':'team'}
-function l3dLine(side,nat){const B={G:[],D:[],M:[],A:[]};const bk={GOL:'G',ZAG:'D',LD:'D',LE:'D',LAT:'D',VOL:'M',MC:'M',MEI:'M',ME:'M',MD:'M',PE:'A',PD:'A',PON:'A',SA:'A',ATA:'A'};
- let ros=[];try{ros=sideRoster(side,nat)||[]}catch(e){}const seen=new Set();for(const p of ros){if(!p||!p.n||p.n===S.name||seen.has(p.n))continue;seen.add(p.n);(B[bk[p.pos]||'M']).push(p.n)}return B}
-async function l3dFullMatch(x){const o=x.o,ctrl=fullMode();if(!ctrl)return{skip:true};
- if(!L3D.frame||!L3D._loaded){try{toast({ic:'🏟️',title:'Partida completa',txt:'Montando o estádio…',ms:1600})}catch(e){}}
- await l3dBoot();L3D._loaded=true;const base=l3dCfg({kind:'finish'});let at={};try{at=CA()}catch(e){}
- const nat=o.kind==='nat';const dk={amador:-.07,pro:0,lenda:.07}[S.diff]||0;
- const cfg={mode:'match',ctrl,us:base.us,them:base.them,gkUs:base.gkUs,hero:base.hero,crowd:base.crowd,env:base.env,heroPos:S.pos,heroName:S.name,heroAttrs:at,
-  usName:o.us.n,themName:o.them.n,usAbbr:mkAbbr(o.us.n),themAbbr:mkAbbr(o.them.n),usS:o.us.s,themS:o.them.s,diffK:dk,penTaker:!!(S.taker&&S.taker.pen),
-  names:{us:l3dLine(o.us,nat),them:l3dLine(o.them)},startMin:x.startMin|0,pre:[x.preU|0,x.preT|0],comp:[o.comp,o.label].filter(Boolean).join(' · '),xg:[1.3*Math.exp(x.d/19),1.18*Math.exp(-x.d/19)],halfLen:90};
- L3D.frame.classList.add('on');document.body.classList.add('l3d-on');
- const res=await new Promise(r=>{L3D._res=r;L3D.frame.contentWindow.postMessage({type:'ml-play',cfg},'*')});
- return res}
-// o ⚙️ guarda o jeito de controlar escolhido dentro da partida
-addEventListener('message',e=>{const d=e.data||{};if(!L3D.frame||e.source!==L3D.frame.contentWindow)return;if(d.type==='ml-ctrl'&&S&&(d.ctrl==='team'||d.ctrl==='solo')){S.fullMatch=d.ctrl;try{saveNow('fullMatch')}catch(_){}}});
-{const _pm2=playMine;playMine=async function(o,io){if(io&&io!==IO_AUTO&&io.chance&&!io.fullMatch&&fullMode())io={...io,fullMatch:x=>l3dFullMatch(x)};return _pm2(o,io)}}
-// linha "Partida" no menu de opções
-function fmRowHTML(){const v=S.fullMatch||'team';return`<div class="livemode" id="fmRow"><span class="eyebrow">Partida</span>${[['off','⚡ Lances'],['team','🎮 Time todo'],['solo','⭐ Só eu']].map(([k,n])=>`<button class="lmbtn ${v===k?'on':''}" data-fm="${k}">${n}</button>`).join('')}</div>`}
-function fmBind(root){root.querySelectorAll('[data-fm]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();S.fullMatch=b.dataset.fm;try{saveNow('fullMatch')}catch(e){}root.querySelectorAll('[data-fm]').forEach(x=>x.classList.toggle('on',x===b))})}
-function fmEnsureRow(){const m=document.getElementById('dockM');if(!m||!S||m.querySelector('#fmRow'))return;const j=m.querySelector('[data-l3m],[data-l3m2]');const row=j?j.closest('.livemode'):null;if(row)row.insertAdjacentHTML('afterend',fmRowHTML());else m.insertAdjacentHTML('afterbegin',fmRowHTML());fmBind(m)}
-{const _rh2=renderHub;renderHub=function(...a){const r=_rh2.apply(this,a);try{fmEnsureRow();setTimeout(()=>{try{fmEnsureRow()}catch(e){}},0)}catch(e){}
-  // primeira vez: avisa que existe
-  try{if(S&&!S.fullMatchTold&&fullMode()&&!S.youth){S.fullMatchTold=1;setTimeout(()=>{try{toast({ic:'🏟️',title:'Partida completa em 3D',txt:'Agora você joga o jogo inteiro: joystick, passe e chute. Troque em ⚙️ › Partida.',ms:5200})}catch(e){}},900)}}catch(e){}
+// ================== PARTIDA EM LANCES ==================
+// Com "Jogar" ligado, o jogo em que você entra em campo acontece inteiro no estádio 3D: o relógio corre, os seus lances
+// entram um atrás do outro sem tela de apresentação, os gols dos outros aparecem num lance rápido e no fim vem o
+// resumo com a sua nota. É o "ao vivo" da carreira (live) passando dentro do motor. ⚙️ › Partida volta pro jeito antigo.
+const SESS={on:false,skipAll:false,me:null,scorers:null,seq:0,wait:{}};
+function sessWanted(){return lanceMode()==='jogar'&&!L3D.failed&&(S.matchMode||'sess')==='sess'}
+function sessCall(op,data){return new Promise(r=>{const id=++SESS.seq;SESS.wait[id]=r;try{L3D.frame.contentWindow.postMessage({type:'ml-sess',op,id,...(data||{})},'*')}catch(e){delete SESS.wait[id];r({})}})}
+addEventListener('message',e=>{const d=e.data||{};if(!L3D.frame||e.source!==L3D.frame.contentWindow)return;
+ if(d.type==='ml-sess-ok'){if(d.skipAll)SESS.skipAll=true;const r=SESS.wait[d.id];if(r){delete SESS.wait[d.id];r(d)}}
+ if(d.type==='ml-sess-skip')SESS.skipAll=true});
+// lance resolvido sem jogar (⏭ ou "Simular"): a chance depende da sua habilidade
+function l3dAuto(o){const sk=clamp(o.skill??.6,.1,.98),kp=clamp(o.keeper??.45,.1,.9);const K=o.kind||'finish';
+ const p=K==='tackle'?clamp(.35+.45*sk,.2,.8):K==='keeper'?clamp(.3+.4*sk,.15,.75):clamp(.22+.5*sk-.3*kp,.1,.75);const ok=Math.random()<p;
+ NM.netHit=null;NM.intc=null;NM.dmAssist=false;NM.selfGoal=false;NM.last=ok?(o.okTxt||'Deu certo!'):'Não deu.';NM.grade=ok?70:42;NM.why='Simulado';return{ok,perfect:false,grade:NM.grade}}
+function sessInfo(m){const base=l3dCfg({kind:'finish'});const us=m.us,th=m.them;const tc=x=>{try{return teamColors(x)}catch(e){return['#e8e8e8','#151515']}};
+ return{cfg:{us:base.us,them:base.them,gkUs:base.gkUs,hero:base.hero,crowd:base.crowd,env:base.env},usName:us.n,themName:th.n,usAbbr:mkAbbr(us.n),themAbbr:mkAbbr(th.n),usC:[base.us&&base.us.shirt||tc(us)[0],tc(us)[1]],themC:[base.them&&base.them.shirt||tc(th)[0],tc(th)[1]],
+  comp:m.o&&m.o.comp,label:m.o&&m.o.label,home:m.home,heroGK:S.pos==='GOL',def:['GOL','ZAG','LD','LE','VOL'].includes(S.pos)}}
+const IO_LIVE0=IO_UI.live;
+const SESS_LIVE={sess:true,async start(m){
+  const fallback=()=>m.o&&m.o.__live0?IO_LIVE0.start(m):null;
+  if(!m.part||!m.part.play||!sessWanted())return fallback();
+  try{await l3dBoot();L3D._loaded=true}catch(e){return fallback()}
+  SESS.on=true;SESS.skipAll=false;SESS.me=null;SESS.scorers=null;L3D.frame.classList.add('on');document.body.classList.add('l3d-on');
+  const r=await sessCall('start',{info:sessInfo(m)});
+  if(!r||r.skip||r.err){SESS.on=false;SESS.skipAll=!!(r&&r.skip);L3D.frame.classList.remove('on');document.body.classList.remove('l3d-on');return fallback()}
+  let done=false;
+  const api={sess:true,
+   async until(t){if(SESS.skipAll&&!SESS.on)return;await sessCall('clock',{to:t})},
+   flash(t){if(SESS.on&&!SESS.skipAll)try{L3D.frame.contentWindow.postMessage({type:'ml-sess',op:'flash',txt:t},'*')}catch(e){}},
+   redraw(){},
+   async event(e,gu,gt){await sessCall('event',{e:{t:e.t,us:!!e.us,mine:!!e.mine,ast:!!e.ast,missed:!!e.missed,w:e.w,m:e.m},gu,gt})},
+   async finish(f){if(done)return;done=true;const me=SESS.me||{};
+    await sessCall('end',{f:{msg:f&&f.msg,win:f&&f.win,gu:SESS.gu,gt:SESS.gt},me:{nota:me.nota,g:me.g,a:me.a},scorers:(SESS.scorers||[]).map(s=>({m:s.m,w:s.w,us:s.us}))});
+    SESS.on=false;SESS.skipAll=false;L3D.frame.classList.remove('on');document.body.classList.remove('l3d-on')}};
+  SESS.api=api;return api}};
+// pênalti dentro da partida em lances: no 3D também
+async function sessPenalty(o){if(o.mode==='shoot'){const sk=typeof skillOf==='function'?skillOf('FIN'):.6;const r=await nssMoment({kind:'pen',title:'Pênalti!',skill:sk,keeper:.5,okTxt:'GOL!',comp:o.comp,min:o.min});return{goal:!!r.ok,res:r.ok?'gol':'defesa'}}
+ const sk=typeof skillOf==='function'?skillOf('REF'):.6;const r=await nssMoment({kind:'keeper',pen:true,title:'Pênalti contra',skill:sk,keeper:.5,okTxt:'DEFENDEU!',comp:o.comp,min:o.min});return{goal:!r.ok,res:r.ok?'defesa':'gol'}}
+{const _pm3=playMine;playMine=async function(o,io){
+  if(!io||io===IO_AUTO||!io.chance||!sessWanted())return _pm3(o,io);
+  const o2={...o,__live0:!!o.live,live:true};
+  const io2={...io,live:SESS_LIVE,matchDecision:null,penalty:async x=>SESS.on?sessPenalty(x):io.penalty(x)};
+  const r=await _pm3(o2,io2);SESS.skipAll=false;
+  if(r&&r.live&&r.live.sess){SESS.me=r.me;SESS.scorers=r.scorers;SESS.gu=r.gu;SESS.gt=r.gt;const L=r.live;
+   // quem chamou fecha com a mensagem certa (campeão, classificado...); se ninguém fechar, fecha sozinho
+   setTimeout(()=>{L.finish({msg:'Fim de jogo.',win:r.gu>r.gt?true:r.gu<r.gt?false:null})},0)}
+  return r}}
+// ⚙️ › Partida: lances em sequência (novo) ou o jeito antigo
+function smRowHTML(){const v=S.matchMode||'sess';return`<div class="livemode" id="smRow"><span class="eyebrow">Partida</span>${[['sess','🏟️ Em lances'],['old','📋 Clássica']].map(([k,n])=>`<button class="lmbtn ${v===k?'on':''}" data-sm="${k}">${n}</button>`).join('')}</div>`}
+function smEnsureRow(){const m=document.getElementById('dockM');if(!m||!S||m.querySelector('#smRow'))return;const j=m.querySelector('[data-l3m],[data-l3m2]');const row=j?j.closest('.livemode'):null;if(row)row.insertAdjacentHTML('afterend',smRowHTML());else m.insertAdjacentHTML('afterbegin',smRowHTML());
+ m.querySelectorAll('[data-sm]').forEach(b=>b.onclick=ev=>{ev.stopPropagation();S.matchMode=b.dataset.sm;try{saveNow('matchMode')}catch(e){}m.querySelectorAll('[data-sm]').forEach(x=>x.classList.toggle('on',x===b))})}
+{const _rh3=renderHub;renderHub=function(...a){const r=_rh3.apply(this,a);try{smEnsureRow();setTimeout(()=>{try{smEnsureRow()}catch(e){}},0)}catch(e){}
+  try{if(S&&!S.sessTold&&sessWanted()&&!S.youth){S.sessTold=1;setTimeout(()=>{try{toast({ic:'🏟️',title:'Partida em lances',txt:'Agora o jogo inteiro passa no estádio e os seus lances vêm em sequência. Acerte seguido pra ficar em chamas. ⚙️ › Partida troca.',ms:5200})}catch(e){}},900)}}catch(e){}
   return r}}

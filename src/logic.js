@@ -339,11 +339,11 @@ async function playMine(o,io){
  const d=usS-o.them.s+adv;
  const gu0=poisson(1.3*Math.exp(d/19)),gt0=poisson(1.18*Math.exp(-d/19));
  const P=POS[S.pos];
+ // partida em lances (3D): o jogo inteiro passa no estádio e os seus lances vêm em sequência
+ const SESS=!!(io.live&&io.live.sess&&o.live&&part.play);
  const share=part.play?clamp(P.sg*clamp(1+(perf-base)/18,.4,1.7)*(part.min/90),0,.45):0;
  const ashare=part.play?clamp(P.sa*clamp(1+(perf-base)/18,.4,1.7)*(part.min/90),0,.4):0;
  const usR=sideRoster(o.us,kind==='nat');const thR=sideRoster(o.them);
- // partida completa em 3D: quem começa joga os 90 minutos
- const wantFull=part.play&&!!io.fullMatch;if(wantFull&&part.start)part.min=90;
  // janela em campo
  const onFrom=part.play?(part.start?0:90-part.min):999,onTo=part.play?(part.start?part.min:90):-1;
  const onPitch=m=>m>=onFrom&&m<=onTo;
@@ -365,32 +365,24 @@ async function playMine(o,io){
   if(!part.start)tl.push({m:onFrom,t:'in'});
  }
  // lances para dar tensão
- const MINEP={ATA:.46,SA:.44,PE:.42,PD:.42,MEI:.4,MC:.3,ME:.32,MD:.32,VOL:.2,LD:.21,LE:.21,ZAG:.16,GOL:0}[S.pos]??.3;const DEFP={ZAG:.72,VOL:.6,LD:.52,LE:.52,MC:.32,ME:.22,MD:.22}[S.pos]||0;let myD=0;
- const nf=RI(6,10);for(let i=0;i<nf;i++){const us=ch(clamp(.5+d/40,.2,.8));const mine=us&&part.play&&ch(MINEP);tl.push({m:mine?mMine():RI(1,90),t:'c',us,mine,w:mine?S.name:us?scorerFrom(usR,S.name):scorerFrom(thR)})}
+ const MINEPk=SESS?1.15:1;const MINEP0={ATA:.46,SA:.44,PE:.42,PD:.42,MEI:.4,MC:.3,ME:.32,MD:.32,VOL:.2,LD:.21,LE:.21,ZAG:.16,GOL:0}[S.pos]??.3;const MINEP=Math.min(.75,MINEP0*MINEPk);const DEFP=Math.min(.85,({ZAG:.72,VOL:.6,LD:.52,LE:.52,MC:.32,ME:.22,MD:.22}[S.pos]||0)*(SESS?1.15:1));let myD=0;
+ const nf=SESS?RI(8,12):RI(6,10);for(let i=0;i<nf;i++){const us=ch(clamp(.5+d/40,.2,.8));const mine=us&&part.play&&ch(MINEP);tl.push({m:mine?mMine():RI(1,90),t:'c',us,mine,w:mine?S.name:us?scorerFrom(usR,S.name):scorerFrom(thR)})}
  {const nDM=io.matchDecision&&part.play&&(typeof lancesWanted!=='function'||lancesWanted(!!o.live))?(o.live?RI(1,2):(ch(.6)?1:0)):0;for(let i=0;i<nDM;i++){const m=mMine();if(m)tl.push({m,t:'dm'})}}
  tl.sort((a,b)=>a.m-b.m);
- let FULL=null;
- if(wantFull){const pre=tl.filter(e=>e.t==='g'&&e.m<onFrom);const preU=pre.filter(e=>e.us).length;
-  let fm=null;try{fm=await io.fullMatch({o,part,startMin:onFrom,preU,preT:pre.length-preU,d})}catch(e){fm=null}
-  if(fm&&!fm.skip&&fm.full){FULL=fm;
-   // os gols e lances sorteados a partir da sua entrada saem; entram os da partida jogada
-   for(let i=tl.length-1;i>=0;i--){const e=tl[i];if(e.m>=onFrom&&['g','c','dm','pf','pa'].includes(e.t))tl.splice(i,1)}
-   for(const g of fm.ev||[])tl.push({m:clamp(g.m|0,Math.max(1,onFrom),90),t:'g',us:!!g.us,mine:!!g.hero,ast:!!g.heroAst,w:g.hero?S.name:g.w,full:true});
-   tl.sort((a,b)=>a.m-b.m);myD+=(fm.st&&fm.st.tk)|0}}
- const live=o.live&&io.live&&!FULL?await io.live.start({o,us:o.us,them:o.them,home:o.home,neutral:o.neutral,agg:o.agg,part}):null;
+ const live=o.live&&io.live?await io.live.start({o,us:o.us,them:o.them,home:o.home,neutral:o.neutral,agg:o.agg,part}):null;
  let gu=0,gt=0,myG=0,myA=0,penNote=null,fkNote=false;const scorers=[];
  let interN=0;
  for(let e of tl){
   if(live)await live.until(e.m);
-  if(!FULL&&io.chance&&part.play&&interN<(live?6:5)&&onPitch(e.m)&&(typeof lancesWanted!=='function'||lancesWanted(live))){
+  if(io.chance&&part.play&&interN<(SESS?7:live?6:5)&&onPitch(e.m)&&(typeof lancesWanted!=='function'||lancesWanted(live))){
    let c=null;
    if(e.t==='g'&&e.us&&e.mine)c={type:chanceType(e),planned:true};
    else if(e.t==='g'&&e.us&&e.ast&&typeof assistType==='function')c={type:assistType(),planned:true,ast:true};
    else if(e.t==='c'&&e.us&&e.mine&&ch(.75))c={type:chanceType(e),planned:false};
    else if(e.t==='c'&&e.us&&!e.mine&&(S.pos!=='GOL'||ch(.35))&&typeof assistType==='function'&&ch(['MEI','MC','PE','PD','SA','ATA','ME','MD'].includes(S.pos)?.44:.36))c={type:assistType(),planned:false,ast:true};
    else if(DEFP&&!e.us&&(e.t==='g'||e.t==='c')&&ch(e.t==='g'?DEFP:DEFP*.6))c={type:'tackle',planned:e.t==='g'};
-   else if(S.pos==='GOL'&&!e.us&&(e.t==='g'||e.t==='c')&&ch(e.t==='g'?.75:.35))c={type:'reflex',planned:e.t==='g'};
-   if(c){interN++;if(live){live.flash(c.type==='tackle'?'🛡️ Ataque deles! É com você…':c.type==='reflex'?'⚠️ Perigo no seu gol!':c.ast?'⚡ Você tem a bola pra criar…':'⚡ A bola é sua…');await sleep(S.liveSpeed===3?600:1400)}
+   else if(S.pos==='GOL'&&!e.us&&(e.t==='g'||e.t==='c')&&ch(e.t==='g'?(SESS?.9:.75):(SESS?.55:.35)))c={type:'reflex',planned:e.t==='g'};
+   if(c){interN++;if(live){live.flash(c.type==='tackle'?'🛡️ Ataque deles! É com você…':c.type==='reflex'?'⚠️ Perigo no seu gol!':c.ast?'⚡ Você tem a bola pra criar…':'⚡ A bola é sua…');await sleep(live.sess?120:S.liveSpeed===3?600:1400)}
     const ok=await io.chance({...c,comp:o.comp,min:e.m});if(live)live.redraw();
     const asst=!!NM.dmAssist;NM.dmAssist=false;const selfG=!!NM.selfGoal;NM.selfGoal=false;
     if(ok&&asst&&!c.ast&&c.type!=='reflex'){e={...e,t:'g',ast:true,mine:false,w:scorerFrom(usR,S.name)}}else
@@ -435,8 +427,8 @@ async function playMine(o,io){
  else if(st.injLeft>0&&!inj)st.injLeft--;
  const cs=part.play&&S.pos==='GOL'&&gt===0&&part.min>=60;
  let nota=null;
- if(part.play){nota=6.35+(FULL?FULL.adj||0:0)+(gu>gt?.4:gu<gt?-.35:0)+myG*.85+myA*.5+myD*.3+(S.pos==='GOL'?(gt===0?.8:-.25*gt):0)+(perf-base)/18+(penNote==='defendeu pênalti'?.8:0)+randn()*.45-(r?1.5:0);nota=Math.round(clamp(nota,3,10)*10)/10}
- const me={play:part.play,why:part.why,start:part.start,min:part.play?part.min:0,g:myG,a:myA,nota,y,r,cs,inj,pen:penNote,fk:fkNote,full:FULL?{st:FULL.st,sim:!!FULL.sim,ctrl:FULL.ctrl}:null};
+ if(part.play){nota=6.35+(gu>gt?.4:gu<gt?-.35:0)+myG*.85+myA*.5+myD*.3+(S.pos==='GOL'?(gt===0?.8:-.25*gt):0)+(perf-base)/18+(penNote==='defendeu pênalti'?.8:0)+randn()*.45-(r?1.5:0);nota=Math.round(clamp(nota,3,10)*10)/10}
+ const me={play:part.play,why:part.why,start:part.start,min:part.play?part.min:0,g:myG,a:myA,nota,y,r,cs,inj,pen:penNote,fk:fkNote};
  return{gu,gt,me,scorers,perf,live};
 }
 // Registra nas estatísticas
