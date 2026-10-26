@@ -315,9 +315,11 @@ IO_UI.live={
     else if(e.t==='in')html=`<div class="fl me"><b>${e.m}'</b>🔁 Você entra em campo</div>`;
     else if(e.t==='pmiss')html=`<div class="fl ${e.mine?'me bad':''}"><b>${e.m}'</b>❌ Pênalti perdido por ${esc(e.w)}</div>`;
     else if(e.t==='dsr')html=`<div class="fl me"><b>${e.m}'</b>🛡️ Desarme! Você tirou a bola de ${esc(e.w)}</div>`;
+    else if(e.t==='ppok')html=`<div class="fl me"><b>${e.m}'</b>🎯 Passe na medida! Você armou a jogada</div>`;
+    else if(e.t==='ppx')html=`<div class="fl me bad"><b>${e.m}'</b>❌ Seu passe foi cortado</div>`;
     else if(e.t==='gks')html=`<div class="fl me"><b>${e.m}'</b>🧤 Que defesa! Você parou ${esc(e.w)}</div>`;
     else if(e.t==='psave')html=`<div class="fl ${e.mine?'me':''}"><b>${e.m}'</b>🧤 Pênalti defendido! ${esc(e.w)} parou no goleiro</div>`;
-    if(html){const sd=(e.us||e.mine||['y','r','inj','in','gks','dsr'].includes(e.t))?m.us:m.them;const tc=teamColors(sd);const ab=esc((sd.a||sd.n||'').slice(0,3).toUpperCase());html=html.replace('<div class="fl','<div style="--tc:'+tc[0]+';--tc2:'+tc[1]+'" class="fl tm').replace(/(<b>\d+'<\/b>)/,'$1<span class="tmb">'+ab+'</span>');push(html);if(pause)await sleep(pause)}
+    if(html){const sd=(e.us||e.mine||['y','r','inj','in','gks','dsr','ppok','ppx'].includes(e.t))?m.us:m.them;const tc=teamColors(sd);const ab=esc((sd.a||sd.n||'').slice(0,3).toUpperCase());html=html.replace('<div class="fl','<div style="--tc:'+tc[0]+';--tc2:'+tc[1]+'" class="fl tm').replace(/(<b>\d+'<\/b>)/,'$1<span class="tmb">'+ab+'</span>');push(html);if(pause)await sleep(pause)}
    },
    finish(f){
     return new Promise(res=>{L.ended=true;const c=document.getElementById('lclk');if(c)c.textContent='Fim de jogo';

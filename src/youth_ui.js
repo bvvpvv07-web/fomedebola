@@ -11,7 +11,7 @@ const FOCUS={
  mental:{n:'Cabeça',d:'Leitura de jogo, calma e liderança',attrs:['MEN','DEF']},
 };
 function penShell(inner){
- $app.innerHTML=`<header class="ph"><div class="ph-in"><span class="flagbox">${NATS[S.nat].f}</span><div class="who"><b>${esc(S.name)} <span style="color:var(--muted);font-weight:600">#${S.num}</span></b><span>15 anos · ${POS[S.pos].n} · sem clube</span></div><div class="ovr"><b class="mono">${S.ovr}</b><small>OVR</small></div></div></header>
+ $app.innerHTML=`<header class="ph"><div class="ph-in"><span class="flagbox">${NATS[S.nat].f}</span><div class="who"><b>${esc(S.name)} <span style="color:var(--muted);font-weight:600">#${S.num}</span></b><span>${S.age} anos · ${POS[S.pos].n} · sem clube</span></div><div class="ovr"><b class="mono">${S.ovr}</b><small>OVR</small></div></div></header>
  <div class="wrap">${journeyHTML('ob',2,PEN.step===0?'Escolha onde fazer a peneira. Depois são 6 etapas: no circuito você aprende cada lance do jogo até os olheiros decidirem.':'Cada etapa mexe na impressão dos olheiros. Quanto mais alta, melhores os clubes.')}${PEN.step>0?`<div class="penprog">${['Local','Preparação','Teste físico','Circuito','Jogo-treino','Pênalti','Olheiros'].map((t,i)=>`<span class="${i<PEN.step?'done':i===PEN.step?'on':''}">${t}</span>`).join('')}</div>
  <section class="card penscore"><div class="eyebrow">Impressão dos olheiros</div><div class="pbar"><i style="width:${clamp(PEN.score,0,100)}%"></i></div><b class="mono">${Math.round(PEN.score)}</b></section>`:''}${inner}</div>`;
  scrollTo(0,0);
@@ -22,7 +22,7 @@ function renderPeneira(){
  const st=PEN.step;
  if(st===0){
   penShell(`<section class="card" style="display:grid;gap:12px"><h2 class="h2">Onde você vai fazer a peneira?</h2>
-  <p class="muted" style="margin:0;max-width:58ch">Você tem 15 anos e uma chuteira emprestada do primo. O que acontecer nos próximos dias decide quem vai te querer.</p>
+  <p class="muted" style="margin:0;max-width:58ch">Você tem ${S.age} anos e uma chuteira emprestada do primo. O que acontecer nos próximos dias decide quem vai te querer.</p>
   <div class="behs">${Object.entries(VENUES).map(([k,v])=>`<button class="beh" data-v="${k}"><b>${v.n}</b><span>${v.d}</span><span class="mono" style="display:block;margin-top:6px;color:var(--gold);font-size:11px">${v.crowd}</span></button>`).join('')}</div></section>`);
   $app.querySelectorAll('[data-v]').forEach(b=>b.onclick=()=>{PEN.venue=b.dataset.v;PEN.score-=VENUES[PEN.venue].diff*.4;PEN.step=1;renderPeneira()});return;
  }

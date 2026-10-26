@@ -2,8 +2,8 @@
 // Nada de música gravada: as batidas são tocadas pelo próprio navegador (Web Audio). Bumbo, 808 com distorção e
 // deslize, palmas e caixa de ruído, chimbal com rolos de trap, acordes de piano elétrico, sininho e um chiado de vinil
 // nas faixas de boom bap. Cada faixa tem introdução, verso, refrão e quebra, e a melodia muda a cada vez.
-// No menu toca o som mais calmo (lo-fi e boom bap); dentro da carreira roda a playlist de trap e rap.
-// Fica mais baixo durante os lances em 3D. Ligar/desligar: botão 🎵 no menu inicial e no ⚙️ da carreira.
+// Batidas agressivas: jersey club, trap pesado (rage), phonk e funk mandelão, além do trap, drill, rap e boom bap.
+// Continua tocando nos lances em 3D (só um pouco mais baixo). Ligar/desligar: botão 🎵 no menu inicial e no ⚙️ da carreira.
 const MUS_T=[
  {id:'lofi',n:'Lo-fi da Peneira',g:'Lo-fi hip hop',gain:1.75,bpm:78,swing:.2,root:53,lp:3200,crackle:.035,
   prog:[[0,4,7,11],[-1,2,6,9],[-3,0,4,7],[-5,-1,2,6]],scale:[0,2,4,7,9],
@@ -20,10 +20,22 @@ const MUS_T=[
  {id:'drill',n:'Drill do Morro',g:'Drill',bpm:142,swing:0,root:52,lp:11000,crackle:0,
   prog:[[0,3,7],[-4,0,3],[-2,2,5],[-5,-1,2,5]],scale:[0,2,3,7,8,10],
   kick:['x.........x.....','x..........x....'],snare:'........x......x',snK:'snare',hat:['x..x..x.x..x..x.','x..x..xtx..x.tx.'],hatV:.085,b:'glide',lead:'bell',dens:.24,keys:'pad',arr:'IVHVHBH'},
+ {id:'jersey',n:'Bonde do Jersey',g:'Jersey club',gain:1.2,bpm:145,swing:0,root:49,lp:13000,crackle:0,
+  prog:[[0,3,7],[-4,0,3],[-2,2,5],[3,7,10]],scale:[0,3,5,7,10],
+  kick:['x..x..x...x..x..','x..x..x.x.x.x...'],snare:'....x.......x...',snK:'clap',hat:['x.x.x.x.x.x.x.x.','x.x.x.x.x.x.xrxr'],hatV:.075,sq:'..x...x...x...x.',b:'dist',kickHard:1,lead:'chop',dens:.42,keys:'pad',arr:'IVHVHBHH'},
+ {id:'rage',n:'Rage na Quadra',g:'Trap pesado',gain:1.15,bpm:160,swing:0,root:44,lp:14000,crackle:0,
+  prog:[[0,3,7],[1,5,8],[-2,2,5],[-4,0,3]],scale:[0,1,3,7,8],
+  kick:['x.......x.......','x.......x.x...x.'],snare:'........x.......',snK:'clap',hat:['x.x.x.x.xrxrx.tt','xrx.x.xtx.x.xrxr'],hatV:.08,b:'dist',kickHard:1,lead:'saw',dens:.34,keys:'pad',arr:'IVHVHBHH'},
+ {id:'phonk',n:'Phonk do Grau',g:'Phonk',gain:1.2,bpm:130,swing:0,root:46,lp:12000,crackle:.012,
+  prog:[[0,3,7],[-4,0,3],[-2,1,5],[-5,-2,2]],scale:[0,1,3,5,7,8],
+  kick:['x.....x...x.....','x.....x.x.x.....'],snare:'........x.......',snK:'snare',hat:['x.xtx.x.x.xtx.x.','x.x.x.xtx.x.xtxt'],hatV:.075,b:'dist',kickHard:1,lead:'cowbell',dens:.46,keys:'none',arr:'IVHVHBH'},
+ {id:'funk',n:'Mandelão da Quebrada',g:'Funk',gain:1.2,bpm:130,swing:0,root:45,lp:13000,crackle:0,
+  prog:[[0,3,7],[0,3,7],[-2,2,5],[-4,0,3]],scale:[0,3,5,7,10],
+  kick:['x..x..x.x..x..x.','x..x..x.x..x.xx.'],snare:'....x.......x...',snK:'clap',hat:['..x...x...x...x.','..x...x...x.x.x.'],hatV:.07,b:'dist',kickHard:1,lead:'tuin',dens:.3,keys:'none',arr:'IVHVHBHH'},
  {id:'rap',n:'Rima de Vestiário',g:'Rap',bpm:94,swing:.12,root:47,lp:8000,crackle:.018,
   prog:[[0,3,7,10],[-2,2,5,9],[-4,0,3,7],[-5,-1,2,5]],scale:[0,3,5,7,10],
   kick:['x.....x...x.....','x.....x...x..x..'],snare:'....x.......x...',snK:'clap',hat:['x.x.x.x.x.x.x.x.','x.x.x.x.x.xxx.x.'],hatV:.09,b:'808',lead:'piano',dens:.18,keys:'rhodes',arr:'IVHVHBH'}];
-const MUS_LIST={menu:['lofi','rua9'],game:['varzea','camisa10','rap','drill','rua9']};
+const MUS_LIST={menu:['jersey','phonk','rua9','funk'],game:['rage','jersey','funk','camisa10','phonk','drill','varzea','rap']};
 const MUS={ac:null,on:true,vol:.6,cur:null,pl:'menu',idx:{menu:0,game:0},timer:null,next:0,step:0,bar:0,duck:1,seed:1,mel:null,bus:null,out:null};
 try{const v=localStorage.getItem('fdb_music');if(v!=null)MUS.on=v!=='0';const vv=localStorage.getItem('fdb_mvol');if(vv!=null)MUS.vol=Math.min(1,Math.max(0,+vv))}catch(e){}
 function musRnd(){MUS.seed=(MUS.seed*1103515245+12345)&0x7fffffff;return MUS.seed/0x7fffffff}
@@ -41,20 +53,23 @@ function musInit(){if(MUS.ac)return true;const AC=window.AudioContext||window.we
  // eco do sininho/flauta
  MUS.dl=ac.createDelay(1);MUS.dl.delayTime.value=.32;MUS.dlG=ac.createGain();MUS.dlG.gain.value=.28;MUS.dl.connect(MUS.dlG);MUS.dlG.connect(MUS.dl);MUS.dlG.connect(MUS.bus);
  // distorção do 808
+ MUS.sat2=ac.createWaveShaper();{const c2=new Float32Array(1024);for(let i=0;i<1024;i++){const x=i/512-1;c2[i]=Math.tanh(x*9)*.9}MUS.sat2.curve=c2;const g2=ac.createGain();g2.gain.value=.6;MUS.sat2.connect(g2);g2.connect(comp)}
  MUS.sat=ac.createWaveShaper();const cv=new Float32Array(1024);for(let i=0;i<1024;i++){const x=i/512-1;cv[i]=Math.tanh(x*3.8)*.92}MUS.sat.curve=cv;const sg=ac.createGain();sg.gain.value=.7;MUS.sat.connect(sg);sg.connect(comp);
  return true}
 // ---------- instrumentos ----------
 function mEnv(g,t,a,peak,dec,end=.0001){g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime(peak,t+a);g.gain.exponentialRampToValueAtTime(end,t+a+dec)}
 function mKick(t,v=1,soft){const ac=MUS.ac,o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.setValueAtTime(soft?120:160,t);o.frequency.exponentialRampToValueAtTime(soft?48:42,t+.11);mEnv(g,t,.003,.95*v,soft?.28:.36);o.connect(g);g.connect(MUS.bus);o.start(t);o.stop(t+.45)}
+function mKickHard(t,v=1){const ac=MUS.ac,o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.setValueAtTime(190,t);o.frequency.exponentialRampToValueAtTime(44,t+.09);mEnv(g,t,.002,1*v,.32);o.connect(g);g.connect(MUS.sat2);o.start(t);o.stop(t+.4);mNoise(t,.03,'highpass',3000,.7,.35*v,.012)}
+function mSqueak(t,v=1){const ac=MUS.ac,o=ac.createOscillator(),g=ac.createGain();o.type='sine';o.frequency.setValueAtTime(2300,t);o.frequency.exponentialRampToValueAtTime(3400,t+.05);mEnv(g,t,.004,.07*v,.07);o.connect(g);g.connect(MUS.bus);o.start(t);o.stop(t+.1)}
 function mNoise(t,dur,type,f,q,v,dec){const ac=MUS.ac,s=ac.createBufferSource(),fl=ac.createBiquadFilter(),g=ac.createGain();s.buffer=MUS.noise;fl.type=type;fl.frequency.value=f;fl.Q.value=q;mEnv(g,t,.002,v,dec);s.connect(fl);fl.connect(g);g.connect(MUS.bus);s.start(t,Math.random()*.5);s.stop(t+dur)}
 function mSnare(t,v=1){mNoise(t,.28,'bandpass',2100,.7,.85*v,.19);mNoise(t,.2,'highpass',5000,.5,.25*v,.1);const ac=MUS.ac,o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.setValueAtTime(210,t);o.frequency.exponentialRampToValueAtTime(140,t+.06);mEnv(g,t,.002,.25*v,.08);o.connect(g);g.connect(MUS.bus);o.start(t);o.stop(t+.12)}
 function mClap(t,v=1){for(let i=0;i<3;i++)mNoise(t+i*.011,.05,'bandpass',1350,1,.55*v,.03);mNoise(t+.033,.32,'bandpass',1400,.8,.75*v,.18);mNoise(t+.033,.2,'highpass',4500,.5,.22*v,.09)}
 function mRim(t,v=1){mNoise(t,.06,'highpass',2600,.7,.55*v,.04);const ac=MUS.ac,o=ac.createOscillator(),g=ac.createGain();o.type='square';o.frequency.value=820;mEnv(g,t,.001,.08*v,.025);o.connect(g);g.connect(MUS.bus);o.start(t);o.stop(t+.05)}
 function mHat(t,v,open){mNoise(t,open?.4:.09,'highpass',open?6000:6800,.5,v*2.6,open?.26:.055)}
-function m808(t,midi,dur,from,v=1,soft){const ac=MUS.ac,o=ac.createOscillator(),g=ac.createGain();o.type='sine';const f=musHz(midi);
+function m808(t,midi,dur,from,v=1,soft,dest){const ac=MUS.ac,o=ac.createOscillator(),g=ac.createGain();o.type='sine';const f=musHz(midi);
  if(from!=null){o.frequency.setValueAtTime(musHz(from),t);o.frequency.exponentialRampToValueAtTime(f,t+.09)}else o.frequency.setValueAtTime(f,t);
  g.gain.setValueAtTime(.0001,t);g.gain.exponentialRampToValueAtTime((soft?.42:.6)*v,t+.008);g.gain.setValueAtTime((soft?.37:.54)*v,t+Math.max(.02,dur*.6));g.gain.exponentialRampToValueAtTime(.0001,t+dur);
- o.connect(g);g.connect(soft?MUS.bus:MUS.sat);o.start(t);o.stop(t+dur+.05)}
+ o.connect(g);g.connect(dest||(soft?MUS.bus:MUS.sat));o.start(t);o.stop(t+dur+.05)}
 function mKeys(t,notes,dur,kind,v=1){const ac=MUS.ac;const out=ac.createGain();const fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.value=kind==='pad'?2400:3400;fl.Q.value=.5;out.connect(fl);fl.connect(MUS.bus);
  const a=kind==='pad'?.16:.01,peak=(kind==='pad'?.11:.15)*v;out.gain.setValueAtTime(.0001,t);out.gain.exponentialRampToValueAtTime(peak,t+a);out.gain.setValueAtTime(peak*(kind==='pad'?1:.55),t+Math.min(dur*.5,.6));out.gain.exponentialRampToValueAtTime(.0001,t+dur);
  for(const n of notes){for(const [ty,det,lv] of(kind==='pad'?[['sawtooth',-7,.35],['sawtooth',7,.35],['triangle',0,.6]]:[['triangle',0,.7],['sine',1200,.18],['sine',-4,.5]])){const o=ac.createOscillator(),g=ac.createGain();o.type=ty;o.frequency.value=musHz(n);o.detune.value=det;g.gain.value=lv;o.connect(g);g.connect(out);o.start(t);o.stop(t+dur+.05)}}}
@@ -62,21 +77,26 @@ function mLead(t,midi,dur,kind,v=1){const ac=MUS.ac,o=ac.createOscillator(),g=ac
  if(kind==='bell'){o.type='sine';o.frequency.value=f*2;const o2=ac.createOscillator(),g2=ac.createGain();o2.type='sine';o2.frequency.value=f*4.01;g2.gain.value=.3;o2.connect(g2);g2.connect(g);o2.start(t);o2.stop(t+dur+.4);mEnv(g,t,.003,.22*v,dur+.35)}
  else if(kind==='brass'){o.type='sawtooth';o.frequency.value=f;const fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.setValueAtTime(600,t);fl.frequency.exponentialRampToValueAtTime(2600,t+.06);fl.frequency.exponentialRampToValueAtTime(1100,t+dur);o.connect(fl);fl.connect(g);mEnv(g,t,.02,.16*v,dur)}
  else if(kind==='flute'){o.type='sine';o.frequency.value=f*2;const lfo=ac.createOscillator(),lg=ac.createGain();lfo.frequency.value=5;lg.gain.value=f*.012;lfo.connect(lg);lg.connect(o.frequency);lfo.start(t);lfo.stop(t+dur+.2);mEnv(g,t,.05,.17*v,dur+.15)}
+ else if(kind==='chop'){o.type='square';o.frequency.value=f*2;const fl=ac.createBiquadFilter();fl.type='bandpass';fl.Q.value=4;fl.frequency.setValueAtTime(700,t);fl.frequency.exponentialRampToValueAtTime(1500,t+.05);fl.frequency.exponentialRampToValueAtTime(900,t+.12);o.connect(fl);fl.connect(g);mEnv(g,t,.004,.17*v,Math.min(dur,.14));kind='x'}
+ else if(kind==='saw'){o.type='sawtooth';o.frequency.value=f*2;const o2=ac.createOscillator();o2.type='sawtooth';o2.frequency.value=f*2;o2.detune.value=18;const o3=ac.createOscillator();o3.type='sawtooth';o3.frequency.value=f;o3.detune.value=-14;const fl=ac.createBiquadFilter();fl.type='lowpass';fl.frequency.setValueAtTime(5200,t);fl.frequency.exponentialRampToValueAtTime(1300,t+dur);o.connect(fl);o2.connect(fl);o3.connect(fl);fl.connect(g);o2.start(t);o2.stop(t+dur+.2);o3.start(t);o3.stop(t+dur+.2);mEnv(g,t,.005,.085*v,dur+.08);kind='x'}
+ else if(kind==='cowbell'){o.type='square';o.frequency.value=f*2;const o2=ac.createOscillator();o2.type='square';o2.frequency.value=f*2*1.48;const fl=ac.createBiquadFilter();fl.type='bandpass';fl.frequency.value=f*3;fl.Q.value=1.8;o.connect(fl);o2.connect(fl);fl.connect(g);o2.start(t);o2.stop(t+.5);mEnv(g,t,.002,.2*v,.32);kind='x'}
+ else if(kind==='tuin'){o.type='sine';o.frequency.setValueAtTime(f*8,t);o.frequency.exponentialRampToValueAtTime(f*2,t+.18);mEnv(g,t,.003,.2*v,Math.max(.22,dur*.8))}
  else{o.type='triangle';o.frequency.value=f*2;mEnv(g,t,.004,.2*v,dur+.25)}
- if(kind!=='brass')o.connect(g);g.connect(MUS.bus);g.connect(MUS.dl);o.start(t);o.stop(t+dur+.6)}
+ if(kind!=='brass'&&kind!=='x')o.connect(g);g.connect(MUS.bus);g.connect(MUS.dl);o.start(t);o.stop(t+dur+.6)}
 // ---------- sequenciador ----------
 function musTrack(id){return MUS_T.find(x=>x.id===id)||MUS_T[0]}
 function musMelody(T){const L=[];let deg=Math.floor(musRnd()*T.scale.length);for(let i=0;i<32;i++){if(musRnd()<T.dens&&!(i%2&&musRnd()<.5)){deg=Math.max(0,Math.min(T.scale.length*2-1,deg+Math.round((musRnd()-.5)*3)));L.push({i,deg,len:musRnd()<.3?3:1})}else L.push(null)}return L}
 function musStep(t){const T=MUS.cur,i=MUS.step%16,bar=MUS.bar,sec=T.arr[Math.floor(bar/4)%T.arr.length]||'V',v=bar%2;const ch=T.prog[bar%T.prog.length];const st=60/T.bpm/4;
  const drums=true,kick=sec!=='B',dv=sec==='I'?.5:1;
  // acordes
- if(i===0)mKeys(t,ch.map(n=>T.root+12+n),st*16*(T.keys==='pad'?1.02:.9),T.keys,sec==='B'?1.2:1);
+ if(i===0&&T.keys!=='none')mKeys(t,ch.map(n=>T.root+12+n),st*16*(T.keys==='pad'?1.02:.9),T.keys,sec==='B'?1.2:1);
  if(i===8&&T.keys==='rhodes'&&sec!=='I')mKeys(t,ch.slice(1).map(n=>T.root+12+n),st*6,'rhodes',.6);
  // bateria
- const kp=T.kick[v];if(kick&&kp[i]==='x'&&!(sec==='I'&&i>0&&T.bpm>110)){mKick(t,dv,T.b==='soft');
+ const kp=T.kick[v];if(kick&&kp[i]==='x'&&!(sec==='I'&&i>0&&T.bpm>110)){(T.kickHard?mKickHard:mKick)(t,dv,T.b==='soft');
   // baixo: 808 que segura até o próximo bumbo (com deslize no drill)
   let n=1;while(n<16&&kp[(i+n)%16]!=='x')n++;const root=T.root-12+ch[0];
-  if(sec==='I')n=16;if(T.b==='soft')m808(t,root,Math.min(n,8)*st,null,.9*dv,true);else m808(t,root,n*st*.95,T.b==='glide'&&musRnd()<.45?root+(musRnd()<.5?7:12):null,dv)}
+  if(sec==='I')n=16;if(T.b==='soft')m808(t,root,Math.min(n,8)*st,null,.9*dv,true);else if(T.b==='dist')m808(t,root,n*st*.95,musRnd()<.3?root+12:null,dv*1.05,false,MUS.sat2);else m808(t,root,n*st*.95,T.b==='glide'&&musRnd()<.45?root+(musRnd()<.5?7:12):null,dv)}
+ if(T.sq&&T.sq[i]==='x'&&sec!=='I'&&sec!=='B')mSqueak(t,dv);
  if(drums&&T.snare[i]==='x'){(T.snK==='clap'?mClap:T.snK==='rim'?mRim:mSnare)(t,dv);if(T.snK==='clap'&&T.bpm<120)mSnare(t,.5)}
  const hp=T.hat[v][i];if(hp!=='.'){const hv=T.hatV*(sec==='I'?.7:1)*(i%4===0?1:.75);
   if(hp==='x')mHat(t,hv);else if(hp==='r'){mHat(t,hv*.8);mHat(t+st/2,hv*.7)}else if(hp==='t'){for(let k=0;k<3;k++)mHat(t+k*st/3,hv*(.6+.15*k))}else if(hp==='o')mHat(t,hv*1.2,true)}
@@ -95,15 +115,17 @@ function musNext(auto){const L=MUS_LIST[MUS.pl];MUS.idx[MUS.pl]=(MUS.idx[MUS.pl]
 function musStart(){if(!MUS.on)return;if(!musInit())return;const ac=MUS.ac;if(ac.state==='suspended')ac.resume().catch(()=>{});if(!MUS.cur)musPlay(MUS_LIST[MUS.pl][MUS.idx[MUS.pl]]);else musGain()}
 function musSet(on){MUS.on=!!on;try{localStorage.setItem('fdb_music',on?'1':'0')}catch(e){}if(on){musStart();if(MUS.ac&&MUS.ac.state==='suspended')MUS.ac.resume().catch(()=>{})}musGain(.15);musLabel();
  // desligada: para de tocar de vez (não gasta bateria)
- if(!on&&MUS.ac)setTimeout(()=>{if(!MUS.on&&MUS.ac.state==='running')MUS.ac.suspend().catch(()=>{})},500)}
+ }
 function musLabel(){document.querySelectorAll('[data-mus-now]').forEach(e=>e.textContent=MUS.cur?`${MUS.cur.n} · ${MUS.cur.g}`:'—');document.querySelectorAll('[data-mus-on]').forEach(b=>b.classList.toggle('on',(b.dataset.musOn==='1')===MUS.on));document.querySelectorAll('.mus-btn').forEach(b=>{b.classList.toggle('off',!MUS.on);b.setAttribute('aria-label',MUS.on?'Desligar música':'Ligar música')})}
 // liga no primeiro toque (o navegador exige um gesto)
 ['pointerdown','keydown','touchend'].forEach(ev=>addEventListener(ev,()=>{if(MUS.on&&(!MUS.ac||MUS.ac.state!=='running'||!MUS.cur))musStart()},{capture:true,passive:true}));
 // menu ou carreira? lance em 3D abaixa o volume; aba escondida pausa
 setInterval(()=>{try{const inGame=!!(typeof S!=='undefined'&&S&&S.st&&!(typeof CLOUD!=='undefined'&&CLOUD.screen==='home'));const pl=inGame?'game':'menu';
  if(pl!==MUS.pl){MUS.pl=pl;if(MUS.cur&&MUS.on){MUS.idx[pl]=(MUS.idx[pl]+MUS_LIST[pl].length-1)%MUS_LIST[pl].length;musNext(false)}}
- const duck=document.body.classList.contains('l3d-on')?.38:document.body.classList.contains('rc-open')?.8:1;if(duck!==MUS.duck){MUS.duck=duck;musGain(.4)}
- if(MUS.ac){if(document.hidden&&MUS.ac.state==='running')MUS.ac.suspend().catch(()=>{});else if(!document.hidden&&MUS.on&&MUS.ac.state==='suspended')MUS.ac.resume().catch(()=>{})}}catch(e){}},700);
+ const duck=document.body.classList.contains('l3d-on')?.78:document.body.classList.contains('rc-open')?.8:1;if(duck!==MUS.duck){MUS.duck=duck;musGain(.4)}
+ if(MUS.ac){if(document.hidden&&MUS.ac.state==='running')MUS.ac.suspend().catch(()=>{});else if(!document.hidden&&MUS.ac.state!=='running')MUS.ac.resume().catch(()=>{})}if(MUS.on&&MUS.ac&&MUS.ac.state==='running'&&!MUS.cur)musStart()}catch(e){}},700);
+// o estádio 3D (iframe) toca no mesmo áudio e repassa os toques: no iPad a música não para quando o lance abre
+window.FDB_AUDIO=()=>{musInit();return MUS.ac};window.FDB_GESTURE=()=>{if(!MUS.ac)musInit();if(MUS.ac&&MUS.ac.state!=='running')MUS.ac.resume().catch(()=>{});if(MUS.on&&!MUS.cur)musStart()};
 // botão no menu inicial
 function musBtnHTML(){return`<button class="mus-btn ${MUS.on?'':'off'}" aria-label="${MUS.on?'Desligar música':'Ligar música'}"><span>🎵</span></button>`}
 new MutationObserver(()=>{const top=document.querySelector('.htop-in');if(top&&!top.querySelector('.mus-btn')){const pc=top.querySelector('.profchip');const w=document.createElement('div');w.innerHTML=musBtnHTML();const b=w.firstChild;if(pc)pc.before(b);else top.appendChild(b);b.onclick=e=>{e.stopPropagation();musSet(!MUS.on);if(MUS.on)try{toast({ic:'🎵',title:MUS.cur?MUS.cur.n:'Música ligada',txt:MUS.cur?MUS.cur.g:'',ms:1600,group:'mus'})}catch(_){}}}}).observe(document.getElementById('app')||document.body,{childList:true,subtree:true});

@@ -2,7 +2,7 @@
 import os
 D=os.path.dirname(os.path.abspath(__file__))
 P=os.path.join(D,'modo-lance.html');s=open(P).read()
-css=open(os.path.join(D,'sess.css')).read();html=open(os.path.join(D,'sess.html')).read();js=open(os.path.join(D,'sess.js')).read()
+css=open(os.path.join(D,'sess.css')).read();html=open(os.path.join(D,'sess.html')).read();js=open(os.path.join(D,'sess.js')).read()+'\n'+open(os.path.join(D,'kids.js')).read()
 def put(s,a,b,body,anchor):
     if a in s:
         i=s.index(a)+len(a);j=s.index(b);return s[:i]+body+s[j:]

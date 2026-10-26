@@ -272,7 +272,7 @@ function penWelcome(){
   <div class="gates"><i></i><i></i></div>
   <div class="eyebrow">Capítulo 1</div>
   <div class="whistle" style="font-size:clamp(34px,10vw,52px)">BEM-VINDO<br>À PENEIRA</div>
-  <div class="pcardw"><div class="pc-top"><b class="mono">${S.ovr}</b><span>${S.pos}</span><span class="pc-flag">${nat.f}</span></div><div class="pc-name">${esc(S.name)}</div><div class="pc-sub">#${S.num} · 15 anos · ${esc(POS[S.pos].n)}</div><div class="pc-pot">Potencial ${'★'.repeat(Math.round(prospectStars(S.pot)))}</div></div>
+  <div class="pcardw"><div class="pc-top"><b class="mono">${S.ovr}</b><span>${S.pos}</span><span class="pc-flag">${nat.f}</span></div><div class="pc-name">${esc(S.name)}</div><div class="pc-sub">#${S.num} · ${S.age} anos · ${esc(POS[S.pos].n)}</div><div class="pc-pot">Potencial ${'★'.repeat(Math.round(prospectStars(S.pot)))}</div></div>
   <p class="muted" style="margin:10px 0 14px">Centenas de garotos. Poucas vagas. Os olheiros estão na arquibancada.<br><b style="color:var(--chalk)">Mostre quem você é.</b></p>
   <button class="btn wide" id="celOk">Entrar em campo</button></div>`;
   document.getElementById('celOk').onclick=()=>{$ov.hidden=true;$ov.innerHTML='';res()};
