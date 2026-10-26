@@ -1,14 +1,14 @@
 <!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fome de Bola · simulador de carreira no futebol</title>
-<meta name="description" content="Fome de Bola: simulador de carreira no futebol. Da peneira à Bola de Ouro, com lances no estilo New Star Soccer, vida fora de campo e ranking.">
+<meta name="description" content="Fome de Bola: simulador de carreira no futebol. Da peneira à Bola Dourada, com lances jogáveis em 3D, vida fora de campo e ranking.">
 <meta name="theme-color" content="#0b1f15">
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icon-192.png" type="image/png">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
 <meta name="apple-mobile-web-app-capable" content="yes"><meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Fome de Bola">
-<meta property="og:title" content="Fome de Bola"><meta property="og:description" content="Simulador de carreira no futebol: da peneira à Bola de Ouro."><meta property="og:image" content="og.png"><meta property="og:type" content="website">
+<meta property="og:title" content="Fome de Bola"><meta property="og:description" content="Simulador de carreira no futebol: da peneira à Bola Dourada."><meta property="og:image" content="og.png"><meta property="og:type" content="website">
 <link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Barlow:wght@400;500;600;700&family=IBM+Plex+Mono:wght@500;600&family=Saira+Condensed:wght@600;700;800;900&family=Playfair+Display:wght@700;800;900&family=Source+Serif+4:ital,opsz,wght@0,8..60,400;0,8..60,600;0,8..60,700;1,8..60,600&family=UnifrakturCook:wght@700&display=swap" rel="stylesheet">
 <style>
@@ -1240,25 +1240,27 @@ body.l3d-on #toasts,body.rc-open #toasts{top:calc(10px + env(safe-area-inset-top
 <div id="app"></div>
 <div id="overlay" hidden></div>
 <script>
+const FICT_REAL_H=[10981980, 17099844, 19578209, 20003167, 20766846, 20943315, 21338997, 22536055, 25623050, 32723851, 36153948, 40972094, 43282000, 45534449, 53489076, 54298278, 61881791, 64802237, 70064935, 77960460, 79412941, 82225566, 86818897, 87049651, 88554198, 89309872, 92799550, 93574593, 97319098, 97444930, 99659675, 104611070, 104970616, 110974570, 115852020, 120796010, 121392484, 126742057, 127964934, 128261364, 141111818, 142703645, 143564280, 145008431, 153890024, 154487655, 158761634, 164187894, 165011553, 172074390, 173500171, 178181284, 180146002, 181770325, 183334834, 185755970, 194340365, 195604054, 195661508, 196369997, 196829898, 197596876, 200293979, 213424974, 217606942, 219998593, 223560134, 226568834, 228106859, 232366616, 235257612, 239686574, 239848360, 246336626, 253301101, 254827989, 255353849, 273938565, 275347326, 288399936, 289679409, 290728265, 292118306, 294004697, 298673911, 303511504, 305242620, 307028881, 310921513, 318841829, 320773290, 332981546, 335863843, 337315702, 338701115, 348413365, 352536180, 356155308, 362284806, 362339643, 370401348, 375744576, 379669087, 381941263, 383555377, 383696513, 388737542, 392388524, 400336103, 405638775, 412241164, 419585946, 423889090, 426722677, 428275575, 438903220, 440057959, 440920331, 443375311, 443763750, 444484811, 444840089, 446079706, 454091819, 454335714, 461513817, 473018810, 476027061, 484194497, 486224653, 487862911, 491372705, 499374871, 501168517, 503326461, 504721830, 511419612, 512961708, 517915763, 521737696, 531231961, 535897432, 537604747, 537618656, 537643359, 542129843, 544958937, 545820635, 548888812, 562459783, 566205210, 567996252, 572839195, 576646592, 581134892, 584082458, 584991837, 586068657, 586477662, 588036960, 590884719, 590950068, 595437012, 600965918, 603376851, 603792287, 607031489, 610834710, 618161317, 618668504, 619347401, 622949704, 624437436, 624768655, 626571691, 632685007, 638896136, 639822868, 640239037, 646809724, 649904500, 650726014, 653295555, 657380604, 664091715, 664457106, 667306721, 676302947, 683802181, 691505389, 695763351, 700220352, 704275351, 723186262, 732095349, 734838282, 740113228, 745201202, 746726493, 746982163, 748361661, 749989823, 750726238, 755819972, 756512515, 759518800, 759748698, 762628077, 764348511, 765650587, 767514062, 772456004, 772532570, 774111500, 778995812, 782454930, 785600728, 788484931, 794091245, 797525079, 804325260, 806924061, 818299170, 819541713, 825715332, 826246067, 829469468, 832287367, 833524465, 838809959, 845554663, 845876087, 851895537, 853405383, 855559240, 867442016, 869274843, 876381686, 881284108, 885196513, 889182174, 891664295, 892712251, 895366543, 897238581, 898787522, 909481784, 916715187, 917844194, 918045445, 918983037, 919464434, 929750175, 931870770, 932462474, 932494849, 934441670, 934465346, 936473435, 938974289, 939467888, 939634600, 947893916, 954163081, 959179634, 959656845, 960263000, 979691243, 983395813, 984892689, 987776358, 998707463, 1004191790, 1006800087, 1007129699, 1010845613, 1016706445, 1019287189, 1019713364, 1020231286, 1028011234, 1037636006, 1038937395, 1040862567, 1042695809, 1043682641, 1044050178, 1047735961, 1049350340, 1050124312, 1050658681, 1053190445, 1059288799, 1068204403, 1068334360, 1075084998, 1080171450, 1086372122, 1093579721, 1096594894, 1100936782, 1101884234, 1107640981, 1108220501, 1108912820, 1113704491, 1115759939, 1121297694, 1121486583, 1128279345, 1129554183, 1135617168, 1140130659, 1145217195, 1150985651, 1153154273, 1153366508, 1154284826, 1156510957, 1158794590, 1159845861, 1166083168, 1167626952, 1168188627, 1170103563, 1171995276, 1173806598, 1182136312, 1190996531, 1200509871, 1201355966, 1210585195, 1219676692, 1221972260, 1222608968, 1224840491, 1226808668, 1231474425, 1233024316, 1236730277, 1237610703, 1237910839, 1239462426, 1240445119, 1242632539, 1244558550, 1245216255, 1245529025, 1257399421, 1258432660, 1262470125, 1262914502, 1265206041, 1271505691, 1274745116, 1276290881, 1276921459, 1278027404, 1287814548, 1306798339, 1307312912, 1313966678, 1314629051, 1314662980, 1315635412, 1320432868, 1327353353, 1333544927, 1336580271, 1352066331, 1353352565, 1358966466, 1370401047, 1373425883, 1374833088, 1375609982, 1375807540, 1378113041, 1380320408, 1380570257, 1381950475, 1382960289, 1393673670, 1398153188, 1404220952, 1406238908, 1408631043, 1410492004, 1420582996, 1421002796, 1440153030, 1440381961, 1441945979, 1443259965, 1446777063, 1446889765, 1447637247, 1447788844, 1450674175, 1450803971, 1460184907, 1463598361, 1465384764, 1467518406, 1478252838, 1483819061, 1484031034, 1487877399, 1488675792, 1501390438, 1508752575, 1513825008, 1524824005, 1526276925, 1528136535, 1530609599, 1532363216, 1540080316, 1541520074, 1548635468, 1549539442, 1552240089, 1554914818, 1555415061, 1560005034, 1560126353, 1560635505, 1564333098, 1567480327, 1571263550, 1576651198, 1583235733, 1583532200, 1591779902, 1593736534, 1595029870, 1595313579, 1597499548, 1601585824, 1603543951, 1607571167, 1608557918, 1616033872, 1620373744, 1624802300, 1631021798, 1635840771, 1638534892, 1644810272, 1647432655, 1655795742, 1656282416, 1660967976, 1666199963, 1666782937, 1666920005, 1668456858, 1671164856, 1677485601, 1686500715, 1687874355, 1689068771, 1690032419, 1692693169, 1694983869, 1700438284, 1700719256, 1704527982, 1707499250, 1710424653, 1715298484, 1718554921, 1720278163, 1723173123, 1724873309, 1725635672, 1726240837, 1732299303, 1735456301, 1738674179, 1738961734, 1755430614, 1755937940, 1759099425, 1763309158, 1766125390, 1767579432, 1767809837, 1770287568, 1780026168, 1783489093, 1784027501, 1785340318, 1785569213, 1785775858, 1788673636, 1791911140, 1797410122, 1806367057, 1806829991, 1808948965, 1809289729, 1810939641, 1812540427, 1814169531, 1817181392, 1837284720, 1838067924, 1844635256, 1845595512, 1845610506, 1864776473, 1865259136, 1869545192, 1874779143, 1880069060, 1883596971, 1887009584, 1888014310, 1897514971, 1897988085, 1899399019, 1900079285, 1906605423, 1909186780, 1912182695, 1912326998, 1912337940, 1914450427, 1917310704, 1918828380, 1925182689, 1925712388, 1927164703, 1933296322, 1949795552, 1951068888, 1963991285, 1970471720, 1970921234, 1976379943, 1982879134, 1987657362, 1991264575, 2001261623, 2003740103, 2005927413, 2008205070, 2008475916, 2010317018, 2017646276, 2018320208, 2020185811, 2020590741, 2024509776, 2026635396, 2028222886, 2030352081, 2032368419, 2033626215, 2034189490, 2041748504, 2042540778, 2044040935, 2044776585, 2047077914, 2047097803, 2047593867, 2053776872, 2059591938, 2062112359, 2064803098, 2067702199, 2076132109, 2079966951, 2080663436, 2096781856, 2097858573, 2100479235, 2101523697, 2108455431, 2110028185, 2114598446, 2118508612, 2120175720, 2126075980, 2129048015, 2140268278, 2151841273, 2155557867, 2159474487, 2180676050, 2190822715, 2190868419, 2197895815, 2200366407, 2208270047, 2209206555, 2213307971, 2224071167, 2225638688, 2228772142, 2232594587, 2233056038, 2234913069, 2236349300, 2240055282, 2240141141, 2245291390, 2248587686, 2260235988, 2260513715, 2272728772, 2273249556, 2275524695, 2278320577, 2281001969, 2284545868, 2295796778, 2297842696, 2300662810, 2322805550, 2323461287, 2332036177, 2332675951, 2340791269, 2340866640, 2341323082, 2341751192, 2361126997, 2365481129, 2367281075, 2368265357, 2370839765, 2385659463, 2385865283, 2392587709, 2394228589, 2395220716, 2396542395, 2396716897, 2399479688, 2410145657, 2410162663, 2411515493, 2418028128, 2419676876, 2420231230, 2427220040, 2430208818, 2433771763, 2455907094, 2455971637, 2475323977, 2475934057, 2478492130, 2484553020, 2486180326, 2487935771, 2492520399, 2493179541, 2495502813, 2518266686, 2518827399, 2518925483, 2519071394, 2523531841, 2527161574, 2528433875, 2533433111, 2539416321, 2541548119, 2547730974, 2549862679, 2552236690, 2554263121, 2556690960, 2558858053, 2559004037, 2562211953, 2564238682, 2568557796, 2574033791, 2574497169, 2578667757, 2578709368, 2578922608, 2580942921, 2583536889, 2588008947, 2588111034, 2596215834, 2596518933, 2599736211, 2601823158, 2603040340, 2612099162, 2617674798, 2618563198, 2619172658, 2620018277, 2625603655, 2626633665, 2628949937, 2629575501, 2630891503, 2634051750, 2636368956, 2646603822, 2646697110, 2648489731, 2651554578, 2654983056, 2656081667, 2659767455, 2661601792, 2664680361, 2664929961, 2673490051, 2673663096, 2676134168, 2676321332, 2679496595, 2682389153, 2683567230, 2689340479, 2689476231, 2690819041, 2693301138, 2696922733, 2699671491, 2702009769, 2709399479, 2719557846, 2720042583, 2720893320, 2721490744, 2721657972, 2724912487, 2731861473, 2733816100, 2739410093, 2754354434, 2765416711, 2765735051, 2784994383, 2787038872, 2790880898, 2791218839, 2793820716, 2795962753, 2799627600, 2802414872, 2807551385, 2809648173, 2810634717, 2819097132, 2820302906, 2822645417, 2826012918, 2829549735, 2833012935, 2838113944, 2839214835, 2840091023, 2843145540, 2843247586, 2847141834, 2851499251, 2855044794, 2863931069, 2866073120, 2867136474, 2867767059, 2871070064, 2874331117, 2878512347, 2879535544, 2884728168, 2887433055, 2891489123, 2893695189, 2895289966, 2899435299, 2905578688, 2905978528, 2906295198, 2916169248, 2922139762, 2922867074, 2922933322, 2925994605, 2926140198, 2927322401, 2933273499, 2937060094, 2937423874, 2939586375, 2941229068, 2941587398, 2941934385, 2942094956, 2945135162, 2950635957, 2953518059, 2956597121, 2957079926, 2960963429, 2962404679, 2965315516, 2965928029, 2966004077, 2967069082, 2971592220, 2973062581, 2975843234, 2979111092, 2979639189, 2981478529, 2986870573, 2988828484, 2989329045, 2994756828, 2999729902, 3006312738, 3006613665, 3006949788, 3009893124, 3016107873, 3016153937, 3020732444, 3021042324, 3021240694, 3023487886, 3029101329, 3034525198, 3037343813, 3044390434, 3047994524, 3057180060, 3058016349, 3061537338, 3062994938, 3071086273, 3076042359, 3076094084, 3076879469, 3078140183, 3087218313, 3096451425, 3120082003, 3123164300, 3126213491, 3129690118, 3131762151, 3133278661, 3134900497, 3140746159, 3145248213, 3155499545, 3159839842, 3170157437, 3170891832, 3172050559, 3173016828, 3174168353, 3181733025, 3184508705, 3186838642, 3187901709, 3190946470, 3203590126, 3207437379, 3211292671, 3227798725, 3227969508, 3230580873, 3238300218, 3240303653, 3240937275, 3246976896, 3259281366, 3264276107, 3266538216, 3268395343, 3277787335, 3279025252, 3280903515, 3287841597, 3289026846, 3291914620, 3292604994, 3295257682, 3296248142, 3304324837, 3304806197, 3305619573, 3306555469, 3312110492, 3319494252, 3320977612, 3323126208, 3333024937, 3335671805, 3336510185, 3337680965, 3339838446, 3349954714, 3350626421, 3351171960, 3352225703, 3357495238, 3358919376, 3359551117, 3360999229, 3361586797, 3364308102, 3367989323, 3371037390, 3377697700, 3381609815, 3383767138, 3393058194, 3399192294, 3405679538, 3409114595, 3410176381, 3410505146, 3411183351, 3412219881, 3418911768, 3420799229, 3421455916, 3422037053, 3427242488, 3430759526, 3434201394, 3439290889, 3443298070, 3447257137, 3452582867, 3454685412, 3455074923, 3455121877, 3457817489, 3461819730, 3468362384, 3474110939, 3478752842, 3490786931, 3490807389, 3493263660, 3494856568, 3496587409, 3496842537, 3498827413, 3501423554, 3501609597, 3506188262, 3507065451, 3509264166, 3512308080, 3513343298, 3524215685, 3525601860, 3530558972, 3531184705, 3531484579, 3533774185, 3534065529, 3535550398, 3538772192, 3539306872, 3548892195, 3550013546, 3553316767, 3555740966, 3556622520, 3558641585, 3563894766, 3565802700, 3568008551, 3568283432, 3574833935, 3575483139, 3577252738, 3579064527, 3580241707, 3581042719, 3581152835, 3583474878, 3589700884, 3595773316, 3596779004, 3597240997, 3603607423, 3604482686, 3610169680, 3610287411, 3611598366, 3614030342, 3615109284, 3615758364, 3625432654, 3628308113, 3630263654, 3630670610, 3631469031, 3634579009, 3637008941, 3643530055, 3644591638, 3649832818, 3650056904, 3652621691, 3668691309, 3679892303, 3684739576, 3685586994, 3686867520, 3688814324, 3691224522, 3696395758, 3699712999, 3702490031, 3706129601, 3709465946, 3712362838, 3719001474, 3733903930, 3744084688, 3750276148, 3755806174, 3761650299, 3764525527, 3769269871, 3771094462, 3780483539, 3782407898, 3790458382, 3791422743, 3793160153, 3793830434, 3795205537, 3796157734, 3809266432, 3812170504, 3814610991, 3814802960, 3819903421, 3821426780, 3823652187, 3824098132, 3825826294, 3826941367, 3829286526, 3829358913, 3829537207, 3829945822, 3831139342, 3840910203, 3845130715, 3850464262, 3858265096, 3861048073, 3871833944, 3877678364, 3885701343, 3891406190, 3891439042, 3893323150, 3894045179, 3894931418, 3895912544, 3899743830, 3905363956, 3907016218, 3907166367, 3907624516, 3908347871, 3908547155, 3910100769, 3911224751, 3913074474, 3913319633, 3913603964, 3914556724, 3922526984, 3927389948, 3931270103, 3936216803, 3936809613, 3942448949, 3942524638, 3944149843, 3947282538, 3951863626, 3953880047, 3956123785, 3956168858, 3958121778, 3959264127, 3959458036, 3961742929, 3964661292, 3967403791, 3970106408, 3974791404, 3983142256, 3984035777, 3989579607, 3990259624, 3991349965, 3997238482, 4000431500, 4004104043, 4008183298, 4008560408, 4009811022, 4014758882, 4014771724, 4018656646, 4019878823, 4023915892, 4033512033, 4034474085, 4037522610, 4041856191, 4044750635, 4045146252, 4045229279, 4045946668, 4053779086, 4055793124, 4058386002, 4058573071, 4059377974, 4062353606, 4063248318, 4064897898, 4068292491, 4069379381, 4069981274, 4072883976, 4074219216, 4081233059, 4085052633, 4086259905, 4090004586, 4090693386, 4091383920, 4092099759, 4092963397, 4094485955, 4096179246, 4103738894, 4107792937, 4113593955, 4119456757, 4121403426, 4124498162, 4134026876, 4134194420, 4136506980, 4140001726, 4146629504, 4147606324, 4147727507, 4151564678, 4156519341, 4159969023, 4160393370, 4162868936, 4163784702, 4167123344, 4168606728, 4170187053, 4173960008, 4174590029, 4174934595, 4174942240, 4176546177, 4179032103, 4184568891, 4185902423, 4186245348, 4188049585, 4188843306, 4196708013, 4202495966, 4204866334, 4205307891, 4208198511, 4209951572, 4211144721, 4220762960, 4221300061, 4222680743, 4225272015, 4233786131, 4234233820, 4243986240, 4244971651, 4245451026, 4248346137, 4253297247, 4253390589, 4258780043, 4267723041, 4275855710, 4277445743, 4279025881, 4284350727, 4287620540, 4290226655, 4290335675];
+const FICT_TXT=[["TXVuZGlhbCBkZSBDbHViZXMgZGEgRklGQQ==", "Mundial de Clubes"], ["RGF0YSBGSUZB", "Data internacional"], ["U3VwZXJjb3BhIGRhIFVFRkE=", "Supercopa Europeia"], ["QUZDIENoYW1waW9ucyBMZWFndWUgRWxpdGU=", "Copa da Ásia de Clubes"], ["Q2hhbXBpb25zIExlYWd1ZQ==", "Copa Europeia"], ["RXVyb3BhIExlYWd1ZQ==", "Taça Europeia"], ["Q29uZmVyZW5jZSBMZWFndWU=", "Copa da Conferência"], ["Q29uY2FjaGFtcGlvbnM=", "Copa Norte-Americana"], ["Q29wYSBMaWJlcnRhZG9yZXM=", "Copa Continental"], ["TGliZXJ0YWRvcmVz", "Copa Continental"], ["UmVjb3BhIFN1bC1BbWVyaWNhbmE=", "Recopa Continental"], ["Q29wYSBTdWwtQW1lcmljYW5h", "Taça Sul"], ["U3VsLUFtZXJpY2FuYQ==", "Taça Sul"], ["TUxTIE5FWFQgQ3Vw", "Copa Sub-20 Americana"], ["TUxTIE5FWFQ=", "Base Americana"], ["TUxTIEN1cA==", "Final da Liga Americana"], ["U3VwcG9ydGVyc+KAmSBTaGllbGQ=", "Escudo da Temporada"], ["TUxT", "Liga Americana"], ["Qm9sYSBkZSBPdXJv", "Bola Dourada"], ["Q2h1dGVpcmEgZGUgT3Vybw==", "Chuteira Dourada"], ["THV2YSBkZSBPdXJv", "Luva Dourada"], ["R29sZGVuIEJveQ==", "Revelação do Ano"], ["Q29wYSBkbyBNdW5kbw==", "Copa Mundial"], ["T2xpbXDDrWFkYXM=", "Jogos Mundiais"], ["Q29wYSBBbcOpcmljYQ==", "Copa das Américas"], ["RXVyb2NvcGE=", "Copa das Nações"], ["Q29wYSBBZnJpY2FuYSBkZSBOYcOnw7Vlcw==", "Copa da África"], ["Q29wYSBPdXJv", "Copa do Norte"], ["QnJhc2lsZWlyw6Nv", "Brasileiro"], ["Q29wYSBkbyBCcmFzaWw=", "Taça Brasil"], ["UGF1bGlzdMOjbw==", "Campeonato Paulista"], ["RkEgQ3Vw", "Copa da Inglaterra"], ["Q2FyYWJhbyBDdXA=", "Copa da Liga Inglesa"], ["Q29wYSBkZWwgUmV5", "Copa da Espanha"], ["Q29wcGEgSXRhbGlh", "Copa da Itália"], ["REZCLVBva2Fs", "Copa da Alemanha"], ["Q291cGUgZGUgRnJhbmNl", "Copa da França"], ["VGHDp2EgZGUgUG9ydHVnYWw=", "Copa de Portugal"], ["S05WQiBCZWtlcg==", "Copa da Holanda"], ["VVMgT3BlbiBDdXA=", "Copa dos EUA"], ["S2luZydzIEN1cA==", "Copa da Arábia"], ["Q29tbXVuaXR5IFNoaWVsZA==", "Supercopa Inglesa"], ["REZMLVN1cGVyY3Vw", "Supercopa Alemã"], ["Sm9oYW4gQ3J1aWpmZiBTY2hhYWw=", "Supercopa Holandesa"], ["U3VwZXJ0YcOnYSBDw6JuZGlkbyBkZSBPbGl2ZWlyYQ==", "Supertaça Portuguesa"], ["U3VwZXJjb3BhIGRlIEVzcGHDsWE=", "Supercopa Espanhola"], ["U3VwZXJjb3BwYSBJdGFsaWFuYQ==", "Supercopa Italiana"], ["VHJvcGjDqWUgZGVzIENoYW1waW9ucw==", "Supercopa Francesa"], ["RmluYWwgZW0gV2VtYmxleQ==", "Final em Londres"], ["UHJlbWllciBMZWFndWU=", "Liga Inglesa"], ["Q2hhbXBpb25zaGlw", "Segunda Inglesa"], ["TGFMaWdhIEh5cGVybW90aW9u", "Segunda Espanhola"], ["TGEgTGlnYQ==", "Liga Espanhola"], ["UGxheW9mZiBkYSBTZXJpZSBC", "Playoff da Segunda Italiana"], ["Mi4gQnVuZGVzbGlnYQ==", "Segunda Alemã"], ["QnVuZGVzbGlnYQ==", "Liga Alemã"], ["TGlndWUgMQ==", "Liga Francesa"], ["TGlndWUgMg==", "Segunda Francesa"], ["TGlnYSBQb3J0dWdhbCAy", "Segunda Portuguesa"], ["TGlnYSBQb3J0dWdhbA==", "Liga Portuguesa"], ["RWVyc3RlIERpdmlzaWU=", "Segunda Holandesa"], ["RXJlZGl2aXNpZQ==", "Liga Holandesa"], ["TGlnYSBQcm9mZXNpb25hbA==", "Liga Argentina"], ["UHJpbWVyYSBOYWNpb25hbA==", "Segunda Argentina"], ["U2F1ZGkgUHJvIExlYWd1ZQ==", "Liga Saudita"], ["U2F1ZGkgRmlyc3QgRGl2aXNpb24=", "Segunda Saudita"], ["VUVGQSBZb3V0aCBMZWFndWU=", "Liga Europeia Sub-19"], ["ZGF0YXMgRklGQQ==", "datas internacionais"], ["Q29waW5oYQ==", "Copa Júnior"], ["Q291cGUgR2FtYmFyZGVsbGE=", "Copa Juvenil Francesa"], ["RkEgWW91dGggQ3Vw", "Copa Juvenil Inglesa"], ["bGFuY2VzIG5vIGVzdGlsbyBOZXcgU3RhciBTb2NjZXI=", "lances jogáveis em 3D"], ["TmV3IFN0YXIgU29jY2Vy", "fliperama"], ["RUEgRkMgMjc=", "jogos de futebol"]];
 const WEB_CFG={"url": "https://dwrvpzmfhprazbkmmhqh.supabase.co", "key": "sb_publishable_NlDnuy7PDBwiGnygbSkNFA_E5m6TkAG"};
-const ASSET_B={"abc": "escudos/abc.webp", "adodenhaag": "escudos/adodenhaag.webp", "avs": "escudos/avs.webp", "azalkmaar": "escudos/azalkmaar.webp", "academicodeviseu": "escudos/academicodeviseu.webp", "agropecuario": "escudos/agropecuario.webp", "ajax": "escudos/ajax.webp", "alahly": "escudos/alahly.webp", "alahli": "escudos/alahli.webp", "alain": "escudos/alain.webp", "alettifaq": "escudos/alettifaq.webp", "alfateh": "escudos/alfateh.webp", "alfayha": "escudos/alfayha.webp", "alhazem": "escudos/alhazem.webp", "alhilal": "escudos/alhilal.webp", "alittihad": "escudos/alittihad.webp", "alkhaleej": "escudos/alkhaleej.webp", "alkholood": "escudos/alkholood.webp", "alnajma": "escudos/alnajma.webp", "alnassr": "escudos/alnassr.webp", "alokhdood": "escudos/alokhdood.webp", "alorobah": "escudos/alorobah.webp", "alqadsiah": "escudos/alqadsiah.webp", "alraed": "escudos/alraed.webp", "alriyadh": "escudos/alriyadh.webp", "alsadd": "escudos/alsadd.webp", "alshabab": "escudos/alshabab.webp", "altaawoun": "escudos/altaawoun.webp", "alwehda": "escudos/alwehda.webp", "alaves": "escudos/alaves.webp", "albacete": "escudos/albacete.webp", "aldosivi": "escudos/aldosivi.webp", "allboys": "escudos/allboys.webp", "almerecity": "escudos/almerecity.webp", "almeria": "escudos/almeria.webp", "almirantebrown": "escudos/almirantebrown.webp", "alverca": "escudos/alverca.webp", "amazonas": "escudos/amazonas.webp", "amiens": "escudos/amiens.webp", "americamg": "escudos/americamg.webp", "andorra": "escudos/andorra.webp", "angers": "escudos/angers.webp", "annecy": "escudos/annecy.webp", "aparecidense": "escudos/aparecidense.webp", "argentinosjuniors": "escudos/argentinosjuniors.webp", "arminiabielefeld": "escudos/arminiabielefeld.webp", "arouca": "escudos/arouca.webp", "arsenal": "escudos/arsenal.webp", "astonvilla": "escudos/astonvilla.webp", "atalanta": "escudos/atalanta.webp", "athleticclub": "escudos/athleticclub.webp", "athleticmg": "escudos/athleticmg.webp", "athleticopr": "escudos/athleticopr.webp", "atlantaunited": "escudos/atlantaunited.webp", "atlanta": "escudos/atlanta.webp", "atleticotucuman": "escudos/atleticotucuman.webp", "atleticodemadrid": "escudos/atleticodemadrid.webp", "atleticogo": "escudos/atleticogo.webp", "atleticomg": "escudos/atleticomg.webp", "aucklandcity": "escudos/aucklandcity.webp", "augsburg": "escudos/augsburg.webp", "austinfc": "escudos/austinfc.webp", "auxerre": "escudos/auxerre.webp", "avai": "escudos/avai.webp", "avellino": "escudos/avellino.webp", "bahia": "escudos/bahia.webp", "banfield": "escudos/banfield.webp", "barcelona": "escudos/barcelona.webp", "bari": "escudos/bari.webp", "barracascentral": "escudos/barracascentral.webp", "bastia": "escudos/bastia.webp", "bayerleverkusen": "escudos/bayerleverkusen.webp", "bayerndemunique": "escudos/bayerndemunique.webp", "belgrano": "escudos/belgrano.webp", "benficab": "escudos/benficab.webp", "benfica": "escudos/benfica.webp", "birmingham": "escudos/birmingham.webp", "blackburn": "escudos/blackburn.webp", "bocajuniors": "escudos/bocajuniors.webp", "bochum": "escudos/bochum.webp", "bologna": "escudos/bologna.webp", "borussiadortmund": "escudos/borussiadortmund.webp", "borussiamgladbach": "escudos/borussiamgladbach.webp", "botafogopb": "escudos/botafogopb.webp", "botafogosp": "escudos/botafogosp.webp", "botafogo": "escudos/botafogo.webp", "boulogne": "escudos/boulogne.webp", "bournemouth": "escudos/bournemouth.webp", "braga": "escudos/braga.webp", "bragantino": "escudos/bragantino.webp", "brentford": "escudos/brentford.webp", "brest": "escudos/brest.webp", "brighton": "escudos/brighton.webp", "bristolcity": "escudos/bristolcity.webp", "brusque": "escudos/brusque.webp", "burgos": "escudos/burgos.webp", "buriramunited": "escudos/buriramunited.webp", "burnley": "escudos/burnley.webp", "cfmontreal": "escudos/cfmontreal.webp", "crb": "escudos/crb.webp", "cagliari": "escudos/cagliari.webp", "cambuur": "escudos/cambuur.webp", "carrarese": "escudos/carrarese.webp", "casapia": "escudos/casapia.webp", "castellon": "escudos/castellon.webp", "catanzaro": "escudos/catanzaro.webp", "ceara": "escudos/ceara.webp", "celta": "escudos/celta.webp", "centralcordoba": "escudos/centralcordoba.webp", "cesena": "escudos/cesena.webp", "ceuta": "escudos/ceuta.webp", "chacarita": "escudos/chacarita.webp", "chacoforever": "escudos/chacoforever.webp", "chapecoense": "escudos/chapecoense.webp", "charlottefc": "escudos/charlottefc.webp", "charlton": "escudos/charlton.webp", "chaves": "escudos/chaves.webp", "chelsea": "escudos/chelsea.webp", "chicagofire": "escudos/chicagofire.webp", "clermont": "escudos/clermont.webp", "clubamerica": "escudos/clubamerica.webp", "coloradorapids": "escudos/coloradorapids.webp", "columbuscrew": "escudos/columbuscrew.webp", "colon": "escudos/colon.webp", "como": "escudos/como.webp", "confianca": "escudos/confianca.webp", "corinthians": "escudos/corinthians.webp", "coritiba": "escudos/coritiba.webp", "coventry": "escudos/coventry.webp", "cremonese": "escudos/cremonese.webp", "criciuma": "escudos/criciuma.webp", "cruzazul": "escudos/cruzazul.webp", "cruzeiro": "escudos/cruzeiro.webp", "crystalpalace": "escudos/crystalpalace.webp", "cuiaba": "escudos/cuiaba.webp", "culturalleonesa": "escudos/culturalleonesa.webp", "cadiz": "escudos/cadiz.webp", "cordoba": "escudos/cordoba.webp", "dcunited": "escudos/dcunited.webp", "damac": "escudos/damac.webp", "darmstadt": "escudos/darmstadt.webp", "degraafschap": "escudos/degraafschap.webp", "defensayjusticia": "escudos/defensayjusticia.webp", "denbosch": "escudos/denbosch.webp", "deportivolacoruna": "escudos/deportivolacoruna.webp", "deportivomadryn": "escudos/deportivomadryn.webp", "deportivoriestra": "escudos/deportivoriestra.webp", "derbycounty": "escudos/derbycounty.webp", "dordrecht": "escudos/dordrecht.webp", "dunkerque": "escudos/dunkerque.webp", "dynamodresden": "escudos/dynamodresden.webp", "eibar": "escudos/eibar.webp", "eintrachtbraunschweig": "escudos/eintrachtbraunschweig.webp", "eintrachtfrankfurt": "escudos/eintrachtfrankfurt.webp", "elche": "escudos/elche.webp", "elversberg": "escudos/elversberg.webp", "emmen": "escudos/emmen.webp", "empoli": "escudos/empoli.webp", "espanyol": "escudos/espanyol.webp", "esperancedetunis": "escudos/esperancedetunis.webp", "estoril": "escudos/estoril.webp", "estrelaamadora": "escudos/estrelaamadora.webp", "estudiantes": "escudos/estudiantes.webp", "everton": "escudos/everton.webp", "excelsior": "escudos/excelsior.webp", "fccincinnati": "escudos/fccincinnati.webp", "fcdallas": "escudos/fcdallas.webp", "fceindhoven": "escudos/fceindhoven.webp", "famalicao": "escudos/famalicao.webp", "farense": "escudos/farense.webp", "feirense": "escudos/feirense.webp", "felgueiras": "escudos/felgueiras.webp", "ferrocarriloeste": "escudos/ferrocarriloeste.webp", "ferroviaria": "escudos/ferroviaria.webp", "feyenoord": "escudos/feyenoord.webp", "figueirense": "escudos/figueirense.webp", "fiorentina": "escudos/fiorentina.webp", "flamengo": "escudos/flamengo.webp", "fluminense": "escudos/fluminense.webp", "fortaleza": "escudos/fortaleza.webp", "fortunadusseldorf": "escudos/fortunadusseldorf.webp", "fortunasittard": "escudos/fortunasittard.webp", "freiburg": "escudos/freiburg.webp", "frosinone": "escudos/frosinone.webp", "fulham": "escudos/fulham.webp", "genoa": "escudos/genoa.webp", "getafe": "escudos/getafe.webp", "gilvicente": "escudos/gilvicente.webp", "gimnasialaplata": "escudos/gimnasialaplata.webp", "gimnasiademendoza": "escudos/gimnasiademendoza.webp", "girona": "escudos/girona.webp", "goaheadeagles": "escudos/goaheadeagles.webp", "godoycruz": "escudos/godoycruz.webp", "goias": "escudos/goias.webp", "granada": "escudos/granada.webp", "grenoble": "escudos/grenoble.webp", "greutherfurth": "escudos/greutherfurth.webp", "groningen": "escudos/groningen.webp", "gremio": "escudos/gremio.webp", "guarani": "escudos/guarani.webp", "guingamp": "escudos/guingamp.webp", "hamburgersv": "escudos/hamburgersv.webp", "hannover96": "escudos/hannover96.webp", "heerenveen": "escudos/heerenveen.webp", "heidenheim": "escudos/heidenheim.webp", "helmondsport": "escudos/helmondsport.webp", "heracles": "escudos/heracles.webp", "herthabsc": "escudos/herthabsc.webp", "hoffenheim": "escudos/hoffenheim.webp", "holsteinkiel": "escudos/holsteinkiel.webp", "houstondynamo": "escudos/houstondynamo.webp", "huesca": "escudos/huesca.webp", "hullcity": "escudos/hullcity.webp", "huracan": "escudos/huracan.webp", "independienterivadavia": "escudos/independienterivadavia.webp", "independiente": "escudos/independiente.webp", "instituto": "escudos/instituto.webp", "intermiami": "escudos/intermiami.webp", "interdemilao": "escudos/interdemilao.webp", "internacional": "escudos/internacional.webp", "ipswich": "escudos/ipswich.webp", "ituano": "escudos/ituano.webp", "jongaz": "escudos/jongaz.webp", "jongajax": "escudos/jongajax.webp", "jongpsv": "escudos/jongpsv.webp", "juvestabia": "escudos/juvestabia.webp", "juventude": "escudos/juventude.webp", "juventus": "escudos/juventus.webp", "kaiserslautern": "escudos/kaiserslautern.webp", "karlsruhe": "escudos/karlsruhe.webp", "kawasakifrontale": "escudos/kawasakifrontale.webp", "koln": "escudos/koln.webp", "lagalaxy": "escudos/lagalaxy.webp", "lafc": "escudos/lafc.webp", "lanus": "escudos/lanus.webp", "laspalmas": "escudos/laspalmas.webp", "laval": "escudos/laval.webp", "lazio": "escudos/lazio.webp", "lehavre": "escudos/lehavre.webp", "lemans": "escudos/lemans.webp", "lecce": "escudos/lecce.webp", "leeds": "escudos/leeds.webp", "leganes": "escudos/leganes.webp", "leicester": "escudos/leicester.webp", "leixoes": "escudos/leixoes.webp", "lens": "escudos/lens.webp", "levante": "escudos/levante.webp", "lille": "escudos/lille.webp", "liverpool": "escudos/liverpool.webp", "londrina": "escudos/londrina.webp", "lorient": "escudos/lorient.webp", "lusitanialourosa": "escudos/lusitanialourosa.webp", "lyon": "escudos/lyon.webp", "mvv": "escudos/mvv.webp", "magdeburg": "escudos/magdeburg.webp", "mainz": "escudos/mainz.webp", "mallorca": "escudos/mallorca.webp", "mamelodisundowns": "escudos/mamelodisundowns.webp", "manaus": "escudos/manaus.webp", "manchestercity": "escudos/manchestercity.webp", "manchesterunited": "escudos/manchesterunited.webp", "mantova": "escudos/mantova.webp", "marseille": "escudos/marseille.webp", "maritimo": "escudos/maritimo.webp", "metz": "escudos/metz.webp", "middlesbrough": "escudos/middlesbrough.webp", "milan": "escudos/milan.webp", "millwall": "escudos/millwall.webp", "minnesotaunited": "escudos/minnesotaunited.webp", "mirandes": "escudos/mirandes.webp", "mirassol": "escudos/mirassol.webp", "modena": "escudos/modena.webp", "monaco": "escudos/monaco.webp", "monterrey": "escudos/monterrey.webp", "montpellier": "escudos/montpellier.webp", "monza": "escudos/monza.webp", "moreirense": "escudos/moreirense.webp", "moron": "escudos/moron.webp", "malaga": "escudos/malaga.webp", "nacbreda": "escudos/nacbreda.webp", "nec": "escudos/nec.webp", "neom": "escudos/neom.webp", "nyredbulls": "escudos/nyredbulls.webp", "nycfc": "escudos/nycfc.webp", "nacional": "escudos/nacional.webp", "nancy": "escudos/nancy.webp", "nantes": "escudos/nantes.webp", "napoli": "escudos/napoli.webp", "nashvillesc": "escudos/nashvillesc.webp", "newenglandrevolution": "escudos/newenglandrevolution.webp", "newcastle": "escudos/newcastle.webp", "newellsoldboys": "escudos/newellsoldboys.webp", "nice": "escudos/nice.webp", "norwich": "escudos/norwich.webp", "nottinghamforest": "escudos/nottinghamforest.webp", "novorizontino": "escudos/novorizontino.webp", "nautico": "escudos/nautico.webp", "nurnberg": "escudos/nurnberg.webp", "oliveirense": "escudos/oliveirense.webp", "operariopr": "escudos/operariopr.webp", "orlandocity": "escudos/orlandocity.webp", "osasuna": "escudos/osasuna.webp", "oxfordunited": "escudos/oxfordunited.webp", "peczwolle": "escudos/peczwolle.webp", "psv": "escudos/psv.webp", "pachuca": "escudos/pachuca.webp", "paderborn": "escudos/paderborn.webp", "padova": "escudos/padova.webp", "palermo": "escudos/palermo.webp", "palmeiras": "escudos/palmeiras.webp", "parisfc": "escudos/parisfc.webp", "parissaintgermain": "escudos/parissaintgermain.webp", "parma": "escudos/parma.webp", "pau": "escudos/pau.webp", "paysandu": "escudos/paysandu.webp", "pacosdeferreira": "escudos/pacosdeferreira.webp", "penafiel": "escudos/penafiel.webp", "persepolis": "escudos/persepolis.webp", "pescara": "escudos/pescara.webp", "philadelphiaunion": "escudos/philadelphiaunion.webp", "pisa": "escudos/pisa.webp", "platense": "escudos/platense.webp", "pontepreta": "escudos/pontepreta.webp", "portimonense": "escudos/portimonense.webp", "portlandtimbers": "escudos/portlandtimbers.webp", "portob": "escudos/portob.webp", "porto": "escudos/porto.webp", "portsmouth": "escudos/portsmouth.webp", "preston": "escudos/preston.webp", "preuenmunster": "escudos/preuenmunster.webp", "pyramids": "escudos/pyramids.webp", "qpr": "escudos/qpr.webp", "quilmes": "escudos/quilmes.webp", "rbleipzig": "escudos/rbleipzig.webp", "rkcwaalwijk": "escudos/rkcwaalwijk.webp", "racingsantander": "escudos/racingsantander.webp", "racing": "escudos/racing.webp", "rayovallecano": "escudos/rayovallecano.webp", "realbetis": "escudos/realbetis.webp", "realmadrid": "escudos/realmadrid.webp", "realoviedo": "escudos/realoviedo.webp", "realsaltlake": "escudos/realsaltlake.webp", "realsociedadb": "escudos/realsociedadb.webp", "realsociedad": "escudos/realsociedad.webp", "redstar": "escudos/redstar.webp", "reggiana": "escudos/reggiana.webp", "reims": "escudos/reims.webp", "remo": "escudos/remo.webp", "rennes": "escudos/rennes.webp", "rioave": "escudos/rioave.webp", "riverplate": "escudos/riverplate.webp", "rodajc": "escudos/rodajc.webp", "rodez": "escudos/rodez.webp", "roma": "escudos/roma.webp", "rosariocentral": "escudos/rosariocentral.webp", "saintetienne": "escudos/saintetienne.webp", "sampaiocorrea": "escudos/sampaiocorrea.webp", "sampdoria": "escudos/sampdoria.webp", "sandiegofc": "escudos/sandiegofc.webp", "sanjoseearthquakes": "escudos/sanjoseearthquakes.webp", "sanlorenzo": "escudos/sanlorenzo.webp", "sanmartindesanjuan": "escudos/sanmartindesanjuan.webp", "sanmartindetucuman": "escudos/sanmartindetucuman.webp", "santaclara": "escudos/santaclara.webp", "santacruz": "escudos/santacruz.webp", "santos": "escudos/santos.webp", "sarmiento": "escudos/sarmiento.webp", "sassuolo": "escudos/sassuolo.webp", "schalke04": "escudos/schalke04.webp", "seattlesounders": "escudos/seattlesounders.webp", "sevilla": "escudos/sevilla.webp", "shanghaiport": "escudos/shanghaiport.webp", "sheffieldunited": "escudos/sheffieldunited.webp", "sheffieldwednesday": "escudos/sheffieldwednesday.webp", "southampton": "escudos/southampton.webp", "spartarotterdam": "escudos/spartarotterdam.webp", "spezia": "escudos/spezia.webp", "sport": "escudos/sport.webp", "sportingb": "escudos/sportingb.webp", "sportinggijon": "escudos/sportinggijon.webp", "sportingkansascity": "escudos/sportingkansascity.webp", "sporting": "escudos/sporting.webp", "stlouiscity": "escudos/stlouiscity.webp", "stpauli": "escudos/stpauli.webp", "stokecity": "escudos/stokecity.webp", "strasbourg": "escudos/strasbourg.webp", "stuttgart": "escudos/stuttgart.webp", "sunderland": "escudos/sunderland.webp", "swansea": "escudos/swansea.webp", "saobernardo": "escudos/saobernardo.webp", "saopaulo": "escudos/saopaulo.webp", "sudtirol": "escudos/sudtirol.webp", "toposs": "escudos/toposs.webp", "talleres": "escudos/talleres.webp", "telstar": "escudos/telstar.webp", "temperley": "escudos/temperley.webp", "tigre": "escudos/tigre.webp", "tigres": "escudos/tigres.webp", "toluca": "escudos/toluca.webp", "tondela": "escudos/tondela.webp", "torino": "escudos/torino.webp", "torontofc": "escudos/torontofc.webp", "torreense": "escudos/torreense.webp", "tottenham": "escudos/tottenham.webp", "toulouse": "escudos/toulouse.webp", "tristansuarez": "escudos/tristansuarez.webp", "troyes": "escudos/troyes.webp", "twente": "escudos/twente.webp", "udinese": "escudos/udinese.webp", "ulsanhd": "escudos/ulsanhd.webp", "unionberlin": "escudos/unionberlin.webp", "uniaodeleiria": "escudos/uniaodeleiria.webp", "union": "escudos/union.webp", "utrecht": "escudos/utrecht.webp", "vvvvenlo": "escudos/vvvvenlo.webp", "valencia": "escudos/valencia.webp", "valladolid": "escudos/valladolid.webp", "vancouverwhitecaps": "escudos/vancouverwhitecaps.webp", "vasco": "escudos/vasco.webp", "venezia": "escudos/venezia.webp", "verona": "escudos/verona.webp", "vilanova": "escudos/vilanova.webp", "villarreal": "escudos/villarreal.webp", "virtusentella": "escudos/virtusentella.webp", "visselkobe": "escudos/visselkobe.webp", "vitoriasc": "escudos/vitoriasc.webp", "vitoria": "escudos/vitoria.webp", "vizela": "escudos/vizela.webp", "volendam": "escudos/volendam.webp", "voltaredonda": "escudos/voltaredonda.webp", "velezsarsfield": "escudos/velezsarsfield.webp", "watford": "escudos/watford.webp", "werderbremen": "escudos/werderbremen.webp", "westbrom": "escudos/westbrom.webp", "westham": "escudos/westham.webp", "willemii": "escudos/willemii.webp", "wolfsburg": "escudos/wolfsburg.webp", "wolves": "escudos/wolves.webp", "wydad": "escudos/wydad.webp", "ypiranga": "escudos/ypiranga.webp", "zaragoza": "escudos/zaragoza.webp", "novaiguacu": "escudos/novaiguacu.webp", "central": "escudos/central.webp", "wrexham": "escudos/wrexham.webp", "csa": "escudos/csa.webp", "aljandal": "escudos/aljandal.webp", "americarn": "escudos/americarn.webp", "saojosers": "escudos/saojosers.webp", "treze": "escudos/treze.webp", "jeddah": "escudos/jeddah.webp", "retro": "escudos/retro.webp", "joinville": "escudos/joinville.webp", "maranhao": "escudos/maranhao.webp", "portuguesa": "escudos/portuguesa.webp", "albatin": "escudos/albatin.webp", "campinense": "escudos/campinense.webp", "brasildepelotas": "escudos/brasildepelotas.webp", "ferroviario": "escudos/ferroviario.webp", "altai": "escudos/altai.webp", "tombense": "escudos/tombense.webp", "alfaisaly": "escudos/alfaisaly.webp", "juazeirense": "escudos/juazeirense.webp", "itabaiana": "escudos/itabaiana.webp", "maringa": "escudos/maringa.webp", "estudiantesderiocuarto": "escudos/estudiantesderiocuarto.webp", "abha": "escudos/abha.webp", "floresta": "escudos/floresta.webp", "anapolis": "escudos/anapolis.webp", "interdelimeira": "escudos/interdelimeira.webp", "aladalah": "escudos/aladalah.webp", "alarabi": "escudos/alarabi.webp", "caxias": "escudos/caxias.webp", "aguasanta": "escudos/aguasanta.webp", "aljabalain": "escudos/aljabalain.webp", "veloclube": "escudos/veloclube.webp", "barra": "escudos/barra.webp"};const ASSET_T={"afcchampionsleagueelite": "tacas/afcchampionsleagueelite.webp", "boladeouro": "tacas/boladeouro.webp", "brasileiraoseriea": "tacas/brasileiraoseriea.webp", "brasileiraoserieb": "tacas/brasileiraoserieb.webp", "brasileiraoseriec": "tacas/brasileiraoseriec.webp", "bundesliga": "tacas/bundesliga.webp", "campeonatoalagoano": "tacas/campeonatoalagoano.webp", "campeonatoamazonense": "tacas/campeonatoamazonense.webp", "campeonatocarioca": "tacas/campeonatocarioca.webp", "campeonatocatarinense": "tacas/campeonatocatarinense.webp", "campeonatogaucho": "tacas/campeonatogaucho.webp", "campeonatogoiano": "tacas/campeonatogoiano.webp", "campeonatomineiro": "tacas/campeonatomineiro.webp", "campeonatoparanaense": "tacas/campeonatoparanaense.webp", "carabaocup": "tacas/carabaocup.webp", "championsleague": "tacas/championsleague.webp", "chuteiradeouro": "tacas/chuteiradeouro.webp", "concachampions": "tacas/concachampions.webp", "copaafricanadenacoes": "tacas/copaafricanadenacoes.webp", "copaamerica": "tacas/copaamerica.webp", "copaintercontinental": "tacas/copaintercontinental.webp", "copaouro": "tacas/copaouro.webp", "copasulamericana": "tacas/copasulamericana.webp", "copadaasia": "tacas/copadaasia.webp", "copadelrey": "tacas/copadelrey.webp", "copadobrasil": "tacas/copadobrasil.webp", "copadomundo": "tacas/copadomundo.webp", "coppaitalia": "tacas/coppaitalia.webp", "coupedefrance": "tacas/coupedefrance.webp", "dfbpokal": "tacas/dfbpokal.webp", "eredivisie": "tacas/eredivisie.webp", "eurocopa": "tacas/eurocopa.webp", "europaleague": "tacas/europaleague.webp", "facup": "tacas/facup.webp", "laliga": "tacas/laliga.webp", "libertadores": "tacas/libertadores.webp", "ligaportugal": "tacas/ligaportugal.webp", "ligue1": "tacas/ligue1.webp", "mundialdeclubesdafifa": "tacas/mundialdeclubesdafifa.webp", "paulistao": "tacas/paulistao.webp", "premierleague": "tacas/premierleague.webp", "recopasulamericana": "tacas/recopasulamericana.webp", "selecaodatemporada": "tacas/selecaodatemporada.webp", "seriea": "tacas/seriea.webp", "supercopadobrasil": "tacas/supercopadobrasil.webp", "serieb": "tacas/serieb.webp", "tacadeportugal": "tacas/tacadeportugal.webp", "campeonatoparaense": "tacas/campeonatoparaense.webp", "supercopadauefa": "tacas/supercopadauefa.webp", "trofeodecampeones": "tacas/trofeodecampeones.webp", "supercoppaitaliana": "tacas/supercoppaitaliana.webp", "supercopasaudita": "tacas/supercopasaudita.webp", "laligahypermotion": "tacas/laligahypermotion.webp", "ligue2": "tacas/ligue2.webp", "2bundesliga": "tacas/2bundesliga.webp", "kingscup": "tacas/kingscup.webp", "campeonatomaranhense": "tacas/campeonatomaranhense.webp", "knvbbeker": "tacas/knvbbeker.webp", "mls": "tacas/mls.webp", "boladeourodacopa": "tacas/boladeourodacopa.webp", "campeonatocearense": "tacas/campeonatocearense.webp", "campeonatopernambucano": "tacas/campeonatopernambucano.webp", "tropheedeschampions": "tacas/tropheedeschampions.webp", "craquedaliga": "tacas/craquedaliga.webp", "luvadeouro": "tacas/luvadeouro.webp", "johancruijffschaal": "tacas/johancruijffschaal.webp", "ligaportugal2": "tacas/ligaportugal2.webp", "championship": "tacas/championship.webp", "saudiproleague": "tacas/saudiproleague.webp", "supercopadeespana": "tacas/supercopadeespana.webp", "tacadaliga": "tacas/tacadaliga.webp", "campeonatopotiguar": "tacas/campeonatopotiguar.webp", "ligaprofesional": "tacas/ligaprofesional.webp", "brasileiraoseried": "tacas/brasileiraoseried.webp", "conferenceleague": "tacas/conferenceleague.webp", "supportersshield": "tacas/supportersshield.webp", "olimpiadas": "tacas/olimpiadas.webp", "acesso": "tacas/acesso.webp", "artilheiro": "tacas/artilheiro.webp", "supertacacandidodeoliveira": "tacas/supertacacandidodeoliveira.webp", "campeonatosergipano": "tacas/campeonatosergipano.webp", "eerstedivisie": "tacas/eerstedivisie.webp", "saudifirstdivision": "tacas/saudifirstdivision.webp", "dflsupercup": "tacas/dflsupercup.webp", "chuteiradeourodacopa": "tacas/chuteiradeourodacopa.webp", "goldenboy": "tacas/goldenboy.webp", "usopencup": "tacas/usopencup.webp", "campeonatomatogrossense": "tacas/campeonatomatogrossense.webp", "podiodaboladeouro": "tacas/podiodaboladeouro.webp", "mlscup": "tacas/mlscup.webp", "primeranacional": "tacas/primeranacional.webp", "melhordaposicao": "tacas/melhordaposicao.webp", "copaargentina": "tacas/copaargentina.webp", "campeonatoparaibano": "tacas/campeonatoparaibano.webp", "campeonatobaiano": "tacas/campeonatobaiano.webp", "communityshield": "tacas/communityshield.webp"};
+const ASSET_B={};const ASSET_T={};
 // ================== DADOS ==================
 const ATTRS=['VEL','FIN','PAS','DRI','DEF','FIS','MEN','REF'];
 const ATTR_NAME={VEL:'Velocidade',FIN:'Finalização',PAS:'Passe',DRI:'Drible',DEF:'Defesa',FIS:'Físico',MEN:'Mentalidade',REF:'Reflexos'};
 const POS={
- GOL:{n:'Goleiro',w:{REF:.45,MEN:.2,FIS:.15,DEF:.1,PAS:.1},sg:0,sa:.004,peak:30,decl:.55,inj:.09,bola:-14,bw:0,x:50,y:91,info:['Pico ~30 anos','Carreira longa','Bola de Ouro quase impossível','Disputa a Luva de Ouro']},
- ZAG:{n:'Zagueiro',w:{DEF:.4,FIS:.25,MEN:.15,VEL:.1,PAS:.1},sg:.05,sa:.025,peak:28,decl:.8,inj:.17,bola:-8,bw:1.2,x:50,y:79,info:['Pico ~28','Declínio lento','Bola de Ouro muito difícil','Muitos cartões e lesões']},
- LE:{n:'Lateral esquerdo',w:{VEL:.25,DEF:.25,PAS:.2,FIS:.1,DRI:.1,MEN:.1},sg:.03,sa:.1,peak:26,decl:1.1,inj:.16,bola:-8,bw:.8,x:14,y:72,info:['Pico ~26','Declínio rápido','Bola de Ouro muito difícil','Muitas assistências']},
- LD:{n:'Lateral direito',w:{VEL:.25,DEF:.25,PAS:.2,FIS:.1,DRI:.1,MEN:.1},sg:.03,sa:.1,peak:26,decl:1.1,inj:.16,bola:-8,bw:.8,x:86,y:72,info:['Pico ~26','Declínio rápido','Bola de Ouro muito difícil','Muitas assistências']},
- VOL:{n:'Volante',w:{DEF:.3,PAS:.25,FIS:.2,MEN:.2,VEL:.05},sg:.04,sa:.07,peak:28,decl:.8,inj:.17,bola:-6,bw:.9,x:50,y:65,info:['Pico ~28','Declínio lento','Bola de Ouro difícil','Leva muito cartão']},
- ME:{n:'Meia esquerda',w:{VEL:.2,PAS:.25,DRI:.2,MEN:.15,FIS:.1,DEF:.1},sg:.09,sa:.16,peak:27,decl:.95,inj:.15,bola:-1,bw:.7,x:14,y:47,info:['Pico ~27','Corredor pelo lado','Bola de Ouro possível','Muitos cruzamentos']},
- MD:{n:'Meia direita',w:{VEL:.2,PAS:.25,DRI:.2,MEN:.15,FIS:.1,DEF:.1},sg:.09,sa:.16,peak:27,decl:.95,inj:.15,bola:-1,bw:.7,x:86,y:47,info:['Pico ~27','Corredor pelo lado','Bola de Ouro possível','Muitos cruzamentos']},
- MC:{n:'Meio-campo',w:{PAS:.25,MEN:.2,DRI:.15,DEF:.15,FIS:.15,FIN:.1},sg:.08,sa:.12,peak:27,decl:.85,inj:.15,bola:-2,bw:.75,x:50,y:52,info:['Pico ~27','Equilibrado','Bola de Ouro possível','Precisa de tudo um pouco']},
- MEI:{n:'Meia armador',w:{PAS:.35,DRI:.25,MEN:.2,FIN:.15,VEL:.05},sg:.13,sa:.2,peak:27,decl:.9,inj:.14,bola:3,bw:.6,x:50,y:38,info:['Pico ~27','Rei das assistências','Bola de Ouro favorável','Bom batedor de falta']},
- PE:{n:'Ponta esquerda',w:{VEL:.3,DRI:.3,FIN:.15,PAS:.15,MEN:.1},sg:.18,sa:.17,peak:25,decl:1.25,inj:.17,bola:3,bw:.6,x:16,y:23,info:['Pico ~25','Declínio muito rápido','Bola de Ouro favorável','Lesões musculares']},
- PD:{n:'Ponta direita',w:{VEL:.3,DRI:.3,FIN:.15,PAS:.15,MEN:.1},sg:.18,sa:.17,peak:25,decl:1.25,inj:.17,bola:3,bw:.6,x:84,y:23,info:['Pico ~25','Declínio muito rápido','Bola de Ouro favorável','Lesões musculares']},
- SA:{n:'Segundo atacante',w:{FIN:.3,DRI:.2,PAS:.2,VEL:.15,MEN:.15},sg:.22,sa:.15,peak:26,decl:1.0,inj:.15,bola:3,bw:.55,x:50,y:25,info:['Pico ~26','Faz e cria gols','Bola de Ouro favorável','Versátil']},
- ATA:{n:'Centroavante',w:{FIN:.45,FIS:.15,VEL:.15,MEN:.15,DRI:.1},sg:.32,sa:.1,peak:26,decl:1.0,inj:.16,bola:4,bw:.55,x:50,y:11,info:['Pico ~26','Goleador nato','Bola de Ouro favorável','Disputa a Chuteira de Ouro']},
+ GOL:{n:'Goleiro',w:{REF:.45,MEN:.2,FIS:.15,DEF:.1,PAS:.1},sg:0,sa:.004,peak:30,decl:.55,inj:.09,bola:-14,bw:0,x:50,y:91,info:['Pico ~30 anos','Carreira longa','Bola Dourada quase impossível','Disputa a Luva Dourada']},
+ ZAG:{n:'Zagueiro',w:{DEF:.4,FIS:.25,MEN:.15,VEL:.1,PAS:.1},sg:.05,sa:.025,peak:28,decl:.8,inj:.17,bola:-8,bw:1.2,x:50,y:79,info:['Pico ~28','Declínio lento','Bola Dourada muito difícil','Muitos cartões e lesões']},
+ LE:{n:'Lateral esquerdo',w:{VEL:.25,DEF:.25,PAS:.2,FIS:.1,DRI:.1,MEN:.1},sg:.03,sa:.1,peak:26,decl:1.1,inj:.16,bola:-8,bw:.8,x:14,y:72,info:['Pico ~26','Declínio rápido','Bola Dourada muito difícil','Muitas assistências']},
+ LD:{n:'Lateral direito',w:{VEL:.25,DEF:.25,PAS:.2,FIS:.1,DRI:.1,MEN:.1},sg:.03,sa:.1,peak:26,decl:1.1,inj:.16,bola:-8,bw:.8,x:86,y:72,info:['Pico ~26','Declínio rápido','Bola Dourada muito difícil','Muitas assistências']},
+ VOL:{n:'Volante',w:{DEF:.3,PAS:.25,FIS:.2,MEN:.2,VEL:.05},sg:.04,sa:.07,peak:28,decl:.8,inj:.17,bola:-6,bw:.9,x:50,y:65,info:['Pico ~28','Declínio lento','Bola Dourada difícil','Leva muito cartão']},
+ ME:{n:'Meia esquerda',w:{VEL:.2,PAS:.25,DRI:.2,MEN:.15,FIS:.1,DEF:.1},sg:.09,sa:.16,peak:27,decl:.95,inj:.15,bola:-1,bw:.7,x:14,y:47,info:['Pico ~27','Corredor pelo lado','Bola Dourada possível','Muitos cruzamentos']},
+ MD:{n:'Meia direita',w:{VEL:.2,PAS:.25,DRI:.2,MEN:.15,FIS:.1,DEF:.1},sg:.09,sa:.16,peak:27,decl:.95,inj:.15,bola:-1,bw:.7,x:86,y:47,info:['Pico ~27','Corredor pelo lado','Bola Dourada possível','Muitos cruzamentos']},
+ MC:{n:'Meio-campo',w:{PAS:.25,MEN:.2,DRI:.15,DEF:.15,FIS:.15,FIN:.1},sg:.08,sa:.12,peak:27,decl:.85,inj:.15,bola:-2,bw:.75,x:50,y:52,info:['Pico ~27','Equilibrado','Bola Dourada possível','Precisa de tudo um pouco']},
+ MEI:{n:'Meia armador',w:{PAS:.35,DRI:.25,MEN:.2,FIN:.15,VEL:.05},sg:.13,sa:.2,peak:27,decl:.9,inj:.14,bola:3,bw:.6,x:50,y:38,info:['Pico ~27','Rei das assistências','Bola Dourada favorável','Bom batedor de falta']},
+ PE:{n:'Ponta esquerda',w:{VEL:.3,DRI:.3,FIN:.15,PAS:.15,MEN:.1},sg:.18,sa:.17,peak:25,decl:1.25,inj:.17,bola:3,bw:.6,x:16,y:23,info:['Pico ~25','Declínio muito rápido','Bola Dourada favorável','Lesões musculares']},
+ PD:{n:'Ponta direita',w:{VEL:.3,DRI:.3,FIN:.15,PAS:.15,MEN:.1},sg:.18,sa:.17,peak:25,decl:1.25,inj:.17,bola:3,bw:.6,x:84,y:23,info:['Pico ~25','Declínio muito rápido','Bola Dourada favorável','Lesões musculares']},
+ SA:{n:'Segundo atacante',w:{FIN:.3,DRI:.2,PAS:.2,VEL:.15,MEN:.15},sg:.22,sa:.15,peak:26,decl:1.0,inj:.15,bola:3,bw:.55,x:50,y:25,info:['Pico ~26','Faz e cria gols','Bola Dourada favorável','Versátil']},
+ ATA:{n:'Centroavante',w:{FIN:.45,FIS:.15,VEL:.15,MEN:.15,DRI:.1},sg:.32,sa:.1,peak:26,decl:1.0,inj:.16,bola:4,bw:.55,x:50,y:11,info:['Pico ~26','Goleador nato','Bola Dourada favorável','Disputa a Chuteira Dourada']},
 };
 const POS_ORDER=['GOL','ZAG','LE','LD','VOL','MC','ME','MD','MEI','PE','PD','SA','ATA'];
 const POS_ALIAS={PON:'PD',LAT:'LD'};POS.PON=POS.PD;POS.LAT=POS.LD;
@@ -1271,43 +1273,43 @@ const DIFF={
 
 // Países (copas nacionais, supercopas, vagas continentais)
 const COUNTRY={
- BRA:{n:'Brasil',f:'🇧🇷',conf:'SA',lang:'pt',cup:'Copa do Brasil',cupLegs:true,sup:'Supercopa do Brasil',top:'BRA1',slots:{LIB:[1,6],SUD:[7,12]},cupTo:'LIB'},
- ENG:{n:'Inglaterra',f:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',conf:'EU',lang:'en',cup:'FA Cup',lcup:'Carabao Cup',sup:'Community Shield',top:'ENG1',slots:{UCL:[1,4],UEL:[5,5],UECL:[6,6]},cupTo:'UEL'},
- ESP:{n:'Espanha',f:'🇪🇸',conf:'EU',lang:'es',cup:'Copa del Rey',sup:'Supercopa de España',top:'ESP1',slots:{UCL:[1,4],UEL:[5,5],UECL:[6,6]},cupTo:'UEL'},
- ITA:{n:'Itália',f:'🇮🇹',conf:'EU',lang:'it',cup:'Coppa Italia',sup:'Supercoppa Italiana',top:'ITA1',slots:{UCL:[1,4],UEL:[5,5],UECL:[6,6]},cupTo:'UEL'},
- GER:{n:'Alemanha',f:'🇩🇪',conf:'EU',lang:'de',cup:'DFB-Pokal',sup:'DFL-Supercup',top:'GER1',slots:{UCL:[1,4],UEL:[5,5],UECL:[6,6]},cupTo:'UEL'},
- FRA:{n:'França',f:'🇫🇷',conf:'EU',lang:'fr',cup:'Coupe de France',sup:'Trophée des Champions',top:'FRA1',slots:{UCL:[1,3],UEL:[4,4],UECL:[5,5]},cupTo:'UEL'},
- POR:{n:'Portugal',f:'🇵🇹',conf:'EU',lang:'pt',cup:'Taça de Portugal',lcup:'Taça da Liga',sup:'Supertaça Cândido de Oliveira',top:'POR1',slots:{UCL:[1,2],UEL:[3,3],UECL:[4,4]},cupTo:'UEL'},
- NED:{n:'Holanda',f:'🇳🇱',conf:'EU',lang:'nl',cup:'KNVB Beker',sup:'Johan Cruijff Schaal',top:'NED1',slots:{UCL:[1,2],UEL:[3,3],UECL:[4,4]},cupTo:'UEL'},
+ BRA:{n:'Brasil',f:'🇧🇷',conf:'SA',lang:'pt',cup:'Taça Brasil',cupLegs:true,sup:'Supercopa do Brasil',top:'BRA1',slots:{LIB:[1,6],SUD:[7,12]},cupTo:'LIB'},
+ ENG:{n:'Inglaterra',f:'🏴󠁧󠁢󠁥󠁮󠁧󠁿',conf:'EU',lang:'en',cup:'Copa da Inglaterra',lcup:'Copa da Liga Inglesa',sup:'Supercopa Inglesa',top:'ENG1',slots:{UCL:[1,4],UEL:[5,5],UECL:[6,6]},cupTo:'UEL'},
+ ESP:{n:'Espanha',f:'🇪🇸',conf:'EU',lang:'es',cup:'Copa da Espanha',sup:'Supercopa Espanhola',top:'ESP1',slots:{UCL:[1,4],UEL:[5,5],UECL:[6,6]},cupTo:'UEL'},
+ ITA:{n:'Itália',f:'🇮🇹',conf:'EU',lang:'it',cup:'Copa da Itália',sup:'Supercopa Italiana',top:'ITA1',slots:{UCL:[1,4],UEL:[5,5],UECL:[6,6]},cupTo:'UEL'},
+ GER:{n:'Alemanha',f:'🇩🇪',conf:'EU',lang:'de',cup:'Copa da Alemanha',sup:'Supercopa Alemã',top:'GER1',slots:{UCL:[1,4],UEL:[5,5],UECL:[6,6]},cupTo:'UEL'},
+ FRA:{n:'França',f:'🇫🇷',conf:'EU',lang:'fr',cup:'Copa da França',sup:'Supercopa Francesa',top:'FRA1',slots:{UCL:[1,3],UEL:[4,4],UECL:[5,5]},cupTo:'UEL'},
+ POR:{n:'Portugal',f:'🇵🇹',conf:'EU',lang:'pt',cup:'Copa de Portugal',lcup:'Taça da Liga',sup:'Supertaça Portuguesa',top:'POR1',slots:{UCL:[1,2],UEL:[3,3],UECL:[4,4]},cupTo:'UEL'},
+ NED:{n:'Holanda',f:'🇳🇱',conf:'EU',lang:'nl',cup:'Copa da Holanda',sup:'Supercopa Holandesa',top:'NED1',slots:{UCL:[1,2],UEL:[3,3],UECL:[4,4]},cupTo:'UEL'},
  ARG:{n:'Argentina',f:'🇦🇷',conf:'SA',lang:'es',cup:'Copa Argentina',sup:'Trofeo de Campeones',top:'ARG1',slots:{LIB:[1,4],SUD:[5,10]},cupTo:'LIB'},
- USA:{n:'Estados Unidos',f:'🇺🇸',conf:'NA',lang:'en',cup:'US Open Cup',sup:null,top:'USA1',slots:{CCC:[1,4]},cupTo:'CCC'},
- KSA:{n:'Arábia Saudita',f:'🇸🇦',conf:'AS',lang:'ar',cup:"King's Cup",sup:'Supercopa Saudita',top:'KSA1',slots:{ACL:[1,3]},cupTo:'ACL'},
+ USA:{n:'Estados Unidos',f:'🇺🇸',conf:'NA',lang:'en',cup:'Copa dos EUA',sup:null,top:'USA1',slots:{CCC:[1,4]},cupTo:'CCC'},
+ KSA:{n:'Arábia Saudita',f:'🇸🇦',conf:'AS',lang:'ar',cup:"Copa da Arábia",sup:'Supercopa Saudita',top:'KSA1',slots:{ACL:[1,3]},cupTo:'ACL'},
 };
 // Ligas. rr=1: turno único. down/up: rebaixados/promovidos
 const LG={
- BRA1:{n:'Brasileirão Série A',c:'BRA',tier:1,down:4,next:'BRA2',wm:.42,lp:5,bp:-9},
- BRA2:{n:'Brasileirão Série B',c:'BRA',tier:2,down:4,prev:'BRA1',next:'BRA3',wm:.13,lp:2,bp:-30},
- BRA3:{n:'Brasileirão Série C',c:'BRA',tier:3,down:4,prev:'BRA2',next:'BRA4',wm:.06,lp:1,bp:-40},
- BRA4:{n:'Brasileirão Série D',c:'BRA',tier:4,down:0,prev:'BRA3',wm:.03,lp:.5,bp:-50},
- ENG1:{n:'Premier League',c:'ENG',tier:1,down:3,next:'ENG2',wm:1,lp:9,bp:0},
- ENG2:{n:'Championship',c:'ENG',tier:2,down:0,prev:'ENG1',wm:.25,lp:2,bp:-25},
- ESP1:{n:'La Liga',c:'ESP',tier:1,down:3,next:'ESP2',wm:.85,lp:8,bp:0},
- ESP2:{n:'LaLiga Hypermotion',c:'ESP',tier:2,down:0,prev:'ESP1',wm:.2,lp:2,bp:-25},
- ITA1:{n:'Serie A',c:'ITA',tier:1,down:3,next:'ITA2',wm:.7,lp:8,bp:-1},
- ITA2:{n:'Serie B',c:'ITA',tier:2,down:0,prev:'ITA1',wm:.18,lp:2,bp:-25},
- GER1:{n:'Bundesliga',c:'GER',tier:1,down:2,next:'GER2',wm:.75,lp:8,bp:-1},
- GER2:{n:'2. Bundesliga',c:'GER',tier:2,down:0,prev:'GER1',wm:.2,lp:2,bp:-25},
- FRA1:{n:'Ligue 1',c:'FRA',tier:1,down:2,next:'FRA2',wm:.62,lp:6,bp:-3},
- FRA2:{n:'Ligue 2',c:'FRA',tier:2,down:0,prev:'FRA1',wm:.15,lp:2,bp:-25},
- POR1:{n:'Liga Portugal',c:'POR',tier:1,down:2,next:'POR2',wm:.32,lp:5,bp:-7},
- POR2:{n:'Liga Portugal 2',c:'POR',tier:2,down:0,prev:'POR1',wm:.07,lp:1,bp:-30},
- NED1:{n:'Eredivisie',c:'NED',tier:1,down:2,next:'NED2',wm:.32,lp:5,bp:-7},
- NED2:{n:'Eerste Divisie',c:'NED',tier:2,down:0,prev:'NED1',wm:.07,lp:1,bp:-30},
- ARG1:{n:'Liga Profesional',c:'ARG',tier:1,down:2,next:'ARG2',rr:1,wm:.24,lp:5,bp:-11},
- ARG2:{n:'Primera Nacional',c:'ARG',tier:2,down:0,prev:'ARG1',wm:.05,lp:1,bp:-35},
- USA1:{n:'MLS',c:'USA',tier:1,down:0,rr:1,po:8,wm:.55,lp:3,bp:-16},
- KSA1:{n:'Saudi Pro League',c:'KSA',tier:1,down:3,next:'KSA2',wm:1.6,lp:3,bp:-16},
- KSA2:{n:'Saudi First Division',c:'KSA',tier:2,down:0,prev:'KSA1',wm:.2,lp:1,bp:-35},
+ BRA1:{n:'Brasileiro Série A',c:'BRA',tier:1,down:4,next:'BRA2',wm:.42,lp:5,bp:-9},
+ BRA2:{n:'Brasileiro Série B',c:'BRA',tier:2,down:4,prev:'BRA1',next:'BRA3',wm:.13,lp:2,bp:-30},
+ BRA3:{n:'Brasileiro Série C',c:'BRA',tier:3,down:4,prev:'BRA2',next:'BRA4',wm:.06,lp:1,bp:-40},
+ BRA4:{n:'Brasileiro Série D',c:'BRA',tier:4,down:0,prev:'BRA3',wm:.03,lp:.5,bp:-50},
+ ENG1:{n:'Liga Inglesa',c:'ENG',tier:1,down:3,next:'ENG2',wm:1,lp:9,bp:0},
+ ENG2:{n:'Segunda Inglesa',c:'ENG',tier:2,down:0,prev:'ENG1',wm:.25,lp:2,bp:-25},
+ ESP1:{n:'Liga Espanhola',c:'ESP',tier:1,down:3,next:'ESP2',wm:.85,lp:8,bp:0},
+ ESP2:{n:'Segunda Espanhola',c:'ESP',tier:2,down:0,prev:'ESP1',wm:.2,lp:2,bp:-25},
+ ITA1:{n:'Liga Italiana',c:'ITA',tier:1,down:3,next:'ITA2',wm:.7,lp:8,bp:-1},
+ ITA2:{n:'Segunda Italiana',c:'ITA',tier:2,down:0,prev:'ITA1',wm:.18,lp:2,bp:-25},
+ GER1:{n:'Liga Alemã',c:'GER',tier:1,down:2,next:'GER2',wm:.75,lp:8,bp:-1},
+ GER2:{n:'Segunda Alemã',c:'GER',tier:2,down:0,prev:'GER1',wm:.2,lp:2,bp:-25},
+ FRA1:{n:'Liga Francesa',c:'FRA',tier:1,down:2,next:'FRA2',wm:.62,lp:6,bp:-3},
+ FRA2:{n:'Segunda Francesa',c:'FRA',tier:2,down:0,prev:'FRA1',wm:.15,lp:2,bp:-25},
+ POR1:{n:'Liga Portuguesa',c:'POR',tier:1,down:2,next:'POR2',wm:.32,lp:5,bp:-7},
+ POR2:{n:'Segunda Portuguesa',c:'POR',tier:2,down:0,prev:'POR1',wm:.07,lp:1,bp:-30},
+ NED1:{n:'Liga Holandesa',c:'NED',tier:1,down:2,next:'NED2',wm:.32,lp:5,bp:-7},
+ NED2:{n:'Segunda Holandesa',c:'NED',tier:2,down:0,prev:'NED1',wm:.07,lp:1,bp:-30},
+ ARG1:{n:'Liga Argentina',c:'ARG',tier:1,down:2,next:'ARG2',rr:1,wm:.24,lp:5,bp:-11},
+ ARG2:{n:'Segunda Argentina',c:'ARG',tier:2,down:0,prev:'ARG1',wm:.05,lp:1,bp:-35},
+ USA1:{n:'Liga Americana',c:'USA',tier:1,down:0,rr:1,po:8,wm:.55,lp:3,bp:-16},
+ KSA1:{n:'Liga Saudita',c:'KSA',tier:1,down:3,next:'KSA2',wm:1.6,lp:3,bp:-16},
+ KSA2:{n:'Segunda Saudita',c:'KSA',tier:2,down:0,prev:'KSA1',wm:.2,lp:1,bp:-35},
 };
 // Nome|força|cor1|cor2|UF
 const CLUB_SRC={
@@ -1344,7 +1346,7 @@ const EXT_SRC={
 };
 const ABBR={'Manchester City':'MCI','Manchester United':'MUN','Real Madrid':'RMA','Atlético de Madrid':'ATM','Atlético-MG':'CAM','Athletico-PR':'CAP','São Paulo':'SPFC','Paris Saint-Germain':'PSG','Bayern de Munique':'FCB','Inter de Milão':'INT','Bayer Leverkusen':'B04','Borussia Dortmund':'BVB','RB Leipzig':'RBL','Aston Villa':'AVL','Nottingham Forest':'NFO','Crystal Palace':'CRY','West Ham':'WHU','Real Sociedad':'RSO','Real Betis':'BET','Athletic Club':'ATH','Inter Miami':'MIA','LA Galaxy':'LAG','Boca Juniors':'BOC','River Plate':'RIV','Eintracht Frankfurt':'SGE','Vitória SC':'VSC','Botafogo-SP':'BFC','América-MG':'AMG','Ponte Preta':'PON','Vila Nova':'VNO','Operário-PR':'OPE',"Borussia M'gladbach":'BMG','AZ Alkmaar':'AZ','NY Red Bulls':'NYR','Seattle Sounders':'SEA','Columbus Crew':'CLB','Vélez Sarsfield':'VEL','Corinthians':'SCCP','Palmeiras':'SEP','Flamengo':'FLA','Fluminense':'FLU','Internacional':'SCI','Grêmio':'GRE','Cruzeiro':'CRU','Botafogo':'BOT','Bragantino':'RBB','Novorizontino':'NOV','Atlético-GO':'ACG','Athletic-MG':'ATC','São Bernardo':'SBE','Inter de Limeira':'ILI','Botafogo-PB':'BPB','Santa Cruz':'STA','Volta Redonda':'VRE','América-RN':'AMR','Sampaio Corrêa':'SAM','São José-RS':'SJO','Brasil de Pelotas':'BRP','Nova Iguaçu':'NIG','Água Santa':'AGS','Velo Clube':'VEL','Sheffield United':'SHU','Sheffield Wednesday':'SHW','West Brom':'WBA','Hull City':'HUL','Stoke City':'STK','Derby County':'DER','Oxford United':'OXF','Bristol City':'BRC','Las Palmas':'UDL','Deportivo La Coruña':'DEP','Racing Santander':'RAC','Sporting Gijón':'SPG','Real Sociedad B':'RSB','Cultural Leonesa':'CUL','Rayo Vallecano':'RAY','Real Oviedo':'OVI','Juve Stabia':'JST','Virtus Entella':'ENT','Union Berlin':'FCU','Werder Bremen':'SVW','Hamburger SV':'HSV','St. Pauli':'STP','Holstein Kiel':'KSV','Schalke 04':'S04','Hertha BSC':'BSC','Hannover 96':'H96','Fortuna Düsseldorf':'F95','Greuther Fürth':'SGF','Arminia Bielefeld':'DSC','Eintracht Braunschweig':'EBS','Dynamo Dresden':'SGD','Preußen Münster':'SCP','Paris FC':'PFC','Le Havre':'HAC','Saint-Étienne':'ASSE','Red Star':'RSF','Le Mans':'LMA','Santa Clara':'SCL','Gil Vicente':'GIL','Casa Pia':'CPA','Rio Ave':'RAV','Estrela Amadora':'EST','Paços de Ferreira':'PAC','Académico de Viseu':'ACV','Benfica B':'SLB','Porto B':'FCP','Sporting B':'SCP','União de Leiria':'UDL','Lusitânia Lourosa':'LUS','Go Ahead Eagles':'GAE','Sparta Rotterdam':'SPA','Fortuna Sittard':'FOR','PEC Zwolle':'PEC','NAC Breda':'NAC','Willem II':'WIL','RKC Waalwijk':'RKC','Almere City':'ALM','ADO Den Haag':'ADO','De Graafschap':'DGR','Roda JC':'RJC','VVV-Venlo':'VVV','Den Bosch':'DBO','Helmond Sport':'HEL','TOP Oss':'TOP','FC Eindhoven':'FCE','Jong Ajax':'JAJ','Jong PSV':'JPS','Jong AZ':'JAZ','Rosario Central':'CEN',"Newell's Old Boys":'NOB','San Lorenzo':'SLO','Argentinos Juniors':'ARJ','Godoy Cruz':'GOD','Defensa y Justicia':'DyJ','Gimnasia La Plata':'GLP','Independiente Rivadavia':'IRV','Barracas Central':'BAR','Central Córdoba':'CCO','Atlético Tucumán':'ATU','Deportivo Riestra':'RIE','San Martín de San Juan':'SMJ','Ferro Carril Oeste':'FER','Gimnasia de Mendoza':'GIM','San Martín de Tucumán':'SMT','Estudiantes de Río Cuarto':'ERC','Almirante Brown':'ALB','All Boys':'ALL','Deportivo Madryn':'MAD','Chaco For Ever':'CFE','Tristán Suárez':'TRS','Philadelphia Union':'PHI','FC Cincinnati':'CIN','Orlando City':'ORL','Vancouver Whitecaps':'VAN','Atlanta United':'ATL','Charlotte FC':'CLT','Nashville SC':'NSH','Minnesota United':'MIN','San Diego FC':'SD','Chicago Fire':'CHI','Austin FC':'ATX','FC Dallas':'DAL','Toronto FC':'TOR','New England Revolution':'NE','Houston Dynamo':'HOU','Sporting Kansas City':'SKC','Real Salt Lake':'RSL','Colorado Rapids':'COL','Portland Timbers':'POR','San Jose Earthquakes':'SJ','CF Montréal':'MTL','DC United':'DC','St. Louis City':'STL','Al-Hilal':'HIL','Al-Nassr':'NAS','Al-Ittihad':'ITT','Al-Ahli':'AHL','Al-Qadsiah':'QAD','Al-Ettifaq':'ETT','Al-Shabab':'SHA','Al-Taawoun':'TAA','Al-Fateh':'FAT','Al-Khaleej':'KHA','Al-Fayha':'FAY','Al-Riyadh':'RIY','Al-Kholood':'KHO','Al-Okhdood':'OKH','Al-Hazem':'HAZ','Al-Najma':'NAJ','Al-Wehda':'WEH','Al-Raed':'RAE','Al-Orobah':'ORO','Al-Tai':'TAI','Al-Faisaly':'FAI','Al-Batin':'BAT','Al-Jabalain':'JAB','Al-Adalah':'ADA','Al-Arabi':'ARB','Al-Jandal':'JAN','Club América':'AME','Al-Sadd':'SAD','Al-Ain':'AIN','Ulsan HD':'ULS','Vissel Kobe':'VIS','Shanghai Port':'SHP','Kawasaki Frontale':'KAW','Buriram United':'BUR','Al Ahly':'AHY','Mamelodi Sundowns':'SUN','Espérance de Tunis':'EST','Auckland City':'AUC','Cruz Azul':'CAZ'};
 
-const UF_EST={SP:'Paulistão',RJ:'Campeonato Carioca',MG:'Campeonato Mineiro',RS:'Campeonato Gaúcho',PR:'Campeonato Paranaense',BA:'Campeonato Baiano',SC:'Campeonato Catarinense',PE:'Campeonato Pernambucano',CE:'Campeonato Cearense',GO:'Campeonato Goiano',PA:'Campeonato Paraense',AL:'Campeonato Alagoano',RN:'Campeonato Potiguar',PB:'Campeonato Paraibano',MA:'Campeonato Maranhense',SE:'Campeonato Sergipano',MT:'Campeonato Mato-Grossense',AM:'Campeonato Amazonense'};
+const UF_EST={SP:'Campeonato Paulista',RJ:'Campeonato Carioca',MG:'Campeonato Mineiro',RS:'Campeonato Gaúcho',PR:'Campeonato Paranaense',BA:'Campeonato Baiano',SC:'Campeonato Catarinense',PE:'Campeonato Pernambucano',CE:'Campeonato Cearense',GO:'Campeonato Goiano',PA:'Campeonato Paraense',AL:'Campeonato Alagoano',RN:'Campeonato Potiguar',PB:'Campeonato Paraibano',MA:'Campeonato Maranhense',SE:'Campeonato Sergipano',MT:'Campeonato Mato-Grossense',AM:'Campeonato Amazonense'};
 
 // Seleções jogáveis
 const NATS={
@@ -1372,150 +1374,150 @@ const NATS={
 // Outras seleções (adversárias)
 const OTHER_NATS=[['ECU','Equador','🇪🇨',78,'SA'],['PAR','Paraguai','🇵🇾',76,'SA'],['PER','Peru','🇵🇪',73,'SA'],['CHI','Chile','🇨🇱',74,'SA'],['VEN','Venezuela','🇻🇪',72,'SA'],['BOL','Bolívia','🇧🇴',68,'SA'],['CAN','Canadá','🇨🇦',76,'NA'],['CRC','Costa Rica','🇨🇷',71,'NA'],['PAN','Panamá','🇵🇦',71,'NA'],['JAM','Jamaica','🇯🇲',69,'NA'],['NOR','Noruega','🇳🇴',79,'EU'],['SUI','Suíça','🇨🇭',80,'EU'],['DEN','Dinamarca','🇩🇰',80,'EU'],['AUT','Áustria','🇦🇹',79,'EU'],['TUR','Turquia','🇹🇷',79,'EU'],['POL','Polônia','🇵🇱',77,'EU'],['SRB','Sérvia','🇷🇸',77,'EU'],['UKR','Ucrânia','🇺🇦',77,'EU'],['SWE','Suécia','🇸🇪',77,'EU'],['SCO','Escócia','🏴󠁧󠁢󠁳󠁣󠁴󠁿',75,'EU'],['EGY','Egito','🇪🇬',75,'AF'],['CIV','Costa do Marfim','🇨🇮',77,'AF'],['GHA','Gana','🇬🇭',74,'AF'],['CMR','Camarões','🇨🇲',74,'AF'],['ALG','Argélia','🇩🇿',76,'AF'],['TUN','Tunísia','🇹🇳',73,'AF'],['AUS','Austrália','🇦🇺',74,'AS'],['IRN','Irã','🇮🇷',75,'AS'],['KSA','Arábia Saudita','🇸🇦',72,'AS'],['QAT','Catar','🇶🇦',70,'AS'],['NZL','Nova Zelândia','🇳🇿',66,'OC']];
 const FLAG={...Object.fromEntries(Object.entries(NATS).map(([k,v])=>[k,v.f])),...Object.fromEntries(OTHER_NATS.map(x=>[x[0],x[2]])),SVN:'🇸🇮',HUN:'🇭🇺',GEO:'🇬🇪',SVK:'🇸🇰',GUI:'🇬🇳',GAB:'🇬🇦',CZE:'🇨🇿',WAL:'🏴󠁧󠁢󠁷󠁬󠁳󠁿'};
-const NAT_CUP={SA:'Copa América',EU:'Eurocopa',AF:'Copa Africana de Nações',AS:'Copa da Ásia',NA:'Copa Ouro'};
+const NAT_CUP={SA:'Copa das Américas',EU:'Copa das Nações',AF:'Copa da África',AS:'Copa da Ásia',NA:'Copa do Norte'};
 
 // Estrelas reais (elencos até meados de 2026): nome|clube|posição|país|nascimento|força
-const STAR_SRC=`Kylian Mbappé|Real Madrid|ATA|FRA|1998|91;Vinícius Júnior|Real Madrid|PE|BRA|2000|89;Jude Bellingham|Real Madrid|MEI|ENG|2003|88;Federico Valverde|Real Madrid|MC|URU|1998|88;Thibaut Courtois|Real Madrid|GOL|BEL|1992|89;Trent Alexander-Arnold|Real Madrid|LD|ENG|1998|85;Aurélien Tchouaméni|Real Madrid|VOL|FRA|2000|84;Éder Militão|Real Madrid|ZAG|BRA|1998|84;Arda Güler|Real Madrid|MEI|TUR|2005|83;Dean Huijsen|Real Madrid|ZAG|ESP|2005|81;
-Lamine Yamal|Barcelona|PD|ESP|2007|89;Raphinha|Barcelona|PE|BRA|1996|89;Pedri|Barcelona|MC|ESP|2002|88;Robert Lewandowski|Barcelona|ATA|POL|1988|86;Frenkie de Jong|Barcelona|MC|NED|1997|86;Jules Koundé|Barcelona|LD|FRA|1998|85;Joan García|Barcelona|GOL|ESP|2001|84;Pau Cubarsí|Barcelona|ZAG|ESP|2007|83;Gavi|Barcelona|MC|ESP|2004|83;
-Julián Álvarez|Atlético de Madrid|ATA|ARG|2000|87;Jan Oblak|Atlético de Madrid|GOL|SVN|1993|87;Antoine Griezmann|Atlético de Madrid|SA|FRA|1991|84;Koke|Atlético de Madrid|MC|ESP|1992|82;Nico Williams|Athletic Club|PE|ESP|2002|85;Unai Simón|Athletic Club|GOL|ESP|1997|84;Mikel Oyarzabal|Real Sociedad|ATA|ESP|1997|83;Isco|Real Betis|MEI|ESP|1992|82;
-Erling Haaland|Manchester City|ATA|NOR|2000|90;Rodri|Manchester City|VOL|ESP|1996|89;Gianluigi Donnarumma|Manchester City|GOL|ITA|1999|88;Phil Foden|Manchester City|MEI|ENG|2000|85;Bernardo Silva|Manchester City|MC|POR|1994|85;Rúben Dias|Manchester City|ZAG|POR|1997|86;Joško Gvardiol|Manchester City|ZAG|CRO|2002|85;Tijjani Reijnders|Manchester City|MC|NED|1998|84;Jérémy Doku|Manchester City|PE|BEL|2002|83;
-Mohamed Salah|Liverpool|PD|EGY|1992|90;Virgil van Dijk|Liverpool|ZAG|NED|1991|89;Alisson|Liverpool|GOL|BRA|1992|89;Florian Wirtz|Liverpool|MEI|GER|2003|87;Alexis Mac Allister|Liverpool|MC|ARG|1998|87;Alexander Isak|Liverpool|ATA|SWE|1999|87;Ryan Gravenberch|Liverpool|MC|NED|2002|85;Dominik Szoboszlai|Liverpool|MC|HUN|2000|85;Hugo Ekitiké|Liverpool|ATA|FRA|2002|83;
-Bukayo Saka|Arsenal|PD|ENG|2001|88;Martin Ødegaard|Arsenal|MEI|NOR|1998|87;Declan Rice|Arsenal|MC|ENG|1999|87;William Saliba|Arsenal|ZAG|FRA|2001|87;Gabriel Magalhães|Arsenal|ZAG|BRA|1997|87;David Raya|Arsenal|GOL|ESP|1995|86;Viktor Gyökeres|Arsenal|ATA|SWE|1998|85;Martín Zubimendi|Arsenal|VOL|ESP|1999|85;Eberechi Eze|Arsenal|MEI|ENG|1998|84;
-Cole Palmer|Chelsea|MEI|ENG|2002|87;Moisés Caicedo|Chelsea|VOL|ECU|2001|86;Enzo Fernández|Chelsea|MC|ARG|2001|85;Reece James|Chelsea|LD|ENG|1999|84;João Pedro|Chelsea|ATA|BRA|2001|83;Estêvão|Chelsea|PD|BRA|2007|80;
-Bruno Fernandes|Manchester United|MEI|POR|1994|86;Matheus Cunha|Manchester United|SA|BRA|1999|83;Bryan Mbeumo|Manchester United|PD|CMR|1999|83;Benjamin Šeško|Manchester United|ATA|SVN|2003|82;
-Bruno Guimarães|Newcastle|MC|BRA|1997|86;Sandro Tonali|Newcastle|MC|ITA|2000|84;Anthony Gordon|Newcastle|PE|ENG|2001|83;Cristian Romero|Tottenham|ZAG|ARG|1998|85;Micky van de Ven|Tottenham|ZAG|NED|2001|83;Xavi Simons|Tottenham|MEI|NED|2003|83;Mohammed Kudus|Tottenham|PD|GHA|2000|82;
-Emiliano Martínez|Aston Villa|GOL|ARG|1992|85;Ollie Watkins|Aston Villa|ATA|ENG|1995|83;Morgan Rogers|Aston Villa|MEI|ENG|2002|82;Jean-Philippe Mateta|Crystal Palace|ATA|FRA|1997|80;
-Harry Kane|Bayern de Munique|ATA|ENG|1993|90;Joshua Kimmich|Bayern de Munique|VOL|GER|1995|88;Jamal Musiala|Bayern de Munique|MEI|GER|2003|88;Michael Olise|Bayern de Munique|PD|FRA|2001|87;Luis Díaz|Bayern de Munique|PE|COL|1997|86;Manuel Neuer|Bayern de Munique|GOL|GER|1986|85;Dayot Upamecano|Bayern de Munique|ZAG|FRA|1998|84;Alphonso Davies|Bayern de Munique|LE|CAN|2000|84;
-Serhou Guirassy|Borussia Dortmund|ATA|GUI|1996|85;Gregor Kobel|Borussia Dortmund|GOL|SUI|1997|86;Karim Adeyemi|Borussia Dortmund|PE|GER|2002|80;Patrik Schick|Bayer Leverkusen|ATA|CZE|1996|81;Deniz Undav|Stuttgart|ATA|GER|1996|80;
-Ousmane Dembélé|Paris Saint-Germain|PD|FRA|1997|90;Vitinha|Paris Saint-Germain|MC|POR|2000|89;Achraf Hakimi|Paris Saint-Germain|LD|MAR|1998|89;Khvicha Kvaratskhelia|Paris Saint-Germain|PE|GEO|2001|87;Nuno Mendes|Paris Saint-Germain|LE|POR|2002|87;Marquinhos|Paris Saint-Germain|ZAG|BRA|1994|86;João Neves|Paris Saint-Germain|MC|POR|2004|86;Willian Pacho|Paris Saint-Germain|ZAG|ECU|2001|85;Désiré Doué|Paris Saint-Germain|PD|FRA|2005|84;Lucas Chevalier|Paris Saint-Germain|GOL|FRA|2001|83;
-Mason Greenwood|Marseille|PD|ENG|2001|83;Pierre-Emerick Aubameyang|Marseille|ATA|GAB|1989|79;Paul Pogba|Monaco|MC|FRA|1993|78;
-Lautaro Martínez|Inter de Milão|ATA|ARG|1997|88;Nicolò Barella|Inter de Milão|MC|ITA|1997|87;Alessandro Bastoni|Inter de Milão|ZAG|ITA|1999|86;Hakan Çalhanoğlu|Inter de Milão|VOL|TUR|1994|85;Marcus Thuram|Inter de Milão|ATA|FRA|1997|84;Yann Sommer|Inter de Milão|GOL|SUI|1988|83;
-Kevin De Bruyne|Napoli|MEI|BEL|1991|85;Scott McTominay|Napoli|MC|SCO|1996|85;Stanislav Lobotka|Napoli|VOL|SVK|1994|84;Romelu Lukaku|Napoli|ATA|BEL|1993|81;Rasmus Højlund|Napoli|ATA|DEN|2003|80;
-Mike Maignan|Milan|GOL|FRA|1995|87;Rafael Leão|Milan|PE|POR|1999|85;Christian Pulisic|Milan|PD|USA|1998|84;Luka Modrić|Milan|MC|CRO|1985|83;
-Gleison Bremer|Juventus|ZAG|BRA|1997|85;Kenan Yıldız|Juventus|PE|TUR|2005|83;Jonathan David|Juventus|ATA|CAN|2000|83;Dušan Vlahović|Juventus|ATA|SRB|2000|82;Ademola Lookman|Atalanta|PE|NGA|1997|84;Paulo Dybala|Roma|SA|ARG|1993|82;Nico Paz|Como|MEI|ARG|2004|82;
-Diogo Costa|Porto|GOL|POR|1999|85;Francisco Trincão|Sporting|PD|POR|1999|82;
-Cristiano Ronaldo|Al-Nassr|ATA|POR|1985|85;João Félix|Al-Nassr|SA|POR|1999|80;Sadio Mané|Al-Nassr|PE|SEN|1992|80;Theo Hernández|Al-Hilal|LE|FRA|1997|84;Rúben Neves|Al-Hilal|MC|POR|1997|82;Darwin Núñez|Al-Hilal|ATA|URU|1999|81;Kalidou Koulibaly|Al-Hilal|ZAG|SEN|1991|80;Karim Benzema|Al-Ittihad|ATA|FRA|1987|83;N'Golo Kanté|Al-Ittihad|VOL|FRA|1991|82;Ivan Toney|Al-Ahli|ATA|ENG|1996|82;Riyad Mahrez|Al-Ahli|PD|ALG|1991|81;
-Lionel Messi|Inter Miami|SA|ARG|1987|86;Rodrigo De Paul|Inter Miami|MC|ARG|1994|81;Luis Suárez|Inter Miami|ATA|URU|1987|77;Son Heung-min|LAFC|PE|KOR|1992|84;Denis Bouanga|LAFC|PE|GAB|1994|80;
-Giorgian de Arrascaeta|Flamengo|MEI|URU|1994|82;Jorginho|Flamengo|VOL|ITA|1991|80;Pedro|Flamengo|ATA|BRA|1997|79;Agustín Rossi|Flamengo|GOL|ARG|1995|78;Léo Pereira|Flamengo|ZAG|BRA|1996|77;
-Gustavo Gómez|Palmeiras|ZAG|PAR|1993|79;Vitor Roque|Palmeiras|ATA|BRA|2005|78;Andreas Pereira|Palmeiras|MC|BRA|1996|78;Raphael Veiga|Palmeiras|MEI|BRA|1995|78;Weverton|Palmeiras|GOL|BRA|1987|76;
-Memphis Depay|Corinthians|ATA|NED|1994|80;Rodrigo Garro|Corinthians|MEI|ARG|1997|77;Yuri Alberto|Corinthians|ATA|BRA|2001|76;Neymar Jr|Santos|PE|BRA|1992|81;Lucas Moura|São Paulo|MEI|BRA|1992|76;Matheus Pereira|Cruzeiro|MEI|BRA|1996|79;Kaio Jorge|Cruzeiro|ATA|BRA|2002|77;Cássio|Cruzeiro|GOL|BRA|1987|75;Hulk|Atlético-MG|ATA|BRA|1986|76;Philippe Coutinho|Vasco|MEI|BRA|1992|76;Pablo Vegetti|Vasco|ATA|ARG|1988|75;Alan Patrick|Internacional|MEI|BRA|1991|76;Everton Ribeiro|Bahia|MEI|BRA|1989|74;
-Franco Armani|River Plate|GOL|ARG|1986|76;Leandro Paredes|Boca Juniors|MC|ARG|1994|79;Edinson Cavani|Boca Juniors|ATA|URU|1987|74`;
+const STAR_SRC=`#0|Real Madrid|ATA|FRA|1998|91;#1|Real Madrid|PE|BRA|2000|89;#2|Real Madrid|MEI|ENG|2003|88;#3|Real Madrid|MC|URU|1998|88;#4|Real Madrid|GOL|BEL|1992|89;#5|Real Madrid|LD|ENG|1998|85;#6|Real Madrid|VOL|FRA|2000|84;#7|Real Madrid|ZAG|BRA|1998|84;#8|Real Madrid|MEI|TUR|2005|83;#9|Real Madrid|ZAG|ESP|2005|81;
+#10|Barcelona|PD|ESP|2007|89;#11|Barcelona|PE|BRA|1996|89;#12|Barcelona|MC|ESP|2002|88;#13|Barcelona|ATA|POL|1988|86;#14|Barcelona|MC|NED|1997|86;#15|Barcelona|LD|FRA|1998|85;#16|Barcelona|GOL|ESP|2001|84;#17|Barcelona|ZAG|ESP|2007|83;#18|Barcelona|MC|ESP|2004|83;
+#19|Atlético de Madrid|ATA|ARG|2000|87;#20|Atlético de Madrid|GOL|SVN|1993|87;#21|Atlético de Madrid|SA|FRA|1991|84;#22|Atlético de Madrid|MC|ESP|1992|82;#23|Athletic Club|PE|ESP|2002|85;#24|Athletic Club|GOL|ESP|1997|84;#25|Real Sociedad|ATA|ESP|1997|83;#26|Real Betis|MEI|ESP|1992|82;
+#27|Manchester City|ATA|NOR|2000|90;#28|Manchester City|VOL|ESP|1996|89;#29|Manchester City|GOL|ITA|1999|88;#30|Manchester City|MEI|ENG|2000|85;#31|Manchester City|MC|POR|1994|85;#32|Manchester City|ZAG|POR|1997|86;#33|Manchester City|ZAG|CRO|2002|85;#34|Manchester City|MC|NED|1998|84;#35|Manchester City|PE|BEL|2002|83;
+#36|Liverpool|PD|EGY|1992|90;#37|Liverpool|ZAG|NED|1991|89;#38|Liverpool|GOL|BRA|1992|89;#39|Liverpool|MEI|GER|2003|87;#40|Liverpool|MC|ARG|1998|87;#41|Liverpool|ATA|SWE|1999|87;#42|Liverpool|MC|NED|2002|85;#43|Liverpool|MC|HUN|2000|85;#44|Liverpool|ATA|FRA|2002|83;
+#45|Arsenal|PD|ENG|2001|88;#46|Arsenal|MEI|NOR|1998|87;#47|Arsenal|MC|ENG|1999|87;#48|Arsenal|ZAG|FRA|2001|87;#49|Arsenal|ZAG|BRA|1997|87;#50|Arsenal|GOL|ESP|1995|86;#51|Arsenal|ATA|SWE|1998|85;#52|Arsenal|VOL|ESP|1999|85;#53|Arsenal|MEI|ENG|1998|84;
+#54|Chelsea|MEI|ENG|2002|87;#55|Chelsea|VOL|ECU|2001|86;#56|Chelsea|MC|ARG|2001|85;#57|Chelsea|LD|ENG|1999|84;#58|Chelsea|ATA|BRA|2001|83;#59|Chelsea|PD|BRA|2007|80;
+#60|Manchester United|MEI|POR|1994|86;#61|Manchester United|SA|BRA|1999|83;#62|Manchester United|PD|CMR|1999|83;#63|Manchester United|ATA|SVN|2003|82;
+#64|Newcastle|MC|BRA|1997|86;#65|Newcastle|MC|ITA|2000|84;#66|Newcastle|PE|ENG|2001|83;#67|Tottenham|ZAG|ARG|1998|85;#68|Tottenham|ZAG|NED|2001|83;#69|Tottenham|MEI|NED|2003|83;#70|Tottenham|PD|GHA|2000|82;
+#71|Aston Villa|GOL|ARG|1992|85;#72|Aston Villa|ATA|ENG|1995|83;#73|Aston Villa|MEI|ENG|2002|82;#74|Crystal Palace|ATA|FRA|1997|80;
+#75|Bayern de Munique|ATA|ENG|1993|90;#76|Bayern de Munique|VOL|GER|1995|88;#77|Bayern de Munique|MEI|GER|2003|88;#78|Bayern de Munique|PD|FRA|2001|87;#79|Bayern de Munique|PE|COL|1997|86;#80|Bayern de Munique|GOL|GER|1986|85;#81|Bayern de Munique|ZAG|FRA|1998|84;#82|Bayern de Munique|LE|CAN|2000|84;
+#83|Borussia Dortmund|ATA|GUI|1996|85;#84|Borussia Dortmund|GOL|SUI|1997|86;#85|Borussia Dortmund|PE|GER|2002|80;#86|Bayer Leverkusen|ATA|CZE|1996|81;#87|Stuttgart|ATA|GER|1996|80;
+#88|Paris Saint-Germain|PD|FRA|1997|90;#89|Paris Saint-Germain|MC|POR|2000|89;#90|Paris Saint-Germain|LD|MAR|1998|89;#91|Paris Saint-Germain|PE|GEO|2001|87;#92|Paris Saint-Germain|LE|POR|2002|87;#93|Paris Saint-Germain|ZAG|BRA|1994|86;#94|Paris Saint-Germain|MC|POR|2004|86;#95|Paris Saint-Germain|ZAG|ECU|2001|85;#96|Paris Saint-Germain|PD|FRA|2005|84;#97|Paris Saint-Germain|GOL|FRA|2001|83;
+#98|Marseille|PD|ENG|2001|83;#99|Marseille|ATA|GAB|1989|79;#100|Monaco|MC|FRA|1993|78;
+#101|Inter de Milão|ATA|ARG|1997|88;#102|Inter de Milão|MC|ITA|1997|87;#103|Inter de Milão|ZAG|ITA|1999|86;#104|Inter de Milão|VOL|TUR|1994|85;#105|Inter de Milão|ATA|FRA|1997|84;#106|Inter de Milão|GOL|SUI|1988|83;
+#107|Napoli|MEI|BEL|1991|85;#108|Napoli|MC|SCO|1996|85;#109|Napoli|VOL|SVK|1994|84;#110|Napoli|ATA|BEL|1993|81;#111|Napoli|ATA|DEN|2003|80;
+#112|Milan|GOL|FRA|1995|87;#113|Milan|PE|POR|1999|85;#114|Milan|PD|USA|1998|84;#115|Milan|MC|CRO|1985|83;
+#116|Juventus|ZAG|BRA|1997|85;#117|Juventus|PE|TUR|2005|83;#118|Juventus|ATA|CAN|2000|83;#119|Juventus|ATA|SRB|2000|82;#120|Atalanta|PE|NGA|1997|84;#121|Roma|SA|ARG|1993|82;#122|Como|MEI|ARG|2004|82;
+#123|Porto|GOL|POR|1999|85;#124|Sporting|PD|POR|1999|82;
+#125|Al-Nassr|ATA|POR|1985|85;#126|Al-Nassr|SA|POR|1999|80;#127|Al-Nassr|PE|SEN|1992|80;#128|Al-Hilal|LE|FRA|1997|84;#129|Al-Hilal|MC|POR|1997|82;#130|Al-Hilal|ATA|URU|1999|81;#131|Al-Hilal|ZAG|SEN|1991|80;#132|Al-Ittihad|ATA|FRA|1987|83;#133|Al-Ittihad|VOL|FRA|1991|82;#134|Al-Ahli|ATA|ENG|1996|82;#135|Al-Ahli|PD|ALG|1991|81;
+#136|Inter Miami|SA|ARG|1987|86;#137|Inter Miami|MC|ARG|1994|81;#138|Inter Miami|ATA|URU|1987|77;#139|LAFC|PE|KOR|1992|84;#140|LAFC|PE|GAB|1994|80;
+#141|Flamengo|MEI|URU|1994|82;#142|Flamengo|VOL|ITA|1991|80;#143|Flamengo|ATA|BRA|1997|79;#144|Flamengo|GOL|ARG|1995|78;#145|Flamengo|ZAG|BRA|1996|77;
+#146|Palmeiras|ZAG|PAR|1993|79;#147|Palmeiras|ATA|BRA|2005|78;#148|Palmeiras|MC|BRA|1996|78;#149|Palmeiras|MEI|BRA|1995|78;#150|Palmeiras|GOL|BRA|1987|76;
+#151|Corinthians|ATA|NED|1994|80;#152|Corinthians|MEI|ARG|1997|77;#153|Corinthians|ATA|BRA|2001|76;#154|Santos|PE|BRA|1992|81;#155|São Paulo|MEI|BRA|1992|76;#156|Cruzeiro|MEI|BRA|1996|79;#157|Cruzeiro|ATA|BRA|2002|77;#158|Cruzeiro|GOL|BRA|1987|75;#159|Atlético-MG|ATA|BRA|1986|76;#160|Vasco|MEI|BRA|1992|76;#161|Vasco|ATA|ARG|1988|75;#162|Internacional|MEI|BRA|1991|76;#163|Bahia|MEI|BRA|1989|74;
+#164|River Plate|GOL|ARG|1986|76;#165|Boca Juniors|MC|ARG|1994|79;#166|Boca Juniors|ATA|URU|1987|74`;
 
-// Ícones do EA FC 27 (nome, país, posição, OVR). VEL FIN PAS DRI DEF FIS MEN REF
-const LEGEND_SRC=`Sergio Agüero|🇦🇷|ATA|90|90,89,80,88,34,78,88,10
-Karl-Heinz Rummenigge|🇩🇪|ATA|90|91,89,81,91,56,81,88,10
-Raphaël Varane|🇫🇷|ZAG|90|82,51,68,76,90,84,91,14
-Pepe|🇵🇹|ZAG|89|80,50,65,68,89,87,90,14
-Pelé|🇧🇷|ATA|95|95,96,93,96,60,76,95,12
-Diego Maradona|🇦🇷|MEI|95|92,93,92,97,40,76,93,10
-Ronaldo|🇧🇷|ATA|94|97,95,81,95,45,79,90,10
-Zinedine Zidane|🇫🇷|MEI|94|84,90,94,95,72,86,97,12
-Ronaldinho|🇧🇷|MEI|93|91,91,91,96,40,79,88,10
-Johan Cruyff|🇳🇱|SA|93|93,91,91,95,42,75,95,12
-Ferenc Puskás|🇭🇺|SA|92|85,95,89,91,47,79,91,10
-Garrincha|🇧🇷|PD|92|95,85,84,96,40,70,80,10
-Paolo Maldini|🇮🇹|ZAG|92|85,55,80,79,94,86,96,15
-Lev Yashin|🇷🇺|GOL|92|60,15,80,40,91,88,95,93
-Bobby Charlton|🏴󠁧󠁢󠁥󠁮󠁧󠁿|MC|92|83,92,91,89,64,81,93,12
-Gerd Müller|🇩🇪|ATA|92|82,96,72,86,40,80,92,10
-Franz Beckenbauer|🇩🇪|ZAG|92|80,73,88,86,92,82,97,14
-Andrés Iniesta|🇪🇸|MC|92|80,78,93,95,63,66,95,10
-Cafu|🇧🇷|LD|91|92,68,84,87,86,82,88,12
-Eusébio|🇵🇹|ATA|91|93,93,82,90,40,80,88,10
-Marco van Basten|🇳🇱|ATA|91|85,94,80,90,40,80,90,10
-Carlos Alberto|🇧🇷|LD|91|88,70,84,85,89,85,93,12
-Franco Baresi|🇮🇹|ZAG|91|76,55,80,76,93,83,96,14
-Zico|🇧🇷|MEI|91|86,92,92,93,45,70,90,10
-Thierry Henry|🇫🇷|ATA|91|94,91,85,91,46,79,89,10
-Gianluigi Buffon|🇮🇹|GOL|91|60,15,72,40,90,89,96,90
-Roberto Baggio|🇮🇹|SA|91|85,92,89,93,40,70,90,10
-Xavi|🇪🇸|MC|91|75,76,95,92,68,67,96,10
-Zlatan Ibrahimović|🇸🇪|ATA|91|80,93,84,89,40,90,92,12
-Oliver Kahn|🇩🇪|GOL|91|58,15,70,35,89,88,96,92
-Andrea Pirlo|🇮🇹|MC|90|70,80,95,90,64,68,95,10
-Iker Casillas|🇪🇸|GOL|90|62,14,70,40,86,85,92,92
-Raúl|🇪🇸|ATA|90|87,91,83,89,40,72,91,10
-Rivaldo|🇧🇷|MEI|90|86,91,88,91,45,76,86,10
-Lothar Matthäus|🇩🇪|VOL|90|86,86,86,85,82,85,94,12
-Roberto Carlos|🇧🇷|LE|90|93,82,84,84,82,85,84,12
-Dennis Bergkamp|🇳🇱|SA|90|82,90,89,92,40,74,90,10
-Alessandro Del Piero|🇮🇹|SA|90|85,90,87,91,40,68,90,10
-George Best|🇬🇧|PE|90|92,88,85,95,40,70,78,10
-Ruud Gullit|🇳🇱|MC|90|87,88,87,88,76,90,90,12
-Bobby Moore|🏴󠁧󠁢󠁥󠁮󠁧󠁿|ZAG|90|74,55,79,72,92,82,96,14
-Toni Kroos|🇩🇪|MC|90|64,80,95,85,70,72,94,12
-Samuel Eto'o|🇨🇲|ATA|89|93,89,77,87,40,80,85,10
-Alan Shearer|🏴󠁧󠁢󠁥󠁮󠁧󠁿|ATA|89|79,93,74,80,45,88,90,10
-Hristo Stoichkov|🇧🇬|SA|89|87,90,85,89,40,76,82,10
-Didier Drogba|🇨🇮|ATA|89|85,90,73,82,40,92,90,10
-Jairzinho|🇧🇷|PD|89|93,87,80,90,45,80,84,10
-Kenny Dalglish|🏴󠁧󠁢󠁳󠁣󠁴󠁿|SA|89|82,89,86,89,40,74,90,10
-Peter Schmeichel|🇩🇰|GOL|89|60,15,74,40,87,88,94,90
-Carles Puyol|🇪🇸|ZAG|89|80,50,70,68,92,87,95,14
-Gary Lineker|🏴󠁧󠁢󠁥󠁮󠁧󠁿|ATA|89|87,91,76,82,40,70,88,10
-Luís Figo|🇵🇹|PD|89|85,85,88,90,42,77,88,10
-Emilio Butragueño|🇪🇸|ATA|89|85,88,80,88,40,68,88,10
-Sócrates|🇧🇷|MEI|89|76,87,89,87,58,80,92,10
-Hugo Sánchez|🇲🇽|ATA|89|85,92,76,85,40,78,88,10
-Kaká|🇧🇷|MEI|89|90,87,86,89,45,74,86,10
-Philipp Lahm|🇩🇪|LD|89|85,62,84,85,89,72,95,12
-Fabio Cannavaro|🇮🇹|ZAG|89|82,50,70,70,91,84,93,14
-Alessandro Nesta|🇮🇹|ZAG|89|80,48,74,72,92,82,92,14
-Javier Zanetti|🇦🇷|LD|89|86,60,82,82,86,86,93,12
-Ruud van Nistelrooy|🇳🇱|ATA|89|79,92,72,82,40,84,88,10
-Eric Cantona|🇫🇷|SA|89|80,89,85,86,45,86,85,10
-Marcelo|🇧🇷|LE|89|85,74,86,89,80,76,84,12
-Francesco Totti|🇮🇹|SA|89|80,89,90,88,40,76,90,10
-Rio Ferdinand|🏴󠁧󠁢󠁥󠁮󠁧󠁿|ZAG|88|81,50,74,72,89,82,92,14
-Gareth Bale|🏴󠁧󠁢󠁷󠁬󠁳󠁿|PD|88|94,87,83,86,55,82,82,10
-Steven Gerrard|🏴󠁧󠁢󠁥󠁮󠁧󠁿|MC|88|80,87,89,84,73,84,92,12
-David Beckham|🏴󠁧󠁢󠁥󠁮󠁧󠁿|MC|88|79,83,93,82,62,74,88,10
-Pavel Nedvěd|🇨🇿|MC|88|85,87,86,87,67,82,90,10
-Michael Owen|🏴󠁧󠁢󠁥󠁮󠁧󠁿|ATA|88|94,88,72,85,40,66,84,10
-Wayne Rooney|🏴󠁧󠁢󠁥󠁮󠁧󠁿|SA|88|83,89,84,86,60,85,86,10
-Edwin van der Sar|🇳🇱|GOL|88|58,15,82,45,86,86,93,87
-Petr Čech|🇨🇿|GOL|88|56,14,70,38,88,87,93,88
-Robin van Persie|🇳🇱|ATA|88|80,90,84,87,40,74,86,10
-Paul Scholes|🏴󠁧󠁢󠁥󠁮󠁧󠁿|MC|88|70,86,90,86,70,74,90,10
-Miroslav Klose|🇩🇪|ATA|88|80,89,72,80,45,82,90,10
-Laurent Blanc|🇫🇷|ZAG|88|72,62,80,74,88,82,92,14
-Patrick Vieira|🇫🇷|VOL|88|78,72,84,82,87,88,92,12
-Juan Román Riquelme|🇦🇷|MEI|88|68,84,93,91,40,72,88,10
-Michael Laudrup|🇩🇰|MEI|88|84,84,90,91,40,68,88,10
-Ronald Koeman|🇳🇱|ZAG|88|66,82,87,78,86,82,90,14
-Gheorghe Hagi|🇷🇴|MEI|88|80,87,90,91,40,68,86,10
-Fernando Hierro|🇪🇸|ZAG|88|72,70,82,74,88,84,93,14
-Lilian Thuram|🇫🇷|ZAG|88|82,50,72,74,89,86,92,14
-Franck Ribéry|🇫🇷|PE|88|88,82,84,91,40,70,80,10
-Giorgio Chiellini|🇮🇹|ZAG|88|74,48,64,64,90,88,94,14
-Andriy Shevchenko|🇺🇦|ATA|88|89,90,78,85,40,80,86,10
-Bastian Schweinsteiger|🇩🇪|MC|88|74,82,87,84,76,82,92,12
-Marcel Desailly|🇫🇷|ZAG|88|78,52,70,70,89,88,90,14
-Frank Lampard|🏴󠁧󠁢󠁥󠁮󠁧󠁿|MC|87|74,88,86,82,66,80,90,10
-Fernando Torres|🇪🇸|ATA|87|90,87,74,84,40,76,82,10
-Xabi Alonso|🇪🇸|VOL|87|64,78,90,80,78,78,92,12
-Ian Wright|🏴󠁧󠁢󠁥󠁮󠁧󠁿|ATA|87|88,88,72,84,40,76,82,10
-Ian Rush|🏴󠁧󠁢󠁷󠁬󠁳󠁿|ATA|87|84,89,72,80,40,76,86,10
-John Barnes|🏴󠁧󠁢󠁥󠁮󠁧󠁿|PE|87|86,82,82,88,45,76,84,10
-Patrick Kluivert|🇳🇱|ATA|87|82,87,76,84,40,80,82,10
-Davor Šuker|🇭🇷|ATA|87|80,89,76,85,40,74,84,10
-Frank Rijkaard|🇳🇱|VOL|87|78,72,82,80,86,86,92,12
-Claude Makélélé|🇫🇷|VOL|87|76,60,80,78,86,82,92,12
-Emmanuel Petit|🇫🇷|VOL|87|74,72,84,78,82,82,86,12
-Robert Pires|🇫🇷|PE|87|82,82,86,87,45,68,84,10
-Nemanja Vidić|🇷🇸|ZAG|87|70,45,62,60,90,88,92,14
-Gianfranco Zola|🇮🇹|SA|87|84,86,86,90,40,64,84,10
-Hernán Crespo|🇦🇷|ATA|86|80,88,72,80,40,80,84,10
-Gianluca Zambrotta|🇮🇹|LD|86|86,60,78,80,85,78,86,12
-Michael Essien|🇬🇭|VOL|86|82,72,80,80,84,90,86,12
-Ashley Cole|🏴󠁧󠁢󠁥󠁮󠁧󠁿|LE|86|88,55,78,80,85,74,84,12
-Gennaro Gattuso|🇮🇹|VOL|86|75,62,74,72,86,88,94,12
-Sol Campbell|🏴󠁧󠁢󠁥󠁮󠁧󠁿|ZAG|86|74,48,62,62,88,90,88,14
-Juan Sebastián Verón|🇦🇷|MC|86|70,82,90,84,64,76,86,10
-Roy Keane|🇮🇪|VOL|86|72,72,82,78,85,86,96,12
-Henrik Larsson|🇸🇪|ATA|86|82,87,76,84,40,74,88,10
-Luis Hernández|🇲🇽|ATA|86|86,86,70,82,40,72,80,10
-Cha Bum-kun|🇰🇷|ATA|86|86,86,70,80,40,82,86,10`;
+// Ícones do jogos de futebol (nome, país, posição, OVR). VEL FIN PAS DRI DEF FIS MEN REF
+const LEGEND_SRC=`#0|🇦🇷|ATA|90|90,89,80,88,34,78,88,10
+#1|🇩🇪|ATA|90|91,89,81,91,56,81,88,10
+#2|🇫🇷|ZAG|90|82,51,68,76,90,84,91,14
+#3|🇵🇹|ZAG|89|80,50,65,68,89,87,90,14
+#4|🇧🇷|ATA|95|95,96,93,96,60,76,95,12
+#5|🇦🇷|MEI|95|92,93,92,97,40,76,93,10
+#6|🇧🇷|ATA|94|97,95,81,95,45,79,90,10
+#7|🇫🇷|MEI|94|84,90,94,95,72,86,97,12
+#8|🇧🇷|MEI|93|91,91,91,96,40,79,88,10
+#9|🇳🇱|SA|93|93,91,91,95,42,75,95,12
+#10|🇭🇺|SA|92|85,95,89,91,47,79,91,10
+#11|🇧🇷|PD|92|95,85,84,96,40,70,80,10
+#12|🇮🇹|ZAG|92|85,55,80,79,94,86,96,15
+#13|🇷🇺|GOL|92|60,15,80,40,91,88,95,93
+#14|🏴󠁧󠁢󠁥󠁮󠁧󠁿|MC|92|83,92,91,89,64,81,93,12
+#15|🇩🇪|ATA|92|82,96,72,86,40,80,92,10
+#16|🇩🇪|ZAG|92|80,73,88,86,92,82,97,14
+#17|🇪🇸|MC|92|80,78,93,95,63,66,95,10
+#18|🇧🇷|LD|91|92,68,84,87,86,82,88,12
+#19|🇵🇹|ATA|91|93,93,82,90,40,80,88,10
+#20|🇳🇱|ATA|91|85,94,80,90,40,80,90,10
+#21|🇧🇷|LD|91|88,70,84,85,89,85,93,12
+#22|🇮🇹|ZAG|91|76,55,80,76,93,83,96,14
+#23|🇧🇷|MEI|91|86,92,92,93,45,70,90,10
+#24|🇫🇷|ATA|91|94,91,85,91,46,79,89,10
+#25|🇮🇹|GOL|91|60,15,72,40,90,89,96,90
+#26|🇮🇹|SA|91|85,92,89,93,40,70,90,10
+#27|🇪🇸|MC|91|75,76,95,92,68,67,96,10
+#28|🇸🇪|ATA|91|80,93,84,89,40,90,92,12
+#29|🇩🇪|GOL|91|58,15,70,35,89,88,96,92
+#30|🇮🇹|MC|90|70,80,95,90,64,68,95,10
+#31|🇪🇸|GOL|90|62,14,70,40,86,85,92,92
+#32|🇪🇸|ATA|90|87,91,83,89,40,72,91,10
+#33|🇧🇷|MEI|90|86,91,88,91,45,76,86,10
+#34|🇩🇪|VOL|90|86,86,86,85,82,85,94,12
+#35|🇧🇷|LE|90|93,82,84,84,82,85,84,12
+#36|🇳🇱|SA|90|82,90,89,92,40,74,90,10
+#37|🇮🇹|SA|90|85,90,87,91,40,68,90,10
+#38|🇬🇧|PE|90|92,88,85,95,40,70,78,10
+#39|🇳🇱|MC|90|87,88,87,88,76,90,90,12
+#40|🏴󠁧󠁢󠁥󠁮󠁧󠁿|ZAG|90|74,55,79,72,92,82,96,14
+#41|🇩🇪|MC|90|64,80,95,85,70,72,94,12
+#42|🇨🇲|ATA|89|93,89,77,87,40,80,85,10
+#43|🏴󠁧󠁢󠁥󠁮󠁧󠁿|ATA|89|79,93,74,80,45,88,90,10
+#44|🇧🇬|SA|89|87,90,85,89,40,76,82,10
+#45|🇨🇮|ATA|89|85,90,73,82,40,92,90,10
+#46|🇧🇷|PD|89|93,87,80,90,45,80,84,10
+#47|🏴󠁧󠁢󠁳󠁣󠁴󠁿|SA|89|82,89,86,89,40,74,90,10
+#48|🇩🇰|GOL|89|60,15,74,40,87,88,94,90
+#49|🇪🇸|ZAG|89|80,50,70,68,92,87,95,14
+#50|🏴󠁧󠁢󠁥󠁮󠁧󠁿|ATA|89|87,91,76,82,40,70,88,10
+#51|🇵🇹|PD|89|85,85,88,90,42,77,88,10
+#52|🇪🇸|ATA|89|85,88,80,88,40,68,88,10
+#53|🇧🇷|MEI|89|76,87,89,87,58,80,92,10
+#54|🇲🇽|ATA|89|85,92,76,85,40,78,88,10
+#55|🇧🇷|MEI|89|90,87,86,89,45,74,86,10
+#56|🇩🇪|LD|89|85,62,84,85,89,72,95,12
+#57|🇮🇹|ZAG|89|82,50,70,70,91,84,93,14
+#58|🇮🇹|ZAG|89|80,48,74,72,92,82,92,14
+#59|🇦🇷|LD|89|86,60,82,82,86,86,93,12
+#60|🇳🇱|ATA|89|79,92,72,82,40,84,88,10
+#61|🇫🇷|SA|89|80,89,85,86,45,86,85,10
+#62|🇧🇷|LE|89|85,74,86,89,80,76,84,12
+#63|🇮🇹|SA|89|80,89,90,88,40,76,90,10
+#64|🏴󠁧󠁢󠁥󠁮󠁧󠁿|ZAG|88|81,50,74,72,89,82,92,14
+#65|🏴󠁧󠁢󠁷󠁬󠁳󠁿|PD|88|94,87,83,86,55,82,82,10
+#66|🏴󠁧󠁢󠁥󠁮󠁧󠁿|MC|88|80,87,89,84,73,84,92,12
+#67|🏴󠁧󠁢󠁥󠁮󠁧󠁿|MC|88|79,83,93,82,62,74,88,10
+#68|🇨🇿|MC|88|85,87,86,87,67,82,90,10
+#69|🏴󠁧󠁢󠁥󠁮󠁧󠁿|ATA|88|94,88,72,85,40,66,84,10
+#70|🏴󠁧󠁢󠁥󠁮󠁧󠁿|SA|88|83,89,84,86,60,85,86,10
+#71|🇳🇱|GOL|88|58,15,82,45,86,86,93,87
+#72|🇨🇿|GOL|88|56,14,70,38,88,87,93,88
+#73|🇳🇱|ATA|88|80,90,84,87,40,74,86,10
+#74|🏴󠁧󠁢󠁥󠁮󠁧󠁿|MC|88|70,86,90,86,70,74,90,10
+#75|🇩🇪|ATA|88|80,89,72,80,45,82,90,10
+#76|🇫🇷|ZAG|88|72,62,80,74,88,82,92,14
+#77|🇫🇷|VOL|88|78,72,84,82,87,88,92,12
+#78|🇦🇷|MEI|88|68,84,93,91,40,72,88,10
+#79|🇩🇰|MEI|88|84,84,90,91,40,68,88,10
+#80|🇳🇱|ZAG|88|66,82,87,78,86,82,90,14
+#81|🇷🇴|MEI|88|80,87,90,91,40,68,86,10
+#82|🇪🇸|ZAG|88|72,70,82,74,88,84,93,14
+#83|🇫🇷|ZAG|88|82,50,72,74,89,86,92,14
+#84|🇫🇷|PE|88|88,82,84,91,40,70,80,10
+#85|🇮🇹|ZAG|88|74,48,64,64,90,88,94,14
+#86|🇺🇦|ATA|88|89,90,78,85,40,80,86,10
+#87|🇩🇪|MC|88|74,82,87,84,76,82,92,12
+#88|🇫🇷|ZAG|88|78,52,70,70,89,88,90,14
+#89|🏴󠁧󠁢󠁥󠁮󠁧󠁿|MC|87|74,88,86,82,66,80,90,10
+#90|🇪🇸|ATA|87|90,87,74,84,40,76,82,10
+#91|🇪🇸|VOL|87|64,78,90,80,78,78,92,12
+#92|🏴󠁧󠁢󠁥󠁮󠁧󠁿|ATA|87|88,88,72,84,40,76,82,10
+#93|🏴󠁧󠁢󠁷󠁬󠁳󠁿|ATA|87|84,89,72,80,40,76,86,10
+#94|🏴󠁧󠁢󠁥󠁮󠁧󠁿|PE|87|86,82,82,88,45,76,84,10
+#95|🇳🇱|ATA|87|82,87,76,84,40,80,82,10
+#96|🇭🇷|ATA|87|80,89,76,85,40,74,84,10
+#97|🇳🇱|VOL|87|78,72,82,80,86,86,92,12
+#98|🇫🇷|VOL|87|76,60,80,78,86,82,92,12
+#99|🇫🇷|VOL|87|74,72,84,78,82,82,86,12
+#100|🇫🇷|PE|87|82,82,86,87,45,68,84,10
+#101|🇷🇸|ZAG|87|70,45,62,60,90,88,92,14
+#102|🇮🇹|SA|87|84,86,86,90,40,64,84,10
+#103|🇦🇷|ATA|86|80,88,72,80,40,80,84,10
+#104|🇮🇹|LD|86|86,60,78,80,85,78,86,12
+#105|🇬🇭|VOL|86|82,72,80,80,84,90,86,12
+#106|🏴󠁧󠁢󠁥󠁮󠁧󠁿|LE|86|88,55,78,80,85,74,84,12
+#107|🇮🇹|VOL|86|75,62,74,72,86,88,94,12
+#108|🏴󠁧󠁢󠁥󠁮󠁧󠁿|ZAG|86|74,48,62,62,88,90,88,14
+#109|🇦🇷|MC|86|70,82,90,84,64,76,86,10
+#110|🇮🇪|VOL|86|72,72,82,78,85,86,96,12
+#111|🇸🇪|ATA|86|82,87,76,84,40,74,88,10
+#112|🇲🇽|ATA|86|86,86,70,82,40,72,80,10
+#113|🇰🇷|ATA|86|86,86,70,80,40,82,86,10`;
 const LEGENDS=LEGEND_SRC.split('\n').map(r=>{const[n,f,p,o,v]=r.split('|');return[n,f,p,+o,v.split(',').map(Number)]});
 
 const FIRST=['Lucas','Mateo','Kai','Enzo','Rafael','Theo','Jonas','Amadou','Diego','Luka','Hugo','Iker','Yuki','Sami','Bruno','Noah','Pablo','Kenji','Jamal','Marco','Aurélien','Tomás','Nico','Elias','Gabriel','Davi','Thiago','Matías','Joaquín','Felipe','Caio','Igor','Arthur','Leon','Finn','Malik','Oscar','Emil','Rúben','Dário'];
@@ -1524,7 +1526,7 @@ const LAST=['Varela','Okoye','Lindqvist','Duarte','Moreau','Kessler','Bianchi','
 const FLAG_LIST=[...Object.values(NATS).map(n=>n.f),...OTHER_NATS.map(x=>x[2])];
 
 function TROPHY_NAMES(){const s=new Set();for(const l in LG)s.add(LG[l].n);for(const k in COUNTRY){const C=COUNTRY[k];[C.cup,C.lcup,C.sup].forEach(x=>x&&s.add(x))}Object.values(UF_EST).forEach(x=>s.add(x));
- ['Champions League','Europa League','Conference League','Libertadores','Copa Sul-Americana','Concachampions','AFC Champions League Elite','Supercopa da UEFA','Recopa Sul-Americana','Copa Intercontinental','Mundial de Clubes da FIFA','MLS Cup','Supporters’ Shield','Copa do Mundo','Olimpíadas',...Object.values(NAT_CUP),'Bola de Ouro','Pódio da Bola de Ouro','Golden Boy','Chuteira de Ouro','Luva de Ouro','Artilheiro','Craque da liga','Melhor da posição','Seleção da Temporada','Bola de Ouro da Copa','Chuteira de Ouro da Copa','Acesso'].forEach(x=>s.add(x));return[...s]}
+ ['Copa Europeia','Taça Europeia','Copa da Conferência','Copa Continental','Taça Sul','Copa Norte-Americana','Copa da Ásia de Clubes','Supercopa Europeia','Recopa Continental','Copa Intercontinental','Mundial de Clubes','Final da Liga Americana','Escudo da Temporada','Copa Mundial','Jogos Mundiais',...Object.values(NAT_CUP),'Bola Dourada','Pódio da Bola Dourada','Revelação do Ano','Chuteira Dourada','Luva Dourada','Artilheiro','Craque da liga','Melhor da posição','Seleção da Temporada','Bola Dourada da Copa','Chuteira Dourada da Copa','Acesso'].forEach(x=>s.add(x));return[...s]}
 
 // ================== UTIL ==================
 const rnd=()=>Math.random();
@@ -1571,7 +1573,7 @@ function initWorld(){
  for(const l in LG){const cl=leagueClubs(l).sort((a,b)=>b.s-a.s);cl.forEach((c,i)=>W.pos[c.id]=i+1);W.champ[l]=cl[0].id}
  for(const c in COUNTRY){const cl=countryClubs(c).filter(x=>LG[x.l].tier===1).sort((a,b)=>b.s-a.s);W.cupwin[c]=cl[1]?cl[1].id:cl[0].id;W.lcupwin[c]=cl[2]?cl[2].id:cl[0].id}
  W.contwin={UCL:'Paris Saint-Germain',UEL:'Tottenham',UECL:'Chelsea',LIB:'Flamengo',SUD:'Lanús',CCC:'Cruz Azul',ACL:'Al-Ahli'};
- W.stars=STAR_SRC.split(';').map(x=>x.trim()).filter(Boolean).map(r=>{const[n,club,pos,nat,born,rt]=r.split('|');return{n,club,pos,nat,born:+born,r:+rt,real:true}}).filter(s=>CLUB[s.club]);
+ W.stars=STAR_SRC.split(';').map(x=>x.trim()).filter(Boolean).map(r=>{const[n,club,pos,nat,born,rt]=r.split('|');return{n:fictP(n,nat),club,pos,nat,born:+born,r:+rt,real:true}}).filter(s=>CLUB[s.club]);
 }
 function roster(id){
  const real=W.stars.filter(s=>s.club===id).map(s=>({n:s.n,pos:s.pos}));
@@ -2007,13 +2009,13 @@ function contParticipants(comp){
  return[...new Set(out)];
 }
 const CONT_INFO={
- UCL:{n:'Champions League',ic:'orelhas',kind:'lp',m:8,top:16,po:10,pts:20,ko:['Oitavas','Quartas','Semifinal'],fin:'Final'},
- UEL:{n:'Europa League',ic:'cont2',kind:'lp',m:8,top:16,po:10,pts:7,ko:['Oitavas','Quartas','Semifinal'],fin:'Final'},
- UECL:{n:'Conference League',ic:'cont3',kind:'lp',m:6,top:13,po:8,pts:4,ko:['Oitavas','Quartas','Semifinal'],fin:'Final'},
- LIB:{n:'Libertadores',ic:'liberta',kind:'grp',adv:2,pts:13,ko:['Oitavas','Quartas','Semifinal'],fin:'Final'},
- SUD:{n:'Copa Sul-Americana',ic:'cont2',kind:'grp',adv:2,pts:5,ko:['Oitavas','Quartas','Semifinal'],fin:'Final'},
- CCC:{n:'Concachampions',ic:'cont2',kind:'ko',pts:5,ko:['Oitavas','Quartas','Semifinal'],fin:'Final'},
- ACL:{n:'AFC Champions League Elite',ic:'cont2',kind:'lp',m:8,top:13,po:99,pts:6,ko:['Oitavas','Quartas','Semifinal'],fin:'Final'},
+ UCL:{n:'Copa Europeia',ic:'orelhas',kind:'lp',m:8,top:16,po:10,pts:20,ko:['Oitavas','Quartas','Semifinal'],fin:'Final'},
+ UEL:{n:'Taça Europeia',ic:'cont2',kind:'lp',m:8,top:16,po:10,pts:7,ko:['Oitavas','Quartas','Semifinal'],fin:'Final'},
+ UECL:{n:'Copa da Conferência',ic:'cont3',kind:'lp',m:6,top:13,po:8,pts:4,ko:['Oitavas','Quartas','Semifinal'],fin:'Final'},
+ LIB:{n:'Copa Continental',ic:'liberta',kind:'grp',adv:2,pts:13,ko:['Oitavas','Quartas','Semifinal'],fin:'Final'},
+ SUD:{n:'Taça Sul',ic:'cont2',kind:'grp',adv:2,pts:5,ko:['Oitavas','Quartas','Semifinal'],fin:'Final'},
+ CCC:{n:'Copa Norte-Americana',ic:'cont2',kind:'ko',pts:5,ko:['Oitavas','Quartas','Semifinal'],fin:'Final'},
+ ACL:{n:'Copa da Ásia de Clubes',ic:'cont2',kind:'lp',m:8,top:13,po:99,pts:6,ko:['Oitavas','Quartas','Semifinal'],fin:'Final'},
 };
 const TITLE_PTS={base:.5,liga:0,copa:3,lcup:2,super:1,est:1,usc:2,rec:2,int:6,mun:12,copa_mundo:30,nat:12,olimp:6};
 function myContComp(c){
@@ -2045,8 +2047,8 @@ function buildSeason(){
   let opp=lastChamp===me.id?lastCup:lastChamp;if(opp===me.id){const tl=leagueClubs(C.top).sort((a,b)=>W.pos[a.id]-W.pos[b.id]);opp=tl.find(x=>x.id!==me.id).id}
   mkKO('sup',C.sup,'super','super',[{n:'Final',legs:1,neutral:true,opp}]);pre.push({k:'ko',cid:'sup'});
  }
- if(W.contwin.UCL===me.id||W.contwin.UEL===me.id){const o=W.contwin.UCL===me.id?W.contwin.UEL:W.contwin.UCL;if(o&&o!==me.id){mkKO('usc','Supercopa da UEFA','super','usc',[{n:'Final',legs:1,neutral:true,opp:o}]);pre.push({k:'ko',cid:'usc'})}}
- if(W.contwin.LIB===me.id||W.contwin.SUD===me.id){const o=W.contwin.LIB===me.id?W.contwin.SUD:W.contwin.LIB;if(o&&o!==me.id){mkKO('rec','Recopa Sul-Americana','super','rec',[{n:'Final',legs:2,opp:o}]);pre.push({k:'ko',cid:'rec'})}}
+ if(W.contwin.UCL===me.id||W.contwin.UEL===me.id){const o=W.contwin.UCL===me.id?W.contwin.UEL:W.contwin.UCL;if(o&&o!==me.id){mkKO('usc','Supercopa Europeia','super','usc',[{n:'Final',legs:1,neutral:true,opp:o}]);pre.push({k:'ko',cid:'usc'})}}
+ if(W.contwin.LIB===me.id||W.contwin.SUD===me.id){const o=W.contwin.LIB===me.id?W.contwin.SUD:W.contwin.LIB;if(o&&o!==me.id){mkKO('rec','Recopa Continental','super','rec',[{n:'Final',legs:2,opp:o}]);pre.push({k:'ko',cid:'rec'})}}
  // estadual
  if(me.country==='BRA'&&me.uf&&UF_EST[me.uf]){
   const pool=CLUBS.filter(x=>x.uf===me.uf&&x.id!==me.id).map(x=>x.id);
@@ -2089,7 +2091,7 @@ function buildSeason(){
   mkKO('int','Copa Intercontinental','globo','int',rounds,{pool:[W.contwin.LIB,W.contwin.CCC,W.contwin.ACL,'Al Ahly','Pyramids'].filter(x=>x&&x!==me.id)});
   rounds.forEach((_,i)=>items.push([.45+i*.02,{k:'ko',cid:'int'}]));
  }
- // datas FIFA
+ // datas internacionais
  [.22,.47,.72].forEach(p=>items.push([p,{k:'intl'}]));
  // eventos de meio de temporada
  [.3,.62].forEach(p=>items.push([p,{k:'ev',when:'mid'}]));
@@ -2100,30 +2102,30 @@ function buildSeason(){
  for(const[p,it]of items)if(p>=1)main.push(it);
  // pós-temporada
  const post=[];
- if(L.po){mkKO('mlscup','MLS Cup','liga','liga',[{n:'Quartas',legs:1},{n:'Semifinal',legs:1},{n:'Final',legs:1}],{po:true,pool:[]});for(let i=0;i<3;i++)post.push({k:'ko',cid:'mlscup'})}
+ if(L.po){mkKO('mlscup','Final da Liga Americana','liga','liga',[{n:'Quartas',legs:1},{n:'Semifinal',legs:1},{n:'Final',legs:1}],{po:true,pool:[]});for(let i=0;i<3;i++)post.push({k:'ko',cid:'mlscup'})}
  const endYear=S.year+1;
  if(endYear%4===1){ // Mundial de Clubes (2029, 2033...)
   const champs=Object.values(W.contwin).filter(Boolean);
   const top=CLUBS.filter(x=>LG[x.l].tier===1).sort((a,b)=>b.s-a.s).slice(0,14).map(x=>x.id);
   const field=[...new Set([...champs,...top])];
   if(field.includes(me.id)){
-   st.comps.mun={id:'mun',n:'Mundial de Clubes da FIFA',ic:'mundial',t:'mun',kind:'est',pool:field.concat(['Al Ahly','Club América','Al-Sadd','Auckland City','Monterrey','Ulsan HD']),grp:[],pts:0,stage:0,alive:true,path:[],rounds:[{n:'Oitavas',legs:1,neutral:true},{n:'Quartas',legs:1,neutral:true},{n:'Semifinal',legs:1,neutral:true},{n:'Final',legs:1,neutral:true}],neutral:true,label:'Fase de grupos'};
+   st.comps.mun={id:'mun',n:'Mundial de Clubes',ic:'mundial',t:'mun',kind:'est',pool:field.concat(['Al Ahly','Club América','Al-Sadd','Auckland City','Monterrey','Ulsan HD']),grp:[],pts:0,stage:0,alive:true,path:[],rounds:[{n:'Oitavas',legs:1,neutral:true},{n:'Quartas',legs:1,neutral:true},{n:'Semifinal',legs:1,neutral:true},{n:'Final',legs:1,neutral:true}],neutral:true,label:'Fase de grupos'};
    for(let i=0;i<3;i++)post.push({k:'est',i,cid:'mun'});for(let i=0;i<4;i++)post.push({k:'ko',cid:'mun'});
   }
  }
  // torneios de seleções
  const nat=NATS[S.nat];
  const tours=[];
- if(endYear%4===2)tours.push({id:'wc',n:'Copa do Mundo',ic:'copa_mundo',t:'copa_mundo',ko:['16 avos','Oitavas','Quartas','Semifinal','Final'],pool:allNations().filter(x=>x.id!==S.nat)});
+ if(endYear%4===2)tours.push({id:'wc',n:'Copa Mundial',ic:'copa_mundo',t:'copa_mundo',ko:['16 avos','Oitavas','Quartas','Semifinal','Final'],pool:allNations().filter(x=>x.id!==S.nat)});
  if(endYear%4===0){tours.push({id:'natc',n:NAT_CUP[nat.c],ic:'nat',t:'nat',ko:['Quartas','Semifinal','Final'],pool:allNations().filter(x=>x.id!==S.nat&&x.c===nat.c)});
-  if(S.age<=23||S.ovr>=86)tours.push({id:'oly',n:'Olimpíadas',ic:'olimp',t:'olimp',ko:['Quartas','Semifinal','Final'],pool:allNations().filter(x=>x.id!==S.nat),u23:true})}
+  if(S.age<=23||S.ovr>=86)tours.push({id:'oly',n:'Jogos Mundiais',ic:'olimp',t:'olimp',ko:['Quartas','Semifinal','Final'],pool:allNations().filter(x=>x.id!==S.nat),u23:true})}
  for(const t of tours){
   if(t.pool.length<5)t.pool=t.pool.concat(allNations().filter(x=>x.id!==S.nat&&!t.pool.includes(x)).slice(0,6));
   st.comps[t.id]={...t,kind:'tour',grp:[],pts:0,stage:0,alive:true,path:[],rounds:t.ko.map(n=>({n,legs:1,neutral:true})),qualified:t.id!=='wc'||ch(clamp(logi((nat.s-74)/2.5),.1,.99)),label:'Fase de grupos'};
   for(let i=0;i<3;i++)post.push({k:'tg',cid:t.id,i});t.ko.forEach(()=>post.push({k:'ko',cid:t.id}));
  }
  st.cal=pre.concat(main).concat(post);
- // chave de copa da MLS e totais
+ // chave de copa da Liga Americana e totais
  return st;
 }
 
@@ -2204,8 +2206,8 @@ async function processItem(it,io){
   if(comp.stage>=comp.rounds.length)return null;
   const rd=comp.rounds[comp.stage];
   if(comp.kind==='lp'||comp.code){} // continental handled below
-  // MLS: só playoffs se ficou entre os 8
-  if(it.cid==='mlscup'&&comp.stage===0){const t=sortTable(st.table);const p=t.findIndex(x=>x.id===me.id)+1;if(p>8){comp.alive=false;comp.out='Fora dos playoffs';return{k:'info',txt:`${p}º lugar: fora dos playoffs da MLS.`,comp:comp.n}}comp.pool=t.slice(0,8).map(x=>x.id)}
+  // Liga Americana: só playoffs se ficou entre os 8
+  if(it.cid==='mlscup'&&comp.stage===0){const t=sortTable(st.table);const p=t.findIndex(x=>x.id===me.id)+1;if(p>8){comp.alive=false;comp.out='Fora dos playoffs';return{k:'info',txt:`${p}º lugar: fora dos playoffs da Liga Americana.`,comp:comp.n}}comp.pool=t.slice(0,8).map(x=>x.id)}
   const isNat=comp.kind==='tour';
   let them;
   if(isNat){const o=wpick(comp.pool.filter(x=>!comp.grp.includes(x)),x=>Math.exp((x.s-70)*(.05+.12*comp.stage/comp.rounds.length)));them=natSide(o)}
@@ -2243,13 +2245,13 @@ async function processItem(it,io){
  if(it.k==='intl'){
   const nat=NATS[S.nat];
   const called=S.age>=18&&(S.ovr>=nat.s-7-(S.life.fama-50)/25+randn()*2);
-  if(!called){S.st.natCalled=S.st.natCalled||false;return{k:'info',txt:`Data FIFA: você não foi convocado pela seleção.`,comp:'Seleção'}}
+  if(!called){S.st.natCalled=S.st.natCalled||false;return{k:'info',txt:`Data internacional: você não foi convocado pela seleção.`,comp:'Seleção'}}
   st.natCalled=true;st.natStarter=S.ovr>=nat.s-1+randn()*1.5;
   const out=[];
   for(let i=0;i<2;i++){const them=natSide(pick(allNations().filter(x=>x.id!==S.nat)));
-   const r=await playMine({us:natSide({id:S.nat,...nat}),them,home:ch(.5),comp:(S.year+1)%4===2?'Eliminatórias':'Amistoso',label:'Data FIFA',kind:'nat'},io);
+   const r=await playMine({us:natSide({id:S.nat,...nat}),them,home:ch(.5),comp:(S.year+1)%4===2?'Eliminatórias':'Amistoso',label:'Data internacional',kind:'nat'},io);
    record('Seleção',r.me);S.caps+=r.me.play?1:0;S.natGoals+=r.me.g;
-   out.push(mkRes(r?((S.year+1)%4===2?'Eliminatórias':'Amistoso internacional'):'', 'Data FIFA',S.nat,them.id,r.gu,r.gt,r,true,null,'intl',{id:S.nat,n:nat.n,f:nat.f,nat:true},them));}
+   out.push(mkRes(r?((S.year+1)%4===2?'Eliminatórias':'Amistoso internacional'):'', 'Data internacional',S.nat,them.id,r.gu,r.gt,r,true,null,'intl',{id:S.nat,n:nat.n,f:nat.f,nat:true},them));}
   return{k:'multi',list:out};
  }
  return null;
@@ -2292,9 +2294,9 @@ function endSeason(){
  const titles=st.titles.slice();
  const isMLS=!!L.po;
  if(!isMLS&&rank===1&&!st.noPro)titles.unshift({t:'liga',n:L.n,club:me.id,ic:'liga',lg:me.l});
- if(isMLS&&rank===1&&!st.noPro)titles.push({t:'lcup',n:'Supporters’ Shield',club:me.id,ic:'lcup'});
+ if(isMLS&&rank===1&&!st.noPro)titles.push({t:'lcup',n:'Escudo da Temporada',club:me.id,ic:'lcup'});
  const mlsWon=st.comps.mlscup&&st.comps.mlscup.won;
- if(mlsWon){const i=titles.findIndex(t=>t.n==='MLS Cup');if(i>=0){titles[i].t='liga';titles[i].lg=me.l}}
+ if(mlsWon){const i=titles.findIndex(t=>t.n==='Final da Liga Americana');if(i>=0){titles[i].t='liga';titles[i].lg=me.l}}
  // ---- mundo: classificações de todas as ligas ----
  const order={};
  for(const l in LG){
@@ -2340,37 +2342,37 @@ function endSeason(){
  const mkCer=(o,meWon,rivals,k=3)=>{const noms=meWon?[meNom,...rivals.slice(0,k-1)]:[...rivals.slice(0,1),meNom,...rivals.slice(1,k-1)];fill(noms,k);return{...o,noms:shuffle(noms),winner:meWon?S.name:noms.find(x=>!x.me).n}};
  const bigT=titles.filter(t=>['liga','cont','copa_mundo','nat','mun'].includes(t.t));
  const tb=t=>t.t==='liga'?(LG[t.lg]&&LG[t.lg].tier===1?(LG[t.lg].lp>=8?2.5:1.2):0):t.t==='cont'?(t.code==='UCL'?6:t.code==='LIB'?2.5:1):t.t==='copa_mundo'?6:t.t==='nat'?2.5:t.t==='mun'?2:0;
- // Bola de Ouro (sempre tem vencedor)
+ // Bola Dourada (sempre tem vencedor)
  let bola=null;
  const mineB=tot.j>=20?S.ovr+((nota||6.5)-7.1)*3+Math.min((tot.g*P.bw+tot.a*.35)/8,4)+bigT.reduce((s,t)=>s+tb(t),0)+P.bola*.5+L.bp*.35+thr-2+randn()*2:-99;
  const cands=W.stars.filter(s=>y-s.born>=18).map(s=>{const c=CLUB[s.club];let b=s.r+(POS[s.pos].bola*.5)+randn()*2.2;if(c&&W.champ[c.l]===c.id&&LG[c.l].tier===1)b+=LG[c.l].lp>=8?2.5:1;if(W.contwin.UCL===s.club)b+=6;if(c&&LG[c.l].bp<-10)b-=4;return{...nomOf(s),b}});
  cands.push({...meNom,b:mineB});cands.sort((a,b)=>b.b-a.b);
  const place=cands.findIndex(x=>x.me)+1;
  const top10=cands.slice(0,10).map(({b,...x})=>x);
- if(place<=3){bola={place,podium:top10.slice(0,3)};awards.push({t:place===1?'bola':'bola_top3',n:place===1?'Bola de Ouro':`Bola de Ouro · ${place}º lugar`,podium:top10.slice(0,3)})}
+ if(place<=3){bola={place,podium:top10.slice(0,3)};awards.push({t:place===1?'bola':'bola_top3',n:place===1?'Bola Dourada':`Bola Dourada · ${place}º lugar`,podium:top10.slice(0,3)})}
  st.bolaTop=top10.slice(0,3);st.bolaPlace=place;
  W.bolaHist=W.bolaHist||[];W.bolaHist.push({y:S.year+1,...top10[0]});
- const yearWinners=[{k:'bola',n:'Bola de Ouro',w:top10[0]}];
- // Golden Boy
+ const yearWinners=[{k:'bola',n:'Bola Dourada',w:top10[0]}];
+ // Revelação do Ano
  const youngR=starsWhere(s=>y-s.born<=21,4);
  if(S.age<=21&&tot.j>=20&&S.ovr>=74){
   const won=tot.j>=25&&nota>=7.05&&S.ovr>=79+thr&&ch(.7);
-  const c=mkCer({k:'gb',ic:'revelacao',title:'Golden Boy',sub:'Melhor jogador sub-21 do mundo'},won,youngR);cer.push(c);
-  if(won)awards.push({t:'revelacao',n:'Golden Boy',d:'Melhor jogador sub-21 do mundo'});
-  yearWinners.push({k:'gb',n:'Golden Boy',w:won?meNom:c.noms.find(x=>x.n===c.winner)});
- }else yearWinners.push({k:'gb',n:'Golden Boy',w:youngR[0]||fill([],1)[0]});
- // Chuteira de Ouro (Europa)
+  const c=mkCer({k:'gb',ic:'revelacao',title:'Revelação do Ano',sub:'Melhor jogador sub-21 do mundo'},won,youngR);cer.push(c);
+  if(won)awards.push({t:'revelacao',n:'Revelação do Ano',d:'Melhor jogador sub-21 do mundo'});
+  yearWinners.push({k:'gb',n:'Revelação do Ano',w:won?meNom:c.noms.find(x=>x.n===c.winner)});
+ }else yearWinners.push({k:'gb',n:'Revelação do Ano',w:youngR[0]||fill([],1)[0]});
+ // Chuteira Dourada (Europa)
  const strikers=starsWhere(s=>['ATA','SA','PE','PD','PON'].includes(s.pos)&&CLUB[s.club]&&COUNTRY[CLUB[s.club].country]&&COUNTRY[CLUB[s.club].country].conf==='EU',4);
  const chutWin=S.pos!=='GOL'&&C.conf==='EU'&&L.tier===1&&lgS.g>=30+thr+randn()*3;
- if(S.pos!=='GOL'&&C.conf==='EU'&&L.tier===1&&lgS.g>=18){const c=mkCer({k:'chut',ic:'chuteira',title:'Chuteira de Ouro',sub:'Maior artilheiro das ligas da Europa',stat:`Você: ${lgS.g} gols na liga`},chutWin,strikers);cer.push(c);yearWinners.push({k:'chut',n:'Chuteira de Ouro',w:chutWin?meNom:c.noms.find(x=>x.n===c.winner)})}
- else yearWinners.push({k:'chut',n:'Chuteira de Ouro',w:strikers[0]});
- if(chutWin)awards.push({t:'chuteira',n:'Chuteira de Ouro',d:`${lgS.g} gols na liga`});
- // Luva de Ouro
+ if(S.pos!=='GOL'&&C.conf==='EU'&&L.tier===1&&lgS.g>=18){const c=mkCer({k:'chut',ic:'chuteira',title:'Chuteira Dourada',sub:'Maior artilheiro das ligas da Europa',stat:`Você: ${lgS.g} gols na liga`},chutWin,strikers);cer.push(c);yearWinners.push({k:'chut',n:'Chuteira Dourada',w:chutWin?meNom:c.noms.find(x=>x.n===c.winner)})}
+ else yearWinners.push({k:'chut',n:'Chuteira Dourada',w:strikers[0]});
+ if(chutWin)awards.push({t:'chuteira',n:'Chuteira Dourada',d:`${lgS.g} gols na liga`});
+ // Luva Dourada
  const gks=starsWhere(s=>s.pos==='GOL',4);
  const luvaWin=S.pos==='GOL'&&L.tier===1&&lgS.cs>=Math.round(lgS.j*.42)+thr&&lgS.j>=25&&nota>=7;
- if(S.pos==='GOL'&&L.tier===1&&lgS.cs>=10){const c=mkCer({k:'luva',ic:'luva',title:'Luva de Ouro',sub:'Melhor goleiro do mundo',stat:`Você: ${lgS.cs} jogos sem sofrer gol`},luvaWin,gks);cer.push(c);yearWinners.push({k:'luva',n:'Luva de Ouro',w:luvaWin?meNom:c.noms.find(x=>x.n===c.winner)})}
- else yearWinners.push({k:'luva',n:'Luva de Ouro',w:gks[0]});
- if(luvaWin)awards.push({t:'luva',n:'Luva de Ouro',d:`${lgS.cs} jogos sem sofrer gol na liga`});
+ if(S.pos==='GOL'&&L.tier===1&&lgS.cs>=10){const c=mkCer({k:'luva',ic:'luva',title:'Luva Dourada',sub:'Melhor goleiro do mundo',stat:`Você: ${lgS.cs} jogos sem sofrer gol`},luvaWin,gks);cer.push(c);yearWinners.push({k:'luva',n:'Luva Dourada',w:luvaWin?meNom:c.noms.find(x=>x.n===c.winner)})}
+ else yearWinners.push({k:'luva',n:'Luva Dourada',w:gks[0]});
+ if(luvaWin)awards.push({t:'luva',n:'Luva Dourada',d:`${lgS.cs} jogos sem sofrer gol na liga`});
  // prêmios da liga
  const inLg=f=>starsWhere(s=>CLUB[s.club]&&CLUB[s.club].l===me.l&&f(s),3);
  const fakeLg=k=>{const out=[];const pool=leagueClubs(me.l).filter(c=>c.id!==me.id).sort((a,b)=>b.s-a.s).slice(0,6);for(let i=0;i<k;i++){const c=pick(pool);const rr=roster(c.id).filter(p=>p.pos!=='GOL');out.push({n:pick(rr).n,f:FLAG[c.country]||COUNTRY[c.country].f,club:c.id})}return out};
@@ -2387,10 +2389,10 @@ function endSeason(){
  if(craqueWin)awards.push({t:'craque_liga',n:`Craque da ${L.n}`,d:'Melhor jogador do campeonato'});
  if(tot.j>=25&&nota>=7.35&&S.ovr>=85&&L.bp>=-9)awards.push({t:'selecao',n:'Seleção da Temporada',d:`Melhor ${POS[S.pos].n.toLowerCase()} do ano`});
  const wc=st.comps.wc;
- if(wc&&wc.called){const g=wc.path.reduce((s,r)=>s+(r.me&&r.me.g||0),0);if(g>=5)awards.push({t:'chuteira',n:'Chuteira de Ouro da Copa',d:`${g} gols na Copa`});const ns=wc.path.filter(r=>r.me&&r.me.nota).map(r=>r.me.nota);if(ns.length>=5&&ns.reduce((a,b)=>a+b,0)/ns.length>=7.7&&['Semifinal','Final'].includes(wc.out||'Final'))awards.push({t:'bola',n:'Bola de Ouro da Copa',d:'Melhor jogador do Mundial',minor:true})}
+ if(wc&&wc.called){const g=wc.path.reduce((s,r)=>s+(r.me&&r.me.g||0),0);if(g>=5)awards.push({t:'chuteira',n:'Chuteira Dourada da Copa',d:`${g} gols na Copa`});const ns=wc.path.filter(r=>r.me&&r.me.nota).map(r=>r.me.nota);if(ns.length>=5&&ns.reduce((a,b)=>a+b,0)/ns.length>=7.7&&['Semifinal','Final'].includes(wc.out||'Final'))awards.push({t:'bola',n:'Bola Dourada da Copa',d:'Melhor jogador do Mundial',minor:true})}
  // ordem: liga, posição, artilheiro, golden boy, chuteira, luva, bola de ouro (principal)
  const ORD={pos:0,art:1,liga:2,gb:3,chut:4,luva:5};cer.sort((a,b)=>ORD[a.k]-ORD[b.k]);
- if(place<=10&&tot.j>=20)cer.push({k:'bola',ic:'bola',title:'Bola de Ouro',sub:`Cerimônia ${S.year+1}`,top10,place,winner:top10[0].n});
+ if(place<=10&&tot.j>=20)cer.push({k:'bola',ic:'bola',title:'Bola Dourada',sub:`Cerimônia ${S.year+1}`,top10,place,winner:top10[0].n});
  // ---- registros ----
  const cs=S.clubs[me.id]||(S.clubs[me.id]={seasons:0,games:0,goals:0,assists:0,cs:0,titles:[],first:S.year});
  const clubGames=tot.j-(st.stats['Seleção']?st.stats['Seleção'].j:0);
@@ -2545,10 +2547,10 @@ const TIERS=[
  [240,'Estrela','Nome conhecido no mundo todo'],
  [310,'Ídolo eterno','Estátua na porta do estádio'],
  [390,'Jogador histórico','Entra em qualquer seleção da década'],
- [470,'Melhor da geração','Exige 1 Bola de Ouro'],
+ [470,'Melhor da geração','Exige 1 Bola Dourada'],
  [600,'Top 10 da história','Exige 2 Bolas de Ouro'],
  [720,'No debate do maior','Exige 3 Bolas de Ouro'],
- [860,'O Predestinado','5 Bolas de Ouro e uma Copa do Mundo'],
+ [860,'O Predestinado','5 Bolas de Ouro e uma Copa Mundial'],
 ];
 function totals(){const h=S.history;return{games:h.reduce((s,x)=>s+x.games,0),goals:h.reduce((s,x)=>s+x.goals,0),assists:h.reduce((s,x)=>s+x.assists,0),cs:h.reduce((s,x)=>s+(x.cs||0),0)}}
 function legacy(){
@@ -2597,10 +2599,10 @@ function autoOffer(offers){
 
 // ================== CATEGORIAS DE BASE ==================
 const YOUTH_NAMES={
- BRA:{lg:'Brasileirão Sub-20',cup:'Copinha'},ENG:{lg:'Premier League 2',cup:'FA Youth Cup'},ESP:{lg:'División de Honor Juvenil',cup:'Copa del Rey Juvenil'},
- ITA:{lg:'Campionato Primavera',cup:'Coppa Italia Primavera'},GER:{lg:'U19 Bundesliga',cup:'DFB-Pokal Junioren'},FRA:{lg:'Championnat National U19',cup:'Coupe Gambardella'},
- POR:{lg:'Liga Revelação',cup:'Taça Revelação'},NED:{lg:'Divisie 1 O19',cup:'KNVB Beker O19'},ARG:{lg:'Torneo Proyección',cup:'Copa de la Reserva'},
- USA:{lg:'MLS NEXT',cup:'MLS NEXT Cup'},KSA:{lg:'Saudi U-21 League',cup:'Copa Saudita Sub-21'},
+ BRA:{lg:'Brasileiro Sub-20',cup:'Copa Júnior'},ENG:{lg:'Liga Inglesa 2',cup:'Copa Juvenil Inglesa'},ESP:{lg:'División de Honor Juvenil',cup:'Copa da Espanha Juvenil'},
+ ITA:{lg:'Campionato Primavera',cup:'Copa da Itália Primavera'},GER:{lg:'U19 Liga Alemã',cup:'Copa da Alemanha Junioren'},FRA:{lg:'Championnat National U19',cup:'Copa Juvenil Francesa'},
+ POR:{lg:'Liga Revelação',cup:'Taça Revelação'},NED:{lg:'Divisie 1 O19',cup:'Copa da Holanda O19'},ARG:{lg:'Torneo Proyección',cup:'Copa de la Reserva'},
+ USA:{lg:'Base Americana',cup:'Copa Sub-20 Americana'},KSA:{lg:'Saudi U-21 League',cup:'Copa Saudita Sub-21'},
 };
 const YSUF={BRA:'Sub-20',ENG:'Sub-21',ESP:'Sub-19',ITA:'Primavera',GER:'Sub-19',FRA:'Sub-19',POR:'Sub-23',NED:'Sub-19',ARG:'Reserva',USA:'Sub-18',KSA:'Sub-21'};
 const ysuf=id=>{const c=CLUB[id];return YSUF[c&&c.country]||'Sub-20'};
@@ -2619,7 +2621,7 @@ function addYouthToSeason(st,me,pre,items){
  st.comps.yl={id:'yl',n:Y.lg,ic:'est',t:'base',kind:'yl',youth:true,opps,homes,myR,bye,RR,gtab,pts:0,gp:0,gc:0,stage:0,alive:true,path:[],rounds:[]};
  opps.forEach((_,i)=>items.push([.05+.9*(i/(opps.length-1)),{k:'yl',i}]));
  const useUYL=C.conf==='EU'&&myContComp(me)==='UCL';
- const cupN=useUYL?'UEFA Youth League':Y.cup;
+ const cupN=useUYL?'Liga Europeia Sub-19':Y.cup;
  const rounds=me.country==='BRA'?['1ª fase','2ª fase','Oitavas','Quartas','Semifinal','Final']:['Oitavas','Quartas','Semifinal','Final'];
  const cpool=useUYL?contParticipants('UCL'):pool;
  st.comps.yc={id:'yc',n:cupN,ic:me.country==='BRA'?'copa':'cont3',t:'base',kind:'ko',youth:true,pool:cpool,stage:0,alive:true,path:[],rounds:rounds.map(n=>({n,legs:1,neutral:n==='Final'}))};
@@ -2739,6 +2741,131 @@ function prospectRank(country){
  return{list,rank:list.findIndex(x=>x.me)+1,total:list.length};
 }
 function prospectStars(pot){return pot>=90?5:pot>=85?4.5:pot>=81?4:pot>=77?3.5:pot>=73?3:pot>=68?2.5:2}
+
+// ================== VERSÃO FICTÍCIA ==================
+// Clubes, lendas e estrelas ganham nomes inventados, sempre os mesmos (sorteados a partir do código de cada um),
+// e os escudos são desenhados aqui. O build tira as imagens e os nomes reais; FICT_REAL_H traz só a "impressão"
+// (hash) dos nomes reais, pra o sorteio nunca cair num nome de verdade. O editor (editor.js) muda por cima disso.
+const FICT={used:new Set(),abbr:{},patch:null};
+const fN=s=>String(s||'').normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
+const FICT_REAL=new Set(typeof FICT_REAL_H!=='undefined'?FICT_REAL_H:[]);
+function fictBad(n){const k=fN(n);return!k||FICT_REAL.has(hash(k))||FICT.used.has(k)}
+const fpk=(r,a)=>a[Math.floor(r()*a.length)];
+const fwk=(r,a)=>{const t=a.reduce((s,x)=>s+x[1],0);let v=r()*t;for(const x of a){v-=x[1];if(v<=0)return x[0]}return a[0][0]};
+// ---------- lugares inventados por língua ----------
+const FP={
+ pt:{A:[['Vale','m'],['Serra','f'],['Porto','m'],['Vila','f'],['Monte','m'],['Campo','m'],['Ribeira','f'],['Lagoa','f'],['Barra','f'],['Ponte','f'],['Morro','m'],['Praia','f'],['Rio','m'],['Arraial','m'],['Cachoeira','f'],['Engenho','m'],['Planalto','m'],['Várzea','f'],['Recanto','m'],['Chapada','f'],['Pedra','f'],['Ilha','f'],['Areia','f'],['Bosque','m']],
+  B:[['Verde'],['Azul'],['Alegre'],['Dourado','Dourada'],['Bonito','Bonita'],['Novo','Nova'],['Grande'],['Formoso','Formosa'],['Claro','Clara'],['Alto','Alta'],['Real'],['Belo','Bela'],['Branco','Branca'],['Velho','Velha'],['Bravo','Brava'],['Santo','Santa'],['Preto','Preta'],['Largo','Larga'],['Fundo','Funda'],['do Sol'],['das Pedras'],['da Mata'],['do Norte'],['do Sul'],['das Flores'],['dos Coqueiros'],['da Serra'],['do Mar'],['das Águas'],['do Oeste'],['dos Ventos'],['de Ouro'],['de Prata'],['do Rei']]},
+ es:{A:[['Valle','m'],['Sierra','f'],['Puerto','m'],['Villa','f'],['Monte','m'],['Río','m'],['Campo','m'],['Costa','f'],['Peña','f'],['Torre','f'],['Llano','m'],['Vega','f'],['Cerro','m'],['Mesa','f'],['Ribera','f'],['Fuente','f'],['Arroyo','m'],['Loma','f'],['Playa','f'],['Pinar','m']],
+  B:[['Verde'],['Alto','Alta'],['Real'],['Nuevo','Nueva'],['Dorado','Dorada'],['Blanco','Blanca'],['Bravo','Brava'],['Claro','Clara'],['Hermoso','Hermosa'],['Viejo','Vieja'],['Grande'],['Azul'],['del Sol'],['del Mar'],['de Oro'],['del Norte'],['del Sur'],['de la Luna'],['de las Flores'],['del Rey'],['de Plata'],['del Viento']]}};
+const FJ={ // pedaços que se juntam numa palavra só
+ en:{A:['Ash','Black','Bram','Brook','Castle','Clay','Elm','Fair','Green','Hart','Holl','King','Lock','Mill','North','Oak','Red','Rose','Silver','Stone','West','White','Wolf','Burn','Cole','Dun','Fen','Thorn','Marl','Hather','Bright','Sand','Salt','Chalk','Raven','Hazel','Lark','Fox'],B:['ford','bury','ham','ton','wick','mouth','field','gate','dale','ley','borough','chester','stead','well','worth','minster','port','by','combe','hurst','ridge','moor','croft','haven']},
+ it:{A:['Monte','Castel','Borgo','Villa','Colle','Poggio','Rocca','Fonte','Campo','Torre'],B:['verde','alto','fiore','rosso','bello','nuovo','mare','sole','chiaro','doro','azzurro','grande','lungo','santo','franco','vecchio','lieto','forte']},
+ de:{A:['Rhein','Wald','Berg','Linden','Eichen','Hohen','Neu','Sonnen','Stein','Tann','Wiesen','Rosen','Falken','Adler','Hirsch','Buchen','Erlen','Kirch','Mühl','Kron','Fels','Grün','Silber','Gold','Eisen'],B:['stadt','berg','burg','feld','hausen','heim','dorf','tal','bach','au','brück','wald','furt','stein','hagen','hof']},
+ fr:{A:['Beau','Bel','Mont','Val','Ville','Bois','Fort','Clair','Roche','Port','Pont','Haut','Grand','Champ','Mer','Blanc'],B:['mont','lieu','champ','fort','pré','val','bourg','court','ville','mer','rive','lac','bois','roc','nay','cy']},
+ nl:{A:['Zand','Water','Dijk','Molen','Brug','Veen','Hoog','Oost','West','Noord','Zuid','Berg','Linde','Eik','Groen','Duin','Wind','Kas','Wil','Ber','Bloem','Vos'],B:['dam','dijk','veen','hoven','burg','wijk','horst','stad','meer','vliet','haven','huizen','bergen','sloot','hout','dorp']},
+ us:{A:['Bay','Lake','Pine','River','Stone','Silver','Golden','Red','Iron','Cedar','Maple','Harbor','Sun','Prairie','Canyon','Desert','Coast','Summit','Eagle','Granite','Copper','Blue','Ocean','Storm'],B:['ville','ton',' Valley',' Springs',' Falls',' Ridge',' Bay',' City',' Point',' Heights',' Creek',' Park']}};
+const F_TUPI=['Tabajara','Tamoios','Guaraci','Itapuã','Jacuípe','Juruá','Ubirajara','Jaçanã','Piratini','Caiçara','Tapajós','Xingu','Araguari','Itaúna','Ibitinga','Iporã','Jupiá','Tibagi','Anhumas','Ivaí','Paraguaçu','Itapira','Jaraguá','Sapucaí','Mogiana','Paranaíba','Juquiá','Aracati','Potengi','Ibiapaba','Pajeú','Acaraú','Jaguaribe','Itapicuru','Mearim','Gurupi','Javari','Purus','Iguatemi','Aimberê','Tupinambá','Potira','Moacir','Jurema','Itaparica','Camboriú','Iracema','Araripe','Ubatã','Itaquera'];
+const F_AR=['Nojoom','Fajr','Sahel','Wadi','Majd','Najma','Sukoor','Qamar','Shams','Bahr','Jabal','Nakheel','Rimal','Ward','Fursan','Sharq','Gharb','Nour','Amal','Wafa','Taj','Kawkab','Burj','Waha','Thuraya','Asifa','Barq','Saqr','Fahd','Nasim','Durra','Yasmin','Fanar','Manar','Hamra','Sahra','Riyah','Sanabel'];
+const F_JP=['Sakura','Kaze','Hoshi','Umi','Yama','Sora','Hikari','Tsubasa','Raijin','Kumo','Taiyo','Ryu','Tora','Kawa','Mori'],F_JPY=['FC','United','Stars','Dragons','Tigers','Phoenix','Waves','Blaze'];
+const F_AF=['Sahara','Atlas','Kilima','Savane','Baobab','Delta','Oasis','Kalahari','Zambeze','Okavango','Simba','Tembo','Jua','Nyota','Mvua'];
+function fPlace(r,L){const P=FP[L];const[a,g]=fpk(r,P.A);const b=fpk(r,P.B);return a+' '+(b.length>1&&g==='f'?b[1]:b[0])}
+function fJoin(r,L){const P=FJ[L];const a=fpk(r,P.A),b=fpk(r,P.B);if(b[0]===' ')return a+b;let w=(a+b).toLowerCase();return w[0].toUpperCase()+w.slice(1)}
+const FSTY={
+ br:[['{P}',5],['{P} FC',3],['Esporte Clube {P}',1],['Atlético {P}',2],['União {P}',2],['Grêmio {P}',1],['Operário {P}',1],['Ferroviário {P}',1],['Comercial {P}',1],['Independente {P}',1],['Real {P}',1],['Sociedade {P}',1]],
+ pt:[['{P}',3],['Sporting {P}',2],['{P} FC',2],['CD {P}',1],['União de {P}',1],['Vitória de {P}',1],['Desportivo de {P}',1],['Atlético {P}',1]],
+ en:[['{P} United',3],['{P} City',3],['{P} Town',2],['{P} Rovers',2],['{P} Athletic',2],['{P} Albion',1],['{P} Wanderers',1],['{P} FC',2],['{P} Rangers',1],['{P} County',1]],
+ es:[['Real {P}',2],['Deportivo {P}',2],['Atlético {P}',2],['{P} CF',2],['Unión {P}',1],['Racing {P}',1],['Sporting {P}',1],['CD {P}',1],['{P}',2]],
+ ar_es:[['Club Atlético {P}',1],['Deportivo {P}',2],['Racing {P}',1],['Unión {P}',1],['Sportivo {P}',1],['Gimnasia de {P}',1],['Defensores de {P}',1],['Atlético {P}',2],['Juventud {P}',1],['{P}',2]],
+ mx:[['Club {P}',2],['Deportivo {P}',2],['{P} FC',2],['Atlético {P}',1],['Real {P}',1],['Halcones de {P}',1],['Jaguares de {P}',1]],
+ it:[['AC {P}',2],['US {P}',2],['{P} Calcio',2],['Sporting {P}',1],['Virtus {P}',1],['Real {P}',1],['AS {P}',2],['FC {P}',1],['{P}',2]],
+ de:[['FC {P}',3],['SV {P}',2],['VfB {P}',1],['TSV {P}',1],['Borussia {P}',1],['SC {P}',1],['Eintracht {P}',1],['1. FC {P}',1],['SpVgg {P}',1],['Fortuna {P}',1],['Union {P}',1],['VfL {P}',1]],
+ fr:[['Olympique {P}',2],['AS {P}',2],['FC {P}',2],['Stade {P}',2],['Racing {P}',1],['US {P}',1],['SC {P}',1],['AJ {P}',1],['{P}',2]],
+ nl:[['FC {P}',3],['SC {P}',2],['{P} FC',1],['VV {P}',1],['SV {P}',1],['{P} Boys',1],['Sparta {P}',1],['Fortuna {P}',1],['{P}',2]],
+ us:[['{P} FC',3],['{P} United',2],['Real {P}',1],['{P} SC',2],['{P} Athletic',1],['{P} Rush',1],['{P} Storm',1],['{P} Comets',1],['{P} Rapids',1]]};
+function fictClubName(id,c,r){
+ const cty=c.country||null,ext=c.ext||null;
+ const sty=cty==='BRA'?'br':cty==='POR'?'pt':cty==='ENG'?'en':cty==='ESP'?'es':cty==='ARG'?'ar_es':cty==='ITA'?'it':cty==='GER'?'de':cty==='FRA'?'fr':cty==='NED'?'nl':cty==='USA'?'us':cty==='KSA'?'ar':
+  ext==='NA'?'mx':ext==='AS'?(/^Al[- ]/.test(id)?'ar':'jp'):ext==='AF'?(/^Al[- ]|^Pyr|^Wyd/.test(id)?'ar':'af'):'en';
+ if(sty==='ar')return fpk(r,[`Al-${fpk(r,F_AR)}`,`Al-${fpk(r,F_AR)}`,`Al-${fpk(r,F_AR)}`,`${fpk(r,F_AR)} Club`]);
+ if(sty==='jp')return`${fpk(r,F_JP)} ${fpk(r,F_JPY)}`;
+ if(sty==='af'){const x=fpk(r,F_AF);return fpk(r,[`${x} Stars`,`${x} United`,`Espoir de ${x}`,`${x} Lions`,`Étoile du ${x}`])}
+ let P;if(sty==='br'||sty==='pt')P=sty==='br'&&r()<.3?fpk(r,F_TUPI):fPlace(r,'pt');else if(sty==='es'||sty==='ar_es'||sty==='mx')P=fPlace(r,'es');
+ else P=fJoin(r,sty==='en'?'en':sty);
+ return fwk(r,FSTY[sty]).replace('{P}',P)}
+// sigla: pula as palavras genéricas (FC, Atlético, United…) e usa as que dão nome ao clube
+const F_GEN=new Set(['fc','sc','ac','as','us','cf','cd','sv','vfb','tsv','vfl','spvgg','1','esporte','clube','atletico','sociedade','uniao','gremio','operario','ferroviario','comercial','independente','real','desportivo','deportivo','club','union','racing','sporting','olympique','stade','united','city','town','rovers','athletic','albion','wanderers','rangers','county','calcio','virtus','pro','borussia','eintracht','fortuna','juniors','sportivo','gimnasia','defensores','juventud','vitoria','de','da','do','das','dos','del','di','du','la','las','los','boys','vv','aj','en','avant','sparta','halcones','jaguares','stars','lions','espoir','etoile','rush','storm','wolves','comets']);
+function fictAbbr(n,taken){const W=n.replace(/-/g,' ').split(/\s+/).map(w=>w.normalize('NFD').replace(/[̀-ͯ]/g,'').replace(/[^A-Za-z]/g,'')).filter(Boolean);
+ let D=W.filter(w=>!F_GEN.has(w.toLowerCase())&&!/^al$/i.test(w));if(!D.length)D=W;const U=s=>s.toUpperCase();
+ const opts=[];if(D.length>=2)opts.push(D[0][0]+D[1].slice(0,2),D[0].slice(0,2)+D[1][0],D[0][0]+D[1][0]+(D[1][1]||'X'));opts.push(D[0].slice(0,3),D[0][0]+D[0].slice(2,4),D[0][0]+(D[0][1]||'X')+(D[0][3]||D[0][2]||'X'));
+ for(const o of opts){const a=U(o).padEnd(3,'X');if(!taken.has(a)){taken.add(a);return a}}
+ for(let i=2;i<10;i++){const a=U(D[0].slice(0,2))+i;if(!taken.has(a)){taken.add(a);return a}}return U(D[0].slice(0,3))}
+// ---------- pessoas (lendas e estrelas) ----------
+const F_NICK=['Tião','Juca','Zeca','Biro','Toninho','Pepeu','Bita','Lelo','Babá','Cacá','Fefé','Gegê','Lulu','Nonô','Pipo','Quim','Tatá','Vadão','Xodó','Zuzu','Bolinha','Foguinho','Canela','Baiano','Mineiro','Paraíba','Tuca','Dinho','Nego','Lalá','Tinho','Bebeco','Duda','Tico','Marujo','Russo','Galego','Bigode','Formiga','Pelado'];
+const F_NA={BRA:'pt',POR:'pt',ESP:'es',ARG:'es',URU:'es',COL:'es',MEX:'es',CHI:'es',PAR:'es',PER:'es',ECU:'es',VEN:'es',BOL:'es',ENG:'en',USA:'en',SCO:'en',WAL:'en',IRL:'en',ITA:'it',GER:'de',AUT:'de',SUI:'de',FRA:'fr',BEL:'fr',NED:'nl',KSA:'ar',EGY:'ar',MAR:'ar',ALG:'ar',TUN:'ar'};
+let F_FLAGNAT=null;function fictNatOfFlag(f){if(!F_FLAGNAT){F_FLAGNAT={};try{for(const k in FLAG)F_FLAGNAT[FLAG[k]]=k}catch(e){}}return F_FLAGNAT[f]||null}
+function fictPerson(seed,nat,legend){const r=seeded(hash('p:'+seed));const L=F_NA[nat];
+ for(let t=0;t<30;t++){let n;
+  if(nat==='BRA'&&r()<(legend?.55:.3))n=fpk(r,F_NICK);
+  else if(L&&typeof YNAMES!=='undefined'&&YNAMES[L]){const P=YNAMES[L];n=fpk(r,P.f)+' '+fpk(r,P.l)}
+  else n=fpk(r,FIRST)+' '+fpk(r,LAST);
+  const bad=n.split(' ').some(w=>w.length>=3&&FICT_REAL.has(hash(fN(w))))||FICT_REAL.has(hash(fN(n)));
+  if(!bad&&!FICT.used.has(fN(n))){FICT.used.add(fN(n));return n}}
+ return fakeName(r)}
+// estrela atual: chamado pelo jogo quando monta o mundo e o álbum
+const F_STAR={};function fictP(n,nat){if(!/^#\d+$/.test(String(n).trim()))return n;const k=String(n).trim();return F_STAR[k]||(F_STAR[k]=fictPerson('s'+k,nat,false))}
+// ---------- aplica nos dados ----------
+function fictGenClubs(){if(FICT.names.done)return;FICT.used.clear();const taken={};
+ for(const id in CLUB){const c=CLUB[id];const r=seeded(hash('club:'+id));let n=null;
+  for(let t=0;t<40;t++){const x=fictClubName(id,c,r);if(x.length<=22&&!fictBad(x)){n=x;break}}
+  if(!n)n='Clube '+id.slice(0,2).toUpperCase()+(hash(id)%97);
+  FICT.used.add(fN(n));const lk=c.l||c.ext||'x';taken[lk]=taken[lk]||new Set();FICT.names[id]={n,a:fictAbbr(n,taken[lk])}}
+ for(let i=0;i<LEGENDS.length;i++){const L=LEGENDS[i];if(/^#\d+$/.test(L[0]))L[0]=fictPerson('l'+i,fictNatOfFlag(L[1]),true)}
+ FICT.names.done=true}
+FICT.names={};FICT.legend0=null;
+function fictPatch(){if(FICT.patch)return FICT.patch;let p=null;try{p=JSON.parse(localStorage.getItem('fdb_patch')||'null')}catch(e){}FICT.patch=p&&typeof p==='object'?p:{v:1,clubs:{},leagues:{},players:{}};
+ FICT.patch.clubs=FICT.patch.clubs||{};FICT.patch.leagues=FICT.patch.leagues||{};FICT.patch.players=FICT.patch.players||{};return FICT.patch}
+function applyFict(){fictGenClubs();const P=fictPatch();
+ if(!FICT.legend0)FICT.legend0=LEGENDS.map(L=>L[0]);
+ for(const id in CLUB){const c=CLUB[id],f=FICT.names[id];if(!f)continue;const p=P.clubs[id]||{};
+  c.n=p.n||f.n;c.a=p.a||f.a;if(!c.c10){c.c10=c.c1;c.c20=c.c2}c.c1=p.c1||c.c10;c.c2=p.c2||c.c20;c.img=p.img||null}
+ if(!FICT.lg0){FICT.lg0={};for(const k in LG)FICT.lg0[k]=LG[k].n}
+ for(const k in LG)LG[k].n=P.leagues[k]||FICT.lg0[k];
+ LEGENDS.forEach((L,i)=>{L[0]=P.players['l'+i]||FICT.legend0[i]})}
+// CLUB é remontado em alguns lugares (nova carreira, carregar): o nome inventado volta junto
+{const _bcF=buildClubs;buildClubs=function(...a){const r=_bcF.apply(this,a);try{applyFict()}catch(e){console.warn('fict',e)}return r}}
+applyFict();
+// ---------- escudo desenhado ----------
+const F_SH=['M30 2 L56 9 V34 C56 52 44 63 30 69 C16 63 4 52 4 34 V9 Z','M4 5 H56 V32 C56 51 44 61 30 69 C16 61 4 51 4 32 Z','M6 3 H54 V45 C54 57 42 64 30 68 C18 64 6 57 6 45 Z','M30 2 L57 18 V50 L30 68 L3 50 V18 Z','M30 3 C46 3 57 9 57 9 V36 C57 53 44 63 30 68 C16 63 3 53 3 36 V9 C3 9 14 3 30 3 Z'];
+function fictCrest(c){const h=hash('crest:'+(c.id||c.n));const c1=c.c1||'#555',c2=c.c2||'#ddd';const dk=l3Dark(c1)?c2:'#111';
+ const sh=h%6===5?null:F_SH[h%5];const pat=(h>>>3)%7;const id='cr'+(h%100000);
+ let P='';switch(pat){
+  case 1:for(let x=8;x<60;x+=12)P+=`<rect x="${x}" y="0" width="6" height="72" fill="${c2}"/>`;break;
+  case 2:P=`<rect x="30" y="0" width="30" height="72" fill="${c2}"/>`;break;
+  case 3:P=`<polygon points="0,14 14,0 60,46 60,62 46,72" fill="${c2}"/>`;break;
+  case 4:for(let y=10;y<72;y+=14)P+=`<rect x="0" y="${y}" width="60" height="7" fill="${c2}"/>`;break;
+  case 5:P=`<polygon points="0,30 30,48 60,30 60,42 30,60 0,42" fill="${c2}"/>`;break;
+  case 6:P=`<rect x="30" y="0" width="30" height="36" fill="${c2}"/><rect x="0" y="36" width="30" height="36" fill="${c2}"/>`;break}
+ const a=esc(String(c.a||'').slice(0,3));const big=String(c.a||'')[0]||'';const stars=c.s>=84?3:c.s>=80?2:c.s>=76?1:0;
+ const st=stars?Array.from({length:stars},(_,i)=>{const x=30+(i-(stars-1)/2)*9;return`<path transform="translate(${x} ${sh?-1:1}) scale(.34)" d="M0-10 2.9-3.1 10-3.1 4.3 1.2 6.5 8.1 0 4 -6.5 8.1 -4.3 1.2 -10-3.1 -2.9-3.1Z" fill="#f2c443"/>`}).join(''):'';
+ const body=sh?`<clipPath id="${id}"><path d="${sh}"/></clipPath><g clip-path="url(#${id})"><rect width="60" height="72" fill="${c1}"/>${P}</g><path d="${sh}" fill="none" stroke="${dk}" stroke-width="2.6"/>`
+  :`<clipPath id="${id}"><circle cx="30" cy="36" r="27"/></clipPath><g clip-path="url(#${id})"><rect width="60" height="72" fill="${c1}"/>${P}</g><circle cx="30" cy="36" r="27" fill="none" stroke="${dk}" stroke-width="2.6"/><circle cx="30" cy="36" r="21.5" fill="none" stroke="${c2}" stroke-width="1.4" opacity=".8"/>`;
+ const plate=`<rect x="13" y="${sh?27:28}" width="34" height="17" rx="4" fill="${c1}" stroke="${dk}" stroke-width="1.6"/><text x="30" y="${sh?40:41}" text-anchor="middle" font-family="Saira Condensed,Arial Narrow,sans-serif" font-weight="900" font-size="13.5" fill="${pickInk(c1)}" letter-spacing=".4">${a||esc(big)}</text>`;
+ return`<svg viewBox="0 0 60 72" xmlns="http://www.w3.org/2000/svg">${body}${plate}${st?`<g transform="translate(0 ${sh?13:15})">${st}</g>`:''}</svg>`}
+function l3Dark(h){h=String(h||'#000').replace('#','');if(h.length===3)h=h.split('').map(x=>x+x).join('');const n=parseInt(h,16)||0;const r=n>>16&255,g=n>>8&255,b=n&255;return(.299*r+.587*g+.114*b)<60}
+// escudo: imagem do editor > escudo enviado no Claude > escudo desenhado
+{const _shF=shieldHTML;shieldHTML=function(c,size=''){if(!c)return'';if(c.nat||(c.f&&!c.c1))return _shF(c,size);const cc=CLUB[c.id]||c;
+  if(cc.img)return`<span class="shield img ${size}" title="${esc(cc.n)}"><img src="${esc(cc.img)}" alt="" loading="lazy"></span>`;
+  const up=typeof CLOUD!=='undefined'&&CLOUD.badges&&CLOUD.badges[c.id];const ab=typeof ASSET_B!=='undefined'&&Object.keys(ASSET_B).length;if(up||ab)return _shF(c,size);
+  return`<span class="shield img crest ${size}" title="${esc(cc.n)}">${fictCrest(cc)}</span>`}}
+// sigla do nome inventado (placar do 3D, tabelas)
+{const _mkF=mkAbbr;mkAbbr=function(n){const c=FICT.byName&&FICT.byName[n];return c?c.a:_mkF(n)}}
+{const _afF=applyFict;applyFict=function(){_afF();FICT.byName={};for(const id in CLUB)FICT.byName[CLUB[id].n]=CLUB[id]}}
+applyFict();
+{const st=document.createElement('style');st.textContent='.shield.crest svg{width:100%;height:100%;display:block;overflow:visible}';document.head.appendChild(st)}
+// textos guardados antes da versão fictícia (cartas do ranking, ligas no histórico): troca pelos nomes novos
+const F_TXT=(typeof FICT_TXT!=='undefined'?FICT_TXT:[]).map(([a,b])=>{try{return[new TextDecoder().decode(Uint8Array.from(atob(a),c=>c.charCodeAt(0))),b]}catch(e){return null}}).filter(Boolean).sort((x,y)=>y[0].length-x[0].length);
+function fictText(s){if(typeof s!=='string'||!F_TXT.length)return s;for(const[a,b]of F_TXT)if(s.includes(a))s=s.split(a).join(b);return s}
 
 // ================== UI ==================
 const $app=document.getElementById('app');const $ov=document.getElementById('overlay');
@@ -2986,7 +3113,7 @@ function nextLabel(){
  const st=S.st;for(let i=st.idx;i<st.cal.length;i++){const it=st.cal[i];
   if(it.k==='ev')return'Decisão fora/dentro de campo';
   if(it.k==='lg')return`${LG[st.lg].n} · rodada ${it.r+1}`;
-  if(it.k==='intl')return'Data FIFA';
+  if(it.k==='intl')return'Data internacional';
   const c=st.comps[it.cid||'est'];if(c&&c.alive){const rd=c.rounds[c.stage];return`${c.n}${it.k==='ko'&&rd?` · ${rd.n}`:''}`}
  }return'Fim da temporada';
 }
@@ -3198,7 +3325,7 @@ async function fastForward(){
 // ================== TROFÉUS DESENHADOS ==================
 let TRO_N=0;
 const TROPHY_KINDS=['liga','copa','lcup','super','est','orelhas','liberta','cont2','cont3','globo','mundial','copa_mundo','nat','olimp','bola','bola_top3','chuteira','luva','revelacao','craque_liga','posicao','artilheiro','selecao','craque_copa','acesso'];
-const TRO_LABEL={revelacao:'Golden Boy',chuteira:'Chuteira de Ouro',luva:'Luva de Ouro',artilheiro:'Artilheiro',craque_liga:'Craque da liga',posicao:'Melhor da posição',selecao:'Seleção da Temporada',craque_copa:'Bola de Ouro da Copa',bola:'Bola de Ouro',bola_top3:'Pódio da Bola de Ouro',acesso:'Acesso'};
+const TRO_LABEL={revelacao:'Revelação do Ano',chuteira:'Chuteira Dourada',luva:'Luva Dourada',artilheiro:'Artilheiro',craque_liga:'Craque da liga',posicao:'Melhor da posição',selecao:'Seleção da Temporada',craque_copa:'Bola Dourada da Copa',bola:'Bola Dourada',bola_top3:'Pódio da Bola Dourada',acesso:'Acesso'};
 const normName=t=>String(t||'').normalize('NFD').replace(/[\u0300-\u036f]/g,'').toLowerCase().replace(/\.[a-z0-9]+$/,'').replace(/[^a-z0-9]/g,'');
 function trophyImg(n,kind){const m=(typeof CLOUD!=='undefined'&&CLOUD.trophies)||{};const up=m[normName(n)]||(TRO_LABEL[kind]&&m[normName(TRO_LABEL[kind])]);if(up)return'/_blob/'+up;const A=typeof ASSET_T!=='undefined'?ASSET_T:{};return A[normName(n)]||(TRO_LABEL[kind]&&A[normName(TRO_LABEL[kind])])||null}
 function TROPHY(kind,o={}){
@@ -3538,15 +3665,15 @@ function ceremonyUI(c){
   const done=()=>{const b=document.getElementById('cerOk');b.disabled=false;b.scrollIntoView({block:'end',behavior:reduced?'auto':'smooth'});b.focus({preventScroll:true});b.onclick=()=>{$ov.hidden=true;$ov.innerHTML='';res()}};
   if(c.k==='bola'){
    const yr=S.year;
-   $ov.innerHTML=`<div class="ovwrap cer bola"><div class="spot"></div><div class="eyebrow">Cerimônia da Bola de Ouro · ${yr}</div><h2 class="pkh">Os 10 melhores do mundo</h2>
+   $ov.innerHTML=`<div class="ovwrap cer bola"><div class="spot"></div><div class="eyebrow">Cerimônia da Bola Dourada · ${yr}</div><h2 class="pkh">Os 10 melhores do mundo</h2>
    <div class="rank10" id="r10"></div><div class="reveal" id="rev"></div><button class="btn wide" id="cerOk" disabled style="margin-top:12px">Continuar</button></div>`;
    const r10=document.getElementById('r10');
    for(let i=9;i>=3;i--){const n=c.top10[i];if(!n)continue;r10.insertAdjacentHTML('afterbegin',`<div class="r10row ${n.me?'me':''}"><b class="mono">${i+1}º</b><span class="r10n">${n.f||''} ${esc(n.n)}</span><span class="r10c">${n.club&&CLUB[n.club]?esc(CLUB[n.club].n):''}</span></div>`);await sleep(n.me?900:380)}
    const rev=document.getElementById('rev');
    for(const i of[2,1]){const n=c.top10[i];rev.innerHTML=`<div class="drum">${i+1}º lugar…</div>`;await sleep(1100);r10.insertAdjacentHTML('afterbegin',`<div class="r10row podium ${n.me?'me':''}"><b class="mono">${i+1}º</b><span class="r10n">${n.f||''} ${esc(n.n)}</span><span class="r10c">${n.club&&CLUB[n.club]?esc(CLUB[n.club].n):''}</span></div>`);rev.innerHTML='';await sleep(n.me?1000:500)}
-   rev.innerHTML=`<div class="drum">E a Bola de Ouro ${yr} vai para…</div>`;rev.scrollIntoView({block:'center'});await sleep(1800);
+   rev.innerHTML=`<div class="drum">E a Bola Dourada ${yr} vai para…</div>`;rev.scrollIntoView({block:'center'});await sleep(1800);
    const w=c.top10[0];
-   rev.innerHTML=`<div class="winner ${w.me?'me':''}"><div class="tro rise">${TROPHY('bola',{n:'Bola de Ouro'})}</div>${nomCard(w,'big')}${w.me?'<h3 class="champ">VOCÊ É O MELHOR DO MUNDO</h3>':''}</div>`;
+   rev.innerHTML=`<div class="winner ${w.me?'me':''}"><div class="tro rise">${TROPHY('bola',{n:'Bola Dourada'})}</div>${nomCard(w,'big')}${w.me?'<h3 class="champ">VOCÊ É O MELHOR DO MUNDO</h3>':''}</div>`;
    rev.scrollIntoView({block:'center',behavior:reduced?'auto':'smooth'});
    if(w.me)confetti($ov,['#f2c443','#fff4c4','#e2ad34','#ffffff'],5200);
    done();return;
@@ -4370,14 +4497,14 @@ weekHTML=function(){
 const TITLE_RANK={copa_mundo:0,cont:1,mun:2,int:3,liga:4,nat:5,olimp:6,copa:7,lcup:8,usc:9,rec:9,super:10,est:11};
 const AWARD_RANK={bola:0,bola_top3:1,craque_copa:2,revelacao:3,chuteira:4,luva:5,selecao:6,craque_liga:7,posicao:8,artilheiro:9};
 function groupTitles(list){const g={};for(const t of list){const k=t.n;(g[k]=g[k]||{n:t.n,ic:t.ic||t.t,t:t.t,y:[],clubs:[]}).y.push(t.year+1);if(t.club&&!g[k].clubs.includes(t.club))g[k].clubs.push(t.club)}return Object.values(g).sort((a,b)=>(TITLE_RANK[a.t]??20)-(TITLE_RANK[b.t]??20)||b.y.length-a.y.length)}
-function groupAwards(list){const g={};for(const a of list){const t=a.t==='craque_copa'?'craque_copa':a.t;const n=a.t==='bola_top3'?'Pódio da Bola de Ouro':a.n.replace(/ · .*/,'');(g[n]=g[n]||{n,ic:t,t,y:[]}).y.push(a.year+1)}return Object.values(g).sort((a,b)=>(AWARD_RANK[a.t]??20)-(AWARD_RANK[b.t]??20)||b.y.length-a.y.length)}
+function groupAwards(list){const g={};for(const a of list){const t=a.t==='craque_copa'?'craque_copa':a.t;const n=a.t==='bola_top3'?'Pódio da Bola Dourada':a.n.replace(/ · .*/,'');(g[n]=g[n]||{n,ic:t,t,y:[]}).y.push(a.year+1)}return Object.values(g).sort((a,b)=>(AWARD_RANK[a.t]??20)-(AWARD_RANK[b.t]??20)||b.y.length-a.y.length)}
 function galCard(g,i){return`<button class="gcard" data-g="${i}" style="animation-delay:${Math.min(i,12)*.05}s"><span class="gcount mono">${g.y.length}×</span><div class="gtro">${TROPHY(g.ic,g.clubs&&g.clubs[0]&&CLUB[g.clubs[0]]?{c1:CLUB[g.clubs[0]].c1,c2:CLUB[g.clubs[0]].c2,n:g.n}:{n:g.n})}</div><div class="gshelf"></div><b class="gname">${esc(g.n)}</b><span class="gyears mono">${g.y.slice(0,6).join(' · ')}${g.y.length>6?' …':''}</span>${g.clubs&&g.clubs.length?`<span class="gclubs">${g.clubs.slice(0,4).map(id=>shieldHTML(CLUB[id]||{id,n:id},'sm')).join('')}</span>`:''}</button>`}
 function wishlist(){
  if(!S||!S.club)return[];const c=club();const L=LG[c.l];const C=COUNTRY[c.country];
  const have=new Set([...S.titles.map(t=>t.n),...S.awards.map(a=>a.n)]);
- const w=[[L.n,'liga'],[C.cup,'copa'],[C.conf==='EU'?'Champions League':C.conf==='SA'?'Libertadores':Object.values(CONT_INFO).find(x=>x)?.n,'C'],['Copa do Mundo','copa_mundo'],[NAT_CUP[NATS[S.nat].c],'nat'],['Bola de Ouro','bola'],[S.pos==='GOL'?'Luva de Ouro':'Chuteira de Ouro',S.pos==='GOL'?'luva':'chuteira']];
- if(S.age<=21)w.splice(6,0,['Golden Boy','revelacao']);
- return w.filter(([n])=>n&&!have.has(n)).map(([n,ic])=>({n,ic:ic==='C'?(n==='Champions League'?'orelhas':n==='Libertadores'?'liberta':'cont2'):ic}));
+ const w=[[L.n,'liga'],[C.cup,'copa'],[C.conf==='EU'?'Copa Europeia':C.conf==='SA'?'Copa Continental':Object.values(CONT_INFO).find(x=>x)?.n,'C'],['Copa Mundial','copa_mundo'],[NAT_CUP[NATS[S.nat].c],'nat'],['Bola Dourada','bola'],[S.pos==='GOL'?'Luva Dourada':'Chuteira Dourada',S.pos==='GOL'?'luva':'chuteira']];
+ if(S.age<=21)w.splice(6,0,['Revelação do Ano','revelacao']);
+ return w.filter(([n])=>n&&!have.has(n)).map(([n,ic])=>({n,ic:ic==='C'?(n==='Copa Europeia'?'orelhas':n==='Copa Continental'?'liberta':'cont2'):ic}));
 }
 function galleryHTML(titles,awards,opts={}){
  const T=groupTitles(titles),A=groupAwards(awards);const nT=titles.length,nA=awards.filter(a=>a.t!=='bola_top3').length;
@@ -4667,7 +4794,7 @@ const GOAL_MS=[25,50,100,150,200,250,300,400,500,600,700,800,900,1000];
 function careerGoals(){const h=(S.history||[]).reduce((s,x)=>s+(x.goals||0),0);const st=S.st&&S.st.stats||{};let c=0;for(const k in st)if(k!=='Base')c+=st[k].g||0;return h+c}
 async function postMatchMoments(list,io){
  for(const r of list){
-  if(!r||r.k!=='match'||!r.me||!r.me.play)continue;const m=r.me;const youth=r.cid==='yl'||/Sub-|Primavera|Reserva|Copinha|Youth|Junioren|Juvenil|Revelação|O19|U19|U-21|NEXT|Gambardella|Proyecci/.test(r.comp);
+  if(!r||r.k!=='match'||!r.me||!r.me.play)continue;const m=r.me;const youth=r.cid==='yl'||/Sub-|Primavera|Reserva|Copa Júnior|Youth|Junioren|Juvenil|Revelação|O19|U19|U-21|NEXT|Gambardella|Proyecci/.test(r.comp);
   const opp=r.home&&r.away?(r.home.id===S.club||r.home.n.startsWith(club().n)?r.away:r.home):null;
   if(m.g>=3&&((S.flags.hats=(S.flags.hats||0)+1)<=3||m.g>=4))await io.moment({k:'hat',emoji:'⚽'.repeat(Math.min(m.g,5)),eyebrow:`${r.comp} · ${r.label}`,big:m.g===3?'HAT-TRICK!':m.g===4?'POKER!':`${m.g} GOLS!`,title:`${m.g} gols${opp?' contra o '+opp.n:''}`,lines:[`Placar: ${r.hg}–${r.ag}`,`Nota ${m.nota??'—'}`],ball:true});
   if(!youth&&m.g>0&&!S.flags.firstGoal){S.flags.firstGoal=true;await io.moment({k:'first',emoji:'🥹',eyebrow:'Um dia pra nunca esquecer',big:'PRIMEIRO GOL!',title:`Seu primeiro gol como profissional${opp?' contra o '+opp.n:''}`,lines:[`${r.comp} · ${r.label}`],ball:true})}
@@ -4907,7 +5034,7 @@ renderReport=function(ls){
    const tiles=document.createElement('div');tiles.className='plantiles';
    const T=[];const aw=blocks.find(b=>/Prêmios/.test(b[0]));const yw=blocks.find(b=>/Vencedores/.test(b[0]));
    if(aw)T.push(['aw','🏅','Seus prêmios',`${ls.awards.length} no ano`,aw[1]]);
-   if(yw)T.push(['yw','🌍','Vencedores do ano','Bola de Ouro e mais',yw[1]]);
+   if(yw)T.push(['yw','🌍','Vencedores do ano','Bola Dourada e mais',yw[1]]);
    if(news.length){const box=document.createElement('div');box.style.cssText='display:grid;gap:8px';news.forEach(n=>box.appendChild(n));T.push(['nw','📰','Notícias',`${news.length} novidade${news.length>1?'s':''}`,box])}
    tiles.innerHTML=T.map(([k,ic,n,d])=>`<button class="ptile ${k==='aw'?'hot':''}" data-rt="${k}"><span>${ic}</span><b>${n}</b><small>${d}</small></button>`).join('');
    blocks.forEach(b=>b[1].remove());card.appendChild(tiles);
@@ -4967,7 +5094,7 @@ function starVals(pos,r,seed){const rr=seeded(hash(seed));const w=POS[pos].w;con
 let DRAFT_POOL=null;
 function buildDraftPool(){
  const icons=LEGENDS.map(L=>({n:L[0],f:L[1],pos:L[2],ovr:L[3],vals:Object.fromEntries(ATTRS.map((k,j)=>[k,L[4][j]])),icon:true}));
- const stars=STAR_SRC.split(';').map(x=>x.trim()).filter(Boolean).map(r=>{const[n,club,pos,nat,born,rt]=r.split('|');return{n,club,pos:POS_ALIAS[pos]||pos,f:FLAG[nat]||'🏳️',ovr:+rt}}).filter(s=>s.ovr>=80&&POS[s.pos]).map(s=>({...s,vals:starVals(s.pos,s.ovr,s.n)}));
+ const stars=STAR_SRC.split(';').map(x=>x.trim()).filter(Boolean).map(r=>{const[n,club,pos,nat,born,rt]=r.split('|');return{n:fictP(n,nat),club,pos:POS_ALIAS[pos]||pos,f:FLAG[nat]||'🏳️',ovr:+rt}}).filter(s=>s.ovr>=80&&POS[s.pos]).map(s=>({...s,vals:starVals(s.pos,s.ovr,s.n)}));
  DRAFT_POOL=icons.concat(stars);
 }
 function drawLegend(){
@@ -5042,7 +5169,7 @@ function retireShow(card){
   <div class="eyebrow" style="position:relative">${R.sub}</div>
   <div class="rt-card">${playerCard({ovr:card.peak,pos:card.pos,name:card.name,flag:card.flag,club:topClub&&topClub.id,attrs:S&&S.attrs?CA():{},face:S&&S.face,tier:tierCls,label:R.lbl,size:'big'})}</div>
   <h2 class="champ" style="font-size:30px">${esc(TIERS[card.tier][1])}</h2><div class="cname">"${esc(card.nick)}" · ${card.pts} pts de legado</div>
-  <div class="chipsrow" style="justify-content:center;margin:10px 0"><span class="chip">${card.tot.games} jogos</span><span class="chip">${card.pos==='GOL'?card.tot.cs+' sem sofrer':card.tot.goals+' gols'}</span><span class="chip gold">${card.nTitles} títulos</span>${card.bolas?`<span class="chip gold">${card.bolas}× Bola de Ouro</span>`:''}</div>
+  <div class="chipsrow" style="justify-content:center;margin:10px 0"><span class="chip">${card.tot.games} jogos</span><span class="chip">${card.pos==='GOL'?card.tot.cs+' sem sofrer':card.tot.goals+' gols'}</span><span class="chip gold">${card.nTitles} títulos</span>${card.bolas?`<span class="chip gold">${card.bolas}× Bola Dourada</span>`:''}</div>
   <button class="btn wide" id="celOk">Ver o legado completo</button>`);
   if(R.k!=='humble')confetti($ov,R.k==='goat'?['#ffffff','#f2c443','#c9a0ff']:['#f2c443','#ff7a2b','#ffffff'],R.k==='goat'?7000:R.k==='star'?5000:2500);
   document.getElementById('celOk').onclick=()=>{$ov.hidden=true;$ov.innerHTML='';res()};
@@ -6635,8 +6762,8 @@ function storySeason(ls){
  const r=ls.row||{};const c=CLUB[r.club]||club();const cn=c?c.n:'';const T=(ls.titles||[]);const A=(ls.awards||[]);const N=(ls.news||[]).map(x=>x.t);
  const has=k=>T.some(t=>(t.ic||t.t)===k);let g=r.goals||0,j=r.games||0,nt=r.nota||0;const B=ls.stats&&ls.stats.Base;if(B&&!j){j=B.j||0;g=B.g||0;nt=B.nn?B.ns/B.nn:nt}const gk=S.pos==='GOL';
  let ic='📖',title,lead;
- if(A.some(a=>a.t==='bola')){ic='🏆';title='O melhor do mundo';lead=`Paris, smoking, flashes. O nome anunciado foi o de ${first()}. O garoto do campinho levou a Bola de Ouro.`}
- else if(has('copa_mundo')){ic='🌍';title='Campeão do mundo';lead=`${first()} levantou a Copa do Mundo. Um país inteiro na rua por causa de um grupo de jogadores, e ele era um deles.`}
+ if(A.some(a=>a.t==='bola')){ic='🏆';title='O melhor do mundo';lead=`Paris, smoking, flashes. O nome anunciado foi o de ${first()}. O garoto do campinho levou a Bola Dourada.`}
+ else if(has('copa_mundo')){ic='🌍';title='Campeão do mundo';lead=`${first()} levantou a Copa Mundial. Um país inteiro na rua por causa de um grupo de jogadores, e ele era um deles.`}
  else if(has('liberta')||has('orelhas')){ic='🏆';title='Glória continental';lead=`O ${cn} conquistou o continente, e ${first()} estava em campo na noite que a cidade nunca vai esquecer.`}
  else if(N.includes('promo')){ic='🎉';title='O garoto subiu';lead=`Depois de ${S.age>=19?'muita espera':'pouco tempo'} na base, ${first()} foi chamado pro time profissional do ${cn}. O vestiário de cima tem outro cheiro.`}
  else if(N.includes('nopromo')&&S.flags&&S.flags.release){ic='🎒';title='Recomeço';lead=`O ${cn} não acreditou nele. Aos ${S.age} anos, ${first()} arrumou a mala e foi provar o contrário em outro lugar.`}
@@ -6925,7 +7052,7 @@ const PRESS_Q=[
  {q:'"Você sairia do clube por uma proposta melhor?"',a:[['Aqui é minha casa.',{torc:8,board:3}],['Futebol é dinâmico, nunca se sabe.',{torc:-6,fama:2}],['Meu empresário cuida disso.',{torc:-3}]]},
  {q:'"O que achou da provocação do rival?"',a:[['Respondo em campo.',{torc:5,disc:2}],['Eles vivem falando da gente.',{torc:7,fama:3,disc:-2}],['Nem vi.',{torc:1}]]},
  {q:'"E a vida fora de campo? Foi visto na balada…"',a:[['Folga é folga, mas sou profissional.',{board:2,torc:2}],['Minha vida pessoal não é assunto.',{fama:2,torc:-1}],['Tava comemorando o gol, ué!',{fama:4,torc:3,board:-4}]]},
- {q:'"Qual é o seu sonho no futebol?"',a:[['Ganhar tudo com essa camisa.',{torc:7}],['Seleção e Bola de Ouro.',{fama:4}],['Dar uma casa pros meus pais.',{cab:3,torc:3}]]},
+ {q:'"Qual é o seu sonho no futebol?"',a:[['Ganhar tudo com essa camisa.',{torc:7}],['Seleção e Bola Dourada.',{fama:4}],['Dar uma casa pros meus pais.',{cab:3,torc:3}]]},
  {q:'"A torcida vaiou você no último jogo. Magoou?"',a:[['Eles têm o direito. Vou virar o jogo.',{torc:8,cab:-1}],['Magoou sim, sou humano.',{torc:2,cab:2}],['Vaia de quem não joga não me afeta.',{torc:-12,fama:3}]]},
 ];
 function mgColetiva(){return new Promise(res=>{
@@ -7421,14 +7548,14 @@ function rpgOpen(){const R=rpgS();
 // ================== CAMPEONATOS: regras reais, playoffs, continentais e balanço por competição ==================
 // Critérios de desempate por país, acesso/rebaixamento com playoffs (Inglaterra, Espanha, Itália, Alemanha, França,
 // Portugal, Holanda), suspensão por cartão por liga, Champions/Europa/Conference com fase de liga de 36 clubes,
-// Libertadores com o 3º do grupo caindo pra Sul-Americana, todas as ligas simuladas rodada a rodada e, no balanço,
+// Copa Continental com o 3º do grupo caindo pra Taça Sul, todas as ligas simuladas rodada a rodada e, no balanço,
 // pop-ups de cada campeonato + briga de artilharia e de assistências.
 
 // ---------- regras ----------
 const CAMP_TB={BRA:['p','v','sg','gp','h2h'],ENG:['p','sg','gp','h2h'],ESP:['p','h2h','sg','gp'],ITA:['p','h2h','sg','gp'],GER:['p','sg','gp','h2h'],FRA:['p','sg','gp','h2h'],POR:['p','h2h','sg','gp'],NED:['p','sg','gp','h2h'],ARG:['p','sg','gp','h2h'],USA:['p','v','sg','gp'],KSA:['p','h2h','sg','gp']};
 const CAMP_TB_TXT={p:'pontos',v:'vitórias',sg:'saldo de gols',gp:'gols marcados',h2h:'confronto direto'};
 // playoff de acesso na liga de baixo (posições) e playoff de rebaixamento na de cima (posição que joga contra o 3º de baixo)
-const CAMP_PO={ENG2:{po:[3,6],n:'Playoff da Championship',fin:'Final em Wembley'},ESP2:{po:[3,6],n:'Playoff de ascenso',seed:true},ITA2:{po:[3,8],n:'Playoff da Serie B',seed:true},
+const CAMP_PO={ENG2:{po:[3,6],n:'Playoff da Segunda Inglesa',fin:'Final em Londres'},ESP2:{po:[3,6],n:'Playoff de ascenso',seed:true},ITA2:{po:[3,8],n:'Playoff da Segunda Italiana',seed:true},
  GER1:{rpo:16,n:'Relegation (playoff de rebaixamento)'},FRA1:{rpo:16,n:'Barrage (playoff de rebaixamento)'},POR1:{rpo:16,n:'Playoff de manutenção'},NED1:{rpo:16,n:'Playoff de rebaixamento'}};
 const CAMP_YEL={BRA:3,FRA:3,ITA:5,ENG:5,ESP:5,GER:5,POR:5,NED:5,ARG:5,USA:5,KSA:5};
 const CAMP_LP={UCL:{size:36,direct:8,po:24},UEL:{size:36,direct:8,po:24},UECL:{size:36,direct:8,po:24},ACL:{size:24,direct:16,po:16}};
@@ -7507,14 +7634,14 @@ function campLP(comp,res,I,me){const F=CAMP_LP[comp.code]||{size:36,direct:8,po:
  else if(hasPO&&pos<=F.po){comp.stage=0;res.note=`${pos}º na fase de liga: vai pro playoff`;const opp=rows[Math.min(rows.length-1,F.direct+(F.po-pos))];if(opp)comp.rounds[0].opp=opp.id}
  else{comp.alive=false;comp.out='Fase de liga';res.note=`${pos}º na fase de liga: eliminado`}}
 function campGrp(comp,res,I,me){const t=sortTable(comp.gtab,null);const pos=t.findIndex(x=>x.id===me.id)+1;comp.gpos=pos;comp.gTable=t.map(r=>({id:r.id,p:r.p,j:r.j,gp:r.gp,gc:r.gc,v:r.v||0}));
- if(comp.code==='SUD'){if(pos===1){comp.stage=1;res.note='1º do grupo: direto pras oitavas'}else if(pos===2){comp.stage=0;res.note='2º do grupo: playoff contra um 3º da Libertadores';const lib=contParticipants('LIB').filter(x=>CLUB[x]);if(lib.length)comp.rounds[0].opp=pick(lib)}else{comp.alive=false;comp.out='Fase de grupos';res.note=`${pos}º do grupo: eliminado`}return}
+ if(comp.code==='SUD'){if(pos===1){comp.stage=1;res.note='1º do grupo: direto pras oitavas'}else if(pos===2){comp.stage=0;res.note='2º do grupo: playoff contra um 3º da Copa Continental';const lib=contParticipants('LIB').filter(x=>CLUB[x]);if(lib.length)comp.rounds[0].opp=pick(lib)}else{comp.alive=false;comp.out='Fase de grupos';res.note=`${pos}º do grupo: eliminado`}return}
  if(pos<=(I.adv||2)){comp.stage=0;res.note=`${pos}º do grupo: classificado pras oitavas`;return}
- if(comp.code==='LIB'&&pos===3){// regra real: 3º da Libertadores cai pro playoff da Sul-Americana
+ if(comp.code==='LIB'&&pos===3){// regra real: 3º da Copa Continental cai pro playoff da Taça Sul
   const SI=CONT_INFO.SUD;comp.fromLIB=true;comp.code='SUD';comp.n=SI.n;comp.ic=SI.ic;comp.pts=SI.pts;comp.pool=contParticipants('SUD');
   comp.rounds=[{n:'Playoff',legs:2,po:true}].concat(SI.ko.map(n=>({n,legs:2}))).concat([{n:SI.fin,legs:1,neutral:true}]);comp.stage=0;comp.alive=true;
   const sud=comp.pool.filter(x=>CLUB[x]);if(sud.length)comp.rounds[0].opp=pick(sud);
   try{S.st.cal.splice(S.st.idx+1,0,{k:'ko',cid:'cont'})}catch(e){}
-  res.note='3º do grupo: cai pro playoff da Copa Sul-Americana';return}
+  res.note='3º do grupo: cai pro playoff da Taça Sul';return}
  comp.alive=false;comp.out='Fase de grupos';res.note=`${pos}º do grupo: eliminado`}
 
 // ---------- briga de artilharia e de assistências ----------
@@ -7540,10 +7667,10 @@ function campRecap(){const st=S.st;const me=club();if(!st||!me)return null;const
 // ---------- pop-ups do balanço ----------
 function campZones(lg,n){const L=LG[lg];const C=COUNTRY[L.c];const z={};const lab=(i,t,c)=>{if(!z[i])z[i]={t,c}};
  if(L.tier===1&&C.slots){const col={UCL:'#3d7bff',LIB:'#3d7bff',UEL:'#ff9a3c',SUD:'#ff9a3c',UECL:'#3ccf8e',CCC:'#3d7bff',ACL:'#3d7bff'};
-  for(const k in C.slots){const[a,b]=C.slots[k];for(let i=a;i<=b;i++)lab(i,k==='LIB'&&i>=5?'Pré-Libertadores':CONT_INFO[k].n,col[k]||'#3d7bff')}}
+  for(const k in C.slots){const[a,b]=C.slots[k];for(let i=a;i<=b;i++)lab(i,k==='LIB'&&i>=5?'Pré-Copa Continental':CONT_INFO[k].n,col[k]||'#3d7bff')}}
  if(L.prev){const au=campAutoUp(lg);for(let i=1;i<=au;i++)lab(i,'Acesso','#3ccf8e');const R=CAMP_PO[lg];if(R&&R.po)for(let i=R.po[0];i<=R.po[1];i++)lab(i,'Playoff de acesso','#f2c443')}
  if(L.next&&L.down){const R=CAMP_PO[lg];for(let i=n-L.down+1;i<=n;i++)lab(i,'Rebaixamento','#ff5a4a');if(R&&R.rpo)lab(R.rpo,'Playoff de rebaixamento','#f2c443')}
- if(L.po)for(let i=1;i<=L.po;i++)lab(i,'Playoffs da MLS','#3d7bff');return z}
+ if(L.po)for(let i=1;i<=L.po;i++)lab(i,'Playoffs da Liga Americana','#3d7bff');return z}
 function campTableHTML(rows,meId,zones,opt={}){const n=rows.length;const mi=rows.findIndex(r=>r.id===meId);const show=new Set();
  const top=opt.full?n:6;for(let i=0;i<Math.min(top,n);i++)show.add(i);for(let i=Math.max(0,mi-2);i<=Math.min(n-1,mi+2);i++)show.add(i);if(!opt.full)for(let i=Math.max(0,n-(zones&&Object.values(zones).some(z=>z.t==='Rebaixamento')?4:0));i<n;i++)show.add(i);
  let last=-1,html='';for(const i of[...show].sort((a,b)=>a-b)){if(i>last+1)html+=`<tr class="cp-gap"><td colspan="7">···</td></tr>`;last=i;const r=rows[i];const c=CLUB[r.id]||{n:r.id};const z=zones&&zones[i+1];
@@ -7571,10 +7698,10 @@ async function campRecapShow(){const R=S.campRecap;if(!R||R.shown)return;R.shown
  for(const c of R.comps){if(c.id==='acc'||c.id==='rpo'){if(!c.path.length)continue}
   const lastN=c.path.length?c.path[c.path.length-1]:null;const res=c.won?'CAMPEÃO!':c.out?`Caiu: ${c.out}`:lastN&&lastN.note?lastN.note:'';
   let body='';if(c.lpTable){const zz={};for(let i=1;i<=c.lpTable.length;i++)zz[i]=i<=8?{t:'Oitavas direto',c:'#3ccf8e'}:i<=24?{t:'Playoff',c:'#f2c443'}:{t:'Eliminado',c:'#ff5a4a'};body+=`<div class="eyebrow" style="margin:4px 0">Fase de liga (${c.lpTable.length} clubes)</div>`+campTableHTML(c.lpTable,me,zz)}
-  if(c.gTable){body+=`<div class="eyebrow" style="margin:4px 0">Seu grupo</div>`+campTableHTML(c.gTable.map(r=>({...r,v:r.v??'-'})),me,{1:{t:'Oitavas',c:'#3ccf8e'},2:{t:'Oitavas',c:'#3ccf8e'},3:{t:c.fromLIB?'Sul-Americana':'Eliminado',c:'#f2c443'}},{full:true})}
+  if(c.gTable){body+=`<div class="eyebrow" style="margin:4px 0">Seu grupo</div>`+campTableHTML(c.gTable.map(r=>({...r,v:r.v??'-'})),me,{1:{t:'Oitavas',c:'#3ccf8e'},2:{t:'Oitavas',c:'#3ccf8e'},3:{t:c.fromLIB?'Taça Sul':'Eliminado',c:'#f2c443'}},{full:true})}
   const ko=c.path.filter(r=>!/Grupo|Fase de liga|fase · jogo|Fase de grupos|1ª fase/.test(r.label||''));if(ko.length)body+=`<div class="eyebrow" style="margin:8px 0 4px">Mata-mata</div>`+campPathHTML({path:ko});else if(!c.lpTable&&!c.gTable)body+=campPathHTML(c);
   const gs=c.path.reduce((s,r)=>s+(r.g||0),0),as=c.path.reduce((s,r)=>s+(r.as||0),0);
-  pages.push({ic:c.won?'🏆':c.code?'🌎':'🏅',eyebrow:`${seasonLbl(R.y)}${c.fromLIB?' · veio da Libertadores':''}`,title:c.n,big:res,good:c.won,bad:!c.won&&!!c.out,sub:`${c.path.length} jogo${c.path.length===1?'':'s'} · você: ${gs} gol${gs===1?'':'s'}, ${as} assist.`,body})}
+  pages.push({ic:c.won?'🏆':c.code?'🌎':'🏅',eyebrow:`${seasonLbl(R.y)}${c.fromLIB?' · veio da Copa Continental':''}`,title:c.n,big:res,good:c.won,bad:!c.won&&!!c.out,sub:`${c.path.length} jogo${c.path.length===1?'':'s'} · você: ${gs} gol${gs===1?'':'s'}, ${as} assist.`,body})}
  // briga de artilharia e de assistências
  if(R.race){const gi=R.race.gl.findIndex(x=>x.me),ai=R.race.as.findIndex(x=>x.me);const lead=R.race.gl[0],alead=R.race.as[0];
   pages.push({ic:'⚽',eyebrow:`Artilharia · ${L.n}`,title:gi===0?'VOCÊ É O ARTILHEIRO!':R.race.gl[gi].v===0?'Você não marcou na liga':gi>=30?'Fora da briga':`Você terminou em ${gi+1}º`,big:gi===0?`${lead.v} gols`:`${esc(lead.n)} levou com ${lead.v} gols`,good:gi===0,sub:gi===0?`${R.race.gl[1]?`${esc(R.race.gl[1].n)} ficou ${lead.v-R.race.gl[1].v} gol${lead.v-R.race.gl[1].v===1?'':'s'} atrás.`:''}`:`Faltaram ${lead.v-R.race.gl[gi].v} gols pra você.`,body:campRaceHTML(R.race.gl,'gols')});
@@ -7701,14 +7828,14 @@ async function renderIntro(){
   <div class="floods"><i></i><i></i></div>
   <div class="eyebrow">Simulador de carreira · futebol</div>
   <h1 class="logo"><span class="l1">Fome</span><span class="l2">de Bola</span></h1>
-  <p class="lede">Roube atributos dos Ícones do FC 27, escolha onde jogar e viva a carreira jogo a jogo: da Série D ao topo da Europa, com pênaltis decisivos, braçadeira, Bola de Ouro e estátua na porta do estádio.</p>
+  <p class="lede">Roube atributos dos Ícones do FC 27, escolha onde jogar e viva a carreira jogo a jogo: da Série D ao topo da Europa, com pênaltis decisivos, braçadeira, Bola Dourada e estátua na porta do estádio.</p>
   <div class="row"><button class="btn big" id="go">Nova carreira</button>${saves[0]?`<button class="btn ghost big" id="cont0">Continuar</button>`:''}</div>
   <div class="strip"><div><b>22</b><span>ligas</span></div><div><b>380+</b><span>clubes</span></div><div><b>114</b><span>Ícones</span></div><div><b>11</b><span>degraus</span></div></div>
  </section>
  ${saves.length?`<section class="card"><div class="eyebrow" style="margin-bottom:10px">Em andamento</div><div class="clubs">${saves.map(x=>saveRow(x,true)).join('')}</div></section>`:''}
  <div class="how">
   <div><span class="num">01</span><b>Roube 8 atributos</b><span class="muted">Cada Ícone oferece um atributo. Cada posição pesa os atributos de um jeito: reflexo é ouro no gol e lixo no ataque.</span></div>
-  <div><span class="num">02</span><b>Jogue cada partida</b><span class="muted">Tabela, copas, acesso e rebaixamento, estaduais, continentais, Mundial e Copa do Mundo de 4 em 4 anos.</span></div>
+  <div><span class="num">02</span><b>Jogue cada partida</b><span class="muted">Tabela, copas, acesso e rebaixamento, estaduais, continentais, Mundial e Copa Mundial de 4 em 4 anos.</span></div>
   <div><span class="num">03</span><b>Decida dentro e fora</b><span class="muted">Bata os pênaltis, peça a 10, a braçadeira e aumento. Festa ou dormir cedo? Cada escolha pesa.</span></div>
  </div>
  <section class="card"><div class="eyebrow" style="margin-bottom:10px">A escada do legado</div>
@@ -7759,7 +7886,7 @@ function renderAccount(){
   <div class="eyebrow">Vários de uma vez</div><div class="muted" style="font-size:14px">Selecione várias imagens com o nome do clube no arquivo, por exemplo <span class="mono">Flamengo.png</span>, <span class="mono">Real Madrid.png</span> ou a sigla <span class="mono">FLA.png</span>. O jogo casa cada arquivo com o clube certo.</div>
   <div class="row"><input class="input" type="file" id="bMany" multiple accept="image/png,image/jpeg,image/webp,image/svg+xml" style="flex:1;min-width:200px"><button class="btn small" id="bManyUp">Enviar todos</button></div>
   <div id="bManyOut" class="muted" style="font-size:13px"></div></section>`:''}
- ${CLOUD.assets?`<section class="card" style="display:grid;gap:10px"><div class="eyebrow">Ilustrações das taças</div><div class="muted" style="font-size:14px">Envie as ilustrações com o nome da competição ou do prêmio no arquivo, por exemplo <span class="mono">Champions League.png</span>, <span class="mono">Copa do Brasil.png</span>, <span class="mono">Bola de Ouro.png</span>. Elas substituem os troféus desenhados nas celebrações, cerimônias e na galeria.</div>
+ ${CLOUD.assets?`<section class="card" style="display:grid;gap:10px"><div class="eyebrow">Ilustrações das taças</div><div class="muted" style="font-size:14px">Envie as ilustrações com o nome da competição ou do prêmio no arquivo, por exemplo <span class="mono">Copa Europeia.png</span>, <span class="mono">Taça Brasil.png</span>, <span class="mono">Bola Dourada.png</span>. Elas substituem os troféus desenhados nas celebrações, cerimônias e na galeria.</div>
   <div class="row"><input class="input" type="file" id="tMany" multiple accept="image/png,image/jpeg,image/webp,image/svg+xml" style="flex:1;min-width:200px"><button class="btn small" id="tManyUp">Enviar todas</button></div>
   <div id="tManyOut" class="muted" style="font-size:13px">${Object.keys(CLOUD.trophies||{}).length} ilustrações enviadas.</div></section>`:''}
  <section class="card"><div class="eyebrow" style="margin-bottom:8px">Privacidade</div><div class="muted" style="font-size:14px">Carreiras salvas são só suas. Só fica pública uma carreira que você mandar pro ranking pelo botão Compartilhar.</div></section>`);
@@ -7791,7 +7918,7 @@ function renderAccount(){
 function cardData(){
  const L=legacy();const tot=totals();const nat=NATS[S.nat];
  const groups={};for(const t of S.titles){(groups[t.n]=groups[t.n]||{ic:t.ic||t.t,n:t.n,y:[]}).y.push(t.year+1)}
- const aw={};for(const a of S.awards){const k=a.t==='bola_top3'?'Pódio da Bola de Ouro':a.n.replace(/ · .*/,'');(aw[k]=aw[k]||{t:a.t,n:k,y:[]}).y.push(a.year+1)}
+ const aw={};for(const a of S.awards){const k=a.t==='bola_top3'?'Pódio da Bola Dourada':a.n.replace(/ · .*/,'');(aw[k]=aw[k]||{t:a.t,n:k,y:[]}).y.push(a.year+1)}
  return{v:1,cid:S.cid,name:S.name,nat:S.nat,flag:nat.f,pos:S.pos,startPos:S.startPos,peak:S.peak,peakAge:S.peakAge,shirt:S.shirt,nick:nickname(),tier:L.tier,pts:L.pts,bolas:L.bolas,tot,caps:S.caps,natGoals:S.natGoals,
   titles:Object.values(groups).sort((a,b)=>b.y.length-a.y.length),nTitles:S.titles.length,awards:Object.values(aw),rawT:S.titles.map(t=>({t:t.t,n:t.n,ic:t.ic,club:t.club,year:t.year})),rawA:S.awards.map(a=>({t:a.t,n:a.n,year:a.year})),
   clubs:Object.entries(S.clubs).sort((a,b)=>a[1].first-b[1].first).map(([id,v])=>{const c=CLUB[id]||{};return{id,n:c.n||id,c1:c.c1,c2:c.c2,a:c.a,seasons:v.seasons,games:v.games,goals:v.goals,cs:v.cs,titles:v.titles.length,idol:S.idols.includes(id),statue:S.statues.includes(id),heart:S.heart===id}}),
@@ -7949,12 +8076,12 @@ async function renderIntro(){
  const live=list.filter(x=>!x.done),done=list.filter(x=>x.done).sort((a,b)=>(b.pts||0)-(a.pts||0));
  const cur=live[0];const pr=activeProfile();
  page('home',`
- ${cur?`<section class="continue"><div class="eyebrow">Continuar de onde parou</div>${careerCard(cur,true)}<button class="btn wide big" id="cont0">▶ Continuar</button></section>`:`<section class="hero hhero"><div class="floods"><i></i><i></i></div><div class="eyebrow">Simulador de carreira · futebol</div><h1 class="logo"><span class="l1">Fome</span><span class="l2">de Bola</span></h1><p class="lede">Da peneira à Bola de Ouro. Seu nível nasce na peneira, cresce no treino e na vida fora de campo.</p></section>`}
+ ${cur?`<section class="continue"><div class="eyebrow">Continuar de onde parou</div>${careerCard(cur,true)}<button class="btn wide big" id="cont0">▶ Continuar</button></section>`:`<section class="hero hhero"><div class="floods"><i></i><i></i></div><div class="eyebrow">Simulador de carreira · futebol</div><h1 class="logo"><span class="l1">Fome</span><span class="l2">de Bola</span></h1><p class="lede">Da peneira à Bola Dourada. Seu nível nasce na peneira, cresce no treino e na vida fora de campo.</p></section>`}
  <button class="newcar ${cur?'':'primary'}" id="go"><span>＋</span><div><b>Nova carreira</b><small>${cur?'Começar outra do zero':'Crie seu jogador em 1 minuto'}</small></div><em>→</em></button>
  ${live.length>1?`<section class="hsec"><div class="hsec-h"><span class="eyebrow">Outras em andamento · ${live.length-1}</span><button class="lnk" data-nav="careers">ver todas</button></div>${live.slice(1,4).map(x=>careerCard(x)).join('')}</section>`:''}
  ${done.length?`<section class="hsec"><div class="hsec-h"><span class="eyebrow">Suas lendas</span><button class="lnk" data-nav="careers">ver todas</button></div>${done.slice(0,3).map(x=>careerCard(x)).join('')}</section>`:''}
  <section class="hsec" id="rkTeaser"><div class="hsec-h"><span class="eyebrow">🏆 Top do ranking</span><button class="lnk" data-nav="ranking">ver ranking</button></div><div class="muted" style="font-size:13px">Carregando…</div></section>
- ${!cur&&!done.length?`<details class="hsec howto"><summary>Como funciona <em>›</em></summary><ol><li><b>Crie seu jogador</b> e escolha quem cuida da sua carreira.</li><li><b>Peneira:</b> mostre serviço e escolha seu primeiro clube.</li><li><b>Temporadas</b> em blocos rápidos ou semana a semana, com lances, finais ao vivo e decisões de vida.</li><li><b>Legado:</b> títulos, Bola de Ouro, estátua e ranking.</li></ol></details>`:''}
+ ${!cur&&!done.length?`<details class="hsec howto"><summary>Como funciona <em>›</em></summary><ol><li><b>Crie seu jogador</b> e escolha quem cuida da sua carreira.</li><li><b>Peneira:</b> mostre serviço e escolha seu primeiro clube.</li><li><b>Temporadas</b> em blocos rápidos ou semana a semana, com lances, finais ao vivo e decisões de vida.</li><li><b>Legado:</b> títulos, Bola Dourada, estátua e ranking.</li></ol></details>`:''}
  <p class="foot">Sem afiliação com clubes, ligas, federações ou com a EA. Nomes reais só para identificação.</p>`);
  document.getElementById('go').onclick=()=>{CLOUD.screen='game';renderCreate()};
  const c0=document.getElementById('cont0');if(c0)c0.onclick=()=>loadSave(cur.cid);
@@ -8013,6 +8140,79 @@ function renderProfile(){
 // ---------- BOOT ----------
 setTimeout(()=>renderIntro(),0);
 initCloud().then(()=>{const h=(location.hash||'').replace('#','');if(h.startsWith('share.'))openShared(h.slice(6))});
+
+// ================== EDITOR DE TIMES ==================
+// Os times, ligas e lendas do jogo são inventados. Aqui o jogador muda nome, sigla, cores e escudo,
+// renomeia ligas e lendas, e salva ou carrega tudo num arquivo (.json) pra trocar com os amigos.
+// Fica só no aparelho dele (localStorage 'fdb_patch'), por cima dos nomes inventados.
+const ED={tab:'times',lg:'BRA1',open:null,q:''};
+const hex6=h=>{h=String(h||'#000').trim().toLowerCase();if(/^#[0-9a-f]{3}$/.test(h))h='#'+h.slice(1).split('').map(x=>x+x).join('');return/^#[0-9a-f]{6}$/.test(h)?h:'#000000'};
+function edSave(P){try{localStorage.setItem('fdb_patch',JSON.stringify(P));FICT.patch=P;applyFict();return true}catch(e){toast({ic:'⚠️',title:'Não coube',txt:'O aparelho ficou sem espaço pro editor. Use escudos menores ou tire alguns.',ms:3600});return false}}
+function edClean(P){for(const id in P.clubs){const o=P.clubs[id];for(const k in o)if(!o[k])delete o[k];if(!Object.keys(o).length)delete P.clubs[id]}return P}
+function edImg(file){return new Promise((res,rej)=>{const fr=new FileReader();fr.onerror=rej;fr.onload=()=>{const im=new Image();im.onerror=rej;im.onload=()=>{const N=112;const cv=document.createElement('canvas');cv.width=N;cv.height=N;const g=cv.getContext('2d');
+  const k=Math.min(N/im.width,N/im.height);const w=im.width*k,h=im.height*k;g.drawImage(im,(N-w)/2,(N-h)/2,w,h);let u=cv.toDataURL('image/webp',.86);if(!/^data:image\/webp/.test(u))u=cv.toDataURL('image/png');res(u)};im.src=fr.result};fr.readAsDataURL(file)})}
+function edLgOpts(){const by={};for(const k in LG){const c=LG[k].c;(by[c]=by[c]||[]).push(k)}
+ return Object.entries(by).map(([c,ks])=>`<optgroup label="${esc((COUNTRY[c]&&COUNTRY[c].n)||c)}">${ks.map(k=>`<option value="${k}" ${ED.lg===k?'selected':''}>${esc(LG[k].n)}</option>`).join('')}</optgroup>`).join('')+`<option value="ext" ${ED.lg==='ext'?'selected':''}>Clubes de fora (torneios)</option>`}
+function edClubs(){return ED.lg==='ext'?Object.values(CLUB).filter(c=>c.ext):leagueClubs(ED.lg).slice().sort((a,b)=>b.s-a.s)}
+function edClubRow(c){const P=fictPatch();const p=P.clubs[c.id]||{};const op=ED.open===c.id;const f=FICT.names[c.id]||{};
+ return`<div class="ed-row ${op?'on':''}" data-cid="${esc(c.id)}"><button class="ed-h" data-edo="${esc(c.id)}">${shieldHTML(c)}<span class="ed-n"><b>${esc(c.n)}</b><small>${esc(c.a)}${Object.keys(p).length?' · editado':''}</small></span><em>${op?'▴':'✎'}</em></button>
+ ${op?`<div class="ed-f"><label>Nome<input class="input" id="edN" maxlength="28" value="${esc(c.n)}"></label>
+  <div class="ed-2"><label>Sigla<input class="input" id="edA" maxlength="4" value="${esc(c.a)}" style="text-transform:uppercase"></label><label>Cor 1<input type="color" id="edC1" value="${hex6(c.c1)}"></label><label>Cor 2<input type="color" id="edC2" value="${hex6(c.c2)}"></label></div>
+  <div class="ed-2"><label class="btn ghost small ed-up">🖼️ Escudo (imagem)<input type="file" id="edF" accept="image/*" hidden></label>${p.img?'<button class="btn ghost small" id="edFx">Tirar imagem</button>':''}</div>
+  <div class="ed-2"><button class="btn small" id="edOk">Salvar</button><button class="lnk" id="edR">Voltar ao original (${esc(f.n||'')})</button></div></div>`:''}</div>`}
+function renderEditor(){CLOUD.screen='account';const P=fictPatch();const T=ED.tab;const nC=Object.keys(P.clubs).length,nL=Object.keys(P.leagues).length,nP=Object.keys(P.players).length;
+ const tabs=[['times','Times'],['ligas','Ligas'],['lendas','Lendas'],['arquivo','Arquivo']].map(([k,n])=>`<button class="lmbtn ${T===k?'on':''}" data-edt="${k}">${n}</button>`).join('');
+ let body='';
+ if(T==='times')body=`<select class="input" id="edLg">${edLgOpts()}</select><div class="ed-list">${edClubs().map(edClubRow).join('')}</div>`;
+ else if(T==='ligas')body=`<div class="ed-list">${Object.keys(LG).map(k=>`<label class="ed-lg"><small>${esc((COUNTRY[LG[k].c]&&COUNTRY[LG[k].c].n)||'')}</small><input class="input" data-elg="${k}" maxlength="32" value="${esc(LG[k].n)}"></label>`).join('')}</div><button class="btn small" id="edLgOk">Salvar ligas</button>`;
+ else if(T==='lendas'){const q=fN(ED.q);body=`<input class="input" id="edQ" placeholder="Procurar lenda" value="${esc(ED.q)}"><div class="ed-list">${LEGENDS.map((L,i)=>[L,i]).filter(([L])=>!q||fN(L[0]).includes(q)).slice(0,60).map(([L,i])=>`<label class="ed-lg"><small>${L[1]} ${esc(L[2])} · ${L[3]}</small><input class="input" data-elp="${i}" maxlength="28" value="${esc(L[0])}"></label>`).join('')}</div><button class="btn small" id="edLpOk">Salvar lendas</button>`}
+ else body=`<p class="muted" style="margin:0">Salve tudo o que você mudou num arquivo pra guardar ou mandar pra um amigo. Quem carregar o arquivo vê os mesmos nomes e escudos.</p>
+  <div class="ed-2"><button class="btn small" id="edExp">⬇️ Salvar arquivo</button><label class="btn ghost small ed-up">⬆️ Carregar arquivo<input type="file" id="edImp" accept=".json,application/json" hidden></label></div>
+  <p class="muted" style="margin:0;font-size:13px">Mudanças agora: ${nC} times, ${nL} ligas, ${nP} lendas.</p>
+  ${nC+nL+nP?'<button class="btn ghost small" id="edZero" style="justify-self:start;color:#ffb3aa">Voltar tudo ao original</button>':''}`;
+ page('account',`<div class="phead"><h2>Editor de times</h2><p>Os clubes do jogo são inventados. Mude nome, sigla, cores e escudo como quiser. Fica só neste aparelho e vale pra todas as carreiras.</p></div>
+  <button class="lnk" id="edBack" style="justify-self:start">← Perfil</button><div class="livemode ed-tabs">${tabs}</div><section class="hsec ed">${body}</section>`);
+ document.getElementById('edBack').onclick=()=>renderProfile();
+ document.querySelectorAll('[data-edt]').forEach(b=>b.onclick=()=>{ED.tab=b.dataset.edt;ED.open=null;renderEditor()});
+ const lg=document.getElementById('edLg');if(lg)lg.onchange=()=>{ED.lg=lg.value;ED.open=null;renderEditor()};
+ document.querySelectorAll('[data-edo]').forEach(b=>b.onclick=()=>{ED.open=ED.open===b.dataset.edo?null:b.dataset.edo;renderEditor();const r=document.querySelector('.ed-row.on');if(r)r.scrollIntoView({block:'nearest'})});
+ if(T==='times'&&ED.open){const id=ED.open;const c=CLUB[id];const P2=fictPatch();const cur=()=>P2.clubs[id]=P2.clubs[id]||{};
+  document.getElementById('edOk').onclick=()=>{const o=cur();const n=document.getElementById('edN').value.trim(),a=document.getElementById('edA').value.trim().toUpperCase().replace(/[^A-Z0-9]/g,'').slice(0,4);
+   const f=FICT.names[id]||{};o.n=n&&n!==f.n?n.slice(0,28):'';o.a=a&&a!==f.a?a:'';const c1=document.getElementById('edC1').value,c2=document.getElementById('edC2').value;o.c1=c1!==hex6(c.c10)?c1:'';o.c2=c2!==hex6(c.c20)?c2:'';
+   if(edSave(edClean(P2))){toast({ic:'✅',title:'Time salvo',txt:CLUB[id].n,ms:1600});ED.open=null;renderEditor()}};
+  document.getElementById('edR').onclick=()=>{delete P2.clubs[id];if(edSave(P2)){ED.open=null;renderEditor()}};
+  document.getElementById('edF').onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{const u=await edImg(f);cur().img=u;if(edSave(edClean(P2)))renderEditor()}catch(_){toast({ic:'⚠️',title:'Imagem não abriu',txt:'Tente um PNG ou JPG.',ms:2400})}};
+  const fx=document.getElementById('edFx');if(fx)fx.onclick=()=>{cur().img='';if(edSave(edClean(P2)))renderEditor()}}
+ const lo=document.getElementById('edLgOk');if(lo)lo.onclick=()=>{const P2=fictPatch();document.querySelectorAll('[data-elg]').forEach(i=>{const k=i.dataset.elg,v=i.value.trim().slice(0,32);if(v&&v!==FICT.lg0[k])P2.leagues[k]=v;else delete P2.leagues[k]});if(edSave(P2)){toast({ic:'✅',title:'Ligas salvas',ms:1500});renderEditor()}};
+ const q=document.getElementById('edQ');if(q){q.oninput=()=>{ED.q=q.value;clearTimeout(ED.qt);ED.qt=setTimeout(()=>{renderEditor();const q2=document.getElementById('edQ');if(q2){q2.focus();q2.setSelectionRange(q2.value.length,q2.value.length)}},350)}}
+ const po=document.getElementById('edLpOk');if(po)po.onclick=()=>{const P2=fictPatch();document.querySelectorAll('[data-elp]').forEach(i=>{const k='l'+i.dataset.elp,v=i.value.trim().slice(0,28);if(v&&v!==FICT.legend0[+i.dataset.elp])P2.players[k]=v;else delete P2.players[k]});if(edSave(P2)){toast({ic:'✅',title:'Lendas salvas',ms:1500});renderEditor()}};
+ const ex=document.getElementById('edExp');if(ex)ex.onclick=()=>{const blob=new Blob([JSON.stringify({...fictPatch(),app:'fome-de-bola',v:1},null,1)],{type:'application/json'});const a=document.createElement('a');a.href=URL.createObjectURL(blob);a.download='fome-de-bola-times.json';document.body.appendChild(a);a.click();setTimeout(()=>{URL.revokeObjectURL(a.href);a.remove()},1500)};
+ const im=document.getElementById('edImp');if(im)im.onchange=async e=>{const f=e.target.files&&e.target.files[0];if(!f)return;try{const raw=JSON.parse(await f.text());const P2=edImport(raw);if(edSave(P2)){toast({ic:'✅',title:'Arquivo carregado',txt:`${Object.keys(P2.clubs).length} times, ${Object.keys(P2.leagues).length} ligas, ${Object.keys(P2.players).length} lendas`,ms:2600});renderEditor()}}catch(_){toast({ic:'⚠️',title:'Arquivo inválido',txt:'Não é um arquivo do editor do Fome de Bola.',ms:2600})}};
+ const z=document.getElementById('edZero');if(z)z.onclick=async()=>{if(await confirmPop('Voltar tudo ao original?','Todos os nomes, siglas, cores e escudos que você mudou somem deste aparelho.','Voltar ao original')){if(edSave({v:1,clubs:{},leagues:{},players:{}}))renderEditor()}else renderEditor()}}
+// só aceita o que o jogo conhece: ids de clubes, ligas e lendas, textos curtos, cores e imagens
+function edImport(raw){if(!raw||typeof raw!=='object')throw new Error('x');const P={v:1,clubs:{},leagues:{},players:{}};const str=(v,n)=>typeof v==='string'?v.trim().slice(0,n):'';
+ const col=v=>typeof v==='string'&&/^#[0-9a-f]{6}$/i.test(v)?v:'';const img=v=>typeof v==='string'&&(/^data:image\/(png|jpe?g|webp|gif|svg\+xml);base64,[A-Za-z0-9+/=]+$/.test(v)&&v.length<400000||/^https:\/\/[^\s"'<>]+$/.test(v))?v:'';
+ for(const id in raw.clubs||{}){if(!CLUB[id])continue;const o=raw.clubs[id]||{};const x={n:str(o.n,28),a:str(o.a,4).toUpperCase().replace(/[^A-Z0-9]/g,''),c1:col(o.c1),c2:col(o.c2),img:img(o.img)};for(const k in x)if(!x[k])delete x[k];if(Object.keys(x).length)P.clubs[id]=x}
+ for(const k in raw.leagues||{})if(LG[k]){const v=str(raw.leagues[k],32);if(v)P.leagues[k]=v}
+ for(const k in raw.players||{})if(/^l\d+$/.test(k)&&LEGENDS[+k.slice(1)]){const v=str(raw.players[k],28);if(v)P.players[k]=v}
+ return P}
+// entrada no Perfil
+{const _rpE=renderProfile;renderProfile=function(...a){const r=_rpE.apply(this,a);try{const w=$app.querySelector('.wrap');const last=w&&w.lastElementChild;if(w&&!document.getElementById('edOpen')){const h=`<button class="newcar" id="edOpen"><span>✏️</span><div><b>Editor de times</b><small>Nomes, siglas, cores e escudos dos clubes</small></div><em>→</em></button>`;if(last)last.insertAdjacentHTML('beforebegin',h);else w.insertAdjacentHTML('beforeend',h);document.getElementById('edOpen').onclick=()=>{ED.open=null;renderEditor()}}}catch(e){}return r}}
+{const st=document.createElement('style');st.textContent=`.ed{gap:10px}.ed-tabs{flex-wrap:wrap}.ed-list{display:grid;gap:6px;max-height:none}
+.ed-row{border:1px solid var(--line);border-radius:12px;background:rgba(255,255,255,.02)}.ed-row.on{border-color:var(--gold)}
+.ed-h{display:flex;align-items:center;gap:10px;width:100%;padding:8px 10px;background:none;border:0;color:inherit;text-align:left;cursor:pointer}.ed-h .shield{width:30px;height:35px}
+.ed-n{flex:1;min-width:0;display:grid}.ed-n b{font-size:15px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.ed-n small{color:var(--muted);font-size:12px}.ed-h em{font-style:normal;color:var(--muted)}
+.ed-f{display:grid;gap:10px;padding:4px 10px 12px}.ed-f label{display:grid;gap:4px;font-size:12px;color:var(--muted);font-weight:600}.ed-2{display:flex;gap:10px;align-items:end;flex-wrap:wrap}.ed-2>label{flex:1;min-width:70px}
+.ed-f input[type=color]{width:100%;height:44px;border:1px solid var(--line-2);border-radius:10px;background:var(--pitch);padding:3px}.ed-up{cursor:pointer;display:inline-flex;align-items:center}
+.ed-lg{display:grid;gap:3px}.ed-lg small{color:var(--muted);font-size:12px}`;document.head.appendChild(st)}
+// cartas e carreiras salvas antes da versão fictícia: mostram os nomes novos
+{const _rcF=renderCard;renderCard=function(k,opt){try{if(k&&typeof k==='object'){k={...k};
+   k.clubs=(k.clubs||[]).map(c=>{const n=CLUB[c.id];return n?{...c,n:n.n,a:n.a,c1:n.c1,c2:n.c2}:c});
+   k.titles=(k.titles||[]).map(t=>({...t,n:fictText(t.n)}));k.awards=(k.awards||[]).map(t=>({...t,n:fictText(t.n)}));
+   if(k.rawT)k.rawT=k.rawT.map(t=>({...t,n:fictText(t.n)}));if(k.rawA)k.rawA=k.rawA.map(t=>({...t,n:fictText(t.n)}));
+   k.history=(k.history||[]).map(h=>({...h,lg:fictText(h.lg)}));k.nick=fictText(k.nick);k.retired=fictText(k.retired)}}catch(e){}return _rcF.call(this,k,opt)}}
+{const _lsF=loadSave;loadSave=async function(...a){const r=await _lsF.apply(this,a);try{if(r&&W&&W.stars){let i=0;for(const s of W.stars)if(s.real){if(FICT_REAL.has(hash(fN(s.n))))s.n=fictP('#'+i,s.nat);i++}}
+  if(r&&S){for(const t of S.titles||[])t.n=fictText(t.n);for(const t of S.awards||[])t.n=fictText(t.n);for(const h of S.history||[])h.lg=fictText(h.lg)}}catch(e){}return r}}
 
 // ================== TELA INICIAL NOVA + CRIAÇÃO EM ETAPAS + ROSTOS MONTÁVEIS + SEM BARRAS DE ROLAGEM ==================
 
@@ -8160,7 +8360,7 @@ renderCreate=function(){
 {const _fd=finishDraft;finishDraft=function(...a){const f=CR.face;const r=_fd.apply(this,a);try{if(S&&f)S.face=f;if(S)S.lanceMode=CR.lanceMode||'jogar'}catch(e){}return r}}
 
 // ---------- TELA INICIAL NOVA ----------
-const HOME_TAG=['Da peneira à Bola de Ouro.','Lances jogáveis: chute, passe, drible e cavadinha.','Champions, Libertadores, Copa do Mundo.','Fama, dinheiro, polêmica… e até prisão.','Seu empresário abre as portas. Seu futebol decide.'];
+const HOME_TAG=['Da peneira à Bola Dourada.','Lances jogáveis: chute, passe, drible e cavadinha.','Copa Europeia, Copa Continental, Copa Mundial.','Fama, dinheiro, polêmica… e até prisão.','Seu empresário abre as portas. Seu futebol decide.'];
 let HOME_T=null;
 renderIntro=async function(){
  CLOUD.screen='home';clearInterval(HOME_T);
@@ -8452,13 +8652,13 @@ const QUIZ=[
  ['Que cartão expulsa o jogador direto?',['Vermelho','Amarelo','Azul','Verde'],0],
  ['Dois cartões amarelos no mesmo jogo resultam em…',['Expulsão','Multa','Nada','Pênalti'],0],
  ['Quantas Copas do Mundo o Brasil ganhou?',['5','4','6','3'],0],
- ['Quem ganhou a Copa do Mundo de 2002?',['Brasil','Alemanha','França','Itália'],0],
- ['Quem ganhou a Copa do Mundo de 2022?',['Argentina','França','Brasil','Croácia'],0],
- ['Quem ganhou a Copa do Mundo de 2014?',['Alemanha','Argentina','Brasil','Espanha'],0],
- ['Em que país foi a Copa do Mundo de 2014?',['Brasil','Rússia','África do Sul','Alemanha'],0],
- ['Quem ganhou a Copa do Mundo de 2010?',['Espanha','Holanda','Alemanha','Brasil'],0],
- ['Quem ganhou a Copa do Mundo de 2018?',['França','Croácia','Bélgica','Inglaterra'],0],
- ['Quem foi campeão da primeira Copa do Mundo, em 1930?',['Uruguai','Argentina','Brasil','Itália'],0],
+ ['Quem ganhou a Copa Mundial de 2002?',['Brasil','Alemanha','França','Itália'],0],
+ ['Quem ganhou a Copa Mundial de 2022?',['Argentina','França','Brasil','Croácia'],0],
+ ['Quem ganhou a Copa Mundial de 2014?',['Alemanha','Argentina','Brasil','Espanha'],0],
+ ['Em que país foi a Copa Mundial de 2014?',['Brasil','Rússia','África do Sul','Alemanha'],0],
+ ['Quem ganhou a Copa Mundial de 2010?',['Espanha','Holanda','Alemanha','Brasil'],0],
+ ['Quem ganhou a Copa Mundial de 2018?',['França','Croácia','Bélgica','Inglaterra'],0],
+ ['Quem foi campeão da primeira Copa Mundial, em 1930?',['Uruguai','Argentina','Brasil','Itália'],0],
  ['Qual seleção ganhou a Copa de 1970 com Pelé?',['Brasil','Itália','Alemanha','Inglaterra'],0],
  ['O goleiro pode pegar com a mão um recuo intencional com o pé de um companheiro?',['Não','Sim','Só dentro da pequena área','Só no segundo tempo'],0],
  ['O que acontece quando a bola sai pela linha de fundo depois de tocar por último num defensor?',['Escanteio','Tiro de meta','Lateral','Bola ao chão'],0],
@@ -8588,7 +8788,7 @@ const BT_REQ=[null,null,{ovr:68},{ovr:76,fama:40},{ovr:84,fama:65}];
 const BT_BRANDS={
  raio:{n:'Raio',ic:'⚡',f:'Velocidade',a:['VEL','DRI','FIN'],mark:'bolt',m:['Sprint','Flash','Turbo','Supersônica','Trovão Zero'],c:[['#f5f5f5','#ffb800','#222'],['#ffe600','#111','#111'],['#ff3d00','#ffe600','#1a1a1a'],['#00e5ff','#ff2d7a','#101820'],['#ffd400','#111','#ffd400']]},
  maestro:{n:'Maestro',ic:'🎼',f:'Passe e controle',a:['PAS','DRI','MEN'],mark:'wave',m:['Touch','Visão','Regente','Sinfonia','Ópera Prima'],c:[['#2b2b2b','#d9d9d9','#e8e8e8'],['#1e4fd8','#fff','#fff'],['#0b1f3a','#38d6ff','#0b1f3a'],['#f2f2f2','#b8860b','#111'],['#101010','#f2c443','#f2c443']]},
- art:{n:'Artilheira',ic:'🎯',f:'Finalização',a:['FIN','FIS','VEL'],mark:'star',m:['Pro','Canhão','Matadora','Goleadora X','Chuteira de Ouro'],c:[['#c8102e','#fff','#222'],['#111','#ff2a2a','#ff2a2a'],['#ff2a2a','#111','#111'],['#8a0f1e','#f2c443','#111'],['#f2c443','#c8102e','#c8102e']]},
+ art:{n:'Artilheira',ic:'🎯',f:'Finalização',a:['FIN','FIS','VEL'],mark:'star',m:['Pro','Canhão','Matadora','Goleadora X','Chuteira Dourada'],c:[['#c8102e','#fff','#222'],['#111','#ff2a2a','#ff2a2a'],['#ff2a2a','#111','#111'],['#8a0f1e','#f2c443','#111'],['#f2c443','#c8102e','#c8102e']]},
  mur:{n:'Muralha',ic:'🛡️',f:'Defesa e físico',a:['DEF','FIS','MEN'],mark:'shield',m:['Grip','Couraça','Fortaleza','Titânio','Inquebrável'],c:[['#3b4a3f','#c6d1c6','#111'],['#4a5560','#ff7a00','#111'],['#0d3b2e','#7dff9a','#0d3b2e'],['#9aa4ad','#111','#111'],['#e6e6e6','#20c4bd','#111']]},
  ginga:{n:'Ginga',ic:'🪄',f:'Drible',a:['DRI','VEL','PAS'],mark:'swirl',m:['Samba','Malandra','Pedalada','Elástico','Joga Bonito'],c:[['#2bd46a','#ffe600','#14532d'],['#7a2bd4','#2bd46a','#111'],['#ffe600','#2b6bd4','#2b6bd4'],['#ff7aa8','#111','#111'],['#2bd46a','#ffe600','#1f4fd8']]},
  cor:{n:'Coringa',ic:'🃏',f:'Equilibrada',a:['FIN','PAS','DRI','VEL'],mark:'chev',m:['Base','Plus','Tour','Elite','Absoluta'],c:[['#e8e8e8','#111','#555'],['#111','#e8e8e8','#e8e8e8'],['#6b6b6b','#ff6a12','#111'],['#101820','#f2c443','#101820'],['#ffffff','#f2c443','#f2c443']]},
