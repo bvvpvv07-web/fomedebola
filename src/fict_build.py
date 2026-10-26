@@ -85,7 +85,7 @@ def apply(js):
     js = text(js)
     import base64
     txt = [[base64.b64encode(x.encode()).decode(), y] for x, y in TEXT if not x.startswith(("n:'", "'"))]
-    return 'const FICT_REAL_H=' + json.dumps(sorted(fnv(x) for x in real)) + ';\nconst FICT_TXT=' + json.dumps(txt, ensure_ascii=False) + ';\n' + js
+    return 'const FICT_ON=true;\nconst FICT_REAL_H=' + json.dumps(sorted(fnv(x) for x in real)) + ';\nconst FICT_TXT=' + json.dumps(txt, ensure_ascii=False) + ';\n' + js
 
 def text(s):
     # só troca palavra inteira: "isMLS" (nome de variável) fica, "MLS" no texto vira "Liga Americana"

@@ -12,8 +12,10 @@ if pubset is not None:
       if v not in pubset: am[s][k]='data:image/webp;base64,'+base64.b64encode(open('assets/'+v,'rb').read()).decode()
 js='const ASSET_B='+json.dumps(am['B'])+';const ASSET_T='+json.dumps(am['T'])+';\n'+open('data.js').read()+'\n'+open('logic.js').read()+'\n'+open('youth.js').read()+'\n'+open('fict.js').read()+'\n'+open('ui.js').read()+'\n'+open('fx.js').read()+'\n'+open('minigames.js').read()+'\n'+open('nss.js').read()+'\n'+open('nss2.js').read()+'\n'+open('fast.js').read()+'\n'+open('gallery.js').read()+'\n'+open('agent.js').read()+'\n'+open('youth_ui.js').read()+'\n'+open('flow.js').read()+'\n'+open('moments.js').read()+'\n'+open('dyn.js').read()+'\n'+open('onescreen.js').read()+'\n'+open('cards.js').read()+'\n'+open('swipe.js').read()+'\n'+open('nssmoment.js').read()+'\n'+open('decide.js').read()+'\n'+open('lance_html.js').read()+'\n'+open('lance3d.js').read()+'\n'+open('youthflow.js').read()+'\n'+open('journey.js').read()+'\n'+open('infancia.js').read()+'\n'+open('torcida.js').read()+'\n'+open('v5.js').read()+'\n'+open('prison.js').read()+'\n'+open('rpg.js').read()+'\n'+open('camp.js').read()+'\n'+open('cloud.js').read()+'\n'+open('home.js').read()+'\n'+open('editor.js').read()+'\n'+open('ui2.js').read()+'\n'+open('vidaplus.js').read()+'\n'+open('mg2.js').read()+'\n'+open('boots.js').read()+'\n'+open('skilltree.js').read()+'\n'+open('bitmenu.js').read()+'\n'+open('newspaper.js').read()+'\n'+open('retire.js').read()+'\n'+open('music.js').read()
 import os as _os,re as _re,fict_build as _fb
-REAL=_os.environ.get('FDB_REAL')=='1'
-if not REAL:js=_fb.apply(_re.sub(r'const ASSET_B=\{.*?\};const ASSET_T=\{.*?\};','const ASSET_B={};const ASSET_T={};',js,count=1))
+# oficial por padrão; FDB_FICT=1 gera a versão com clubes, ligas e lendas inventados
+REAL=_os.environ.get('FDB_FICT')!='1'
+if REAL:js='const FICT_ON=false;\n'+js
+else:js=_fb.apply(_re.sub(r'const ASSET_B=\{.*?\};const ASSET_T=\{.*?\};','const ASSET_B={};const ASSET_T={};',js,count=1))
 head='''<meta charset="utf-8">
 <title>Fome de Bola</title>
 <meta name="claude:viewport-fit-sides" content="cover">

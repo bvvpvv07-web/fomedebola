@@ -71,7 +71,10 @@ function fictPerson(seed,nat,legend){const r=seeded(hash('p:'+seed));const L=F_N
 // estrela atual: chamado pelo jogo quando monta o mundo e o álbum
 const F_STAR={};function fictP(n,nat){if(!/^#\d+$/.test(String(n).trim()))return n;const k=String(n).trim();return F_STAR[k]||(F_STAR[k]=fictPerson('s'+k,nat,false))}
 // ---------- aplica nos dados ----------
+const FICT_IS=typeof FICT_ON!=='undefined'?FICT_ON:true;
 function fictGenClubs(){if(FICT.names.done)return;FICT.used.clear();const taken={};
+ // versão oficial: o "nome de fábrica" é o nome real; o editor muda por cima
+ if(!FICT_IS){for(const id in CLUB)FICT.names[id]={n:CLUB[id].n,a:CLUB[id].a};FICT.names.done=true;return}
  for(const id in CLUB){const c=CLUB[id];const r=seeded(hash('club:'+id));let n=null;
   for(let t=0;t<40;t++){const x=fictClubName(id,c,r);if(x.length<=22&&!fictBad(x)){n=x;break}}
   if(!n)n='Clube '+id.slice(0,2).toUpperCase()+(hash(id)%97);
@@ -112,6 +115,8 @@ function l3Dark(h){h=String(h||'#000').replace('#','');if(h.length===3)h=h.split
 // escudo: imagem do editor > escudo enviado no Claude > escudo desenhado
 {const _shF=shieldHTML;shieldHTML=function(c,size=''){if(!c)return'';if(c.nat||(c.f&&!c.c1))return _shF(c,size);const cc=CLUB[c.id]||c;
   if(cc.img)return`<span class="shield img ${size}" title="${esc(cc.n)}"><img src="${esc(cc.img)}" alt="" loading="lazy"></span>`;
+  if(!FICT_IS){const up=typeof CLOUD!=='undefined'&&CLOUD.badges&&CLOUD.badges[c.id];const ab=!up&&c.id&&typeof ASSET_B!=='undefined'&&(ASSET_B[normName(c.id)]||ASSET_B[normName(cc.n)]);
+   if(ab)return`<span class="shield img ${size}" title="${esc(cc.n)}"><img src="${ab}" alt="" loading="lazy"></span>`;return _shF(c,size)}
   const up=typeof CLOUD!=='undefined'&&CLOUD.badges&&CLOUD.badges[c.id];const ab=typeof ASSET_B!=='undefined'&&Object.keys(ASSET_B).length;if(up||ab)return _shF(c,size);
   return`<span class="shield img crest ${size}" title="${esc(cc.n)}">${fictCrest(cc)}</span>`}}
 // sigla do nome inventado (placar do 3D, tabelas)

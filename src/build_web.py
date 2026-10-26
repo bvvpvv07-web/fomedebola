@@ -9,8 +9,10 @@ am=json.load(open('assets/map.json')) if os.path.exists('assets/map.json') else 
 cfg={'url':'https://dwrvpzmfhprazbkmmhqh.supabase.co','key':'sb_publishable_NlDnuy7PDBwiGnygbSkNFA_E5m6TkAG'}
 js='const WEB_CFG='+json.dumps(cfg)+';\nconst ASSET_B='+json.dumps(am['B'])+';const ASSET_T='+json.dumps(am['T'])+';\n'+'\n'.join(open(f).read() for f in FILES)
 import os as _os,re as _re,fict_build as _fb
-REAL=_os.environ.get('FDB_REAL')=='1'
-if not REAL:js=_fb.apply(_re.sub(r'const ASSET_B=\{.*?\};const ASSET_T=\{.*?\};','const ASSET_B={};const ASSET_T={};',js,count=1))
+# oficial por padrão; FDB_FICT=1 gera a versão com clubes, ligas e lendas inventados
+REAL=_os.environ.get('FDB_FICT')!='1'
+if REAL:js='const FICT_ON=false;\n'+js
+else:js=_fb.apply(_re.sub(r'const ASSET_B=\{.*?\};const ASSET_T=\{.*?\};','const ASSET_B={};const ASSET_T={};',js,count=1))
 head='''<!doctype html><html lang="pt-BR"><head><meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>Fome de Bola · simulador de carreira no futebol</title>

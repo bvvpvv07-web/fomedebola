@@ -27,7 +27,7 @@ function renderEditor(){CLOUD.screen='account';const P=fictPatch();const T=ED.ta
   <div class="ed-2"><button class="btn small" id="edExp">⬇️ Salvar arquivo</button><label class="btn ghost small ed-up">⬆️ Carregar arquivo<input type="file" id="edImp" accept=".json,application/json" hidden></label></div>
   <p class="muted" style="margin:0;font-size:13px">Mudanças agora: ${nC} times, ${nL} ligas, ${nP} lendas.</p>
   ${nC+nL+nP?'<button class="btn ghost small" id="edZero" style="justify-self:start;color:#ffb3aa">Voltar tudo ao original</button>':''}`;
- page('account',`<div class="phead"><h2>Editor de times</h2><p>Os clubes do jogo são inventados. Mude nome, sigla, cores e escudo como quiser. Fica só neste aparelho e vale pra todas as carreiras.</p></div>
+ page('account',`<div class="phead"><h2>Editor de times</h2><p>${FICT_IS?'Os clubes do jogo são inventados. ':''}Mude nome, sigla, cores e escudo de qualquer clube. Fica só neste aparelho e vale pra todas as carreiras.</p></div>
   <button class="lnk" id="edBack" style="justify-self:start">← Perfil</button><div class="livemode ed-tabs">${tabs}</div><section class="hsec ed">${body}</section>`);
  document.getElementById('edBack').onclick=()=>renderProfile();
  document.querySelectorAll('[data-edt]').forEach(b=>b.onclick=()=>{ED.tab=b.dataset.edt;ED.open=null;renderEditor()});
