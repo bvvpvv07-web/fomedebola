@@ -25,7 +25,7 @@ async function nsLiveStart(m){
  const nm=(R,ex)=>{const L=R.filter(p=>p.pos!=='GOL'&&p.n!==ex);return L.length?nsShort(pick(L).n):'o camisa '+RI(5,11)};
  const ME=nsSur();
  const onFrom=part&&part.play?(part.start?0:90-part.min):0,onTo=part&&part.play?(part.start?part.min:90):90;
- const L={min:0,gu:0,gt:0,rows:[],msg:'',ended:false,skip:false,out:false,lastAmb:0,poss:true,lastX:-99,ht:false,lowWarn:false,drained:0};
+ const L={wasOn:null,entered:false,min:0,gu:0,gt:0,rows:[],msg:'',ended:false,skip:false,out:false,lastAmb:0,poss:true,lastX:-99,ht:false,lowWarn:false,drained:0};
  x.live=L;
  const spd=()=>L.skip?0:(S.liveSpeed===3?3:1);const minMs=()=>({1:430,3:110,0:0})[spd()];
  const dU=(us.s||70)-(th.s||70)+(home&&!m.neutral?2:0);
@@ -33,7 +33,7 @@ async function nsLiveStart(m){
  const sc=()=>{const gu=L.gu+(x.x.gu||0),gt=L.gt+(x.x.gt||0);return home?[gu,gt]:[gt,gu]};
  const H=home?us:th,A=home?th:us,cH=home?cU:cT,cA=home?cT:cU;
  const ab=s=>esc((s.a||mkAbbr(s.n||'')).slice(0,3).toUpperCase());
- const rowHTML=r=>{const c=r.side==='u'?cU:r.side==='t'?cT:['#26352c','#eef2e4'];return`<div class="nfr ${r.k||''}" style="--c:${c[0]};--k:${pickInk(c[0])}"><b>${r.m!=null?r.m+"'":''}</b><span>${r.t}</span></div>`};
+ const rowHTML=r=>{const c=r.side==='u'?cU:r.side==='t'?cT:['#26352c','#eef2e4'];return`<div class="nfr ${r.k||''}${r.dim?' ndim':''}" style="--c:${c[0]};--k:${pickInk(c[0])}"><b>${r.m!=null?r.m+"'":''}</b><span>${r.t}</span></div>`};
  const effPips=()=>[1,2,3,4,5].map(i=>`<i class="${i<=n.eff?'on':''}"></i>`).join('');
  const drinks=()=>Object.values(n.dr).reduce((s,v)=>s+v,0);
  const draw=()=>{$ov.hidden=false;const[hg,ag]=sc();
@@ -42,10 +42,10 @@ async function nsLiveStart(m){
   <div class="nsl-score"><div class="tm" style="background:${cH[0]};color:${pickInk(cH[0])}">${esc(H.n)}</div><b id="nlH">${hg}</b><b id="nlA">${ag}</b><div class="tm" style="background:${cA[0]};color:${pickInk(cA[0])}">${esc(A.n)}</div></div>
   ${m.agg?`<div class="nsl-agg">Ida ${m.agg[0]}–${m.agg[1]} · agregado <span id="nlAgg">${m.agg[0]+L.gu+(x.x.gu||0)}–${m.agg[1]+L.gt+(x.x.gt||0)}</span></div>`:''}
   <div class="nsl-time"><i id="nlBar" style="width:${L.min/90*100}%"></i></div>
-  <div class="nsl-feed" id="nlFeed">${L.rows.slice(-14).map(rowHTML).join('')}</div>
+  <div class="nsl-off" id="nlOff" ${onPitch()||L.ended?'hidden':''}>${offTxt()}</div><div class="nsl-feed ${onPitch()||L.ended?'':'off'}" id="nlFeed">${L.rows.slice(-14).map(rowHTML).join('')}</div>
   <div class="nsl-msg" id="nlMsg">${esc(L.msg)}</div>
   <div id="nlEnd"></div>
-  <div class="nsl-ctl" ${L.ended||bench?'hidden':''}>
+  <div class="nsl-ctl ${onPitch()?'':'off'}" ${L.ended||bench?'hidden':''}>
    <div class="nsl-eff"><small>Esforço</small><div><button id="nlEm" aria-label="Menos esforço">−</button><span id="nlEv">${effPips()}</span><button id="nlEp" aria-label="Mais esforço">+</button></div></div>
    <button class="nsl-dr" id="nlDr" ${drinks()&&!L.out?'':'disabled'}>❤️<small id="nlDrN">${drinks()}</small></button>
    <div class="nsl-foc"><small>Foco</small><div>${[[-1,'🛡️','Defender'],[0,'⚖️','Equilibrado'],[1,'⚔️','Atacar']].map(([k,ic,t])=>`<button data-fc="${k}" class="${n.foc===k?'on':''}" aria-label="${t}">${ic}</button>`).join('')}</div></div>
@@ -58,7 +58,10 @@ async function nsLiveStart(m){
   const f=document.getElementById('nlFeed');if(f)f.scrollTop=f.scrollHeight};
  const setEn=()=>{const e=document.getElementById('nlEn'),v=document.getElementById('nlEnV');if(e){e.style.width=Math.round(n.en)+'%';e.parentElement.classList.toggle('low',n.en<30)}if(v)v.textContent=Math.round(n.en)+'%'};
  const setScore=()=>{const[hg,ag]=sc();const h=document.getElementById('nlH'),a=document.getElementById('nlA');if(h){h.textContent=hg;a.textContent=ag}const g=document.getElementById('nlAgg');if(g&&m.agg)g.textContent=`${m.agg[0]+L.gu+(x.x.gu||0)}–${m.agg[1]+L.gt+(x.x.gt||0)}`};
- const push=r=>{L.rows.push(r);if(L.rows.length>40)L.rows.splice(0,L.rows.length-40);const f=document.getElementById('nlFeed');if(f){f.insertAdjacentHTML('beforeend',rowHTML(r));while(f.children.length>14)f.firstElementChild.remove();f.scrollTop=f.scrollHeight}};
+ const offTxt=()=>L.out||L.entered?'🚪 Você saiu do jogo · só acompanhando':(bench?'🪑 Você está no banco · só acompanhando':'🪑 No banco · espere a sua vez');
+ const push=r=>{if(r.dim==null)r.dim=!onPitch()&&!L.ended&&!/\b(nme|nin|nbn)\b/.test(r.k||'');L.rows.push(r);if(L.rows.length>40)L.rows.splice(0,L.rows.length-40);const f=document.getElementById('nlFeed');if(f){f.insertAdjacentHTML('beforeend',rowHTML(r));while(f.children.length>14)f.firstElementChild.remove();f.scrollTop=f.scrollHeight}};
+ const chkOn=()=>{const on=onPitch();if(on===L.wasOn)return;L.wasOn=on;const f=document.getElementById('nlFeed'),b=document.getElementById('nlOff');if(f)f.classList.toggle('off',!on);const cl=$ov.querySelector('.nsl-ctl');if(cl)cl.classList.toggle('off',!on);if(b){b.hidden=on;b.textContent=offTxt()}
+  if(on&&!L.entered){L.entered=true;push({m:L.min,side:'u',t:`🔥 VOCÊ ENTROU EM CAMPO!<small>Agora é com você, ${ME}</small>`,k:'nme nin'});api.flash('🔥 Você entrou! Agora é com você');const lv=$ov.querySelector('.nslive');if(lv&&!reduced){lv.classList.remove('enter');void lv.offsetWidth;lv.classList.add('enter')}try{SFX.whistle()}catch(e){}}};
  async function nlDrink(){const have=NS_DRINKS.filter(d=>n.dr[d.id]>0);if(!have.length)return;let d=have[0];if(have.length>1){const kk=await nsPop({ic:'🥤',title:'Qual energético?',opts:have.map(d=>[d.id,`${d.ic} ${d.n} (${n.dr[d.id]})`]),ok:'Cancelar'});d=NS_DRINKS.find(z=>z.id===kk)}if(!d)return;nsDrink(d);setEn();const c=document.getElementById('nlDrN');if(c)c.textContent=drinks();if(!drinks()){const b=document.getElementById('nlDr');if(b)b.disabled=true}api.flash(`🥤 ${d.n}: energia em ${Math.round(n.en)}%`)}
  // narração: quem tem a bola manda na cor da linha
  const amb=()=>{const mine=onPitch()&&L.poss;let pU=clamp(.5+dU/45+(n.foc>0?.04:n.foc<0?-.03:0),.25,.75);
@@ -78,30 +81,34 @@ async function nsLiveStart(m){
  async function extraChance(){const P=S.pos;const atk=n.foc>=0;let type;
   if(P==='GOL')return;
   const r=rnd();if(['ATA','SA','PE','PD'].includes(P))type=r<.62?chanceType({}):assistType();else if(['MEI','MC','ME','MD'].includes(P))type=r<.45?chanceType({}):assistType();else type=r<(atk?.35:.2)?chanceType({}):assistType();
+  if(!x.x.drK&&P!=='ZAG'&&ch(['ATA','SA','PE','PD','MEI','ME','MD'].includes(P)?.55:.3))type='dribble';else if(type==='dribble'&&x.x.drK)type=chanceType({})==='dribble'?'finish':type;if(type==='dribble')x.x.drK=1;
   const isPass=['pass','long','cross'].includes(type);x.x.ch=(x.x.ch||0)+1;L.lastX=L.min;
-  push({m:L.min,side:'u',t:isPass?`<b>${ME}</b> levanta a cabeça…`:`<b>${ME}</b> tem espaço pra finalizar…`,k:'nme'});
+  push({m:L.min,side:'u',t:isPass?`<b>${ME}</b> levanta a cabeça…`:type==='dribble'?`<b>${ME}</b> parte pra cima do marcador…`:`<b>${ME}</b> tem espaço pra finalizar…`,k:'nme'});
   let ok,auto=false;if(L.skip||S.lances==='off'||!lancesWanted(true)){ok=nsAutoChance({type});auto=true}
-  else{api.flash('⚡ A bola é sua…');await sleep(L.skip?0:900);x.inX=true;try{ok=await IO_UI.chance({type,planned:false,comp:m.o.comp,min:L.min})}catch(e){ok=false}x.inX=false;draw()}
+  else{api.flash(type==='dribble'?'🌀 Um contra um: arraste pro lado e passe por ele':'⚡ A bola é sua…');await sleep(L.skip?0:900);x.inX=true;try{ok=await IO_UI.chance({type,planned:false,comp:m.o.comp,min:L.min})}catch(e){ok=false}x.inX=false;draw()}
   const self=!!NM.selfGoal,dma=!!NM.dmAssist;NM.selfGoal=false;NM.dmAssist=false;
   {const hp=NM.heroPasses||0,dr=NM.drib||0;NM.heroPasses=0;NM.drib=0;x.x.ps=(x.x.ps||0)+hp;x.x.dr=(x.x.dr||0)+dr;if(!ok&&(hp||dr))push({m:L.min,side:'u',t:`✓ ${[hp?`${hp} passe${hp>1?'s':''} certo${hp>1?'s':''}`:'',dr?`${dr} drible${dr>1?'s':''}`:''].filter(Boolean).join(' e ')} de <b>${ME}</b>`,k:'nme'})}
-  if(ok&&(!isPass||self)){x.x.gu=(x.x.gu||0)+1;x.x.g=(x.x.g||0)+1;x.x.sc.push({m:L.min,w:S.name,us:true});push({m:L.min,side:'u',t:`⚽ GOL! <b>${ME}</b> marca!`,k:'ngl nme'});api.flash('GOOOOL! É SEU!');goalFx(true)}
-  else if(ok&&isPass&&(dma||ch(.42)||(!auto&&nsIs3D()))){const w=nm(RU);const full=(RU.find(p=>nsShort(p.n)===w)||{n:w}).n;x.x.gu=(x.x.gu||0)+1;x.x.a=(x.x.a||0)+1;x.x.sc.push({m:L.min,w:full,us:true});push({m:L.min,side:'u',t:`⚽ GOL de ${w}! Assistência de <b>${ME}</b>`,k:'ngl nme'});api.flash(`GOL do ${us.n}! Sua assistência`);goalFx(true)}
+  if(ok&&(isPass?self:!dma)){x.x.gu=(x.x.gu||0)+1;x.x.g=(x.x.g||0)+1;x.x.sc.push({m:L.min,w:S.name,us:true});push({m:L.min,side:'u',t:`⚽ GOL! <b>${ME}</b> marca!`,k:'ngl nme'});api.flash('GOOOOL! É SEU!');goalFx(true)}
+  else if(ok&&(dma||(isPass&&(ch(.42)||(!auto&&nsIs3D()))))){const w=nm(RU);const full=(RU.find(p=>nsShort(p.n)===w)||{n:w}).n;x.x.gu=(x.x.gu||0)+1;x.x.a=(x.x.a||0)+1;x.x.sc.push({m:L.min,w:full,us:true});push({m:L.min,side:'u',t:`⚽ GOL de ${w}! Assistência de <b>${ME}</b>`,k:'ngl nme'});api.flash(`GOL do ${us.n}! Sua assistência`);goalFx(true)}
   else if(ok&&isPass){x.x.ps=(x.x.ps||0)+1;push({m:L.min,side:'u',t:`Passe na medida de <b>${ME}</b>, mas ${nm(RU)} não converte`,k:'nme'})}
   else push({m:L.min,side:'u',t:isPass?`O passe de <b>${ME}</b> é cortado`:pick([`<b>${ME}</b> finaliza… ${gkDef(RT)}`,`<b>${ME}</b> chuta pra fora`,`<b>${ME}</b> é travado na hora do chute`]),k:'nme nbad'});
   setScore()}
  async function setPiece(){const P=S.pos;if(P==='GOL')return;const bp=n.sk.bp.l;x.x.sp=(x.x.sp||0)+1;L.lastX=L.min;
   const wide=['PE','PD','ME','MD','MEI','LE','LD','MC','VOL','SA'].includes(P);const r=rnd();
-  let kind=r<.14&&(S.taker.pen||bp>=58||ch(.35))?'pen':r<.6&&(S.taker.fk||bp>=52||ch(.55))?'fk':wide?'corner':'head';const usedK=x.x.spK||(x.x.spK=[]);if(usedK.includes(kind)){kind=['fk','corner','head','pen'].find(k=>!usedK.includes(k)&&(k!=='pen'||S.taker.pen||bp>=58))||kind}usedK.push(kind);
+  const usedK=x.x.spK||(x.x.spK=[]);const aerial=['ATA','SA','ZAG','VOL','MC'].includes(P);
+  const W=[['corner',wide||bp>=50?.42:.22],['head',aerial?.34:.14],['fk',S.taker.fk||bp>=52?.32:.2],['pen',S.taker.pen||bp>=58||ch(.3)?.13:0]].filter(([k,w])=>w>0&&!usedK.includes(k));
+  // o primeiro lance parado do jogo é sempre um escanteio (cobrar ou subir pra cabecear)
+  let kind;if(!usedK.includes('corner')&&!usedK.includes('head'))kind=(wide||bp>=50)&&!(aerial&&ch(.5))?'corner':'head';else{const tot=W.reduce((a,[,w])=>a+w,0);let q=rnd()*tot;kind=(W.find(([,w])=>(q-=w)<=0)||W[0]||['fk'])[0]}usedK.push(kind);void r;
   const T={pen:['🎯 PÊNALTI! A bola é sua','Pênalti! <b>'+ME+'</b> vai pra bola'],fk:['🧱 Falta perigosa: você bate','Falta na entrada da área. <b>'+ME+'</b> ajeita a bola'],corner:['🚩 Escanteio: você cobra','Escanteio. <b>'+ME+'</b> vai pra bandeirinha'],head:['🚩 Escanteio: suba pra cabecear','Escanteio pro '+esc(us.n)+'. <b>'+ME+'</b> entra na área']}[kind];
   push({m:L.min,side:'u',t:T[1],k:'nme'});x.x.ch=(x.x.ch||0)+1;
   let ok,auto=false;const sk=k=>typeof skillOf==='function'?skillOf(k):.6;
   if(L.skip||S.lances==='off'||!lancesWanted(true)){auto=true;ok=ch(kind==='pen'?.72+bp/500:kind==='fk'?.12+bp/300:kind==='corner'?.14+bp/600:.22)}
   else{api.flash(T[0]);await sleep(L.skip?0:1000);x.inX=true;
-   const o=kind==='pen'?{kind:'pen',scen:'penalti',title:'Pênalti!',skill:sk('FIN')*.5+(bp-40)/110,keeper:.5,okTxt:'GOL!'}:kind==='fk'?{kind:'fk',scen:ch(.6)?'falta':'faltaLonge',title:'Falta perigosa',skill:(sk('FIN')+sk('PAS'))/2*.6+(bp-40)/140,keeper:.5,okTxt:'GOLAÇO DE FALTA!'}:kind==='corner'?{kind:'cross',scen:ch(.75)?'escanteio':'escCurto',title:'Escanteio',skill:sk('PAS'),keeper:.45,okTxt:'GOL!'}:{kind:'header',scen:'cabeca',title:'Escanteio na área',skill:sk('FIS'),keeper:.5,okTxt:'GOL DE CABEÇA!'};
+   const o=kind==='pen'?{kind:'pen',scen:'penalti',title:'Pênalti!',skill:sk('FIN')*.5+(bp-40)/110,keeper:.5,okTxt:'GOL!'}:kind==='fk'?{kind:'fk',scen:ch(.6)?'falta':'faltaLonge',title:'Falta perigosa',skill:(sk('FIN')+sk('PAS'))/2*.6+(bp-40)/140,keeper:.5,okTxt:'GOLAÇO DE FALTA!'}:kind==='corner'?{kind:'cross',scen:ch(.75)?'escanteio':'escCurto',title:'Escanteio',skill:sk('PAS'),keeper:.45,okTxt:'GOL!'}:{kind:'header',scen:ch(.7)?'escCab':'cabeca',title:'Escanteio na área',skill:sk('FIS'),keeper:.5,okTxt:'GOL DE CABEÇA!'};
    try{ok=!!(await nssMoment({...o,comp:m.o.comp,min:L.min})).ok}catch(e){ok=false}x.inX=false;draw()}
-  const self=!!NM.selfGoal;NM.selfGoal=false;NM.dmAssist=false;
-  if(ok&&(kind!=='corner'||self)){x.x.gu=(x.x.gu||0)+1;x.x.g=(x.x.g||0)+1;x.x.sc.push({m:L.min,w:S.name+(kind==='pen'?' (pên.)':kind==='fk'?' (falta)':''),us:true});push({m:L.min,side:'u',t:`⚽ GOL! <b>${ME}</b> ${kind==='pen'?'converte o pênalti':kind==='fk'?'acerta a falta':'marca de cabeça'}!`,k:'ngl nme'});api.flash('GOOOOL! É SEU!');goalFx(true)}
-  else if(ok&&kind==='corner'&&(!auto||ch(.6))){const w=nm(RU);const full=(RU.find(p=>nsShort(p.n)===w)||{n:w}).n;x.x.gu=(x.x.gu||0)+1;x.x.a=(x.x.a||0)+1;x.x.sc.push({m:L.min,w:full,us:true});push({m:L.min,side:'u',t:`⚽ GOL de ${w} no escanteio de <b>${ME}</b>!`,k:'ngl nme'});api.flash(`GOL! Sua assistência`);goalFx(true)}
+  const self=!!NM.selfGoal,dma2=!!NM.dmAssist;NM.selfGoal=false;NM.dmAssist=false;
+  if(ok&&(kind==='corner'?self:!dma2)){x.x.gu=(x.x.gu||0)+1;x.x.g=(x.x.g||0)+1;x.x.sc.push({m:L.min,w:S.name+(kind==='pen'?' (pên.)':kind==='fk'?' (falta)':''),us:true});push({m:L.min,side:'u',t:`⚽ GOL! <b>${ME}</b> ${kind==='pen'?'converte o pênalti':kind==='fk'?'acerta a falta':'marca de cabeça'}!`,k:'ngl nme'});api.flash('GOOOOL! É SEU!');goalFx(true)}
+  else if(ok&&(dma2||(kind==='corner'&&(!auto||ch(.6))))){const w=nm(RU);const full=(RU.find(p=>nsShort(p.n)===w)||{n:w}).n;x.x.gu=(x.x.gu||0)+1;x.x.a=(x.x.a||0)+1;x.x.sc.push({m:L.min,w:full,us:true});push({m:L.min,side:'u',t:`⚽ GOL de ${w} no escanteio de <b>${ME}</b>!`,k:'ngl nme'});api.flash(`GOL! Sua assistência`);goalFx(true)}
   else push({m:L.min,side:'u',t:kind==='pen'?`${gkDef(RT).replace(/^d/,'D')}! Pênalti perdido`:kind==='fk'?`A falta de <b>${ME}</b> ${pick(['passa raspando','explode na barreira','vai nas mãos do goleiro'])}`:kind==='corner'?'A zaga afasta o escanteio':`A cabeçada de <b>${ME}</b> sai pela linha de fundo`,k:'nme nbad'});
   setScore()}
  const goalFx=good=>{const b=$ov.querySelector('.nslive');if(b&&!reduced){b.classList.remove('gfx','bad');void b.offsetWidth;b.classList.add('gfx');if(!good)b.classList.add('bad')}try{SFX.goal&&good&&SFX.goal()}catch(e){}};
@@ -112,21 +119,21 @@ async function nsLiveStart(m){
    setTimeout(()=>{if(L.skip){host.innerHTML='';res()}},50)})}
  const api={
   async until(t){
-   if(L.min===0&&t>0&&!L.kick){L.kick=true;push({m:0,side:'n',t:`Bola rolando: ${esc(us.n)} × ${esc(th.n)}`,k:'nht'});if(bench)push({m:0,side:'n',t:`🪑 Você está no banco hoje. Treine e ganhe o técnico pra jogar.`,k:'nht'});else if(part&&!part.start)push({m:0,side:'n',t:`🪑 Você começa no banco`,k:'nht'});try{SFX.whistle()}catch(e){}if(!L.skip)await sleep(600)}
-   while(L.min<t){L.min++;const c=document.getElementById('nlClk'),b=document.getElementById('nlBar');if(c)c.textContent=L.min+"'";if(b)b.style.width=(L.min/90*100)+'%';
+   if(L.min===0&&t>0&&!L.kick){L.kick=true;push({m:0,side:'n',t:`Bola rolando: ${esc(us.n)} × ${esc(th.n)}`,k:'nht'});if(bench)push({m:0,side:'n',t:`🪑 Você está no banco hoje. Treine e ganhe o técnico pra jogar.`,k:'nht nbn'});else if(part&&!part.start)push({m:0,side:'n',t:`🪑 Você começa no banco. Fique pronto pra entrar.`,k:'nht nbn'});try{SFX.whistle()}catch(e){}if(!L.skip)await sleep(600)}
+   while(L.min<t){L.min++;chkOn();const c=document.getElementById('nlClk'),b=document.getElementById('nlBar');if(c)c.textContent=L.min+"'";if(b)b.style.width=(L.min/90*100)+'%';
     if(onPitch()){const d=(16+n.eff*6.5)/90*(S.age>30?1+(S.age-30)*.03:1);n.en=clamp(n.en-d,0,100);L.drained+=d;setEn();if(n.en<15&&!L.lowWarn){L.lowWarn=true;api.flash('🥵 Você está exausto. Tome um energético ou baixe o esforço.')}}
     if(L.min===45&&!L.ht){L.ht=true;await halftime()}
     if(!L.skip&&L.min-L.lastAmb>=(spd()===3?2:1)&&ch(.62)&&L.min!==45){L.lastAmb=L.min;amb()}
     // seu jogador cria mais com esforço e foco no ataque
     if(onPitch()&&S.pos!=='GOL'&&L.min-L.lastX>=8&&(x.x.ch||0)<4&&L.min<89){const b0=NS_ATKB[S.pos]||.4;const bt=nsBootStats();const faro=bt&&(bt.ab||[]).includes('faro')?1.25:1;
      const p=b0*(.45+.15*n.eff)*(n.foc>0?1.5:n.foc<0?.55:1)*faro*(.8+n.rel.team/250)*(n.en<25?.5:1)/90;if(ch(p))await extraChance()}
-    if(onPitch()&&S.pos!=='GOL'&&L.min-L.lastX>=6&&(x.x.sp||0)<2&&L.min>3&&L.min<88&&ch((1.15+(n.foc>0?.35:0))/90))await setPiece();
+    if(onPitch()&&S.pos!=='GOL'&&L.min-L.lastX>=6&&(x.x.sp||0)<3&&L.min>3&&L.min<88&&ch((1.6+(n.foc>0?.35:0))/90))await setPiece();
     // atacar demais abre espaço atrás
     if(n.foc>0&&onPitch()&&ch(.0035*n.eff/3)){x.x.gt=(x.x.gt||0)+1;const w=nm(RT);x.x.sc.push({m:L.min,w:(RT.find(p=>nsShort(p.n)===w)||{n:w}).n,us:false});push({m:L.min,side:'t',t:`⚽ Contra-ataque e gol de ${w}. O time ficou exposto.`,k:'ngl'});api.flash(`Gol do ${th.n}…`);goalFx(false);setScore()}
     const ms=minMs();if(ms)await sleep(L.min>=80?ms*1.3:ms)}},
   flash(t){L.msg=t;const e=document.getElementById('nlMsg');if(e){e.textContent=t;e.classList.remove('pop');void e.offsetWidth;e.classList.add('pop')}},
   redraw(){L.msg='';draw()},
-  out(k){if(L.out)return;L.out=true;if(k==='out'){push({m:L.min,side:'u',t:`🔁 <b>${ME}</b> é substituído e sai de campo`,k:'nme'});api.flash('Você foi substituído')}},
+  out(k){if(L.out)return;L.out=true;if(k==='out'){push({m:L.min,side:'u',t:`🔁 <b>${ME}</b> é substituído e sai de campo`,k:'nme'});api.flash('Você foi substituído')}chkOn()},
   note(t){push({m:L.min,side:'u',t,k:'nme'})},
   async event(e,gu,gt){const k=L.skip?0:spd()===3?.4:1;const mine=e.mine;
    // foco na defesa: às vezes você salva um gol certo
@@ -138,18 +145,18 @@ async function nsLiveStart(m){
    else if(e.t==='y')r={side:'u',t:`🟨 Amarelo para <b>${ME}</b>`,k:'nme'};
    else if(e.t==='r'){r={side:'u',t:`🟥 <b>${ME}</b> expulso!`,k:'nme nbad'};L.out=true}
    else if(e.t==='inj'){r={side:'u',t:`🚑 <b>${ME}</b> sente e sai de campo`,k:'nme nbad'};L.out=true}
-   else if(e.t==='in')r={side:'u',t:`🔁 <b>${ME}</b> entra em campo`,k:'nme'};
+   else if(e.t==='in'){chkOn();if(!L.entered){L.entered=true;r={side:'u',t:`🔥 VOCÊ ENTROU EM CAMPO!<small>Agora é com você, ${ME}</small>`,k:'nme nin'}}}
    else if(e.t==='pmiss')r={side:e.us?'u':'t',t:`❌ Pênalti perdido por ${w}`,k:e.mine?'nme nbad':''};
    else if(e.t==='dsr')r={side:'u',t:`🛡️ Desarme de <b>${ME}</b> em ${w}`,k:'nme'};
    else if(e.t==='ppok')r={side:'u',t:`🎯 Passe na medida de <b>${ME}</b>`,k:'nme'};
    else if(e.t==='ppx')r={side:'u',t:`O passe de <b>${ME}</b> é cortado`,k:'nme nbad'};
    else if(e.t==='gks')r={side:'u',t:`🧤 Defesaça de <b>${ME}</b> em chute de ${w}!`,k:'nme'};
    else if(e.t==='psave')r={side:'u',t:`🧤 Pênalti defendido!`,k:e.mine?'nme':''};
-   if(r){r.m=e.m;push(r);if(k)await sleep(900*k)}},
+   if(r){r.m=e.m;push(r);chkOn();if(k)await sleep(900*k)}},
   finish(f){return new Promise(res=>{L.ended=true;x.ended=true;const[hg,ag]=sc();draw();const end=document.getElementById('nlEnd');const cls=f.win===true?'good':f.win===false?'bad':'';
    if(end)end.innerHTML=`<div class="nsl-fin"><b class="${cls}">${esc(f.msg||'Fim de jogo')}</b><span>${esc(H.n)} ${hg} – ${ag} ${esc(A.n)}</span>${f.agg?`<small>Agregado ${f.agg[0]}–${f.agg[1]}</small>`:''}<button class="btn wide" id="lok">Continuar</button></div>`;
    const b=document.getElementById('lok');if(!b){res();return}b.focus({preventScroll:true});b.onclick=()=>{$ov.hidden=true;$ov.innerHTML='';res()}})}};
- x.api=api;draw();return api}
+ x.api=api;L.wasOn=onPitch();L.entered=L.wasOn;draw();return api}
 {const _s0=IO_UI.live.start;IO_UI.live.start=async function(m){if(!nsOn()||!m||!m.part)return _s0.apply(this,arguments);try{LIVE_USED=true}catch(e){}return nsLiveStart(m)}}
 // conta chances e passes; "pular pro fim" resolve os lances sem abrir o 3D
 {const _chN=IO_UI.chance;IO_UI.chance=async function(c){const x=NSSM.cur;if(!nsOn()||!x||x.inX)return _chN(c);x.x.ch=(x.x.ch||0)+1;let ok;
@@ -172,7 +179,7 @@ async function nsLiveStart(m){
   return r}}
 function nsIs3D(){try{return lanceMode()==='jogar'&&!L3D.failed}catch(e){return false}}
 // lance com cena pedida (falta, pênalti, escanteio)
-{const _scN=l3dScene;const ALT={falta:'faltaLonge',faltaLonge:'falta',escanteio:'escCurto',escCurto:'escanteio',cabeca:'voleio'};
+{const _scN=l3dScene;const ALT={falta:'faltaLonge',faltaLonge:'falta',escanteio:'escCurto',escCurto:'escanteio',escCab:'cabeca',cabeca:'escCab'};
  l3dScene=function(o){const cur=NSSM.cur;let sc=o&&o.scen?o.scen:_scN(o);if(cur){const U=cur.usedSc||(cur.usedSc=new Set());if(U.has(sc)){if(o&&o.scen){if(ALT[sc]&&!U.has(ALT[sc]))sc=ALT[sc]}else{let g=0;while(U.has(sc)&&g++<14)sc=_scN(o)}}U.add(sc)}return sc}}
 // o lance conta passes certos e dribles do seu jogador
 {const _lr=l3dResult;l3dResult=function(o,res){const r=_lr(o,res);try{NM.heroPasses=(res&&res.passes)||0;NM.drib=(res&&res.drib)||0}catch(e){}return r}}
@@ -269,6 +276,17 @@ function nsTableHTML(){const st=S.st;const T=sortTable(st.table);const me=S.club
 .nsl-time{height:5px;background:#07130d;border-radius:9px;overflow:hidden}.nsl-time i{display:block;height:100%;background:var(--accent);transition:width .3s}
 .nsl-feed{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:3px}
 .nfr{display:grid;grid-template-columns:40px 1fr;align-items:center;background:var(--c);color:var(--k);border-radius:6px;padding:7px 10px;font:700 15px var(--f-body);animation:nfin .25s ease-out}.nfr>b{font:800 13px var(--f-mono);opacity:.85}.nfr>span{text-align:center}.nfr>span b{font-weight:900}.nfr.nme{box-shadow:inset 0 0 0 2px #f2c443}.nfr.nbad{filter:saturate(.6) brightness(.85)}.nfr.ngl{font-size:17px;padding:10px;font-weight:900}.nfr.nht{background:#1d2a22;color:var(--muted)}
+.nfr.ndim{opacity:.34;filter:grayscale(1) brightness(.8);box-shadow:none}
+.nsl-feed.off{background:repeating-linear-gradient(135deg,rgba(0,0,0,.18) 0 10px,rgba(0,0,0,.08) 10px 20px);border-radius:10px}
+.nsl-off{align-self:center;background:#0c1510;color:#cfd8cf;border:1.5px dashed rgba(255,255,255,.28);border-radius:999px;padding:6px 14px;font:800 13px var(--f-body);letter-spacing:.02em}
+.nsl-off[hidden]{display:none}
+.nsl-ctl.off{opacity:.45;filter:grayscale(.7)}
+.nfr.nin{grid-template-columns:40px 1fr;background:linear-gradient(90deg,#ffd84a,#ff8a1f);color:#1b1200;font:900 20px var(--f-display,var(--f-body));letter-spacing:.02em;padding:14px 10px;box-shadow:0 0 0 3px #fff3,0 8px 26px rgba(255,170,40,.55);animation:ninPop .7s cubic-bezier(.2,1.6,.4,1)}
+.nfr.nin>b{color:#1b1200}
+.nfr.nin small{display:block;font:700 13px var(--f-body);opacity:.8;letter-spacing:0;margin-top:2px}
+@keyframes ninPop{0%{transform:scale(.6);opacity:0}100%{transform:none;opacity:1}}
+.nslive.enter{animation:nsEnter 1.2s ease-out}
+@keyframes nsEnter{0%{box-shadow:inset 0 0 0 0 rgba(255,216,74,0)}20%{box-shadow:inset 0 0 0 6px rgba(255,216,74,.95),inset 0 0 80px rgba(255,216,74,.45)}100%{box-shadow:inset 0 0 0 0 rgba(255,216,74,0)}}
 @keyframes nfin{from{transform:translateY(8px);opacity:0}}
 .nsl-msg{min-height:22px;text-align:center;font:800 15px var(--f-body);color:var(--gold)}.nsl-msg.pop{animation:nspop .4s}@keyframes nspop{50%{transform:scale(1.06)}}
 .nslive.gfx .nsl-score{animation:nsgf 1s}.nslive.gfx.bad .nsl-score{animation:nsgb 1s}@keyframes nsgf{30%{box-shadow:0 0 0 4px #8be08a}}@keyframes nsgb{30%{box-shadow:0 0 0 4px #ff6a5c}}

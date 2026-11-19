@@ -5,9 +5,9 @@
 // Tela principal: cartão do jogador com as cores do clube, rosto, OVR, estrela e energia.
 
 // ---------- treino em lances 3D ----------
-const NS_TR3D={vel:[['contra','finish'],['mano','dribble'],['lanca','long'],['contra3','pass']],for:[['longe','finish'],['cabeca','header'],['voleio','finish'],['rebote','finish']],
+const NS_TR3D={vel:[['contra','finish'],['mano','dribble'],['lanca','long'],['contra3','pass']],for:[['longe','finish'],['escCab','header'],['voleio','finish'],['cabeca','header']],
  tec:[['mano','dribble'],['area','finish'],['pivo','dribble'],['rebote','finish']],vis:[['enfiada','pass',1],['virada','pass',1],['tabela','pass',1],['saida','pass',1],['cruz','cross',1]],
- bp:[['falta','fk'],['penalti','pen'],['faltaLonge','fk'],['faltaLat','cross',1]]};
+ bp:[['falta','fk'],['escanteio','cross',1],['penalti','pen'],['faltaLonge','fk'],['faltaLat','cross',1]]};
 const NS_TR3D_GK={vel:[['gkMano','keeper'],['gkShot','keeper']],for:[['gkCab','keeper'],['gkShot','keeper']],tec:[['tiroMeta','pass',1],['gkShot','keeper']],vis:[['tiroMeta','pass',1],['gkMano','keeper']],bp:[['gkPen','keeper'],['gkFk','keeper']]};
 async function nsTrain3D(k){const L=(S.pos==='GOL'?NS_TR3D_GK:NS_TR3D)[k];const nm=NSK.find(x=>x[0]===k)[1];let lives=3,score=0,i=0;const off=RI(0,L.length-1);
  while(lives>0&&i<15){const[sc,kind,po]=L[(i+off)%L.length];i++;
@@ -16,7 +16,7 @@ async function nsTrain3D(k){const L=(S.pos==='GOL'?NS_TR3D_GK:NS_TR3D)[k];const 
   if(!res||res.skip)break;
   let ok=false;try{ok=!!l3dResult(o,res).ok}catch(e){}if(ok)score++;else lives--}
  return score}
-{const _cfgT=l3dCfg;l3dCfg=function(o){const c=_cfgT(o);try{if(o&&o.quick)c.quick=true}catch(e){}return c}}
+{const _cfgT=l3dCfg;l3dCfg=function(o){const c=_cfgT(o);try{if(o&&o.quick)c.quick=true;if(o&&(o.drible||o.kind==='dribble'))c.drible=true}catch(e){}return c}}
 nsTrainSession=async function(k){const n=S.n;const cost=nsTrainCost();
  if((n.trainW||0)>=NS_TRAIN_MAX){await nsPop({ic:'🗓️',title:'Treinos da rodada feitos',txt:'Você já fez as 3 sessões desta rodada. Jogue a próxima partida pra liberar mais.'});return}
  if(n.en<cost){const q=await nsPop({ic:'❤️',title:'Sem energia pra treinar',txt:`O treino gasta ${cost}% e você está com ${Math.round(n.en)}%.`,opts:[['dr','🥤 Tomar energético']],ok:'Voltar'});if(q==='dr')await nsDrinkPick();return}
@@ -38,8 +38,8 @@ const NS_NARDO={custom:{skin:'#e3b088',hairC:'#3a2a1a',style:'lateral',beard:'ca
 const NS_FOFO_IC=[[/namor|jantar|aliança|casa maior|herdeiro|misteriosa|curtiu|ex\?/i,'💘'],[/festa|balada|camarote/i,'🥂'],[/carro|CT com brinquedo/i,'🏎️'],[/imóvel|mansão|castelo/i,'🏰'],[/BETTIGER|apostando/i,'🎰'],[/quer |acertou|empresário/i,'✈️'],[/técnico|vestiário|churrasco/i,'🗣️'],[/imprensa|apagada/i,'🙊'],[/cabelo|tatuagem/i,'✂️'],[/pizza/i,'🍕'],[/seleção/i,'🇧🇷']];
 {const _g=nsGossip;nsGossip=function(){return _g().map(p=>{const ic=(NS_FOFO_IC.find(x=>x[0].test(p.title))||[0,'👀'])[1];let head=p.title.replace(/^🚨\s*/,'');const sents=head.match(/[^.!?]+[.!?]?/g)||[head];head=sents[0].trim();if(head.length<28&&sents[1])head+=' '+sents[1].trim();head=head.replace(/[.]$/,'');if(head.length>90)head=head.slice(0,88)+'…';
   return{...p,tag:'',media:`<div class="nsfofo2">${npPlayerPhoto({})}<span class="st">${ic}</span><div class="cap"><i>🚨 EXCLUSIVO · FOFOCAGRAM</i><b>${esc(head)}</b></div></div>`,deck:'Comenta aí 👇'}})}}
-nsFeedPage=function(){return{t:'Fofocagram',cls:'feed',html:()=>{let posts=[];try{posts=fdPosts()}catch(e){}const g=nsGossip();FD.posts=g.concat(posts);
-  return`<div class="fgram-h"><b>Fofocagram</b><span>📷 o app de fotos dos boleiros</span></div><div class="nsstories">${[['nardo','nardomeses'],['me','você'],['club','clube'],['gazeta','gazeta'],['mercado','mercado']].map(([k,t])=>{const a=fdAcc(k);return`<div><i>${a.av}</i><small>${esc(t)}</small></div>`}).join('')}</div>
+nsFeedPage=function(){return{t:'FOFOCAGRAM',cls:'feed',html:()=>{let posts=[];try{posts=fdPosts()}catch(e){}const g=nsGossip();FD.posts=g.concat(posts);
+  return`<div class="fgram-h"><b>FOFOCAGRAM</b><span>📷 o app de fofoca dos boleiros · por @nardomeses</span></div><div class="nsstories">${[['nardo','nardomeses'],['me','você'],['club','clube'],['gazeta','gazeta'],['mercado','mercado']].map(([k,t])=>{const a=fdAcc(k);return`<div><i>${a.av}</i><small>${esc(t)}</small></div>`}).join('')}</div>
   <div class="nsfeedv">${FD.posts.map((p,i)=>{try{return fdPostHTML(p,i)}catch(e){return''}}).join('')}</div>`},
  bind:B=>{B.querySelectorAll('[data-fo]').forEach(el=>el.onclick=()=>fdOpen(+el.dataset.fo));
   B.querySelectorAll('[data-fl]').forEach(b=>b.onclick=e=>{e.stopPropagation();const p=FD.posts[+b.dataset.fl];FD.likes[p.id]=!FD.likes[p.id];fdSync()});

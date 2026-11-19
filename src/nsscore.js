@@ -178,7 +178,7 @@ function nsPop(o){return new Promise(res=>{const h=document.createElement('div')
 function nsHubWanted(){try{if(S&&S.club&&S.st&&!S.n)nsEnsure();return!!(S&&S.club&&S.st&&nsOn()&&!(typeof inPrison==='function'&&inPrison())&&!S.done)}catch(e){return false}}
 function nsStatusRole(){const st=S.st;if(st.injLeft>0)return['🚑',`Lesionado · ${st.injLeft} jogo${st.injLeft>1?'s':''}`,'bad'];if(st.suspLeft>0)return['🟥',`Suspenso · ${st.suspLeft}`,'bad'];
  let role='';try{role=S.youth?'Base':roleFor(S.ovr,club().s,S.age)}catch(e){}const c=S.n.rel.coach;
- return role==='Titular'?['🟢','Titular','good']:role==='Rotação'?['🟡',c>=65?'Rotação (técnico gosta)':'Rotação','']:role==='Base'?['🌱','Base','']:['🟠',c>=65?'Reserva (técnico gosta)':'Reserva','warn']}
+ return role==='Titular'?['🟢','Titular','good']:role==='Rotação'?['🟡','Rotação','']:role==='Base'?['🌱','Base','']:['🟠','Reserva','warn']}
 function nsFormTxt(){const e=S.n.en;return e>=75?['💪','Em forma','good']:e>=50?['🙂','Bem','']:e>=28?['😮‍💨','Cansado','warn']:['🥵','Exausto','bad']}
 function nsSeasonNo(){return S.year-(S.n.y0||S.year)+1}
 function nsTicker(){const nm=typeof nextMatchInfo==='function'?nextMatchInfo():null;const me=club();
