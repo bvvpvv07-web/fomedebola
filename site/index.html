@@ -9939,6 +9939,895 @@ body.rc-open{overflow:hidden}
 @media (min-width:1100px) and (min-aspect-ratio:1/1){.rc-cnt{grid-template-columns:repeat(3,minmax(0,1fr))}.rc-tiles{grid-template-columns:repeat(3,minmax(0,1fr))}.rc-shelf{grid-template-columns:repeat(auto-fill,minmax(150px,1fr))}}
 `;document.head.appendChild(st)}
 
+// ================== NÚCLEO NSS (o jogo inteiro gira em volta do seu jogador) ==================
+// Cinco habilidades que você treina (Velocidade, Força, Técnica, Visão, Bola parada): treinar sobe, ficar sem treinar desce.
+// O OVR sai delas. Energia gasta no treino e no jogo e volta com descanso, treinador, imóveis e energético.
+// Nível de estrela, relacionamentos (treinador, equipe, fãs, namorada, patrocinador), felicidade e estilo de vida.
+// Dinheiro toda semana: salário, bônus por gol e por assistência, patrocinador e o que o agente arranca a mais.
+// A tela principal vira Status/Estats com Liga · Habilidade · Vida · Jogar.
+const NSK=[['vel','Velocidade','⚡'],['for','Força','💪'],['tec','Técnica','🎯'],['vis','Visão','👁️'],['bp','Bola parada','🧱']];
+const NSK_D={vel:'Arrancada, corrida e recuperação. Pesa muito em ponta, lateral e atacante.',for:'Corpo, dividida, cabeceio e chute forte. Pesa em zagueiro, volante e centroavante.',tec:'Domínio, drible e finalização.',vis:'Passe, leitura de jogo e posicionamento. No gol, também é reflexo.',bp:'Faltas, pênaltis e escanteios. Ajuda um pouco na finalização.'};
+const NS_REL=[['coach','Treinador','🪑'],['team','Equipe','👕'],['fans','Fãs','🧣'],['gf','Namorada','🌹'],['spon','Patrocinador','🤝']];
+function nsAttrsOf(s,raw){const v=s.vel,f=s.for,t=s.tec,i=s.vis,b=s.bp;const r=raw?(x=>x):(x=>clamp(Math.round(x),1,99));
+ return{VEL:r(v),FIS:r(f),DRI:r(t),PAS:r(i*.65+t*.35),FIN:r(t*.55+f*.25+b*.2),DEF:r(f*.45+i*.35+v*.2),MEN:r(i*.75+t*.25),REF:r(v*.45+i*.55)}}
+function nsLv(extra){const n=S.n,o={};for(const[k]of NSK)o[k]=n.sk[k].l+((extra&&extra[k])||0);return o}
+function nsOn(){return!!(S&&S.n&&S.n.on)}
+const nsK=v=>money((v||0)/1000);// valores em mil € (salário, bônus) para o texto
+function nsEnsure(){
+ if(!S)return null;if(S.n&&S.n.v>=1)return S.n;
+ let C;try{C=CA()}catch(e){C={...S.attrs}}
+ const sk={vel:C.VEL,for:C.FIS,tec:(C.DRI*2+C.FIN)/3,vis:(C.PAS+C.MEN)/2,bp:(C.FIN+C.PAS)/2};
+ if(S.pos==='GOL'){sk.vel=(C.REF+C.VEL)/2;sk.vis=(C.REF*2+C.MEN)/3}
+ for(const k in sk)sk[k]=clamp(Math.round(sk[k]),10,99);
+ for(let it=0;it<6;it++){const g=S.ovr-fit(nsAttrsOf(sk),S.pos);if(!g)break;for(const k in sk)sk[k]=clamp(sk[k]+Math.sign(g)*Math.max(1,Math.abs(g)),10,99)}
+ const fama=(S.life&&S.life.fama)||5;
+ const n={v:1,on:true,sk:{},cap:{},last:{},week:0,en:100,star:{l:clamp(1+Math.round(fama/7),1,15),p:0},
+  rel:{coach:Math.round(S.coach??55),team:55,fans:clamp(Math.round(20+fama*.6),10,95),gf:S.gf?Math.round(S.gf.v||60):0,spon:0},
+  happy:Math.round((S.life&&S.life.cab)||60),ls:0,dr:{a:2,b:0,c:0,d:0,e:0},ach:{},items:[],veh:[],horses:[],wk:null,eff:3,foc:0,
+  ss:{ap:0,g:0,a:0,ht:0,ps:0,ch:0,motm:0},cs:{ap:0,g:0,a:0,ht:0,ps:0,ch:0,motm:0},is:{ap:0,g:0,a:0,ht:0,ps:0,ch:0,motm:0},hist:{},ct:null,spon:null,auto:'off',pos:S.pos,ovr:null,y0:S.year};
+ const gap=Math.max(4,(S.pot||S.ovr)-S.ovr);
+ for(const[k]of NSK){n.sk[k]={l:sk[k],p:RI(0,50)};n.cap[k]=clamp(sk[k]+gap+RI(0,5),25,99);n.last[k]=0}
+ // carreira antiga: os números que já existem entram nas estatísticas
+ try{for(const h of S.history||[]){n.cs.ap+=h.games||0;n.cs.g+=h.goals||0;n.cs.a+=h.assists||0}n.is.ap=S.caps||0;n.is.g=S.natGoals||0}catch(e){}
+ // imóveis antigos continuam seus
+ S.n=n;
+ try{const map={carro:['veh','esportivo'],iate:['veh','iate'],relogio:['items','relogio'],grife:['items','grife'],game:['items','console']};for(const id of S.owned||[]){const m=map[id];if(m&&!n[m[0]].includes(m[1]))n[m[0]].push(m[1])}nsLsCalc()}catch(e){}
+ if(S.boot){S.boot=null;S.bootLeft=0}
+ if(!S.liveMode||S.liveMode==='decisivos')S.liveMode='all';
+ if(!S.matchMode||S.matchMode==='sess')S.matchMode='old';
+ nsSync();return n;
+}
+// distribui uma mudança de OVR que veio de outro lugar (evento, prêmio…) nas habilidades que mais pesam na posição
+function nsFitR(lv){const A=nsAttrsOf(lv,true);const w=POS[S.pos].w;let s=0;for(const k in w)s+=w[k]*(A[k]||0);return s}
+function nsDistribute(d){const n=S.n;const target=n.ovr+d;const sg=Math.sign(d);
+ for(let g=0;g<60;g++){const cur=fit(nsAttrsOf(nsLv()),S.pos);if(sg>0?cur>=target:cur<=target)break;
+  let best=null,bv=-1;const base=nsFitR(nsLv());
+  for(const[k]of NSK){const l=n.sk[k].l;if((sg>0&&l>=99)||(sg<0&&l<=10))continue;const lv=nsLv();lv[k]+=sg;const gain=Math.abs(nsFitR(lv)-base)+Math.random()*.001;if(gain>bv){bv=gain;best=k}}
+  if(!best)break;n.sk[best].l+=sg}
+}
+function nsSync(){const n=S&&S.n;if(!n)return;
+ if(n.ovr!=null&&S.ovr!==n.ovr&&n.pos===S.pos){const d=clamp(S.ovr-n.ovr,-3,3);if(d)nsDistribute(d)}
+ n.pos=S.pos;S.attrs=nsAttrsOf(nsLv());S.ovr=clamp(fit(S.attrs,S.pos),30,99);n.ovr=S.ovr;
+ if(S.ovr>(S.peak||0)){S.peak=S.ovr;S.peakAge=S.age}if((S.pot||0)<S.ovr)S.pot=S.ovr;
+ S.coach=n.rel.coach;if(S.gf){S.gf.v=n.rel.gf}else n.rel.gf=0;
+ if(S.life){S.life.cab=clamp(Math.round(n.happy),0,100)}
+ nsCt();
+}
+// ---------- treino ----------
+function nsTrainCost(){const n=S.n;return clamp(Math.round(11-(n.rel.coach-50)/25),7,14)}
+function nsAgeF(){const a=S.age;return a<=18?1.35:a<=21?1.2:a<=24?1:a<=27?.8:a<=30?.55:a<=33?.35:.2}
+function nsGain(k,mul=1){const n=S.n;const s=n.sk[k];
+ const capF=clamp((n.cap[k]-s.l)/10+.15,.1,1.3),lvlF=clamp(1.25-(s.l-50)/100,.6,1.4),coachF=.85+n.rel.coach/333;
+ return clamp(Math.round(10*nsAgeF()*capF*lvlF*coachF*mul*R(.85,1.15)),1,60)}
+function nsAddP(k,g,chips){const n=S.n;const s=n.sk[k];s.p+=g;let up=0;while(s.p>=100&&s.l<99){s.p-=100;s.l++;up++}if(s.l>=99)s.p=Math.min(s.p,99);
+ if(up){const before=S.ovr;nsSync();const nm=NSK.find(x=>x[0]===k)[1];if(chips)chips.push([`${nm} ${s.l}`,'up']);try{toast({ic:'📈',title:`${nm} subiu para ${s.l}!`,txt:S.ovr>before?`OVR ${before} → ${S.ovr}`:'Continue treinando.',ms:2200,group:'nsup'})}catch(e){}try{nsAchCheck()}catch(e){}}
+ return up}
+function nsTrain(k,opt={}){const n=nsEnsure();const cost=opt.cost??nsTrainCost();
+ if(n.en<cost+(opt.min||0))return{ok:false,txt:`Energia baixa (${Math.round(n.en)}%). Descanse, jogue ou tome um energético.`};
+ n.en=clamp(n.en-cost,0,100);const g=nsGain(k,opt.mul||1);const up=nsAddP(k,g);n.last[k]=n.week;n.trainW=(n.trainW||0)+1;n.trainT=(n.trainT||0)+1;
+ if(n.rel.coach<100&&ch(.35))n.rel.coach=clamp(n.rel.coach+1,0,100);
+ return{ok:true,g,up,cost}}
+// ---------- nível de estrela ----------
+const nsStarNeed=l=>100;
+function nsStarAdd(x){const n=S.n;if(!n||!x)return 0;const st=n.star;const k=1/(1+(st.l-1)*.3);st.p+=x*k;let up=0;
+ while(st.p>=nsStarNeed(st.l)){st.p-=nsStarNeed(st.l);st.l++;up++;S.life.fama=clamp(S.life.fama+3,0,100)}
+ if(st.p<0)st.p=0;if(up){try{toast({ic:'⭐',title:`Nível de estrela ${st.l}!`,txt:'Mais fãs, patrocínio melhor e clubes de olho.',ms:2600})}catch(e){}}return up}
+// ---------- contrato: salário, bônus por gol e por assistência ----------
+function nsCt(){const n=S.n;if(!n)return null;const w=S.wage||0;
+ if(!n.ct||n.ct.wage!==w){const rg=n.ct&&n.ct.rg||.22,ra=n.ct&&n.ct.ra||.13;n.ct={wage:w,rg,ra,gb:Math.max(w>0?1:0,Math.round(w*rg)),ab:Math.max(w>0?1:0,Math.round(w*ra))}}
+ return n.ct}
+const NS_AGENT={tubarao:.12,normal:.07,pai:.03};
+function nsAgentPct(){return NS_AGENT[S.agent]??.06}
+// ---------- semana: dinheiro, energia, decadência, relacionamentos ----------
+function nsMatchItems(){const st=S.st;if(!st)return 40;if(!st.nsN){st.nsN=Math.max(30,st.cal.filter(it=>it.k!=='ev'&&it.k!=='debut').length)}return st.nsN}
+function nsWeek(info={}){const n=nsEnsure();if(!n)return null;const st=S.st;n.week++;st.nsWk=(st.nsWk||0)+1;
+ const f=52/nsMatchItems();const net=.5;const ag=nsAgentPct();const ct=nsCt();
+ const sal=(S.wage||0)*f*net,gb=(info.g||0)*ct.gb*net,ab=(info.a||0)*ct.ab*net,sp=n.spon?n.spon.w*f*net:0;
+ const rows={sal:[sal,sal*ag],g:[gb,gb*ag],a:[ab,ab*ag],sp:[sp,sp*ag],gN:info.g||0,aN:info.a||0};
+ let tot=0;for(const k of['sal','g','a','sp'])tot+=rows[k][0]+rows[k][1];
+ let rent=0;try{rent=rentWeek()*f}catch(e){}
+ tot+=rent*1000;S.din+=tot/1000;st.paid=(st.paid||0)+sal/1000;
+ // energia: 6 dias de descanso + treinador + imóveis
+ const base=51,coach=Math.round(n.rel.coach/100*30),props=nsPropEn();const en0=n.en;n.en=clamp(n.en+base+coach+props,0,100);
+ // habilidades sem treino caem
+ const drops=[];const P=POS[S.pos];const old=S.age>P.peak+1?(S.age-P.peak-1):0;
+ for(const[k,nm]of NSK){const s=n.sk[k];const idle=n.week-(n.last[k]||0);let d=0;
+  if(idle>=2)d+=(2+old)*(idle>=6?1.5:1);if(old)d+=old*.5;
+  if(d>0){s.p-=Math.round(d);while(s.p<0&&s.l>10){s.l--;s.p+=100;drops.push(nm)}if(s.p<0)s.p=0}}
+ // relacionamentos esfriam aos poucos
+ const R0={...n.rel};n.rel.coach=clamp(n.rel.coach-1.2+(n.trainW>=2?1:0),0,100);n.rel.team=clamp(n.rel.team-.9,0,100);n.rel.fans=clamp(n.rel.fans-(n.star.l>=10?.6:1.1),0,100);
+ if(S.gf)n.rel.gf=clamp(n.rel.gf-(S.rel==='casado'?1:1.6),0,100);
+ if(n.spon){n.rel.spon=clamp(n.rel.spon-1,0,100);if(n.rel.spon<12){(st.lifeNews=st.lifeNews||[]).push(`A ${n.spon.n} encerrou o patrocínio. Faltou aparecer.`);n.spon=null;n.rel.spon=0}}
+ // estilo de vida e felicidade
+ nsLsCalc();const tgt=32+(S.gf?n.rel.gf*.16:4)+n.ls*.22+n.rel.team*.1+n.rel.fans*.06+(S.din<0?-15:0)+(n.en<25?-6:0)+(info.res==='V'?6:info.res==='D'?-5:0);
+ n.happy=clamp(n.happy+(tgt-n.happy)*.25,0,100);
+ n.trainW=0;
+ // treino automático (opcional)
+ let autoN=0;if(n.auto&&n.auto!=='off'){const keep=65;let guard=0;while(n.en-nsTrainCost()>=keep&&guard++<6){const k=n.auto==='eq'?nsWeakest():n.auto;const r=nsTrain(k,{mul:.85});if(!r.ok)break;autoN++}}
+ nsSync();
+ n.wk={rows,tot,rent:rent*1000,en0,base,coach,props,en:n.en,drops,autoN,wk:st.nsWk,y:S.year,res:info.res||null,did:!!info.played};
+ return n.wk}
+function nsWeakest(){const n=S.n;const w=POS[S.pos].w;let best=null,bv=-1e9;for(const[k]of NSK){const lv=nsLv();lv[k]++;const g=fit(nsAttrsOf(lv),S.pos)-fit(nsAttrsOf(nsLv()),S.pos)+(n.cap[k]-n.sk[k].l)/40-(n.week-(n.last[k]||0)>=2?-.5:0);if(g>bv){bv=g;best=k}}return best||'tec'}
+function nsPropEn(){let s=0;try{for(const id of S.props||[]){const p=NS_PROPS.find(x=>x.id===id);if(p)s+=p.en||0}}catch(e){}return Math.min(30,s)}
+function nsLsCalc(){const n=S.n;let s=0;try{for(const id of n.items)s+=(NS_ITEMS.find(x=>x.id===id)||{}).ls||0;for(const id of n.veh)s+=(NS_VEH.find(x=>x.id===id)||{}).ls||0;for(const id of S.props||[])s+=(NS_PROPS.find(x=>x.id===id)||{}).ls||0}catch(e){}n.ls=clamp(Math.round(s),0,100);return n.ls}
+// o XP/árvore antiga sai de cena: quem manda agora é treino + nível de estrela
+{if(typeof rpgGain==='function'){const _rg=rpgGain;rpgGain=function(...a){if(nsOn())return;return _rg.apply(this,a)}}}
+// ---------- desempenho em campo: energia, equipe, felicidade e chuteira ----------
+function nsBootStats(){try{const n=S.n;if(!n||!n.boot||n.bootLeft<=0)return null;return NS_BOOTS.find(b=>b.id===n.boot)||null}catch(e){return null}}
+function nsEffLv(){const b=nsBootStats();const lv=nsLv(b?{vel:b.vel,for:b.for,tec:b.tec}:null);const n=S.n;const e=n.en;const k=e>=50?1:e>=25?.97-(50-e)*.002:.92-(25-e)*.004;for(const x in lv)lv[x]=lv[x]*k;return lv}
+function nsPerfMod(){const n=S.n;let m=fit(nsAttrsOf(nsEffLv()),S.pos)-S.ovr;m+=(n.rel.team-50)/30+(n.happy-55)/45;return m}
+{const _bp=typeof bootPerf==='function'?bootPerf:()=>0;bootPerf=function(){return nsOn()?nsPerfMod()/.8:_bp()}}
+{const _ea=typeof effAttrs==='function'?effAttrs:()=>CA();effAttrs=function(){return nsOn()?nsAttrsOf(nsEffLv()):_ea()}}
+// treinador gosta de você: mais chance de ser titular
+{const _part=participation;participation=function(kind,o){const p=_part(kind,o);try{if(nsOn()&&kind==='club'&&!(S.youth&&!(o&&(o.youthS||o.debut)))){const c=S.n.rel.coach;
+  if(!p.play&&p.why==='banco'&&c>=65&&ch((c-60)/90))return{play:true,start:ch(.5),min:RI(30,90),role:p.role};
+  if(p.play&&p.start&&c<25&&ch((30-c)/80))return{play:true,start:false,min:RI(10,30),role:p.role};
+  if(p.play&&!p.start&&c>=80&&ch(.25))return{...p,start:true,min:90}}}catch(e){}return p}}
+// ---------- fim de temporada: OVR não cresce sozinho, idade pesa nas habilidades ----------
+{const _es=endSeason;endSeason=function(...a){if(!nsOn())return _es.apply(this,a);const n=S.n;nsSync();const pre=S.ovr,pk=S.peak,pka=S.peakAge;
+  const r=_es.apply(this,a);
+  try{const P=POS[S.pos];const old=S.age-P.peak;if(old>=3){for(const[k]of NSK){const loss=Math.round(clamp((old-2)*R(.4,.9),0,3));n.sk[k].l=clamp(n.sk[k].l-loss,10,99)}}
+   const y=r&&r.row?r.row.year:S.year-1;n.hist[y]={motm:n.ss.motm,ht:n.ss.ht,ps:n.ss.ps,ch:n.ss.ch};
+   const tt=(r&&r.titles||[]).length,aw=(r&&r.awards||[]).length;nsStarAdd(tt*35+aw*50);
+   n.ovr=pre;S.ovr=pre;S.peak=pk;S.peakAge=pka;nsSync();if(r&&r.row){r.row.delta=S.ovr-r.row.ovr}}catch(e){console.error(e)}
+  return r}}
+{const _lse=typeof lifeSeasonEnd==='function'?lifeSeasonEnd:null;lifeSeasonEnd=function(){if(!nsOn())return _lse&&_lse();ensureLife();S.perks={}}}
+{const _pw=typeof payWeek==='function'?payWeek:null;payWeek=function(nr){if(nsOn())return;return _pw&&_pw(nr)}}
+{const _bs=buildSeason;buildSeason=function(...a){const r=_bs.apply(this,a);try{if(S.n){S.n.ss={ap:0,g:0,a:0,ht:0,ps:0,ch:0,motm:0};S.st.nsWk=0}}catch(e){}return r}}
+// cada jogo é uma semana: paga, recupera energia e anota a rodada (placar de todo mundo e posições)
+{const _pi=processItem;processItem=async function(it,io){if(!nsOn())return _pi(it,io);nsEnsure();const st=S.st;let snap=null;
+  if(it.k==='lg'){snap={};const T=sortTable(st.table);T.forEach((x,i)=>snap[x.id]={gp:x.gp,gc:x.gc,pos:i+1})}
+  NSSM.items=[];const r=await _pi(it,io);
+  try{if(snap&&st.rounds[it.r]){const list=st.rounds[it.r].map(([h,a])=>{const H=st.table[h],b=snap[h];return H&&b?[h,a,H.gp-b.gp,H.gc-b.gc]:null}).filter(Boolean);const T=sortTable(st.table);const pos={};T.forEach((x,i)=>pos[x.id]=i+1);st.nsRound={r:it.r,list,pos,prev:Object.fromEntries(Object.entries(snap).map(([k,v])=>[k,v.pos]))}}}catch(e){}
+  const isWeek=r&&(r.k==='match'||r.k==='multi'||r.k==='bye');
+  if(isWeek){let g=0,a=0,played=false,res=null;for(const m of NSSM.items){if(m.me&&m.me.play){g+=m.me.g||0;a+=m.me.a||0;played=true}}
+   const L=r.k==='multi'?r.list:[r];const mm=L.find(x=>x&&x.k==='match');if(mm)res=mm.wdl;
+   nsWeek({g,a,played,res})}
+  return r}}
+// contrato novo: dá pra negociar salário e bônus como no NSS
+{const _ao=acceptOffer;acceptOffer=function(o){const w0=S.wage;const r=_ao.apply(this,arguments);try{if(nsOn()&&o&&!o.loan&&S.wage>0){nsSync();setTimeout(()=>nsNegotiate(o),60)}}catch(e){}return r}}
+
+// ================== TELAS ==================
+const NSP={stack:[]};let NS_TAB='status',NS_VIEW=0;
+function nsHost(){let h=document.getElementById('nsp');if(!h){h=document.createElement('div');h.id='nsp';h.hidden=true;document.body.appendChild(h)}return h}
+function nsOpen(p){NSP.stack=[p];nsDraw()}
+function nsPush(p){NSP.stack.push(p);nsDraw()}
+function nsBack(){NSP.stack.pop();if(!NSP.stack.length)return nsClose();nsDraw()}
+function nsClose(){const h=nsHost();h.hidden=true;h.innerHTML='';NSP.stack=[];document.body.classList.remove('nsp-open');try{saveNow('season')}catch(e){}try{renderHub()}catch(e){console.error(e)}}
+function nsRefresh(){if(NSP.stack.length)nsDraw(true)}
+function nsBarHTML(v,cls=''){return`<span class="nsmb ${cls}"><i style="width:${clamp(v,0,100)}%"></i></span>`}
+function nsTopHTML(){const n=S.n;return`<div class="nst-mini"><span title="Nível de estrela">⭐ ${n.star.l}</span><span title="Energia">❤️ ${Math.round(n.en)}%</span><span class="mono">${money(S.din)}</span></div>`}
+function nsDraw(keep){const h=nsHost();const p=NSP.stack[NSP.stack.length-1];if(!p)return;const prev=document.getElementById('nspB');const sc=keep&&prev?prev.scrollTop:0;
+ h.hidden=false;document.body.classList.add('nsp-open');
+ const nav=(p.nav||[]);
+ h.innerHTML=`<div class="nspg ${p.cls||''}"><div class="nsp-h"><button class="nsp-back" id="nspX">‹ ${NSP.stack.length>1?'Voltar':'Início'}</button><b>${esc(p.t)}</b>${nsTopHTML()}</div>
+ <div class="nsp-b" id="nspB">${p.html()}</div>
+ <nav class="nsp-nav">${[{ic:'⬅️',t:NSP.stack.length>1?'Voltar':'Início',id:'__back'},...nav].map((b,i)=>`<button class="nsnb ${b.on?'on':''}" data-nn="${i}" ${b.dis?'disabled':''}><span>${b.ic}</span><small>${esc(b.t)}</small></button>`).join('')}</nav></div>`;
+ document.getElementById('nspX').onclick=()=>NSP.stack.length>1?nsBack():nsClose();
+ h.querySelectorAll('[data-nn]').forEach(b=>b.onclick=()=>{const i=+b.dataset.nn;if(i===0)return NSP.stack.length>1?nsBack():nsClose();const it=nav[i-1];if(it&&it.fn)it.fn()});
+ const B=document.getElementById('nspB');B.scrollTop=sc;try{if(p.bind)p.bind(B)}catch(e){console.error(e)}}
+// popup simples (resultado de ação)
+function nsPop(o){return new Promise(res=>{const h=document.createElement('div');h.className='nspop-host';document.body.appendChild(h);const opts=o.opts||[];
+ h.innerHTML=`<div class="nspop"><div class="nspop-h">${o.ic?`<span>${o.ic}</span>`:''}<b>${esc(o.title||'')}</b></div>${o.html||''}${o.txt?`<p>${esc(o.txt)}</p>`:''}${(o.chips||[]).length?`<div class="chipsrow">${o.chips.map(([t,k])=>`<span class="chip ${k}">${esc(t)}</span>`).join('')}</div>`:''}
+ <div class="nspop-btns">${opts.map(([k,t,cls])=>`<button class="btn ${cls||''}" data-o="${k}">${esc(t)}</button>`).join('')}${o.ok!==false?`<button class="btn ${opts.length?'ghost':''}" data-o="ok">${esc(o.ok||'Ok')}</button>`:''}</div></div>`;
+ h.querySelectorAll('[data-o]').forEach(b=>b.onclick=()=>{h.remove();res(b.dataset.o)});if(o.bind)o.bind(h)})}
+
+// ---------- tela principal ----------
+function nsHubWanted(){try{if(S&&S.club&&S.st&&!S.n)nsEnsure();return!!(S&&S.club&&S.st&&nsOn()&&!(typeof inPrison==='function'&&inPrison())&&!S.done)}catch(e){return false}}
+function nsStatusRole(){const st=S.st;if(st.injLeft>0)return['🚑',`Lesionado · ${st.injLeft} jogo${st.injLeft>1?'s':''}`,'bad'];if(st.suspLeft>0)return['🟥',`Suspenso · ${st.suspLeft}`,'bad'];
+ let role='';try{role=S.youth?'Base':roleFor(S.ovr,club().s,S.age)}catch(e){}const c=S.n.rel.coach;
+ return role==='Titular'?['🟢','Titular','good']:role==='Rotação'?['🟡',c>=65?'Rotação (técnico gosta)':'Rotação','']:role==='Base'?['🌱','Base','']:['🟠',c>=65?'Reserva (técnico gosta)':'Reserva','warn']}
+function nsFormTxt(){const e=S.n.en;return e>=75?['💪','Em forma','good']:e>=50?['🙂','Bem','']:e>=28?['😮‍💨','Cansado','warn']:['🥵','Exausto','bad']}
+function nsSeasonNo(){return S.year-(S.n.y0||S.year)+1}
+function nsTicker(){const nm=typeof nextMatchInfo==='function'?nextMatchInfo():null;const me=club();
+ if(S.st.done)return'Temporada encerrada · hora do balanço';if(!nm)return'Sem jogo marcado';const o=nm.opp&&CLUB[nm.opp];
+ return`Próximo jogo · ${nm.home===false&&o?esc(o.a||mkAbbr(o.n))+' × '+esc(me.a||mkAbbr(me.n)):esc(me.a||mkAbbr(me.n))+(o?' × '+esc(o.a||mkAbbr(o.n)):'')} · ${esc(nm.comp)}${nm.label?' · '+esc(nm.label):''}`}
+function nsStatsRows(){const n=S.n;const st=S.st;let nn=0,ns=0;for(const v of Object.values(st.stats||{})){if(v&&v.nn){nn+=v.nn;ns+=v.ns}}
+ const L=[['Jogos','ap'],['Gols','g'],['Assist.','a'],['Hat-tricks','ht'],['Passes certos','ps'],['Chances','ch'],['Estrela do jogo','motm']];
+ const cur=n.ss,car=n.cs,int=n.is;
+ return`<table class="nstab"><thead><tr><th></th><th>Temporada</th><th>Carreira</th><th>Seleção</th></tr></thead><tbody>${L.map(([t,k])=>`<tr><th>${t}</th><td>${cur[k]||0}</td><td>${car[k]||0}</td><td>${int[k]||0}</td></tr>`).join('')}
+ <tr><th>Nota média</th><td>${nn?fmt2(ns/nn):'—'}</td><td>—</td><td>—</td></tr><tr><th>Títulos</th><td>${(st.titles||[]).length}</td><td>${(S.titles||[]).length}</td><td>—</td></tr></tbody></table>`}
+function nsClubsRows(){const n=S.n;const rows=(S.history||[]).map(h=>({y:h.year,c:h.club,j:h.games,g:h.goals,a:h.assists,m:(n.hist[h.year]||{}).motm}));
+ rows.push({y:S.year,c:S.club,j:n.ss.ap,g:n.ss.g,a:n.ss.a,m:n.ss.motm,cur:true});
+ return`<table class="nstab clubs"><thead><tr><th>Ano</th><th>Equipe</th><th>J</th><th>G</th><th>A</th><th>⭐</th></tr></thead><tbody>${rows.slice(-12).reverse().map(r=>{const c=CLUB[r.c];return`<tr class="${r.cur?'cur':''}"><td>${seasonLbl(r.y)}</td><td class="cl">${c?shieldHTML(c,'sm')+' '+esc(c.a||mkAbbr(c.n)):'—'}</td><td>${r.j||0}</td><td>${r.g||0}</td><td>${r.a||0}</td><td>${r.m??'—'}</td></tr>`}).join('')}</tbody></table>`}
+function nsNextCard(){const nm=typeof nextMatchInfo==='function'?nextMatchInfo():null;const me=club();if(!nm||S.st.done)return'';const o=nm.opp&&CLUB[nm.opp];const away=nm.home===false&&o;const H=away?o:me,A=away?me:o;
+ const last=(S.st.log||[]).filter(x=>x.k==='match').slice(-1)[0];
+ return`<div class="nsnext"><small>Próximo jogo · ${esc(nm.comp)}${nm.label?' · '+esc(nm.label):''}</small><div class="mt"><span class="tm">${shieldHTML(H,'sm')}<b>${esc(H.n)}</b></span><em>×</em><span class="tm">${A?shieldHTML(A,'sm')+`<b>${esc(A.n)}</b>`:'<b>a definir</b>'}</span></div>${last?`<span class="last">Último jogo: ${esc(last.home.n)} ${last.hg} – ${last.ag} ${esc(last.away.n)}</span>`:''}</div>`}
+function nsHubHTML(){const n=S.n;const c=club();const st=S.st;const [ri,rt,rc]=nsStatusRole();const [fi,ft,fc]=nsFormTxt();const bt=nsBootStats();const drinks=Object.values(n.dr).reduce((s,x)=>s+x,0);
+ const skAvg=Math.round(NSK.reduce((s,[k])=>s+n.sk[k].l,0)/5);const achP=typeof nsAchPct==='function'?nsAchPct():0;
+ const trainHint=n.en>=45&&!n.trainW&&!st.done;
+ const body=NS_TAB==='status'?`<div class="ns3">
+   <button class="ns3b" id="nsHabB"><small>Habilidades</small><b>OVR ${S.ovr}</b>${nsBarHTML(skAvg)}<em>média ${skAvg}</em></button>
+   <button class="ns3b" id="nsHapB"><small>Felicidade</small><b>${n.happy>=70?'😄':n.happy>=45?'🙂':n.happy>=25?'😐':'😞'} ${Math.round(n.happy)}%</b>${nsBarHTML(n.happy,'hap')}</button>
+   <button class="ns3b" id="nsLsB"><small>Estilo de vida</small><b>💎 ${n.ls}%</b>${nsBarHTML(n.ls,'ls')}</button></div>
+  <div class="nsg">
+   <div class="nsc ${rc}"><span>${ri}</span>${esc(rt)}</div><div class="nsc ${fc}"><span>${fi}</span>${esc(ft)}</div>
+   <button class="nsc b" id="nsShopB"><span>🛒</span>Lojas</button><button class="nsc b" id="nsCtB"><span>📝</span>${S.wage?`${nsK(S.wage)}/sem · até ${S.year+Math.max(0,S.contract)}`:'Contrato'}</button>
+   <button class="nsc b" id="nsDrShopB"><span>🥤</span>Energéticos</button><button class="nsc b ${drinks?'':'off'}" id="nsDrB"><span>🧃</span>${drinks?`${drinks} na mochila · tomar`:'Nenhum'}</button>
+   <button class="nsc b" id="nsBootShopB"><span>👟</span>Chuteiras</button><button class="nsc b ${bt?'':'off'}" id="nsBootB"><span>${bt?bt.ic||'👟':'—'}</span>${bt?`${esc(bt.n)} · ${n.bootLeft} jogos`:'Nenhuma'}</button>
+   <button class="nsc b" id="nsNewsB"><span>📰</span>Notícias</button><button class="nsc b" id="nsAchB"><span>🏅</span>Realizações ${String(achP).replace('.',',')}%</button>
+  </div>${nsNextCard()}${trainHint?`<button class="nshint" id="nsHintB">💡 Energia em ${Math.round(n.en)}%: treine antes do jogo pra subir as habilidades.</button>`:''}`
+ :`<div class="nsst"><div class="row" style="justify-content:space-between;align-items:center"><b>${NS_VIEW?'Clubes':'Estatísticas'}</b><button class="btn ghost small" id="nsViewB">🔁 Mudar visão</button></div>${NS_VIEW?nsClubsRows():nsStatsRows()}</div>`;
+ return`<div class="nsh">
+ <div class="nsh-top"><button class="nsico" id="nsExit" aria-label="Sair">✕</button><div class="nsname">${shieldHTML(c,'sm')}<div><b>${esc(S.name)}</b><span>#${S.shirt||S.num} · ${esc(POS[S.pos].n)} · ${esc(c.n)}</span></div></div><button class="nsico" id="nsCfg" aria-label="Opções">⚙️</button><button class="nsico" id="nsHelp" aria-label="Ajuda">?</button></div>
+ <div class="nsh-bars"><button class="nsbig star" id="nsStarB"><span class="ic">⭐<i>${n.star.l}</i></span><span class="tx">Nível de estrela</span><span class="fl" style="width:${Math.round(n.star.p)}%"></span></button>
+  <button class="nsbig en ${n.en<30?'low':''}" id="nsEnB"><span class="ic">❤️</span><span class="tx">Energia ${Math.round(n.en)}%</span><span class="fl" style="width:${Math.round(n.en)}%"></span></button></div>
+ <div class="nsh-sub"><span>Idade ${S.age}</span><div class="nstabs"><button data-nt="status" class="${NS_TAB==='status'?'on':''}">Status</button><button data-nt="estats" class="${NS_TAB==='estats'?'on':''}">Estats</button></div><span class="mono gold">${money(S.din)}</span></div>
+ <div class="nsh-body" id="nsBody">${body}</div>
+ <div class="nsh-tick"><span>Ano ${nsSeasonNo()}</span><div class="mq"><span>${nsTicker()}</span></div><span>Sem ${(st.nsWk||0)+1}</span></div>
+ <nav class="nsh-nav"><button id="nsLiga"><span>🏆</span><small>Liga</small></button><button id="nsHab"><span>⚽</span><small>Habilidade</small></button><button id="nsVida"><span>🙂</span><small>Vida</small></button><button id="nsJogar" class="go"><span>➜⚽</span><small>${st.done?'Balanço':'Jogar'}</small></button></nav>
+ <div id="nsModal"></div></div>`}
+function nsRenderHub(){nsEnsure();nsSync();
+ // o que o hub antigo montou (evento da semana, balanço do ano) vem por cima da tela nova, com os botões funcionando
+ let evNode=null;try{if(PAUSE){evNode=$app.querySelector('section.ev');if(evNode)evNode.remove()}}catch(e){}
+ document.querySelectorAll('body > .bl-optmenu').forEach(x=>x.remove());document.body.classList.remove('blhub','onescreen','noscroll');document.body.classList.add('nshub');
+ $app.innerHTML=nsHubHTML();
+ if(evNode){const m=document.getElementById('nsModal');m.className='nsmodal';const w=document.createElement('div');w.className='nsmodal-in';w.appendChild(evNode);m.appendChild(w)}
+ else if(S.st.done){const m=document.getElementById('nsModal');m.className='nsmodal';m.innerHTML=`<div class="nsmodal-in"><section class="card nsdone"><div class="eyebrow">Temporada ${seasonLbl(S.year)} encerrada</div><h3>Hora do balanço 🏁</h3><p class="muted">Tabela final, prêmios, evolução e as propostas pro ano que vem.</p><button class="btn wide" id="nsEndB">Ver o balanço</button></section></div>`}
+ const on=(id,fn)=>{const e=document.getElementById(id);if(e)e.onclick=fn};
+ on('nsExit',()=>askHome());on('nsCfg',nsCfgSheet);on('nsHelp',()=>{try{S.tips=S.tips||{};delete S.tips.tourNS;coachTour('tourNS',TOUR_HUB)}catch(e){}});
+ if(!(S.tips&&S.tips.tourNS)&&!evNode){S.tips=S.tips||{};S.tips.tourHub=true;setTimeout(()=>{try{if($ov.hidden&&!NSP.stack.length&&document.body.classList.contains('nshub'))coachTour('tourNS',TOUR_HUB)}catch(e){}},600)}
+ $app.querySelectorAll('[data-nt]').forEach(b=>b.onclick=()=>{NS_TAB=b.dataset.nt;renderHub()});on('nsViewB',()=>{NS_VIEW=NS_VIEW?0:1;renderHub()});
+ on('nsHab',()=>nsOpen(nsHabPage()));on('nsHabB',()=>nsOpen(nsHabPage()));on('nsHintB',()=>nsOpen(nsHabPage()));
+ on('nsVida',()=>nsOpen(nsVidaPage()));on('nsHapB',()=>nsOpen(nsVidaPage()));on('nsLiga',()=>nsOpen(nsLigaPage()));
+ on('nsLsB',()=>nsOpen(nsShopPage('ls')));on('nsShopB',()=>nsOpen(nsShopPage()));on('nsDrShopB',()=>nsOpen(nsShopPage('dr')));on('nsBootShopB',()=>nsOpen(nsShopPage('bt')));on('nsBootB',()=>nsOpen(nsShopPage('bt')));
+ on('nsDrB',()=>nsDrinkPick());on('nsEnB',()=>nsDrinkPick());on('nsCtB',()=>nsContractSheet());on('nsNewsB',()=>nsNews());on('nsAchB',()=>nsOpen(nsAchPage()));on('nsStarB',()=>nsStarSheet());
+ on('nsEndB',nsEndSeason);on('nsJogar',()=>{if(S.st.done){nsEndSeason();return}if(PAUSE){const m=document.querySelector('.nsmodal');if(m)m.animate([{transform:'scale(1)'},{transform:'scale(1.03)'},{transform:'scale(1)'}],{duration:260});return}nsPlay()});
+}
+{const _rhN=renderHub;renderHub=function(...a){const r=_rhN.apply(this,a);try{if(nsHubWanted())nsRenderHub();else document.body.classList.remove('nshub')}catch(e){console.error(e)}return r}}
+{const _shN=shell;shell=function(...a){document.body.classList.remove('nshub');return _shN.apply(this,a)}}
+// carreira nova ou carregada: liga o modo NSS
+{const _lsN=typeof loadSave==='function'?loadSave:null;if(_lsN)loadSave=function(...a){const r=_lsN.apply(this,a);const fin=x=>{try{if(S&&S.club)nsEnsure()}catch(e){}return x};return r&&r.then?r.then(fin):fin(r)}}
+{const _ncN=newCareer;newCareer=function(...a){const r=_ncN.apply(this,a);try{nsEnsure()}catch(e){}return r}}
+
+// ---------- jogar (uma semana) ----------
+async function nsEndSeason(){if(BUSY)return;BUSY=true;let ls=null;try{ls=endSeason();saveNow('post')}catch(e){console.error(e)}BUSY=false;if(!ls)return;try{await runSeasonEndShow(ls)}catch(e){console.error(e)}renderReport(ls)}
+async function nsPlay(){if(BUSY)return;const n=nsEnsure();
+ if(n.en<20){const k=await nsPop({ic:'🥵',title:'Você está sem energia',txt:`Energia em ${Math.round(n.en)}%. Jogando assim o rendimento cai e o risco de lesão sobe.`,opts:[['dr','🥤 Tomar energético'],['go','Jogar assim mesmo','ghost']],ok:'Voltar'});if(k==='dr'){await nsDrinkPick();return}if(k!=='go')return}
+ S.st.lifeNews=[];LIFE_MSG=null;WEEK_TAB=null;NSSM.post=[];NSSM.inPost=true;
+ // o advance do jogo já resolve os eventos da semana em pop-up e segue direto pro jogo
+ try{await advance('one')}catch(e){console.error(e);BUSY=false}
+ try{await nsPostMatch()}catch(e){console.error(e)}
+ try{if(typeof showPendingMoments==='function')await showPendingMoments()}catch(e){}
+ NSSM.inPost=false;renderHub();try{saveNow('season')}catch(e){}}
+
+// ---------- habilidades ----------
+function nsHabPage(){return{t:'Habilidades',cls:'hab',html:()=>{const n=S.n;const cost=nsTrainCost();const bt=nsBootStats();
+  return`<div class="nshab-top"><div><b>OVR ${S.ovr}</b><span>${esc(POS[S.pos].n)} · potencial ${'★'.repeat(typeof prospectStars==='function'?prospectStars(S.pot):3)}</span></div><div class="nsen">❤️ ${Math.round(n.en)}% ${nsBarHTML(n.en)}</div></div>
+  <p class="muted nshelp">Toque em <b>›</b> pra treinar (−${cost}% de energia). Sem treinar por 2 semanas a habilidade começa a cair.</p>
+  ${NSK.map(([k,nm,ic])=>{const s=n.sk[k];const idle=n.week-(n.last[k]||0);const w=POS[S.pos].w;const imp=nsImp(k);const b=bt&&bt[k]?` <em class="bt">+${bt[k]} chuteira</em>`:'';
+   return`<div class="nshr"><button class="nshr-m" data-hi="${k}"><span class="ic">${ic}</span><div class="nm"><b>${nm} ${s.l}</b>${b}<small>${imp>=3?'Muito importante':imp===2?'Importante':'Ajuda'} na sua posição${idle>=2&&n.week>1?' · <span class="bad">caindo</span>':''}</small></div>${nsBarHTML(s.p,'sk')}</button><button class="nshr-go" data-tr="${k}" ${n.en<cost?'disabled':''} aria-label="Treinar ${nm}">›</button></div>`}).join('')}
+  <div class="nsauto"><span class="eyebrow">Treino automático</span><div class="row">${[['off','Desligado'],['eq','Equilibrado'],...NSK.map(([k,nm])=>[k,nm])].map(([k,t])=>`<button class="lmbtn ${(n.auto||'off')===k?'on':''}" data-au="${k}">${t}</button>`).join('')}</div><small class="muted">Treina sozinho no fim da semana se sobrar energia (guarda pelo menos 65% pro jogo).</small></div>`},
+ bind:B=>{B.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>{const k=b.dataset.tr;const r=nsTrain(k);if(!r.ok){toast({ic:'❤️',title:'Sem energia',txt:r.txt,ms:2400});return}
+   const row=b.closest('.nshr');nsRefresh();const nr=document.querySelector(`[data-tr="${k}"]`);const el=nr&&nr.closest('.nshr');if(el){el.classList.add('pulse');const f=document.createElement('span');f.className='nsfloat';f.textContent=`+${r.g}%`;el.appendChild(f);setTimeout(()=>f.remove(),900)}try{SFX.tick&&SFX.tick()}catch(e){}});
+  B.querySelectorAll('[data-hi]').forEach(b=>b.onclick=()=>{const k=b.dataset.hi;const s=S.n.sk[k];const nm=NSK.find(x=>x[0]===k)[1];nsPop({ic:NSK.find(x=>x[0]===k)[2],title:`${nm} ${s.l}`,txt:NSK_D[k]+` Progresso: ${Math.round(s.p)}% até o próximo nível.${s.l>=S.n.cap[k]?' Você está no seu limite natural: cada nível agora custa bem mais treino.':''}`})});
+  B.querySelectorAll('[data-au]').forEach(b=>b.onclick=()=>{S.n.auto=b.dataset.au;nsRefresh()})},
+ nav:[{ic:'🎮',t:'Prática',fn:nsPractice},{ic:'🥤',t:'Bebida',fn:()=>nsDrinkPick()},{ic:'📊',t:'Ranking',fn:nsRanking}]}}
+function nsImp(k){const w=POS[S.pos].w;const lv=nsLv();const b=fit(nsAttrsOf(lv),S.pos);lv[k]+=10;const d=fit(nsAttrsOf(lv),S.pos)-b;return d>=4?3:d>=2?2:1}
+// prática: minigame de treino que rende mais que o treino simples
+async function nsPractice(){const n=S.n;const cost=nsTrainCost()+6;if(n.en<cost){toast({ic:'❤️',title:'Sem energia',txt:`A prática gasta ${cost}% de energia.`,ms:2200});return}
+ const map={vel:'sprint',for:'header',tec:S.pos==='GOL'?'reflex':'dribble',vis:S.pos==='GOL'?'reflex':'pass',bp:'fk'};
+ const k=await nsPop({ic:'🎮',title:'Prática',txt:`Escolha o treino. Gasta ${cost}% de energia e rende até o triplo do treino normal, se você mandar bem.`,opts:NSK.map(([k,nm,ic])=>[k,`${ic} ${nm}`]),ok:'Cancelar'});
+ if(!map[k])return;n.en=clamp(n.en-cost,0,100);let hits=1;
+ try{if(typeof weeklyTraining==='function'){const h=nsHost();h.hidden=true;const r=await weeklyTraining(map[k]);hits=r.hits||0;h.hidden=false}}catch(e){console.error(e)}
+ const g=nsGain(k,.8+hits*.75);nsAddP(k,g);n.last[k]=n.week;n.trainW=(n.trainW||0)+1;nsSync();
+ await nsPop({ic:hits>=3?'🔥':hits>=2?'👍':'😅',title:hits>=3?'Treino perfeito!':hits>=2?'Bom treino':'Treino fraco',txt:`${NSK.find(x=>x[0]===k)[1]}: +${g}% de progresso.`});nsRefresh()}
+function nsRanking(){const me={n:S.name,r:S.ovr,me:true,club:S.club};let L=[];try{L=(W.stars||[]).filter(s=>s.pos===S.pos||(POS[s.pos]&&POS[S.pos]&&POS[s.pos].sg>.1===POS[S.pos].sg>.1)).map(s=>({n:s.n,r:Math.round(s.r),club:s.club}))}catch(e){}
+ L.push(me);L.sort((a,b)=>b.r-a.r);const i=L.indexOf(me);const show=L.slice(Math.max(0,i-5),i+6);
+ nsPop({ic:'📊',title:`Ranking · ${POS[S.pos].n}`,html:`<div class="nsrank">${show.map(x=>`<div class="${x.me?'me':''}"><span>${L.indexOf(x)+1}º</span><b>${esc(x.me?S.name+' (você)':x.n)}</b><em>${x.r}</em></div>`).join('')}</div>`})}
+
+// ---------- vida: relacionamentos ----------
+function nsRelInfo(k){const n=S.n;
+ if(k==='coach')return{d:'Gosta de você = mais chances de ser titular e mais energia recuperada na semana.',act:'Ficar depois do treino',sub:`−15% energia`};
+ if(k==='team')return{d:'Elenco do seu lado = mais bolas pra você e rendimento melhor.',act:'Churrasco com o elenco',sub:`−${nsK(nsRelCost('team'))}`};
+ if(k==='fans')return{d:'Fãs = valor do patrocínio, fama e moral nos jogos grandes.',act:'Sessão de autógrafos',sub:'−10% energia'};
+ if(k==='gf')return S.gf?{d:`${S.gf.n}${S.rel==='casado'?' (casados)':''}. Namorada feliz = você feliz.`,act:n.rel.gf>=85&&S.rel!=='casado'?'Pedir em casamento':'Jantar romântico',sub:n.rel.gf>=85&&S.rel!=='casado'?`−${nsK(nsRelCost('ring'))}`:`−${nsK(nsRelCost('gf'))}`}:{d:'Solteiro. Uma namorada deixa você mais feliz (e gasta dinheiro).',act:'Procurar namorada',sub:`−${nsK(nsRelCost('date'))}`};
+ if(k==='spon')return n.spon?{d:`${n.spon.n} paga ${nsK(n.spon.w)} por semana. Se a relação esfriar, eles saem.`,act:'Gravar comercial',sub:'−20% energia'}:{d:'Sem patrocinador. Nível de estrela e fãs atraem marcas.',act:'Procurar patrocinador',sub:'grátis'}}
+function nsRelCost(k){const w=Math.max(1,S.wage||1);return k==='team'?Math.max(2,Math.round(w*.35)):k==='gf'?Math.max(1,Math.round(w*.2)):k==='ring'?Math.max(10,Math.round(w*3)):k==='date'?Math.max(1,Math.round(w*.12)):0}
+const NS_BRANDS=['Raio Sports','Vento Norte','Brava Energy','Tropa Mobile','Kaiju Bank','Estrela Pay','Golaço Bet-free','Pampa Foods','Nuvem Telecom','Ferro Motors','Arena Wear','Pulse Audio','Lumen Óculos','Rota Air'];
+async function nsRelAct(k){const n=S.n;const cost=nsRelCost(k);let txt='',chips=[],ic='✅';
+ const pay=v=>{if(S.din*1000<v){toast({ic:'💸',title:'Sem dinheiro',txt:`Precisa de ${nsK(v)}.`,ms:2000});return false}S.din-=v/1000;return true};
+ const en=v=>{if(n.en<v){toast({ic:'❤️',title:'Sem energia',txt:`Precisa de ${v}% de energia.`,ms:2000});return false}n.en-=v;return true};
+ const up=(r,v)=>{const b=n.rel[r];n.rel[r]=clamp(b+v,0,100);chips.push([`${NS_REL.find(x=>x[0]===r)[1]} ${v>=0?'+':''}${Math.round(n.rel[r]-b)}`,v>=0?'up':'down'])};
+ if(k==='coach'){if(!en(15))return;up('coach',Math.round(R(6,10)*(n.rel.coach>80?.6:1)));const kk=nsWeakest();const g=nsGain(kk,.5);nsAddP(kk,g);n.last[kk]=n.week;txt=`O técnico viu você ficando até mais tarde. Ainda deu +${g}% em ${NSK.find(x=>x[0]===kk)[1]}.`}
+ else if(k==='team'){if(!pay(cost))return;up('team',RI(8,13));txt='Carne, pagode e resenha. O elenco agora te passa mais a bola.'}
+ else if(k==='fans'){if(!en(10))return;up('fans',RI(6,11));nsStarAdd(4);txt='Fila dobrando o quarteirão. Os fãs adoraram.'}
+ else if(k==='gf'){
+  if(!S.gf){if(!pay(nsRelCost('date')))return;const p=clamp(.25+n.star.l*.025+n.ls/250+n.happy/400,.2,.85);if(ch(p)){S.gf={n:pick(GF_NAMES),v:55};S.rel=S.rel==='solteiro'?'namorando':S.rel;n.rel.gf=55;ic='🌹';txt=`Você conheceu ${S.gf.n}. Estão namorando!`;chips.push(['Namorando','up'])}else{ic='🙃';txt='Não rolou dessa vez. Mais estrela e estilo de vida ajudam.'}}
+  else if(n.rel.gf>=85&&S.rel!=='casado'){if(!pay(nsRelCost('ring')))return;if(ch(.85)){S.rel='casado';up('gf',10);ic='💍';txt=`${S.gf.n} disse SIM! Casamento marcado.`;try{nsAchHit('casar')}catch(e){}}else{up('gf',-15);ic='💔';txt=`${S.gf.n} pediu mais tempo. Ficou um clima estranho.`}}
+  else{if(!pay(nsRelCost('gf')))return;up('gf',RI(9,14));ic='🍷';txt=`Noite perfeita com ${S.gf.n}.`}}
+ else if(k==='spon'){
+  if(!n.spon){const p=clamp(.15+n.star.l*.05+n.rel.fans/220,.1,.9);if(ch(p)){const w=Math.max(1,Math.min(Math.max(2,Math.round((S.wage||1)*1.2)),Math.round((n.star.l**1.35)*(.5+n.rel.fans/100)*R(.8,1.2))));n.spon={n:pick(NS_BRANDS),w};n.rel.spon=60;ic='🤝';txt=`A ${n.spon.n} fechou contigo: ${nsK(w)} por semana.`;chips.push([`+${nsK(w)}/sem`,'gold']);try{nsAchHit('spon')}catch(e){}}else{ic='📵';txt='Nenhuma marca topou ainda. Suba o nível de estrela e ganhe os fãs.'}}
+  else{if(!en(20))return;up('spon',RI(10,16));const bon=n.spon.w*4;S.din+=bon/1000;chips.push([`+${nsK(bon)}`,'gold']);txt='Comercial gravado. A marca pagou um extra.'}}
+ nsSync();await nsPop({ic,title:NS_REL.find(x=>x[0]===k)[1],txt,chips});nsRefresh()}
+function nsVidaPage(){return{t:'Vida',cls:'vida',html:()=>{const n=S.n;
+  return`<div class="nsv-top"><div class="nsv-b"><small>Felicidade</small>${nsBarHTML(n.happy,'hap')}<b>${Math.round(n.happy)}%</b></div><div class="nsv-b"><small>Energia</small>${nsBarHTML(n.en)}<b>${Math.round(n.en)}%</b></div></div>
+  ${NS_REL.map(([k,nm,ic])=>{const I=nsRelInfo(k);const v=n.rel[k];const off=(k==='gf'&&!S.gf)||(k==='spon'&&!n.spon);
+   return`<div class="nsrel ${off?'off':''}"><button class="nsrel-m" data-ri="${k}"><b>${nm}${k==='gf'&&S.gf?' · '+esc(S.gf.n):k==='spon'&&n.spon?' · '+esc(n.spon.n):''}</b>${nsBarHTML(off?0:v,'rel')}<small>${esc(I.act)} · ${esc(I.sub)}</small></button><button class="nsrel-go" data-ra="${k}" aria-label="${esc(I.act)}">${ic}</button></div>`}).join('')}
+  <div class="nsv-more"><button class="nsc b" id="nsMoreB"><span>🌍</span><div><b>Mais da vida</b><small>médico, academia, balada, estudos, música, hobbies, o lado errado…</small></div></button><button class="nsc b" id="nsNews2"><span>📰</span><div><b>Notícias</b><small>feed das redes e jornal</small></div></button></div>`},
+ bind:B=>{B.querySelectorAll('[data-ra]').forEach(b=>b.onclick=()=>nsRelAct(b.dataset.ra));B.querySelectorAll('[data-ri]').forEach(b=>b.onclick=()=>{const I=nsRelInfo(b.dataset.ri);nsPop({ic:NS_REL.find(x=>x[0]===b.dataset.ri)[2],title:NS_REL.find(x=>x[0]===b.dataset.ri)[1],txt:I.d})});
+  const m=B.querySelector('#nsMoreB');if(m)m.onclick=()=>{try{nsHost().hidden=true;blOpen(vidaPage())}catch(e){console.error(e);nsHost().hidden=false}};const nw=B.querySelector('#nsNews2');if(nw)nw.onclick=nsNews},
+ nav:[{ic:'💎',t:'Estilo de vida',fn:()=>nsPush(nsShopPage('ls'))},{ic:'🎰',t:'Cassino',fn:()=>nsPush(nsCasinoPage())},{ic:'🏆',t:'Prêmios',fn:()=>nsPush(nsTrophyPage())}]}}
+// quando as páginas da vida (BitLife) fecham, a tela NSS volta
+{const _blc=typeof blClose==='function'?blClose:null;if(_blc)blClose=function(...a){const h=document.getElementById('nsp');const back=h&&NSP.stack.length;const r=_blc.apply(this,a);if(back){h.hidden=false;nsDraw(true)}return r}}
+
+// ---------- liga ----------
+let NS_LT='tabela';
+function nsLigaPage(){return{t:'Liga',cls:'liga',html:()=>{const st=S.st;let body='';
+  if(NS_LT==='rodada')body=nsRoundHTML();else{const keep=TAB;TAB=NS_LT;try{body=tabContent()}catch(e){body='<p class="muted">Sem dados ainda.</p>'}TAB=keep}
+  return`<div class="nstabs wide">${[['tabela','Tabela'],['rodada','Rodada'],['jogos','Partidas'],['copas','Copas'],['stats','Números']].map(([k,t])=>`<button class="${NS_LT===k?'on':''}" data-lt="${k}">${t}</button>`).join('')}</div><div class="nslg">${body}</div>`},
+ bind:B=>{B.querySelectorAll('[data-lt]').forEach(b=>b.onclick=()=>{NS_LT=b.dataset.lt;nsRefresh()})},
+ nav:[{ic:'🏅',t:'Realizações',fn:()=>nsPush(nsAchPage())},{ic:'🏆',t:'Prêmios',fn:()=>nsPush(nsTrophyPage())}]}}
+function nsRoundHTML(){const st=S.st;const R0=st.nsRound;if(!R0)return'<p class="muted">A rodada aparece aqui depois do primeiro jogo da liga.</p>';const me=S.club;
+ return`<div class="nsround"><div class="nsr-h"><span></span><span>Casa</span><b>Rodada ${R0.r+1}</b><span>Visitante</span><span></span></div>${R0.list.map(([h,a,hg,ag])=>{const H=CLUB[h],A=CLUB[a];const mine=h===me||a===me;
+  return`<div class="nsr ${mine?'me':''}"><span class="p">${R0.pos[h]||''}º</span><span class="t">${esc(H.a||mkAbbr(H.n))}</span><b>${hg} – ${ag}</b><span class="t">${esc(A.a||mkAbbr(A.n))}</span><span class="p">${R0.pos[a]||''}º</span></div>`}).join('')}</div>`}
+
+// ---------- energético ----------
+async function nsDrinkPick(){const n=S.n;const have=NS_DRINKS.filter(d=>n.dr[d.id]>0);
+ if(!have.length){const k=await nsPop({ic:'🥤',title:'Sem energético',txt:'Compre na loja de energéticos. Dá pra tomar antes do jogo, no intervalo ou antes do treino.',opts:[['shop','🛒 Ir pra loja']],ok:'Fechar'});if(k==='shop'){if(NSP.stack.length)nsPush(nsShopPage('dr'));else nsOpen(nsShopPage('dr'))}return null}
+ const k=await nsPop({ic:'🥤',title:`Tomar energético · energia ${Math.round(n.en)}%`,opts:have.map(d=>[d.id,`${d.ic} ${d.n} (${n.dr[d.id]})`]),ok:'Cancelar'});
+ const d=NS_DRINKS.find(x=>x.id===k);if(!d)return null;const chips=nsDrink(d);await nsPop({ic:d.ic,title:d.n,txt:`Energia agora em ${Math.round(n.en)}%.`,chips});nsRefresh();if(!NSP.stack.length)renderHub();return d}
+function nsDrink(d){const n=S.n;n.dr[d.id]--;const chips=[];const e0=n.en;n.en=clamp(n.en+d.en,0,100);chips.push([`Energia +${Math.round(n.en-e0)}%`,'up']);
+ if(d.sk){const ks=d.sk>=3?NSK.map(x=>x[0]):[nsWeakest()];for(const k of ks){const g=Math.round(d.skp*R(.8,1.2));nsAddP(k,g);chips.push([`${NSK.find(x=>x[0]===k)[1]} +${g}%`,'gold'])}}
+ if(d.rel){for(const[k]of NS_REL){if(k==='gf'&&!S.gf)continue;if(k==='spon'&&!n.spon)continue;n.rel[k]=clamp(n.rel[k]+d.rel,0,100)}chips.push([`Relações +${d.rel}`,'up'])}
+ n.drunk=(n.drunk||0)+1;try{nsAchCheck()}catch(e){}nsSync();return chips}
+
+// ---------- contrato e agente ----------
+async function nsContractSheet(){const n=S.n;const ct=nsCt();const c=club();
+ const k=await nsPop({ic:'📝',title:`Contrato · ${c.n}`,html:`<table class="nstab small"><tbody><tr><th>Salário</th><td>${nsK(ct.wage)} por semana</td></tr><tr><th>Bônus por gol</th><td>${nsK(ct.gb)}</td></tr><tr><th>Bônus por assistência</th><td>${nsK(ct.ab)}</td></tr><tr><th>Até</th><td>${S.year+Math.max(0,S.contract)}${S.loan?' (emprestado)':''}</td></tr><tr><th>Agente</th><td>+${Math.round(nsAgentPct()*100)}% em tudo</td></tr><tr><th>Patrocínio</th><td>${n.spon?`${esc(n.spon.n)} · ${nsK(n.spon.w)}/sem`:'nenhum'}</td></tr></tbody></table>`,
+  opts:[['raise','💰 Pedir aumento'],['bonus','⚽ Pedir mais bônus'],['agent','💼 Falar com o agente'],['taker','🎯 Pedir as bolas paradas','ghost']],ok:'Fechar'});
+ if(k==='raise'){const r=askRaise();nsSync();await nsPop({ic:r.ok?'💰':'🙅',title:r.ok?'Aumento!':'Não rolou',txt:r.txt,chips:r.chips})}
+ else if(k==='bonus'){const p=clamp(.3+(n.star.l-5)*.03+(n.rel.coach-50)/150+(S.ovr-c.s)/25,.08,.85);if(ch(p)){n.ct.rg=Math.round(n.ct.rg*1.25*100)/100;n.ct.ra=Math.round(n.ct.ra*1.25*100)/100;n.ct.wage=-1;nsCt();await nsPop({ic:'⚽',title:'Bônus maior',txt:`Agora: ${nsK(n.ct.gb)} por gol e ${nsK(n.ct.ab)} por assistência.`})}else{n.rel.coach=clamp(n.rel.coach-4,0,100);S.board=clamp((S.board||50)-6,0,100);await nsPop({ic:'🙅',title:'A diretoria negou',txt:'E ficou meio de cara.',chips:[['Treinador −4','down']]})}}
+ else if(k==='agent'){try{openAgent(()=>renderHub())}catch(e){console.error(e)}}
+ else if(k==='taker'){const kind=S.taker&&S.taker.pen?'fk':'pen';const r=askTaker(kind);await nsPop({ic:'🎯',title:kind==='pen'?'Pênaltis':'Faltas',txt:r.txt,chips:r.chips})}
+ renderHub()}
+// negociação do contrato novo (salário, bônus por gol, bônus por assistência)
+function nsNegotiate(o){const n=S.n;if(!n||!S.wage)return;const c=club();let pat=100;const terms={wage:S.wage,gb:nsCt().gb,ab:nsCt().ab};let asks=0;
+ const host=document.createElement('div');host.className='nspop-host neg';document.body.appendChild(host);
+ const draw=(msg,cls)=>{host.innerHTML=`<div class="nspop"><div class="nspop-h"><span>📝</span><b>Negociar contrato · ${esc(c.n)}</b></div>
+  <p class="muted" style="margin:0 0 8px">Peça mais em cada linha. Se a paciência do clube acabar, fica o que estiver na mesa.</p>
+  <div class="nsneg">${[['wage','Salário por semana'],['gb','Bônus por gol'],['ab','Bônus por assistência']].map(([k,t])=>`<div class="nsneg-r"><span>${t}</span><b>${nsK(terms[k])}</b><button class="btn small" data-ask="${k}" ${pat<=0?'disabled':''}>Pedir +</button></div>`).join('')}</div>
+  <div class="nsneg-pat"><small>Paciência do clube</small>${nsBarHTML(pat,pat<35?'low':'')}</div><div class="nsneg-msg ${cls||''}">${esc(msg||'')}</div>
+  <div class="nspop-btns"><button class="btn" id="negOk">✍️ Assinar</button></div></div>`;
+  host.querySelectorAll('[data-ask]').forEach(b=>b.onclick=()=>{const k=b.dataset.ask;asks++;const p=clamp(.62+(n.star.l-4)*.03+(S.ovr-c.s)/18+nsAgentPct()*1.5-asks*.07,.12,.92);
+   if(ch(p)){const inc=k==='wage'?R(1.06,1.12):R(1.15,1.3);terms[k]=Math.round(terms[k]*inc+ (k==='wage'?0:1));pat-=RI(12,22);draw(`Aceitaram: ${nsK(terms[k])}.`,'good')}
+   else{pat-=RI(30,45);draw(pat<=0?'O clube encerrou a conversa. Assine o que está na mesa.':'Recusaram. Cuidado com a paciência.','bad')}});
+  host.querySelector('#negOk').onclick=()=>{S.wage=terms.wage;n.ct={wage:S.wage,rg:terms.gb/Math.max(1,S.wage),ra:terms.ab/Math.max(1,S.wage),gb:terms.gb,ab:terms.ab};host.remove();try{nsAchHit('contrato')}catch(e){}try{saveNow('season')}catch(e){}}};
+ draw()}
+
+// ---------- estrela, notícias, opções ----------
+function nsStarSheet(){const n=S.n;nsPop({ic:'⭐',title:`Nível de estrela ${n.star.l}`,html:`<div class="nsstar">${nsBarHTML(n.star.p,'star')}<small>${Math.round(n.star.p)}% até o nível ${n.star.l+1}</small></div>`,txt:'Sobe com notas altas, gols, assistências, estrela do jogo, títulos e prêmios. Quanto maior, melhores os patrocínios, mais fãs e mais clubes interessados.'})}
+function nsNews(){try{const h=nsHost();const was=!h.hidden;if(typeof fdHTML==='function'){openPanelHTML('Notícias',`<div class="fdhub nsfeed">${fdHTML()}</div>`,()=>{try{const b=document.querySelector('.nsfeed');if(b&&typeof fdBind==='function')fdBind(b)}catch(e){}})}else if(typeof npHTML==='function')openPanelHTML('Jornal',npHTML())}catch(e){console.error(e)}}
+function nsCfgSheet(){const v=S.matchMode||'old',lm=S.lanceMode||'jogar',lc=S.lances||'todos';
+ nsPop({ic:'⚙️',title:'Opções do jogo',html:`<div class="nscfg">
+  <div class="livemode"><span class="eyebrow">Partida</span><button class="lmbtn ${v==='old'?'on':''}" data-cf="mm:old">📋 Lances + 3D</button><button class="lmbtn ${v==='sess'?'on':''}" data-cf="mm:sess">🏟️ Tudo no 3D</button></div>
+  <div class="livemode"><span class="eyebrow">Seus lances</span><button class="lmbtn ${lc!=='off'&&lm==='jogar'?'on':''}" data-cf="lm:jogar">🎮 Jogar</button><button class="lmbtn ${lc!=='off'&&lm==='decidir'?'on':''}" data-cf="lm:decidir">🧠 Decidir</button><button class="lmbtn ${lc==='off'?'on':''}" data-cf="lm:off">Automático</button></div>
+  <div class="livemode"><span class="eyebrow">Ver os jogos</span><button class="lmbtn ${(S.liveMode||'all')==='all'?'on':''}" data-cf="lv:all">Todos</button><button class="lmbtn ${S.liveMode==='decisivos'?'on':''}" data-cf="lv:decisivos">Só os grandes</button></div>
+  <div class="nscfg-sim"><button class="btn ghost small" data-cf="go:decision">⏩ Simular até a próxima decisão</button><button class="btn ghost small" data-cf="go:skip">⏭ Simular o resto da temporada</button><button class="btn ghost small" data-cf="go:fast">⏭⏭ Simular até a aposentadoria</button></div></div>`,
+  bind:h=>h.querySelectorAll('[data-cf]').forEach(b=>b.onclick=()=>{const[k,val]=b.dataset.cf.split(':');
+   if(k==='mm')S.matchMode=val;else if(k==='lm'){if(val==='off')S.lances='off';else{S.lances='todos';S.lanceMode=val}}else if(k==='lv')S.liveMode=val;
+   else if(k==='go'){h.remove();if(val==='fast'){try{fastForward()}catch(e){}}else advance(val==='skip'?'auto':'decision');return}
+   b.parentElement.querySelectorAll('.lmbtn').forEach(x=>x.classList.toggle('on',x===b));try{saveNow('opts')}catch(e){}})})}
+// tour da tela nova
+if(typeof TOUR_HUB!=='undefined'){TOUR_HUB.length=0;TOUR_HUB.push(
+ {sel:'.nsh-bars',t:'Estrela e energia',d:'<b>Nível de estrela</b> sobe com boas atuações e títulos. A <b>energia</b> cai no treino e no jogo e volta durante a semana.'},
+ {sel:'.ns3',t:'Seu jogador',d:'Toque em <b>Habilidades</b> pra treinar, <b>Felicidade</b> pros relacionamentos e <b>Estilo de vida</b> pra loja.'},
+ {sel:'.nsg',t:'Status',d:'Titular ou reserva, forma, lojas, contrato, energéticos e chuteiras com poderes especiais.'},
+ {sel:'#nsHab',t:'Treine toda semana',d:'Cada treino gasta energia e sobe a habilidade. <b>Sem treinar, ela cai.</b>'},
+ {sel:'#nsJogar',t:'Jogar',d:'Você controla só o seu jogador. Escolha <b>esforço</b> e <b>foco</b> durante o jogo e jogue os seus lances.'});}
+
+// ---------- visual ----------
+{const st=document.createElement('style');st.textContent=`
+body.nshub{overflow:hidden}body.nshub #app{padding:0}
+.nsh{height:100dvh;max-width:720px;margin:0 auto;display:flex;flex-direction:column;gap:8px;padding:calc(8px + env(safe-area-inset-top,0px)) 12px calc(8px + env(safe-area-inset-bottom,0px));position:relative}
+.nsh-top{display:flex;gap:8px;align-items:center}.nsico{flex:none;width:40px;height:40px;border-radius:12px;border:1px solid var(--line-2);background:var(--panel);color:var(--chalk);font:800 17px var(--f-body)}
+.nsname{flex:1;min-width:0;display:flex;gap:10px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:5px 10px}.nsname b{display:block;font:800 18px var(--f-display);letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nsname span{display:block;font-size:12.5px;color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nsname>div{min-width:0}
+.nsh-bars{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.nsbig{position:relative;overflow:hidden;height:44px;border-radius:12px;border:1px solid var(--line-2);background:#0a1a12;color:#fff;display:flex;align-items:center;gap:8px;padding:0 10px;font:800 15px var(--f-body)}
+.nsbig .fl{position:absolute;left:0;top:0;bottom:0;z-index:0;transition:width .5s}.nsbig.star .fl{background:linear-gradient(90deg,#b8860b,#f2c443)}.nsbig.en .fl{background:linear-gradient(90deg,#2f9e44,#7be36b)}.nsbig.en.low .fl{background:linear-gradient(90deg,#b0261c,#ff6a5c)}
+.nsbig .ic,.nsbig .tx{position:relative;z-index:1;text-shadow:0 1px 2px #000a}.nsbig .ic{font-size:20px;position:relative}.nsbig .ic i{position:absolute;inset:0;display:grid;place-items:center;font:900 11px var(--f-body);font-style:normal;color:#3b2a00;text-shadow:none;top:2px}
+.nsh-sub{display:flex;align-items:center;justify-content:space-between;gap:8px;font:700 14px var(--f-body);color:var(--muted)}.nsh-sub .gold{color:var(--gold);font-weight:800}
+.nstabs{display:flex;background:#0a1a12;border:1px solid var(--line-2);border-radius:999px;padding:3px}.nstabs button{border:0;background:none;color:var(--muted);font:800 13.5px var(--f-body);padding:6px 14px;border-radius:999px}.nstabs button.on{background:var(--accent);color:var(--accent-ink)}
+.nstabs.wide{display:grid;grid-template-columns:repeat(5,1fr);border-radius:12px;margin-bottom:10px}.nstabs.wide button{padding:8px 2px;border-radius:9px;font-size:12.5px}
+.nsh-body{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.ns3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}.ns3b{display:grid;gap:4px;justify-items:start;text-align:left;padding:10px;border-radius:14px;border:1px solid var(--line-2);background:linear-gradient(180deg,var(--panel-2),var(--panel));color:var(--chalk)}.ns3b small{font:700 12px var(--f-body);color:var(--muted);text-transform:uppercase;letter-spacing:.4px}.ns3b b{font:800 19px var(--f-display)}.ns3b em{font-style:normal;font-size:11.5px;color:var(--dim)}
+.nsmb{display:block;width:100%;height:9px;border-radius:99px;background:#07130d;overflow:hidden;border:1px solid var(--line)}.nsmb i{display:block;height:100%;background:linear-gradient(90deg,#2f9e44,#8be08a);border-radius:99px;transition:width .4s}.nsmb.hap i{background:linear-gradient(90deg,#d4a017,#f2c443)}.nsmb.ls i{background:linear-gradient(90deg,#3a7bd5,#7cc4ff)}.nsmb.sk i{background:linear-gradient(90deg,#ff7a2b,#ffb26b)}.nsmb.rel i{background:linear-gradient(90deg,#2f9e44,#a6e39a)}.nsmb.star i{background:linear-gradient(90deg,#b8860b,#f2c443)}.nsmb.low i{background:linear-gradient(90deg,#b0261c,#ff6a5c)}
+.nsg{display:grid;grid-template-columns:1fr 1fr;gap:6px}.nsc{display:flex;align-items:center;gap:8px;min-height:44px;padding:6px 10px;border-radius:12px;border:1px solid var(--line);background:var(--panel);color:var(--chalk);font:700 14px var(--f-body);text-align:left;line-height:1.2}.nsc span{font-size:18px;flex:none}.nsc.b{border-color:var(--line-2);background:var(--panel-2)}.nsc.good{background:#173f25;border-color:#2f7a45}.nsc.warn{background:#3d3214;border-color:#7a6326}.nsc.bad{background:#441b17;border-color:#8a3329}.nsc.off{color:var(--muted)}.nsc small{display:block;font:600 11.5px var(--f-body);color:var(--muted)}
+.nshint{border:1px dashed var(--accent);background:#2a1a0c;color:#ffd0ad;border-radius:12px;padding:8px 10px;font:700 13.5px var(--f-body);text-align:left}
+.nsh-tick{display:flex;align-items:center;gap:8px;font:700 12.5px var(--f-body);color:var(--muted);background:#08150e;border:1px solid var(--line);border-radius:10px;padding:6px 10px}.nsh-tick .mq{flex:1;overflow:hidden;white-space:nowrap;color:var(--chalk)}.nsh-tick .mq span{display:inline-block;padding-left:100%;animation:nsmq 16s linear infinite}@keyframes nsmq{to{transform:translateX(-100%)}}
+.nsh-nav{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}.nsh-nav button{display:grid;justify-items:center;gap:2px;padding:8px 4px;border-radius:14px;border:1px solid var(--line-2);background:linear-gradient(180deg,var(--panel-2),var(--panel));color:var(--chalk)}.nsh-nav span{font-size:24px;line-height:1}.nsh-nav small{font:800 12.5px var(--f-body)}.nsh-nav .go{background:linear-gradient(180deg,#ff8f45,#e85f10);border-color:#ffb27a;color:#1d0c02}
+.nsmodal{position:absolute;inset:0;z-index:5;background:rgba(5,14,9,.82);display:grid;place-items:center;padding:16px}.nsmodal-in{width:100%;max-width:560px;max-height:100%;overflow:auto}.nsmodal-in>section{margin:0}
+.nsdone{display:grid;gap:8px;text-align:center}.nsdone h3{font:900 28px var(--f-display);margin:0}.nsst{display:grid;gap:8px}.nstab{width:100%;border-collapse:collapse;font:700 14px var(--f-body)}.nstab th,.nstab td{font-family:var(--f-body);letter-spacing:0;padding:7px 6px;border-bottom:1px solid var(--line);text-align:center}.nstab thead th{font-size:12px;color:var(--muted);text-transform:uppercase}.nstab tbody th{text-align:left;color:var(--muted);font-weight:700}.nstab tr.cur td{color:var(--gold)}.nstab td.cl{text-align:left;white-space:nowrap}.nstab.small td{text-align:left}
+#nsp{position:fixed;inset:0;z-index:17;background:var(--pitch)}#nsp[hidden]{display:none}body.nsp-open{overflow:hidden}
+.nspg{height:100dvh;max-width:720px;margin:0 auto;display:flex;flex-direction:column;padding:calc(8px + env(safe-area-inset-top,0px)) 12px calc(8px + env(safe-area-inset-bottom,0px));gap:8px}
+.nsp-h{display:flex;align-items:center;gap:10px}.nsp-h b{flex:1;font:800 22px var(--f-display);letter-spacing:.3px}.nsp-back{border:1px solid var(--line-2);background:var(--panel);color:var(--chalk);border-radius:10px;padding:7px 10px;font:800 14px var(--f-body)}
+.nst-mini{display:flex;gap:8px;font:800 12.5px var(--f-body);color:var(--muted)}.nst-mini .mono{color:var(--gold)}
+.nsp-b{flex:1;min-height:0;overflow:auto;display:flex;flex-direction:column;gap:8px}
+.nsp-nav{display:flex;gap:8px}.nsnb{flex:1;display:grid;justify-items:center;gap:2px;padding:7px 4px;border-radius:12px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--chalk)}.nsnb span{font-size:20px;line-height:1}.nsnb small{font:800 11.5px var(--f-body)}.nsnb.on{background:var(--accent);color:var(--accent-ink)}
+.nshab-top{display:flex;justify-content:space-between;align-items:center;gap:10px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 12px}.nshab-top b{font:800 22px var(--f-display);display:block}.nshab-top span{font-size:13px;color:var(--muted)}.nsen{display:grid;gap:4px;min-width:120px;font:800 14px var(--f-body)}
+.nshelp{margin:0;font-size:13px}
+.nshr{display:flex;gap:8px;position:relative}.nshr-m{flex:1;display:grid;grid-template-columns:auto 1fr;grid-template-areas:"ic nm" "bar bar";gap:6px 10px;align-items:center;text-align:left;padding:9px 12px;border-radius:14px;border:1px solid var(--line-2);background:linear-gradient(180deg,var(--panel-2),var(--panel));color:var(--chalk)}.nshr-m .ic{grid-area:ic;font-size:24px}.nshr-m .nm{grid-area:nm}.nshr-m .nsmb{grid-area:bar;height:10px}.nshr-m b{font:800 20px var(--f-display);letter-spacing:.3px}.nshr-m small{display:block;font-size:12px;color:var(--muted)}.nshr-m .bad{color:var(--bad)}.nshr-m em.bt{font-style:normal;font-size:12px;color:var(--blue);margin-left:6px}
+.nshr-go{flex:none;width:58px;border-radius:14px;border:1px solid #6fd06c;background:linear-gradient(180deg,#3fae4c,#21813a);color:#fff;font:900 34px var(--f-body);line-height:1}.nshr-go:disabled{opacity:.35;filter:grayscale(1)}
+.nshr.pulse .nshr-m{animation:nspulse .45s}@keyframes nspulse{50%{box-shadow:0 0 0 3px var(--good)}}.nsfloat{position:absolute;right:70px;top:6px;font:900 18px var(--f-body);color:var(--good);animation:nsfl .9s forwards;pointer-events:none}@keyframes nsfl{to{transform:translateY(-22px);opacity:0}}
+.nsauto{display:grid;gap:6px;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px}.nsauto .row{display:flex;flex-wrap:wrap;gap:6px}
+.nsv-top{display:grid;grid-template-columns:1fr 1fr;gap:8px}.nsv-b{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:8px 10px;font:800 13px var(--f-body)}.nsv-b small{color:var(--muted)}
+.nsrel{display:flex;gap:8px}.nsrel-m{flex:1;display:grid;gap:5px;text-align:left;padding:9px 12px;border-radius:14px;border:1px solid var(--line-2);background:linear-gradient(180deg,var(--panel-2),var(--panel));color:var(--chalk)}.nsrel-m b{font:800 19px var(--f-display)}.nsrel-m small{font-size:12px;color:var(--muted)}.nsrel.off .nsrel-m{opacity:.7}
+.nsrel-go{flex:none;width:62px;border-radius:14px;border:1px solid var(--line-2);background:#0e2418;font-size:28px}
+.nsv-more{display:grid;grid-template-columns:1fr 1fr;gap:8px}.nsv-more .nsc{flex-direction:row;align-items:flex-start}
+.nslg{display:grid;gap:6px}.nslg .card{margin:0}
+.nsround{display:grid;gap:4px}.nsr-h,.nsr{display:grid;grid-template-columns:40px 1fr 70px 1fr 40px;gap:6px;align-items:center;text-align:center;font:700 14px var(--f-body)}.nsr-h{color:var(--muted);font-size:12px;text-transform:uppercase}.nsr{background:var(--panel);border-radius:8px;padding:6px 0}.nsr .p{color:var(--muted);font-size:12.5px}.nsr b{font:800 17px var(--f-display)}.nsr.me{background:#1d5a2c;outline:1px solid #4caf50}
+.nspop-host{position:fixed;inset:0;z-index:30;display:grid;place-items:center;padding:16px;background:rgba(4,12,8,.72);animation:blfade .15s}.nspop{width:100%;max-width:440px;max-height:calc(100dvh - 32px);overflow:auto;background:var(--panel);border:1px solid var(--line-2);border-radius:18px;padding:16px;display:grid;gap:10px;text-align:center}
+.nspop-h{display:flex;gap:8px;align-items:center;justify-content:center}.nspop-h span{font-size:26px}.nspop-h b{font:800 21px var(--f-display);letter-spacing:.3px}.nspop p{margin:0;color:var(--chalk);line-height:1.4}.nspop .chipsrow{justify-content:center}
+.nspop-btns{display:grid;gap:8px}.nspop-btns .btn{width:100%}
+.nsneg{display:grid;gap:6px}.nsneg-r{display:grid;grid-template-columns:1fr auto auto;gap:10px;align-items:center;text-align:left;background:#0d2118;border-radius:10px;padding:8px 10px}.nsneg-r b{font:800 16px var(--f-body);color:var(--gold)}.nsneg-pat{display:grid;gap:4px;text-align:left}.nsneg-pat small{color:var(--muted)}.nsneg-msg{min-height:1.3em;font-weight:700}.nsneg-msg.good{color:var(--good)}.nsneg-msg.bad{color:var(--bad)}
+.nsstar{display:grid;gap:4px}.nsrank{display:grid;gap:4px;text-align:left}.nsrank div{display:grid;grid-template-columns:40px 1fr auto;gap:8px;padding:6px 10px;border-radius:8px;background:#0d2118}.nsrank div.me{background:#1d5a2c}.nsrank em{font-style:normal;font-weight:800}
+.nscfg{display:grid;gap:10px;text-align:left}.nscfg .livemode{display:flex;flex-wrap:wrap;gap:6px;align-items:center}.nscfg .eyebrow{width:100%}.nscfg-sim{display:grid;gap:6px}
+.nsnext{display:grid;gap:6px;justify-items:center;text-align:center;background:linear-gradient(180deg,#123a26,#0d2a1c);border:1px solid var(--line-2);border-radius:14px;padding:10px}.nsnext small{font:800 12px var(--f-body);color:var(--muted);text-transform:uppercase;letter-spacing:.3px}.nsnext .mt{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;width:100%}.nsnext .tm{display:flex;gap:8px;align-items:center;justify-content:center;min-width:0}.nsnext .tm b{font:800 18px var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nsnext em{font-style:normal;color:var(--muted);font-weight:800}.nsnext .last{font-size:12.5px;color:var(--dim)}
+@media (min-height:900px) and (min-width:600px){.nsh{gap:12px;padding-top:calc(16px + env(safe-area-inset-top,0px));padding-bottom:calc(16px + env(safe-area-inset-bottom,0px))}.nsbig{height:58px;font-size:18px}.nsbig .ic{font-size:26px}.nsh-sub{font-size:16px}.nstabs button{font-size:15px;padding:8px 20px}
+ .ns3b{padding:14px;gap:6px}.ns3b b{font-size:26px}.ns3b small{font-size:13px}.nsmb{height:11px}.nsg{gap:10px}.nsc{min-height:62px;font-size:16.5px;padding:8px 14px;border-radius:14px}.nsc span{font-size:24px}
+ .nsnext{padding:14px}.nsnext .tm b{font-size:22px}.nsh-tick{font-size:14px;padding:9px 12px}.nsh-nav{gap:10px}.nsh-nav button{padding:12px 6px;border-radius:16px}.nsh-nav span{font-size:32px}.nsh-nav small{font-size:15px}
+ .nshr-m{padding:12px 14px}.nshr-m b{font-size:24px}.nshr-go{width:72px;font-size:40px}.nsrel-m{padding:12px 14px}.nsrel-m b{font-size:22px}.nsrel-go{width:72px;font-size:32px}.nsp-h b{font-size:26px}.nsnb{padding:10px 4px}.nsnb span{font-size:24px}.nsnb small{font-size:13px}}
+@media (max-width:420px){.nsh-nav span{font-size:21px}.ns3b b{font-size:16px}.nsc{font-size:13px;min-height:40px}.nsbig{font-size:13.5px}.nstabs button{padding:6px 10px}}
+@media (max-height:700px){.nsg{gap:5px}.nsc{min-height:38px;padding:4px 8px}.ns3b{padding:7px}}
+`;document.head.appendChild(st)}
+
+// ================== PARTIDA NSS ==================
+// Você só controla o seu jogador: o resto do time é da IA. O jogo corre em linhas coloridas com a cor de quem tem a bola.
+// Embaixo: Esforço (mais esforço = mais bola pra você e mais cansaço), energético e Foco (defender, equilibrado, atacar).
+// No intervalo dá pra tomar energético. Os seus lances continuam no 3D. Depois do jogo: estatísticas, relações,
+// nível de estrela, jornal, atualização semanal (dinheiro e energia) e a rodada com a tabela.
+const NSSM={items:[],cur:null,post:[]};
+const NS_ATKB={ATA:.9,SA:.85,PE:.8,PD:.8,MEI:.75,ME:.6,MD:.6,MC:.55,LE:.35,LD:.35,VOL:.3,ZAG:.2,GOL:0};
+const NS_DEFB={ZAG:1.4,VOL:1.2,LD:1.1,LE:1.1,MC:1,ME:.8,MD:.8,MEI:.6,PE:.5,PD:.5,SA:.5,ATA:.4,GOL:0};
+const NS_PASSB={MC:1.6,MEI:1.5,VOL:1.4,ZAG:1,LE:1.2,LD:1.2,ME:1.2,MD:1.2,PE:.9,PD:.9,SA:1,ATA:.6,GOL:.5};
+function nsSur(){const p=(S.name||'').trim().split(/\s+/);return p.length>1?p[p.length-1]:p[0]}
+const nsShort=nm=>{const m=String(nm||'').trim().match(/^(.*?)(\s*\(.*\))?$/);const p=(m[1]||'').split(/\s+/);return(p.length>1&&p[p.length-1].length>2?p[p.length-1]:p.join(' '))+(m[2]||'')};
+function nsDrain(min,eff){return min/90*(16+eff*6.5)*(S.age>30?1+(S.age-30)*.03:1)}
+function nsAutoChance(c){const sk=clamp((S.ovr-45)/50,.05,.95);const t=c&&c.type;
+ const p=t==='tackle'?.35+.4*sk:t==='reflex'?.3+.4*sk:['pass','long','cross','build'].includes(t)?.45+.4*sk:.18+.45*sk;return ch(clamp(p*(S.n.en<30?.8:1),.08,.9))}
+
+// ---------- tela do jogo ----------
+async function nsLiveStart(m){
+ const part=m.part;if(part&&!part.play)return null;
+ const n=S.n;const x=NSSM.cur||{x:{gu:0,gt:0,g:0,a:0,ch:0,ps:0,tk:0,blk:0,sc:[],rm:[]}};const us=m.us,th=m.them;const home=m.neutral?true:m.home;
+ let cU=teamColors(us),cT=teamColors(th);try{if(l3dDist(cU[0],cT[0])<100){cT=l3dDist(cU[0],cT[1]||'#fff')>=100?[cT[1],cT[0]]:[l3dDist(cU[0],'#ffffff')>140?'#ffffff':'#151515','#888']}}catch(e){}
+ const ros=s=>{try{return(sideRoster(s,!!s.nat)||[]).filter(p=>p&&p.n)}catch(e){return[]}};
+ const RU=ros(us).filter(p=>p.n!==S.name),RT=ros(th);
+ const gkOf=R=>{const g=R.find(p=>p.pos==='GOL');return g?nsShort(g.n):null};const gkDef=R=>{const g=gkOf(R);return g?`defesa de ${g}`:'defesa do goleiro'};const gkHold=R=>{const g=gkOf(R);return g?`${g} segura firme`:'O goleiro segura firme'};
+ const two=R=>{const L=R.filter(p=>p.pos!=='GOL');const a=L.length?pick(L):null;const b=L.filter(x=>x!==a);const c=b.length?pick(b):null;return[a?nsShort(a.n):'o camisa '+RI(5,11),c?nsShort(c.n):'um companheiro']};
+ const nm=(R,ex)=>{const L=R.filter(p=>p.pos!=='GOL'&&p.n!==ex);return L.length?nsShort(pick(L).n):'o camisa '+RI(5,11)};
+ const ME=nsSur();
+ const onFrom=part?(part.start?0:90-part.min):0,onTo=part?(part.start?part.min:90):90;
+ const L={min:0,gu:0,gt:0,rows:[],msg:'',ended:false,skip:false,out:false,lastAmb:0,poss:true,lastX:-99,ht:false,lowWarn:false,drained:0};
+ x.live=L;
+ const spd=()=>L.skip?0:(S.liveSpeed===3?3:1);const minMs=()=>({1:430,3:110,0:0})[spd()];
+ const dU=(us.s||70)-(th.s||70)+(home&&!m.neutral?2:0);
+ const onPitch=()=>!L.out&&L.min>=onFrom&&L.min<=onTo;
+ const sc=()=>{const gu=L.gu+(x.x.gu||0),gt=L.gt+(x.x.gt||0);return home?[gu,gt]:[gt,gu]};
+ const H=home?us:th,A=home?th:us,cH=home?cU:cT,cA=home?cT:cU;
+ const ab=s=>esc((s.a||mkAbbr(s.n||'')).slice(0,3).toUpperCase());
+ const rowHTML=r=>{const c=r.side==='u'?cU:r.side==='t'?cT:['#26352c','#eef2e4'];return`<div class="nfr ${r.k||''}" style="--c:${c[0]};--k:${pickInk(c[0])}"><b>${r.m!=null?r.m+"'":''}</b><span>${r.t}</span></div>`};
+ const effPips=()=>[1,2,3,4,5].map(i=>`<i class="${i<=n.eff?'on':''}"></i>`).join('');
+ const drinks=()=>Object.values(n.dr).reduce((s,v)=>s+v,0);
+ const draw=()=>{$ov.hidden=false;const[hg,ag]=sc();
+  $ov.innerHTML=`<div class="nslive">
+  <div class="nsl-top"><span class="nspc">${esc(m.o.comp)}${m.o.label?' · '+esc(m.o.label):''}</span><b class="clk" id="nlClk">${L.ended?'Fim':L.min+"'"}</b><div class="spd">${[[1,'▶'],[3,'▶▶'],[0,'⏭']].map(([k,t])=>`<button data-sp="${k}" class="${spd()===k?'on':''}" aria-label="${k===0?'Pular pro fim':k===3?'Rápido':'Normal'}">${t}</button>`).join('')}</div></div>
+  <div class="nsl-score"><div class="tm" style="background:${cH[0]};color:${pickInk(cH[0])}">${esc(H.n)}</div><b id="nlH">${hg}</b><b id="nlA">${ag}</b><div class="tm" style="background:${cA[0]};color:${pickInk(cA[0])}">${esc(A.n)}</div></div>
+  ${m.agg?`<div class="nsl-agg">Ida ${m.agg[0]}–${m.agg[1]} · agregado <span id="nlAgg">${m.agg[0]+L.gu+(x.x.gu||0)}–${m.agg[1]+L.gt+(x.x.gt||0)}</span></div>`:''}
+  <div class="nsl-time"><i id="nlBar" style="width:${L.min/90*100}%"></i></div>
+  <div class="nsl-feed" id="nlFeed">${L.rows.slice(-14).map(rowHTML).join('')}</div>
+  <div class="nsl-msg" id="nlMsg">${esc(L.msg)}</div>
+  <div id="nlEnd"></div>
+  <div class="nsl-ctl" ${L.ended?'hidden':''}>
+   <div class="nsl-eff"><small>Esforço</small><div><button id="nlEm" aria-label="Menos esforço">−</button><span id="nlEv">${effPips()}</span><button id="nlEp" aria-label="Mais esforço">+</button></div></div>
+   <button class="nsl-dr" id="nlDr" ${drinks()&&!L.out?'':'disabled'}>❤️<small id="nlDrN">${drinks()}</small></button>
+   <div class="nsl-foc"><small>Foco</small><div>${[[-1,'🛡️','Defender'],[0,'⚖️','Equilibrado'],[1,'⚔️','Atacar']].map(([k,ic,t])=>`<button data-fc="${k}" class="${n.foc===k?'on':''}" aria-label="${t}">${ic}</button>`).join('')}</div></div>
+  </div>
+  <div class="nsl-en"><span>Energia</span><span class="nsmb ${n.en<30?'low':''}"><i id="nlEn" style="width:${Math.round(n.en)}%"></i></span><b id="nlEnV">${Math.round(n.en)}%</b></div></div>`;
+  $ov.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{const v=+b.dataset.sp;if(v===0){L.skip=true;x.skip=true}else{L.skip=false;x.skip=false;S.liveSpeed=v}$ov.querySelectorAll('[data-sp]').forEach(y=>y.classList.toggle('on',y===b))});
+  const em=document.getElementById('nlEm'),ep=document.getElementById('nlEp');if(em)em.onclick=()=>{n.eff=clamp(n.eff-1,1,5);document.getElementById('nlEv').innerHTML=effPips()};if(ep)ep.onclick=()=>{n.eff=clamp(n.eff+1,1,5);document.getElementById('nlEv').innerHTML=effPips()};
+  $ov.querySelectorAll('[data-fc]').forEach(b=>b.onclick=()=>{n.foc=+b.dataset.fc;$ov.querySelectorAll('[data-fc]').forEach(y=>y.classList.toggle('on',y===b));api.flash(n.foc>0?'⚔️ Você sobe pro ataque':n.foc<0?'🛡️ Você recua pra ajudar a defesa':'⚖️ Posicionamento equilibrado')});
+  const dr=document.getElementById('nlDr');if(dr)dr.onclick=()=>nlDrink();
+  const f=document.getElementById('nlFeed');if(f)f.scrollTop=f.scrollHeight};
+ const setEn=()=>{const e=document.getElementById('nlEn'),v=document.getElementById('nlEnV');if(e){e.style.width=Math.round(n.en)+'%';e.parentElement.classList.toggle('low',n.en<30)}if(v)v.textContent=Math.round(n.en)+'%'};
+ const setScore=()=>{const[hg,ag]=sc();const h=document.getElementById('nlH'),a=document.getElementById('nlA');if(h){h.textContent=hg;a.textContent=ag}const g=document.getElementById('nlAgg');if(g&&m.agg)g.textContent=`${m.agg[0]+L.gu+(x.x.gu||0)}–${m.agg[1]+L.gt+(x.x.gt||0)}`};
+ const push=r=>{L.rows.push(r);if(L.rows.length>40)L.rows.splice(0,L.rows.length-40);const f=document.getElementById('nlFeed');if(f){f.insertAdjacentHTML('beforeend',rowHTML(r));while(f.children.length>14)f.firstElementChild.remove();f.scrollTop=f.scrollHeight}};
+ async function nlDrink(){const have=NS_DRINKS.filter(d=>n.dr[d.id]>0);if(!have.length)return;let d=have[0];if(have.length>1){const kk=await nsPop({ic:'🥤',title:'Qual energético?',opts:have.map(d=>[d.id,`${d.ic} ${d.n} (${n.dr[d.id]})`]),ok:'Cancelar'});d=NS_DRINKS.find(z=>z.id===kk)}if(!d)return;nsDrink(d);setEn();const c=document.getElementById('nlDrN');if(c)c.textContent=drinks();if(!drinks()){const b=document.getElementById('nlDr');if(b)b.disabled=true}api.flash(`🥤 ${d.n}: energia em ${Math.round(n.en)}%`)}
+ // narração: quem tem a bola manda na cor da linha
+ const amb=()=>{const mine=onPitch()&&L.poss;let pU=clamp(.5+dU/45+(n.foc>0?.04:n.foc<0?-.03:0),.25,.75);
+  if(ch(.38))L.poss=ch(pU);const u=L.poss;const R=u?RU:RT,t=u?us:th,o=u?th:us,side=u?'u':'t';const[p,q]=two(R),d=RI(12,38);
+  const meIn=u&&onPitch()&&ch(clamp(.12+n.eff*.05+(n.foc>0?.06:0)+(n.rel.team-50)/400,.08,.45));
+  let t0;
+  if(meIn){t0=pick([`A bola chega em <b>${ME}</b>`,`<b>${ME}</b> pede e recebe`,`<b>${ME}</b> toca para ${q}`,`Passe de ${d} m de <b>${ME}</b> para ${q}`,`<b>${ME}</b> arranca com a bola`,`<b>${ME}</b> gira em cima do marcador`,n.foc<0?`<b>${ME}</b> volta pra marcar e rouba a bola`:`<b>${ME}</b> aparece livre`]);return push({m:L.min,side,t:t0,k:'nme'})}
+  const r=rnd();
+  if(r<.36)t0=pick([`${p} toca para ${q}`,`Bola de ${p} para ${q}`,`${q} recebe de ${p}`,`${p} acha ${q} com um passe de ${d} m`,`${p} inverte o jogo para ${q}`]);
+  else if(r<.55)t0=pick([`${esc(t.n)} roda a bola com calma`,`${p} protege a bola`,`${p} procura espaço`,`${esc(t.n)} troca passes no meio`]);
+  else if(r<.68)t0=pick([`A defesa do ${esc(o.n)} está aberta`,`${p} invade a área!`,`Contra-ataque do ${esc(t.n)}!`,`${p} parte em velocidade`]);
+  else if(r<.78)t0=pick([`${p} arrisca de longe… pra fora`,`Chute de ${p}, por cima`,`${p} cabeceia raspando a trave`,`${gkDef(u?RT:RU).replace(/^d/,'D')}!`,gkHold(u?RT:RU)]);
+  else if(r<.9)t0=pick([`Falta em ${p}`,`Escanteio para o ${esc(t.n)}`,`Lateral para o ${esc(t.n)}`,`O juiz deixa o jogo seguir`]);
+  else{t0=pick([`${p} perde a bola`,`Desarme! A bola muda de lado`,`Passe errado de ${p}`]);L.poss=!L.poss}
+  push({m:L.min,side,t:t0})};
+ // lance extra do seu jogador (esforço e foco no ataque criam mais)
+ async function extraChance(){const P=S.pos;const atk=n.foc>=0;let type;
+  if(P==='GOL')return;
+  const r=rnd();if(['ATA','SA','PE','PD'].includes(P))type=r<.62?chanceType({}):assistType();else if(['MEI','MC','ME','MD'].includes(P))type=r<.45?chanceType({}):assistType();else type=r<(atk?.35:.2)?chanceType({}):assistType();
+  const isPass=['pass','long','cross'].includes(type);x.x.ch=(x.x.ch||0)+1;L.lastX=L.min;
+  push({m:L.min,side:'u',t:isPass?`<b>${ME}</b> levanta a cabeça…`:`<b>${ME}</b> tem espaço pra finalizar…`,k:'nme'});
+  let ok;if(L.skip||S.lances==='off'||!lancesWanted(true)){ok=nsAutoChance({type})}
+  else{api.flash('⚡ A bola é sua…');await sleep(L.skip?0:900);x.inX=true;try{ok=await IO_UI.chance({type,planned:false,comp:m.o.comp,min:L.min})}catch(e){ok=false}x.inX=false;draw()}
+  const self=!!NM.selfGoal,dma=!!NM.dmAssist;NM.selfGoal=false;NM.dmAssist=false;
+  if(ok&&(!isPass||self)){x.x.gu=(x.x.gu||0)+1;x.x.g=(x.x.g||0)+1;x.x.sc.push({m:L.min,w:S.name,us:true});push({m:L.min,side:'u',t:`⚽ GOL! <b>${ME}</b> marca!`,k:'ngl nme'});api.flash('GOOOOL! É SEU!');goalFx(true)}
+  else if(ok&&isPass&&(dma||ch(.42))){const w=nm(RU);const full=(RU.find(p=>nsShort(p.n)===w)||{n:w}).n;x.x.gu=(x.x.gu||0)+1;x.x.a=(x.x.a||0)+1;x.x.sc.push({m:L.min,w:full,us:true});push({m:L.min,side:'u',t:`⚽ GOL de ${w}! Assistência de <b>${ME}</b>`,k:'ngl nme'});api.flash(`GOL do ${us.n}! Sua assistência`);goalFx(true)}
+  else if(ok&&isPass){x.x.ps=(x.x.ps||0)+1;push({m:L.min,side:'u',t:`Passe na medida de <b>${ME}</b>, mas ${nm(RU)} não converte`,k:'nme'})}
+  else push({m:L.min,side:'u',t:isPass?`O passe de <b>${ME}</b> é cortado`:pick([`<b>${ME}</b> finaliza… ${gkDef(RT)}`,`<b>${ME}</b> chuta pra fora`,`<b>${ME}</b> é travado na hora do chute`]),k:'nme nbad'});
+  setScore()}
+ const goalFx=good=>{const b=$ov.querySelector('.nslive');if(b&&!reduced){b.classList.remove('gfx','bad');void b.offsetWidth;b.classList.add('gfx');if(!good)b.classList.add('bad')}try{SFX.goal&&good&&SFX.goal()}catch(e){}};
+ async function halftime(){const[hg,ag]=sc();push({m:null,side:'n',t:`Intervalo · ${esc(H.n)} ${hg}–${ag} ${esc(A.n)}`,k:'nht'});if(L.skip)return;
+  const host=document.getElementById('nlEnd');if(!host)return;const has=drinks()>0;
+  host.innerHTML=`<div class="nsl-ht"><b>Intervalo</b><span>Energia ${Math.round(n.en)}%${n.en<45?' · você está cansado':''}</span><div class="row">${has?'<button class="btn" id="htDr">🥤 Tomar energético</button>':''}<button class="btn ${has?'ghost':''}" id="htGo">Voltar pro jogo ▶</button></div></div>`;
+  await new Promise(res=>{const go=document.getElementById('htGo');if(go)go.onclick=()=>{host.innerHTML='';res()};const d=document.getElementById('htDr');if(d)d.onclick=async()=>{await nlDrink();const s=host.querySelector('span');if(s)s.textContent=`Energia ${Math.round(n.en)}%`;if(!drinks())d.remove()};
+   setTimeout(()=>{if(L.skip){host.innerHTML='';res()}},50)})}
+ const api={
+  async until(t){
+   if(L.min===0&&t>0&&!L.kick){L.kick=true;push({m:0,side:'n',t:`Bola rolando: ${esc(us.n)} × ${esc(th.n)}`,k:'nht'});if(part&&!part.start)push({m:0,side:'n',t:`Você começa no banco`,k:'nht'});try{SFX.whistle()}catch(e){}if(!L.skip)await sleep(600)}
+   while(L.min<t){L.min++;const c=document.getElementById('nlClk'),b=document.getElementById('nlBar');if(c)c.textContent=L.min+"'";if(b)b.style.width=(L.min/90*100)+'%';
+    if(onPitch()){const d=(16+n.eff*6.5)/90*(S.age>30?1+(S.age-30)*.03:1);n.en=clamp(n.en-d,0,100);L.drained+=d;setEn();if(n.en<15&&!L.lowWarn){L.lowWarn=true;api.flash('🥵 Você está exausto. Tome um energético ou baixe o esforço.')}}
+    if(L.min===45&&!L.ht){L.ht=true;await halftime()}
+    if(!L.skip&&L.min-L.lastAmb>=(spd()===3?2:1)&&ch(.62)&&L.min!==45){L.lastAmb=L.min;amb()}
+    // seu jogador cria mais com esforço e foco no ataque
+    if(onPitch()&&S.pos!=='GOL'&&L.min-L.lastX>=8&&(x.x.ch||0)<4&&L.min<89){const b0=NS_ATKB[S.pos]||.4;const bt=nsBootStats();const faro=bt&&(bt.ab||[]).includes('faro')?1.25:1;
+     const p=b0*(.45+.15*n.eff)*(n.foc>0?1.5:n.foc<0?.55:1)*faro*(.8+n.rel.team/250)*(n.en<25?.5:1)/90;if(ch(p))await extraChance()}
+    // atacar demais abre espaço atrás
+    if(n.foc>0&&onPitch()&&ch(.0035*n.eff/3)){x.x.gt=(x.x.gt||0)+1;const w=nm(RT);x.x.sc.push({m:L.min,w:(RT.find(p=>nsShort(p.n)===w)||{n:w}).n,us:false});push({m:L.min,side:'t',t:`⚽ Contra-ataque e gol de ${w}. O time ficou exposto.`,k:'ngl'});api.flash(`Gol do ${th.n}…`);goalFx(false);setScore()}
+    const ms=minMs();if(ms)await sleep(L.min>=80?ms*1.3:ms)}},
+  flash(t){L.msg=t;const e=document.getElementById('nlMsg');if(e){e.textContent=t;e.classList.remove('pop');void e.offsetWidth;e.classList.add('pop')}},
+  redraw(){L.msg='';draw()},
+  async event(e,gu,gt){const k=L.skip?0:spd()===3?.4:1;const mine=e.mine;
+   // foco na defesa: às vezes você salva um gol certo
+   if(e.t==='g'&&!e.us&&onPitch()&&S.pos!=='GOL'){const p=(n.foc<0?.24:.05)*(n.eff/3)*(NS_DEFB[S.pos]||.6)*(n.en<25?.6:1);if(ch(p)){x.x.gt=(x.x.gt||0)-1;x.x.rm.push({m:e.m,w:e.w});x.x.blk=(x.x.blk||0)+1;L.gu=gu;L.gt=gt;push({m:e.m,side:'u',t:`🛡️ <b>${ME}</b> salva em cima da linha! Era gol de ${esc(nsShort(e.w))}`,k:'nme'});api.flash('Que salvada!');setScore();if(k)await sleep(1400*k);return}}
+   if(e.t==='g'){L.gu=gu;L.gt=gt;setScore();const w=esc(nsShort(e.w));push({m:e.m,side:e.us?'u':'t',t:e.us?(mine?`⚽ GOL! <b>${ME}</b> marca!`:`⚽ GOL de ${w}!${e.ast?` Assistência de <b>${ME}</b>`:''}`):`⚽ Gol de ${w}`,k:'ngl'+(mine||e.ast?' nme':'')});api.flash(e.us?(mine?'GOOOOL! É SEU!':`GOL do ${us.n}!`):`Gol do ${th.n}…`);goalFx(!!e.us);if(k)await sleep(2000*k);return}
+   let r=null;const w=esc(nsShort(e.w||''));
+   if(e.t==='c'&&e.missed)r={side:'u',t:`<b>${ME}</b> perde a chance!`,k:'nme nbad'};
+   else if(e.t==='c')r={side:e.us?'u':'t',t:esc(pick(e.us?LIVE_TXT.c_us:LIVE_TXT.c_th).replace('{w}',nsShort(e.w||''))),k:mine?'nme':''};
+   else if(e.t==='y')r={side:'u',t:`🟨 Amarelo para <b>${ME}</b>`,k:'nme'};
+   else if(e.t==='r'){r={side:'u',t:`🟥 <b>${ME}</b> expulso!`,k:'nme nbad'};L.out=true}
+   else if(e.t==='inj'){r={side:'u',t:`🚑 <b>${ME}</b> sente e sai de campo`,k:'nme nbad'};L.out=true}
+   else if(e.t==='in')r={side:'u',t:`🔁 <b>${ME}</b> entra em campo`,k:'nme'};
+   else if(e.t==='pmiss')r={side:e.us?'u':'t',t:`❌ Pênalti perdido por ${w}`,k:e.mine?'nme nbad':''};
+   else if(e.t==='dsr')r={side:'u',t:`🛡️ Desarme de <b>${ME}</b> em ${w}`,k:'nme'};
+   else if(e.t==='ppok')r={side:'u',t:`🎯 Passe na medida de <b>${ME}</b>`,k:'nme'};
+   else if(e.t==='ppx')r={side:'u',t:`O passe de <b>${ME}</b> é cortado`,k:'nme nbad'};
+   else if(e.t==='gks')r={side:'u',t:`🧤 Defesaça de <b>${ME}</b> em chute de ${w}!`,k:'nme'};
+   else if(e.t==='psave')r={side:'u',t:`🧤 Pênalti defendido!`,k:e.mine?'nme':''};
+   if(r){r.m=e.m;push(r);if(k)await sleep(900*k)}},
+  finish(f){return new Promise(res=>{L.ended=true;x.ended=true;const[hg,ag]=sc();draw();const end=document.getElementById('nlEnd');const cls=f.win===true?'good':f.win===false?'bad':'';
+   if(end)end.innerHTML=`<div class="nsl-fin"><b class="${cls}">${esc(f.msg||'Fim de jogo')}</b><span>${esc(H.n)} ${hg} – ${ag} ${esc(A.n)}</span>${f.agg?`<small>Agregado ${f.agg[0]}–${f.agg[1]}</small>`:''}<button class="btn wide" id="lok">Continuar</button></div>`;
+   const b=document.getElementById('lok');if(!b){res();return}b.focus({preventScroll:true});b.onclick=()=>{$ov.hidden=true;$ov.innerHTML='';res()}})}};
+ draw();return api}
+{const _s0=IO_UI.live.start;IO_UI.live.start=async function(m){if(!nsOn()||!m||!m.part)return _s0.apply(this,arguments);try{LIVE_USED=true}catch(e){}return nsLiveStart(m)}}
+// conta chances e passes; "pular pro fim" resolve os lances sem abrir o 3D
+{const _chN=IO_UI.chance;IO_UI.chance=async function(c){const x=NSSM.cur;if(!nsOn()||!x||x.inX)return _chN(c);x.x.ch=(x.x.ch||0)+1;let ok;
+  if(x.skip){ok=nsAutoChance(c);NM.selfGoal=false;NM.dmAssist=false}else ok=await _chN(c);
+  if(ok&&['pass','long','cross','build'].includes(c.type))x.x.ps=(x.x.ps||0)+1;if(ok&&c.type==='tackle')x.x.tk=(x.x.tk||0)+1;return ok}}
+// no "tudo no 3D" o esforço/foco não aparece, mas a energia gasta igual
+
+// ---------- depois do apito: aplica extras, energia, estatísticas, relações, estrela ----------
+{const _pmN=playMine;playMine=async function(o,io){if(!nsOn())return _pmN(o,io);const n=nsEnsure();
+  const prev=NSSM.cur;const cur={o,x:{gu:0,gt:0,g:0,a:0,ch:0,ps:0,tk:0,blk:0,sc:[],rm:[]},live:null,skip:false};NSSM.cur=cur;let r;
+  try{r=await _pmN(o,io)}finally{NSSM.cur=prev}
+  try{const x=cur.x;const me=r.me;
+   if(x.gu||x.gt||x.rm.length){r.gu+=x.gu;r.gt+=x.gt;if(me){me.g+=x.g;me.a+=x.a}
+    for(const q of x.rm){const i=r.scorers.findIndex(s=>!s.us&&s.m===q.m&&s.w===q.w);if(i>=0)r.scorers.splice(i,1)}
+    r.scorers.push(...x.sc);r.scorers.sort((a,b)=>a.m-b.m);r.gt=Math.max(0,r.gt)}
+   if(me&&me.play&&me.nota!=null){me.nota=Math.round(clamp(me.nota+x.g*.85+x.a*.5+x.blk*.3,3,10)*10)/10}
+   if(me&&me.play){const L=cur.live;if(!L||!L.drained){n.en=clamp(n.en-nsDrain(me.min,n.eff),0,100)}}
+   const post=nsAfterMatch(r,o,cur);NSSM.items.push({me,post});(NSSM.post||(NSSM.post=[])).push(post)}catch(e){console.error(e)}
+  return r}}
+function nsMotm(me,res){return!!(me&&me.play&&me.nota!=null&&(me.nota>=8.2||(me.nota>=7.6&&res==='V')||me.g>=3||(me.nota>=7.3&&me.g+me.a>=2&&res!=='D')))}
+function nsAfterMatch(r,o,cur){const n=S.n;const me=r.me;const x=cur.x;const res=r.gu>r.gt?'V':r.gu<r.gt?'D':'E';const kind=o.kind||'club';
+ const rel0={...n.rel},st0={l:n.star.l,p:n.star.p};const motm=nsMotm(me,res);let ps=0,chN=0;const ach0=Object.keys(n.ach).length;
+ if(me&&me.play){const B=kind==='nat'?[n.is]:[n.ss,n.cs];
+  ps=(x.ps||0)+Math.round(me.min/90*R(3,9)*(NS_PASSB[S.pos]||1)*(n.sk.vis.l/70));chN=Math.max(x.ch||0,me.g+(x.ch?0:RI(0,2)));
+  for(const b of B){b.ap++;b.g+=me.g;b.a+=me.a;if(me.g>=3)b.ht++;b.ps+=ps;b.ch+=chN;if(motm)b.motm++}
+  const nt=me.nota;const dC=nt>=8?5:nt>=7.2?3:nt>=6.5?1:nt<5?-5:nt<5.8?-3:0;
+  const dT=(res==='V'?2:res==='D'?-2:0)+(me.a?2:0)+(ps>=10?1:0);const dF=me.g*3+(res==='V'?1:res==='D'?-2:0)+(motm?3:0)+(nt<5.5?-3:0);
+  n.rel.coach=clamp(n.rel.coach+dC,0,100);n.rel.team=clamp(n.rel.team+dT,0,100);n.rel.fans=clamp(n.rel.fans+dF,0,100);if(n.spon&&nt>=7.5)n.rel.spon=clamp(n.rel.spon+2,0,100);
+  const imp=(o.decisive||/final|semi/i.test(o.label||'')?1.5:1)*(kind==='nat'?1.3:1);
+  nsStarAdd(Math.max(1,((nt-6)*8+me.g*8+me.a*5+(motm?12:0)+(res==='V'?2:0))*imp));
+  {const ks=NSK.map(x=>x[0]).sort((a,b)=>nsImp(b)-nsImp(a)+R(-1.2,1.2)).slice(0,2);for(const k of ks)nsAddP(k,RI(2,5))}
+  if(n.boot&&n.bootLeft>0){n.bootLeft--;if(n.bootLeft<=0){(S.st.lifeNews=S.st.lifeNews||[]).push('Sua chuteira gastou. Hora de comprar outra.');n.boot=null;try{toast({ic:'👟',title:'Chuteira gasta',txt:'Compre outra na loja.',ms:2400})}catch(e){}}}}
+ const isLg=!!(S.st&&club()&&o.comp===LG[club().l].n);
+ const unlocked=[];try{unlocked.push(...nsAchCheck({ps,a:me&&me.a||0,g:me&&me.g||0,nota:me&&me.nota,win:res==='V'&&isLg&&me&&me.play,motm,en:n.en},true))}catch(e){}
+ nsSync();
+ return{o,r,me,res,ps,ch:chN,motm,rel0,rel1:{...n.rel},st0,st1:{l:n.star.l,p:n.star.p},ach:unlocked,x:{...x},kind,isLg,us:o.us,them:o.them,home:o.home,neutral:o.neutral}}
+
+// a decisão da semana (pop-up) espera as telas do pós-jogo terminarem
+{const _bwN=bindWeek;bindWeek=function(...a){if(NSSM.inPost)return;return _bwN.apply(this,a)}}
+// ---------- telas depois do jogo ----------
+function nsPostHost(){let h=document.getElementById('nspost');if(!h){h=document.createElement('div');h.id='nspost';document.body.appendChild(h)}h.hidden=false;return h}
+function nsPostScreen(html,bind){return new Promise(res=>{const h=nsPostHost();h.innerHTML=`<div class="nspost">${html}</div>`;h.scrollTop=0;try{if(bind)bind(h,res)}catch(e){console.error(e)}
+ const c=h.querySelector('[data-pc]');if(c)c.onclick=()=>res(c.dataset.pc)})}
+function nsPostClose(){const h=document.getElementById('nspost');if(h){h.hidden=true;h.innerHTML=''}}
+function nsRelChips(p){return NS_REL.map(([k,nm])=>{const d=Math.round(p.rel1[k]-p.rel0[k]);if(!d||(k==='gf'&&!S.gf)||(k==='spon'&&!S.n.spon))return'';return`<span class="nsd ${d>0?'up':'down'}">${nm} ${d>0?'+':''}${d}</span>`}).join('')}
+function nsStarRowHTML(p){const lvUp=p.st1.l>p.st0.l;return`<div class="nspst"><span class="ic">⭐<i>${p.st1.l}</i></span><div><b>Nível de estrela${lvUp?` · subiu pro ${p.st1.l}!`:''}</b><span class="nsmb star"><i id="psStar" style="width:${lvUp?0:Math.round(p.st0.p)}%"></i></span></div></div>`}
+function nsSideName(s){return esc(s&&s.n||'')}
+async function nsPostMatch(){const posts=(NSSM.post||[]).slice();NSSM.post=[];if(!posts.length&&!(S.n&&S.n.wk))return;
+ const n=S.n;
+ for(const p of posts){const r=p.r,me=p.me;const home=p.neutral?true:p.home;const[hg,ag]=home?[r.gu,r.gt]:[r.gt,r.gu];const H=home?p.us:p.them,A=home?p.them:p.us;
+  const head=`<div class="nsp-res"><span class="nspc">${esc(p.o.comp)}${p.o.label?' · '+esc(p.o.label):''}</span><div class="sc"><span>${nsSideName(H)}</span><b>${hg} – ${ag}</b><span>${nsSideName(A)}</span></div></div>`;
+  let body;
+  if(me&&me.play){const nt=me.nota;
+   body=`<h2 class="nsp-t">${p.motm?'⭐ Estrela do jogo!':p.res==='V'?'Vitória':p.res==='D'?'Derrota':'Empate'}</h2>${head}
+   <div class="nsp-stats">${[['Chances',p.ch],['Gols',me.g],['Assistências',me.a],['Passes certos',p.ps],['Minutos',me.min]].map(([t,v])=>`<div><span>${t}</span><b>${v}</b></div>`).join('')}<div class="nota ${nt>=7.5?'good':nt<6?'bad':''}"><span>Nota do jogo</span><b>${fmt1(nt)}</b></div></div>
+   <div class="nsp-rel">${nsRelChips(p)||'<span class="muted">Relações sem mudança</span>'}</div>${nsStarRowHTML(p)}
+   ${p.ach.length?`<div class="nsp-ach">${p.ach.map(a=>`<div><span>🏅</span><b>${esc(a.t)}</b></div>`).join('')}</div>`:''}`}
+  else{const why=me&&me.why;body=`<h2 class="nsp-t">${why==='lesionado'?'🚑 Fora por lesão':why==='suspenso'?'🟥 Suspenso':why==='base'?'🌱 Jogo do profissional':'🪑 No banco'}</h2>${head}<p class="muted">${why==='banco'?'O técnico não te colocou. Treinar e melhorar a relação com ele ajuda.':why==='lesionado'?`Mais ${S.st.injLeft} jogo${S.st.injLeft===1?'':'s'} de recuperação.`:'Você assistiu de fora.'}</p><div class="nsp-rel">${nsRelChips(p)}</div>`}
+  await nsPostScreen(body+`<button class="btn wide" data-pc="ok">Continuar</button>`,h=>{setTimeout(()=>{const s=h.querySelector('#psStar');if(s)s.style.width=Math.round(p.st1.p)+'%'},80)});
+  if(me&&me.play&&(p.motm||me.g>=2||me.nota<=5||(n.cs.g===me.g&&me.g>0)||(n.cs.ap===1)))await nsPostScreen(nsPaperHTML(p)+`<button class="btn wide" data-pc="ok">Continuar</button>`)}
+ if(n.wk&&!n.wk.shown){n.wk.shown=true;await nsWeekScreen()}
+ const R0=S.st&&S.st.nsRound;if(R0&&!R0.shown&&posts.some(p=>p.isLg)){R0.shown=true;await nsRoundScreen()}
+ nsPostClose()}
+function nsPaperHTML(p){const me=p.me;const c=club();const opp=p.them&&p.them.n||'adversário';const first=(S.name||'').split(' ')[0],sur=nsSur();const r=typeof npRand==='function'?npRand(hash(S.name+S.year+S.st.idx)):Math.random;
+ let kick='NOTÍCIAS DO ESPORTE',head,txt,ic='⭐';
+ if(me.g>=3){head='HAT-TRICK!';ic='⚽';txt=`${S.name} marcou ${me.g} vezes contra o ${opp} e levou a bola pra casa. Nas arquibancadas, a torcida já fala em ídolo.`}
+ else if(n0(S.n.cs.ap)===1){head='NASCE UMA ESTRELA?';ic='🌟';txt=`Estreia de ${S.name} pelo ${c.n}: nota ${fmt1(me.nota)}${me.g?` e gol`:''}. Quem viu de perto garante que o garoto tem algo diferente.`}
+ else if(p.motm){head='ESTRELA DO JOGO!';txt=`${first} ${sur} foi o melhor em campo ${p.res==='V'?'na vitória':p.res==='D'?'mesmo na derrota':'no empate'} do ${p.o.us&&p.o.us.n||c.n} contra o ${opp}${me.g?`, com ${me.g} gol${me.g>1?'s':''}`:''}${me.a?`${me.g?' e':', com'} ${me.a} assistência${me.a>1?'s':''}`:''}. ${['O técnico rasgou elogios na coletiva.','Olheiros de clubes maiores estavam no estádio.','Nas redes, o nome dele ficou entre os assuntos mais comentados.','Os companheiros fizeram fila pra abraçar o camisa '+(S.shirt||S.num)+'.'][Math.floor(r()*4)]}`}
+ else if(me.g>=2){head='DOBLETE!';ic='⚽';txt=`Dois gols de ${S.name} contra o ${opp}. A fase é boa e a torcida sabe disso.`}
+ else if(me.g>0){head='PRIMEIRO GOL!';ic='⚽';txt=`${S.name} desencantou contra o ${opp}. O primeiro de muitos?`}
+ else{head='NOITE PARA ESQUECER';ic='📉';kick='CADERNO DE ESPORTES';txt=`Nota ${fmt1(me.nota)} para ${S.name} contra o ${opp}. A cobrança vai aumentar no próximo treino.`}
+ return`<div class="nspaper"><div class="kick">${kick}</div><div class="hd"><span>${ic}</span><b>${head}</b></div><p>${esc(txt)}</p><small>${esc(c.n)} · ${seasonLbl(S.year)}</small></div>`}
+const n0=v=>v|0;
+function nsWeekScreen(){const n=S.n;const w=n.wk;const R=w.rows;const m=v=>v?nsK(v):'—';
+ const html=`<h2 class="nsp-t">Atualização semanal</h2>
+ <table class="nstab nswk"><thead><tr><th>Dinheiro</th><th>Básico</th><th>Agente</th></tr></thead><tbody>
+ <tr><th>Salário (líquido)</th><td>${m(R.sal[0])}</td><td>+${m(R.sal[1])}</td></tr>
+ <tr><th>Bônus por gol (${R.gN})</th><td>${m(R.g[0])}</td><td>+${m(R.g[1])}</td></tr>
+ <tr><th>Bônus por assistência (${R.aN})</th><td>${m(R.a[0])}</td><td>+${m(R.a[1])}</td></tr>
+ <tr><th>Patrocínio</th><td>${m(R.sp[0])}</td><td>+${m(R.sp[1])}</td></tr>${w.rent?`<tr><th>Aluguéis e imóveis</th><td>${m(w.rent)}</td><td></td></tr>`:''}
+ <tr class="tot"><th>Total da semana</th><td colspan="2">${nsK(w.tot)}</td></tr></tbody></table>
+ <table class="nstab nswk"><thead><tr><th>Energia</th><th>Básico</th><th>Treinador</th></tr></thead><tbody>
+ <tr><th>Dias de descanso (6)</th><td>+${w.base}%</td><td>+${w.coach}%</td></tr><tr><th>Imóveis</th><td>${w.props?'+'+w.props+'%':'—'}</td><td></td></tr>
+ <tr class="tot"><th>Energia agora</th><td colspan="2"><span class="nsmb"><i style="width:${Math.round(w.en)}%"></i></span> ${Math.round(w.en)}%</td></tr></tbody></table>
+ ${w.drops.length?`<div class="nsp-warn">⚠️ Sem treino, caiu: ${[...new Set(w.drops)].join(', ')}</div>`:''}${w.autoN?`<div class="nsp-ok">🏋️ Treino automático: ${w.autoN} sessão${w.autoN>1?'ões':''}</div>`:''}
+ <div class="nsp-btns"><button class="btn ghost" id="wkAg">💼 Agente</button><button class="btn ghost" id="wkCo">🪑 Treinador</button><button class="btn" data-pc="ok">Continuar</button></div>`;
+ return nsPostScreen(html,(h,res)=>{h.querySelector('#wkAg').onclick=async()=>{h.hidden=true;await nsContractSheet0();h.hidden=false};h.querySelector('#wkCo').onclick=async()=>{h.hidden=true;await nsCoachTalk();h.hidden=false}})}
+// versão sem re-render do hub (para usar no meio da sequência)
+async function nsContractSheet0(){const keep=renderHub;renderHub=function(){};try{await nsContractSheet()}finally{renderHub=keep}}
+async function nsCoachTalk(){const n=S.n;const k=await nsPop({ic:'🪑',title:`Treinador · relação ${Math.round(n.rel.coach)}%`,txt:'O que você quer falar com ele?',opts:[['start','🗣️ Quero ser titular'],['pen','🎯 Quero bater os pênaltis'],['fk','🧱 Quero bater as faltas']],ok:'Nada, valeu'});
+ if(k==='start'){if(ch(clamp(n.rel.coach/120+(S.ovr-club().s)/30,.05,.9))){n.promise=2;await nsPop({ic:'👍',title:'Combinado',txt:'Ele prometeu te dar chance nos próximos 2 jogos.'})}else{n.rel.coach=clamp(n.rel.coach-5,0,100);await nsPop({ic:'😠',title:'Não gostou',txt:'"Quem escala sou eu." Relação −5.'})}}
+ else if(k==='pen'||k==='fk'){const r=askTaker(k);await nsPop({ic:'🎯',title:k==='pen'?'Pênaltis':'Faltas',txt:r.txt,chips:r.chips})}}
+{const _partP=participation;participation=function(kind,o){const p=_partP(kind,o);try{const n=S.n;if(nsOn()&&n.promise>0&&kind==='club'&&!S.youth&&(p.why==='banco'||(p.play&&!p.start))){n.promise--;return{play:true,start:true,min:ch(.3)?RI(60,85):90,role:p.role||'Rotação'}}}catch(e){}return p}}
+function nsRoundScreen(){const st=S.st;const R0=st.nsRound;let tab=false;
+ const draw=h=>{h.querySelector('.nspost').innerHTML=`<h2 class="nsp-t">${tab?esc(LG[st.lg||club().l].n):`Rodada ${R0.r+1}`}</h2><div class="nsp-rd">${tab?nsTableHTML():nsRoundHTML()}</div><div class="nsp-btns"><button class="btn ghost" id="rdT">${tab?'⚽ Rodada':'📊 Tabela'}</button><button class="btn" id="rdOk">Continuar ➜</button></div>`;
+  h.querySelector('#rdT').onclick=()=>{tab=!tab;draw(h)}};
+ return new Promise(res=>{const h=nsPostHost();h.innerHTML='<div class="nspost"></div>';draw(h);h.addEventListener('click',function f(e){if(e.target&&e.target.id==='rdOk'){h.removeEventListener('click',f);res()}})})}
+function nsTableHTML(){const st=S.st;const T=sortTable(st.table);const me=S.club;const R0=st.nsRound||{prev:{}};
+ return`<table class="nstab nslt"><thead><tr><th>#</th><th>Time</th><th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th><th>Pts</th></tr></thead><tbody>${T.map((x,i)=>{const c=CLUB[x.id];const pv=R0.prev&&R0.prev[x.id];const mv=pv?pv-(i+1):0;
+  return`<tr class="${x.id===me?'me':''}"><td>${i+1}${mv?`<i class="${mv>0?'up':'dn'}">${mv>0?'▲':'▼'}</i>`:''}</td><td class="cl">${esc(c?(c.a||mkAbbr(c.n)):x.id)}</td><td>${x.j}</td><td>${x.v}</td><td>${x.e}</td><td>${x.d}</td><td>${x.gp-x.gc}</td><td><b>${x.p}</b></td></tr>`}).join('')}</tbody></table>`}
+
+// ---------- visual ----------
+{const st=document.createElement('style');st.textContent=`
+#overlay:has(.nslive){padding:0;background:var(--pitch);place-items:stretch;grid-template-columns:minmax(0,1fr);overflow:hidden}
+.nslive{width:100%;min-width:0;overflow:hidden;max-width:720px;height:100dvh;margin:0 auto;display:flex;flex-direction:column;gap:6px;padding:calc(8px + env(safe-area-inset-top,0px)) 10px calc(8px + env(safe-area-inset-bottom,0px));text-align:left}
+.nsl-top{display:flex;align-items:center;gap:8px;min-width:0}.nsl-top .nspc{flex:1;min-width:0;font:800 13px var(--f-body);color:var(--muted);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}.nsl-top .clk{font:900 22px var(--f-display);min-width:48px;text-align:center}
+.nsl-top .spd{display:flex;gap:4px}.nsl-top .spd button{border:1px solid var(--line-2);background:var(--panel);color:var(--chalk);border-radius:8px;padding:5px 9px;font:800 13px var(--f-body)}.nsl-top .spd button.on{background:var(--accent);color:var(--accent-ink)}
+.nsl-score{display:grid;grid-template-columns:1fr 46px 46px 1fr;border-radius:10px;overflow:hidden;border:1px solid var(--line-2)}.nsl-score .tm{padding:10px 8px;font:800 18px var(--f-display);letter-spacing:.3px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;text-align:center}.nsl-score b{display:grid;place-items:center;background:#0a1610;font:900 28px var(--f-display)}
+.nsl-agg{font:700 12.5px var(--f-body);color:var(--muted);text-align:center}
+.nsl-time{height:5px;background:#07130d;border-radius:9px;overflow:hidden}.nsl-time i{display:block;height:100%;background:var(--accent);transition:width .3s}
+.nsl-feed{flex:1;min-height:0;overflow:hidden;display:flex;flex-direction:column;justify-content:flex-end;gap:3px}
+.nfr{display:grid;grid-template-columns:40px 1fr;align-items:center;background:var(--c);color:var(--k);border-radius:6px;padding:7px 10px;font:700 15px var(--f-body);animation:nfin .25s ease-out}.nfr>b{font:800 13px var(--f-mono);opacity:.85}.nfr>span{text-align:center}.nfr>span b{font-weight:900}.nfr.nme{box-shadow:inset 0 0 0 2px #f2c443}.nfr.nbad{filter:saturate(.6) brightness(.85)}.nfr.ngl{font-size:17px;padding:10px;font-weight:900}.nfr.nht{background:#1d2a22;color:var(--muted)}
+@keyframes nfin{from{transform:translateY(8px);opacity:0}}
+.nsl-msg{min-height:22px;text-align:center;font:800 15px var(--f-body);color:var(--gold)}.nsl-msg.pop{animation:nspop .4s}@keyframes nspop{50%{transform:scale(1.06)}}
+.nslive.gfx .nsl-score{animation:nsgf 1s}.nslive.gfx.bad .nsl-score{animation:nsgb 1s}@keyframes nsgf{30%{box-shadow:0 0 0 4px #8be08a}}@keyframes nsgb{30%{box-shadow:0 0 0 4px #ff6a5c}}
+.nsl-ctl{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:8px;align-items:stretch}.nsl-ctl[hidden]{display:none}
+.nsl-eff,.nsl-foc{display:grid;gap:4px;background:var(--panel);border:1px solid var(--line-2);border-radius:12px;padding:6px 8px}.nsl-eff small,.nsl-foc small{font:800 11.5px var(--f-body);color:var(--muted);text-transform:uppercase;text-align:center}
+.nsl-eff>div,.nsl-foc>div{display:flex;align-items:center;justify-content:center;gap:6px}.nsl-eff button{width:38px;height:38px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);color:var(--chalk);font:900 22px var(--f-body)}
+#nlEv{display:flex;gap:3px}#nlEv i{width:9px;height:20px;border-radius:3px;background:#0a1610;border:1px solid var(--line-2)}#nlEv i.on{background:var(--accent);border-color:var(--accent)}
+.nsl-foc button{width:42px;height:38px;border-radius:10px;border:1px solid var(--line-2);background:var(--panel-2);font-size:19px}.nsl-foc button.on{background:var(--accent);border-color:#ffb27a}
+.nsl-dr{width:64px;border-radius:12px;border:1px solid #ff8a7a;background:linear-gradient(180deg,#b3261e,#7d1712);font-size:24px;color:#fff;display:grid;place-items:center}.nsl-dr small{font:800 12px var(--f-body)}.nsl-dr:disabled{opacity:.35;filter:grayscale(1)}
+.nsl-en{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font:800 13px var(--f-body);color:var(--muted)}.nsl-en .nsmb{height:12px}.nsl-en b{color:var(--chalk)}
+.nsl-ht,.nsl-fin{display:grid;gap:8px;justify-items:center;text-align:center;background:var(--panel);border:1px solid var(--line-2);border-radius:14px;padding:12px}.nsl-ht b,.nsl-fin b{font:900 22px var(--f-display)}.nsl-ht .row{display:flex;gap:8px;flex-wrap:wrap;justify-content:center}.nsl-fin b.good{color:var(--good)}.nsl-fin b.bad{color:var(--bad)}.nsl-fin span{font:800 16px var(--f-body)}
+#nspost{position:fixed;inset:0;z-index:19;background:rgba(5,14,9,.94);overflow:auto;display:grid;place-items:center;padding:calc(12px + env(safe-area-inset-top,0px)) 12px calc(12px + env(safe-area-inset-bottom,0px))}#nspost[hidden]{display:none}
+.nspost{width:100%;max-width:560px;display:grid;gap:10px;background:var(--panel);border:1px solid var(--line-2);border-radius:18px;padding:16px;animation:blfade .2s}
+.nsp-t{margin:0;text-align:center;font:900 26px var(--f-display);letter-spacing:.4px}
+.nsp-res{display:grid;gap:4px;text-align:center}.nsp-res .nspc{font:700 12.5px var(--f-body);color:var(--muted)}.nsp-res .sc{display:grid;grid-template-columns:1fr auto 1fr;gap:10px;align-items:center;font:800 15px var(--f-body)}.nsp-res .sc b{font:900 26px var(--f-display)}.nsp-res .sc span:first-child{text-align:right}.nsp-res .sc span:last-child{text-align:left}
+.nsp-stats{display:grid;gap:3px}.nsp-stats div{display:grid;grid-template-columns:1fr 80px;background:#0d2118;border-radius:8px;padding:8px 12px;font:700 15px var(--f-body)}.nsp-stats b{text-align:right;font:800 17px var(--f-display)}.nsp-stats .nota{background:#1d4a2c}.nsp-stats .nota.good{background:#2f7a45}.nsp-stats .nota.bad{background:#6b241c}.nsp-stats .nota b{font-size:22px}
+.nsp-rel{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.nsd{padding:6px 10px;border-radius:9px;font:800 13.5px var(--f-body)}.nsd.up{background:#2f9e44;color:#fff}.nsd.down{background:#8a3329;color:#fff}
+.nspst{display:grid;grid-template-columns:auto 1fr;gap:10px;align-items:center;background:#0d2118;border-radius:12px;padding:8px 12px}.nspst .ic{font-size:30px;position:relative}.nspst .ic i{position:absolute;inset:0;display:grid;place-items:center;font:900 12px var(--f-body);font-style:normal;color:#3b2a00;top:3px}.nspst b{display:block;font:800 14px var(--f-body);margin-bottom:4px}.nspst .nsmb i{transition:width 1.2s ease-out}
+.nsp-ach{display:grid;gap:4px}.nsp-ach div{display:flex;gap:8px;align-items:center;background:linear-gradient(90deg,#3a7d2a,#245a1d);border-radius:10px;padding:8px 12px;font:800 14px var(--f-body)}
+.nspaper{background:#f3efe3;color:#1b1b1b;border-radius:12px;padding:16px;display:grid;gap:8px;text-align:center;font-family:Georgia,serif}.nspaper .kick{font:900 13px var(--f-body);letter-spacing:2px;color:#b3261e}.nspaper .hd{display:grid;gap:6px;justify-items:center}.nspaper .hd span{font-size:54px}.nspaper .hd b{font:900 32px var(--f-display);letter-spacing:.5px;line-height:1}.nspaper p{margin:0;font-size:17px;line-height:1.45}.nspaper small{color:#666}
+.nswk{background:#0d2118;border-radius:12px;overflow:hidden}.nswk tbody th{font-size:13.5px}.nswk td{white-space:nowrap}.nswk tr.tot th,.nswk tr.tot td{background:#1d4a2c;color:var(--chalk);font-weight:800}.nswk .nsmb{display:inline-block;width:110px;vertical-align:middle}
+.nsp-warn{background:#3d3214;border:1px solid #7a6326;border-radius:10px;padding:8px 10px;font:700 13.5px var(--f-body)}.nsp-ok{background:#173f25;border:1px solid #2f7a45;border-radius:10px;padding:8px 10px;font:700 13.5px var(--f-body)}
+.nsp-btns{display:grid;grid-template-columns:1fr 1fr;gap:8px}.nsp-btns .btn:last-child{grid-column:1/-1}.nsp-btns .btn:only-child,.nsp-btns .btn:nth-child(2):last-child{grid-column:auto}
+.nsp-rd{max-height:60dvh;overflow:auto}.nslt td,.nslt th{padding:5px 4px;font-size:13.5px}.nslt tr.me td{background:#1d5a2c;color:#fff}.nslt i{font-style:normal;font-size:9px;margin-left:2px}.nslt i.up{color:var(--good)}.nslt i.dn{color:var(--bad)}
+@media (max-width:420px){.nfr{font-size:13.5px;padding:6px 8px;grid-template-columns:34px 1fr}.nsl-score{grid-template-columns:1fr 38px 38px 1fr}.nsl-score .tm{font-size:15px}.nsl-score b{font-size:24px}.nsl-ctl{gap:6px}.nsl-eff,.nsl-foc{padding:5px 4px}.nsl-eff>div,.nsl-foc>div{gap:3px}.nsl-eff button{width:28px;height:34px;font-size:18px}#nlEv{gap:2px}#nlEv i{width:7px}.nsl-foc button{width:30px;height:34px;font-size:16px}.nsl-dr{width:50px}.nsl-top .spd button{padding:5px 7px}.nsl-top .clk{font-size:19px;min-width:38px}.nswk th,.nswk td{font-size:12px;padding:5px 3px}.nswk .nsmb{width:70px}}
+@media (max-height:700px){.nfr{padding:5px 8px}.nsl-score .tm{padding:7px}}
+`;document.head.appendChild(st)}
+
+// ================== LOJAS, ESTILO DE VIDA, CASSINO, ESTÁBULO, REALIZAÇÕES E PRÊMIOS ==================
+// Energéticos (energia, e alguns também treino e relações), chuteiras com atributos, durabilidade e poderes especiais
+// (que valem no lance em 3D), itens, veículos e imóveis que sobem o estilo de vida e recuperam energia,
+// cassino com quatro jogos, estábulo com cavalos de corrida seus, medalhas de realizações e a sala de troféus.
+const NS_DRINKS=[
+ {id:'a',ic:'🥤',n:'Energético',d:'Recarrega 30% de energia.',en:30,p:.002},
+ {id:'b',ic:'🧃',n:'Energético + Treino',d:'+25% de energia e progresso na habilidade mais fraca.',en:25,sk:1,skp:25,p:.006},
+ {id:'c',ic:'🍹',n:'Energético + Moral',d:'+25% de energia e +4 em todas as relações.',en:25,rel:4,p:.006},
+ {id:'d',ic:'⚡',n:'Energético Turbo',d:'+35% de energia, treino e +4 nas relações.',en:35,sk:1,skp:30,rel:4,p:.015},
+ {id:'e',ic:'🏆',n:'Energético Lendário',d:'+60% de energia, +20% em TODAS as habilidades e +6 nas relações.',en:60,sk:3,skp:20,rel:6,p:.05},
+];
+const NS_AB={mira:['🎯','Mira','Chutes e passes mais certeiros no lance'],canhao:['💥','Canhão','Chute forte: o goleiro sofre mais'],curva:['🌀','Efeito','Bola com curva: falta e chute colocado'],muralha:['🧱','Muralha','Desarme e defesa mais fortes'],faro:['👃','Faro de gol','A bola chega mais em você durante o jogo']};
+const NS_BOOTS=[
+ {id:'nb1',ic:'👟',n:'Society Básica',vel:1,for:1,tec:1,g:15,p:.003,col:'#e9e6df'},
+ {id:'nb2',ic:'⚡',n:'Raio Leve',vel:4,for:1,tec:2,g:30,p:.02,col:'#ffd400'},
+ {id:'nb3',ic:'🧱',n:'Tanque',vel:1,for:4,tec:2,g:30,p:.02,ab:['muralha'],col:'#5a5f66'},
+ {id:'nb4',ic:'🎯',n:'Toque Fino',vel:2,for:1,tec:4,g:30,p:.025,ab:['mira'],col:'#1fa3ff'},
+ {id:'nb5',ic:'💥',n:'Trovão',vel:2,for:3,tec:3,g:40,p:.08,ab:['canhao'],col:'#ff3b30'},
+ {id:'nb6',ic:'🌀',n:'Folha Seca',vel:2,for:2,tec:4,g:40,p:.09,ab:['curva'],col:'#34c759'},
+ {id:'nb7',ic:'👃',n:'Faro de Gol',vel:3,for:3,tec:4,g:45,p:.25,ab:['faro'],col:'#ff7a2b'},
+ {id:'nb8',ic:'🖤',n:'Elite Carbono',vel:5,for:4,tec:5,g:60,p:.9,ab:['mira','canhao'],col:'#151515'},
+ {id:'nb9',ic:'👑',n:'Lendária Dourada',vel:6,for:6,tec:6,g:80,p:3,ab:['curva','faro','mira'],col:'#f2c443'},
+];
+const NS_ITEMS=[
+ {id:'fone',ic:'🎧',n:'Fone de ouvido',p:.001,ls:1},{id:'console',ic:'🎮',n:'Videogame',p:.002,ls:2},{id:'cel',ic:'📱',n:'Celular top',p:.003,ls:2},
+ {id:'tatu',ic:'🐉',n:'Tatuagem',p:.004,ls:3},{id:'tv',ic:'📺',n:'TV gigante',p:.006,ls:3},{id:'sinuca',ic:'🎱',n:'Mesa de sinuca',p:.008,ls:3},
+ {id:'fliper',ic:'🕹️',n:'Fliperama',p:.012,ls:3},{id:'grife',ic:'🧥',n:'Roupas de grife',p:.03,ls:4},{id:'corrente',ic:'📿',n:'Corrente de ouro',p:.05,ls:5},
+ {id:'relogio',ic:'⌚',n:'Relógio de luxo',p:.08,ls:6},{id:'arte',ic:'🖼️',n:'Quadro famoso',p:.6,ls:8},
+];
+const NS_VEH=[
+ {id:'bike',ic:'🚲',n:'Bicicleta',p:.0008,ls:1},{id:'scooter',ic:'🛵',n:'Scooter',p:.004,ls:2},{id:'moto',ic:'🏍️',n:'Moto',p:.015,ls:4},
+ {id:'popular',ic:'🚗',n:'Carro popular',p:.025,ls:4},{id:'suv',ic:'🚙',n:'SUV',p:.09,ls:7},{id:'esportivo',ic:'🏎️',n:'Carro esportivo',p:.35,ls:12},
+ {id:'limo',ic:'🚘',n:'Limusine',p:.6,ls:12},{id:'heli',ic:'🚁',n:'Helicóptero',p:4,ls:18},{id:'iate',ic:'🛥️',n:'Iate',p:12,ls:22},{id:'jato',ic:'✈️',n:'Jatinho',p:30,ls:28},
+];
+const NS_PROPS=[
+ {id:'ap',ic:'🏢',n:'Apartamento perto do CT',p:.25,en:3,ls:4,r:0,d:'Chega descansado no treino.'},
+ {id:'paisCasa',ic:'🏠',n:'Casa para os seus pais',p:.4,en:2,ls:3,r:0,d:'Seus pais do seu lado pra sempre.',pais:true},
+ {id:'aluguel',ic:'🏘️',n:'Apartamentos para alugar',p:.8,en:0,ls:2,r:.0012,d:'Renda de aluguel toda semana.'},
+ {id:'chale',ic:'🏔️',n:'Chalé na serra',p:.9,en:6,ls:7,r:0,d:'Folga com ar puro.'},
+ {id:'casa',ic:'🏡',n:'Casa com piscina',p:1.2,en:6,ls:8,r:0,d:'Recuperação na piscina.'},
+ {id:'moinho',ic:'🌬️',n:'Moinho',p:1.4,en:2,ls:5,r:.0025,d:'Farinha que vira renda.'},
+ {id:'estabulo',ic:'🐎',n:'Estábulo',p:1.6,en:2,ls:6,r:0,d:'Libera os seus cavalos de corrida.',stable:true},
+ {id:'fazenda',ic:'🌾',n:'Fazenda',p:2,en:5,ls:8,r:.002,d:'Gado, sossego e renda.'},
+ {id:'predio',ic:'🏬',n:'Prédio comercial',p:3,en:0,ls:3,r:.0046,d:'Renda alta e constante.'},
+ {id:'vinhedo',ic:'🍇',n:'Vinhedo',p:4,en:4,ls:10,r:.006,d:'Vinho com o seu nome no rótulo.'},
+ {id:'mansao',ic:'🏰',n:'Mansão',p:5,en:10,ls:14,r:0,d:'Capa de revista.'},
+ {id:'castelo',ic:'🏯',n:'Castelo',p:25,en:15,ls:22,r:0,d:'Muralhas, torres e um campo de futebol no pátio.'},
+ {id:'ilha',ic:'🏝️',n:'Ilha particular',p:60,en:20,ls:30,r:0,d:'O lugar mais longe possível da imprensa.'},
+];
+// a loja antiga de imóveis passa a usar a lista nova (aluguel e valor de venda continuam funcionando)
+try{if(typeof PROPS!=='undefined'){PROPS.length=0;for(const p of NS_PROPS)PROPS.push({...p,fx:{}})}}catch(e){}
+function nsOwned(kind,id){const n=S.n;return kind==='items'?n.items.includes(id):kind==='veh'?n.veh.includes(id):(S.props||[]).includes(id)}
+function nsPay(p){if(S.din+1e-9<p){toast({ic:'💸',title:'Dinheiro insuficiente',txt:`Custa ${money(p)}. Você tem ${money(S.din)}.`,ms:2200});return false}S.din-=p;return true}
+let NS_SHOP='dr',NS_LSUB='items';
+function nsShopPage(tab){if(tab)NS_SHOP=tab;return{t:'Lojas',cls:'shop',html:()=>{const n=S.n;let body='';
+  if(NS_SHOP==='dr')body=NS_DRINKS.map(d=>`<div class="nsrow"><span class="ic">${d.ic}</span><div class="mid"><b>${esc(d.n)}</b><small>${esc(d.d)}</small></div><div class="own">${n.dr[d.id]||0}</div><div class="act"><button class="btn small" data-bd="${d.id}">${money(d.p)}</button>${n.dr[d.id]?`<button class="btn ghost small" data-ud="${d.id}">Tomar</button>`:''}</div></div>`).join('');
+  else if(NS_SHOP==='bt'){const cur=nsBootStats();body=`<div class="nsbt-h"><span></span><span></span><span>Vel</span><span>For</span><span>Téc</span><span>Jogos</span><span></span></div>`+NS_BOOTS.map(b=>{const on=cur&&cur.id===b.id;
+   return`<div class="nsbt ${on?'on':''}"><span class="ic" style="--bc:${b.col}">${b.ic}</span><div class="nm"><b>${esc(b.n)}</b>${(b.ab||[]).map(a=>`<em title="${esc(NS_AB[a][2])}">${NS_AB[a][0]} ${NS_AB[a][1]}</em>`).join('')}</div><span>+${b.vel}</span><span>+${b.for}</span><span>+${b.tec}</span><span>${on?n.bootLeft+'/':''}${b.g}</span><button class="btn small ${on?'ghost':''}" data-bb="${b.id}">${on?'Trocar':money(b.p)}</button></div>`}).join('')+`<div class="nsabl">${Object.values(NS_AB).map(([ic,t,d])=>`<div><b>${ic} ${t}</b><span>${d}</span></div>`).join('')}</div>`}
+  else{const L=NS_LSUB==='items'?NS_ITEMS:NS_LSUB==='veh'?NS_VEH:NS_PROPS;
+   body=`<div class="nstabs wide three">${[['items','📱 Itens'],['veh','🚗 Veículos'],['props','🏡 Imóveis']].map(([k,t])=>`<button class="${NS_LSUB===k?'on':''}" data-ls="${k}">${t}</button>`).join('')}</div><div class="nsls-h">Estilo de vida ${nsBarHTML(n.ls,'ls')} <b>${n.ls}%</b></div>`+
+   L.map(it=>{const own=nsOwned(NS_LSUB,it.id);const extra=NS_LSUB==='props'?[it.en?`+${it.en}% energia/sem`:'',it.r?`renda ${money(it.r*52)}/ano`:'',it.d||''].filter(Boolean).join(' · '):'';
+    return`<div class="nsrow ${own?'owned':''}"><span class="ic">${it.ic}</span><div class="mid"><b>${esc(it.n)}</b><small>+${it.ls} estilo de vida${extra?' · '+esc(extra):''}</small></div><div class="act">${own?`<span class="chip up">✓ Seu</span>${NS_LSUB!=='items'?`<button class="btn ghost small" data-sl="${it.id}">Vender ${money(it.p*.7)}</button>`:''}`:`<button class="btn small" data-bl="${it.id}">${money(it.p)}</button>`}</div></div>`}).join('')}
+  return`<div class="nstabs wide three">${[['dr','🥤 Energéticos'],['bt','👟 Chuteiras'],['ls','💎 Estilo de vida']].map(([k,t])=>`<button class="${NS_SHOP===k?'on':''}" data-sh="${k}">${t}</button>`).join('')}</div><div class="nsshop">${body}</div>`},
+ bind:B=>{B.querySelectorAll('[data-sh]').forEach(b=>b.onclick=()=>{NS_SHOP=b.dataset.sh;nsRefresh()});B.querySelectorAll('[data-ls]').forEach(b=>b.onclick=()=>{NS_LSUB=b.dataset.ls;nsRefresh()});
+  B.querySelectorAll('[data-bd]').forEach(b=>b.onclick=()=>{const d=NS_DRINKS.find(x=>x.id===b.dataset.bd);if(!nsPay(d.p))return;S.n.dr[d.id]=(S.n.dr[d.id]||0)+1;toast({ic:d.ic,title:`+1 ${d.n}`,ms:1200,group:'nsdr'});nsRefresh()});
+  B.querySelectorAll('[data-ud]').forEach(b=>b.onclick=async()=>{const d=NS_DRINKS.find(x=>x.id===b.dataset.ud);const chips=nsDrink(d);await nsPop({ic:d.ic,title:d.n,txt:`Energia em ${Math.round(S.n.en)}%.`,chips});nsRefresh()});
+  B.querySelectorAll('[data-bb]').forEach(b=>b.onclick=async()=>{const bt=NS_BOOTS.find(x=>x.id===b.dataset.bb);const k=await nsPop({ic:bt.ic,title:bt.n,html:`<div class="nsbtd"><span>Velocidade +${bt.vel}</span><span>Força +${bt.for}</span><span>Técnica +${bt.tec}</span><span>Dura ${bt.g} jogos</span></div>${(bt.ab||[]).map(a=>`<p><b>${NS_AB[a][0]} ${NS_AB[a][1]}:</b> ${esc(NS_AB[a][2])}</p>`).join('')}`,opts:[['buy',`Comprar por ${money(bt.p)}`]],ok:'Cancelar'});
+   if(k!=='buy'||!nsPay(bt.p))return;S.n.boot=bt.id;S.n.bootLeft=bt.g;nsSync();try{nsAchCheck()}catch(e){}toast({ic:bt.ic,title:`Calçou a ${bt.n}`,txt:(bt.ab||[]).map(a=>NS_AB[a][1]).join(' + ')||'Mais rendimento em campo.',ms:2200});nsRefresh()});
+  B.querySelectorAll('[data-bl]').forEach(b=>b.onclick=async()=>{const L=NS_LSUB==='items'?NS_ITEMS:NS_LSUB==='veh'?NS_VEH:NS_PROPS;const it=L.find(x=>x.id===b.dataset.bl);
+   if(it.p>=.5){const k=await nsPop({ic:it.ic,title:it.n,txt:`Comprar por ${money(it.p)}? Você tem ${money(S.din)}.`,opts:[['y','Comprar']],ok:'Cancelar'});if(k!=='y')return}
+   if(!nsPay(it.p))return;if(NS_LSUB==='items')S.n.items.push(it.id);else if(NS_LSUB==='veh')S.n.veh.push(it.id);else{S.props=S.props||[];S.props.push(it.id);if(it.pais)S.pais=100}
+   nsLsCalc();S.n.happy=clamp(S.n.happy+Math.min(8,1+it.ls*.4),0,100);if(it.ls>=10)nsStarAdd(4);nsSync();try{nsAchCheck()}catch(e){}toast({ic:it.ic,title:`Comprou: ${it.n}`,txt:`Estilo de vida ${S.n.ls}%`,ms:1800});nsRefresh()});
+  B.querySelectorAll('[data-sl]').forEach(b=>b.onclick=async()=>{const L=NS_LSUB==='veh'?NS_VEH:NS_PROPS;const it=L.find(x=>x.id===b.dataset.sl);const k=await nsPop({ic:it.ic,title:`Vender ${it.n}?`,txt:`Você recebe ${money(it.p*.7)}.`,opts:[['y','Vender']],ok:'Cancelar'});if(k!=='y')return;
+   if(NS_LSUB==='veh')S.n.veh.splice(S.n.veh.indexOf(it.id),1);else{S.props.splice(S.props.indexOf(it.id),1);if(it.stable&&S.n.horses.length){S.din+=S.n.horses.reduce((s,h)=>s+nsHorsePrice(h)*.7,0);S.n.horses=[]}}S.din+=it.p*.7;nsLsCalc();nsSync();nsRefresh()})},
+ nav:[{ic:'🎰',t:'Cassino',fn:()=>nsPush(nsCasinoPage())},{ic:'🐎',t:'Estábulo',fn:()=>nsPush(nsStablePage())}]}}
+// poderes da chuteira no lance em 3D (e energia baixa atrapalha a mira)
+{const _cfgN=l3dCfg;l3dCfg=function(o){const c=_cfgN(o);try{if(nsOn()){const b=nsBootStats();const ab=b&&b.ab||[];
+  if(b&&c.hero)c.hero.boot=b.col;
+  if(ab.includes('mira'))c.noiseK=(c.noiseK||1)*.75;if(ab.includes('canhao'))c.gkK=(c.gkK||0)-.35;if(ab.includes('curva')){c.noiseK=(c.noiseK||1)*.88;c.gkK=(c.gkK||0)-.15}
+  if(ab.includes('muralha'))c.myGkK=(c.myGkK||1)+.15;if(ab.includes('faro'))c.noiseK=(c.noiseK||1)*.92;
+  const e=S.n.en;if(e<35)c.noiseK=(c.noiseK||1)*(1+(35-e)/70)}}catch(e){}return c}}
+
+// ---------- cassino ----------
+function nsCasinoPage(){return{t:'Cassino',cls:'casino',html:()=>{const kid=S.age<18;
+  return`<div class="nscas-bank"><span>Banco</span><b>${money(S.din)}</b><small>Resultado no cassino: <span class="${(S.casino&&S.casino.net||0)>=0?'good':'bad'}">${(S.casino&&S.casino.net||0)>=0?'+':'−'}${money(Math.abs(S.casino&&S.casino.net||0))}</span></small></div>
+  ${kid?'<p class="muted">O cassino libera aos 18 anos.</p>':''}
+  <div class="nscas">${[['bj','🃏','Vinte e um'],['rol','🎡','Roleta'],['slot','🎰','Caça-níquel'],['horse','🏇','Corrida de cavalos']].map(([k,ic,t])=>`<button class="nscas-b" data-cs="${k}" ${kid?'disabled':''}><span>${ic}</span><b>${t}</b></button>`).join('')}</div>
+  <p class="muted nshelp">Aposta é diversão: perder faz parte. Ir demais ao cassino derruba a disciplina e a imprensa adora uma foto.</p>`},
+ bind:B=>B.querySelectorAll('[data-cs]').forEach(b=>b.onclick=async()=>{const fn={bj:blackjack,rol:roulette,slot:slotMachine,horse:horseRace}[b.dataset.cs];if(!fn)return;
+  ensureLife();S.casino.visits=(S.casino.visits||0)+1;S.life.disc=clamp(S.life.disc-1,0,100);try{await fn()}catch(e){console.error(e)}
+  if(ch(S.life.fama>40?.1:.04)){S.n.rel.coach=clamp(S.n.rel.coach-3,0,100);toast({ic:'📸',title:'Paparazzi',txt:'Foto sua no cassino nas redes. O técnico não gostou.',ms:2600})}try{nsAchCheck()}catch(e){}nsRefresh()}),
+ nav:[{ic:'🐎',t:'Meu estábulo',fn:()=>nsPush(nsStablePage())}]}}
+
+// ---------- estábulo e cavalos de corrida ----------
+const NS_HN=['Pé de Vento','Brisa do Sul','Cometa','Sultão','Tornado Azul','Dama da Noite','Pólvora','Garoa','Capitão','Jabuticaba','Saci','Trovoada','Peteca','Baronesa','Faísca Dourada','Lampião','Mandacaru','Ventarola','Rapadura','Boitatá','Iracema','Caramelo','Pirata','Sabiá'];
+const NS_HC=['#8b5a2b','#3b2a1a','#d2b48c','#f5f5f5','#5c4033','#a0522d','#222','#c19a6b'];
+function nsHasStable(){return(S.props||[]).includes('estabulo')}
+function nsHorsePrice(h){return Math.round(.02*Math.pow(1.09,h.f-40)*(h.age>=8?.6:1)*1000)/1000}
+function nsHorseStars(f){const s=clamp(Math.round((f-30)/13),1,5);return'★'.repeat(s)+'☆'.repeat(5-s)}
+function nsHorseMarket(){const n=S.n;if(!n.hmk||n.hmk.wk!==n.week){const L=[];for(let i=0;i<3;i++){const f=clamp(Math.round(R(35,72)+randn()*6),30,88);const used=new Set([...n.horses.map(h=>h.n),...L.map(h=>h.n)]);L.push({id:'h'+Date.now().toString(36)+i,n:pick(NS_HN.filter(x=>!used.has(x))),f,pot:clamp(f+RI(4,22),f,97),age:RI(2,5),r:0,w:0,earn:0,col:pick(NS_HC)})}n.hmk={wk:n.week,L}}return n.hmk.L}
+function nsStablePage(){return{t:'Meu estábulo',cls:'stable',html:()=>{const n=S.n;
+  if(!nsHasStable())return`<div class="nsempty"><span>🐎</span><b>Você ainda não tem um estábulo</b><p class="muted">Compre o Estábulo na loja de imóveis pra ter cavalos de corrida seus: treine, inscreva em páreos e ganhe prêmios.</p><button class="btn" id="goProps">🏡 Ver imóveis</button></div>`;
+  const mk=nsHorseMarket();
+  return`<div class="nsst-h"><b>Cavalos ${n.horses.length}/4</b><span class="muted">Treino e corrida: uma vez por semana cada cavalo</span></div>
+  ${n.horses.length?n.horses.map((h,i)=>`<div class="nshorse"><span class="hi" style="--hc:${h.col}">🐎</span><div class="mid"><b>${esc(h.n)}</b><small>${nsHorseStars(h.f)} · força ${Math.round(h.f)} · ${h.age} anos</small><small>${h.r} corridas · ${h.w} vitórias · prêmios ${money(h.earn)}</small></div>
+   <div class="act"><button class="btn small" data-ht="${i}" ${h.tw===n.week?'disabled':''}>🏋️ ${money(nsHorseTrainCost(h))}</button><button class="btn small" data-hr="${i}" ${h.rw===n.week?'disabled':''}>🏁 Correr</button><button class="btn ghost small" data-hs="${i}">💰</button></div></div>`).join(''):'<p class="muted">Nenhum cavalo ainda. Escolha um no mercado abaixo.</p>'}
+  <div class="eyebrow" style="margin-top:6px">Mercado desta semana</div>
+  ${mk.map((h,i)=>`<div class="nshorse mk"><span class="hi" style="--hc:${h.col}">🐎</span><div class="mid"><b>${esc(h.n)}</b><small>${nsHorseStars(h.f)} · força ${h.f} · ${h.age} anos</small></div><div class="act"><button class="btn small" data-hb="${i}" ${n.horses.length>=4?'disabled':''}>${money(nsHorsePrice(h))}</button></div></div>`).join('')}`},
+ bind:B=>{const g=B.querySelector('#goProps');if(g)g.onclick=()=>{NS_SHOP='ls';NS_LSUB='props';nsPush(nsShopPage())};const n=S.n;
+  B.querySelectorAll('[data-hb]').forEach(b=>b.onclick=()=>{const h=nsHorseMarket()[+b.dataset.hb];if(!h||n.horses.length>=4)return;if(!nsPay(nsHorsePrice(h)))return;n.horses.push({...h});n.hmk.L.splice(+b.dataset.hb,1);try{nsAchCheck()}catch(e){}toast({ic:'🐎',title:`${h.n} é seu!`,ms:1800});nsRefresh()});
+  B.querySelectorAll('[data-ht]').forEach(b=>b.onclick=()=>{const h=n.horses[+b.dataset.ht];if(!nsPay(nsHorseTrainCost(h)))return;h.tw=n.week;const g=h.f<h.pot?R(2,5):R(0,1.2);h.f=clamp(h.f+g,20,99);toast({ic:'🏋️',title:`${h.n} treinou`,txt:`Força ${Math.round(h.f)} (+${g.toFixed(1).replace('.',',')})`,ms:1800});nsRefresh()});
+  B.querySelectorAll('[data-hs]').forEach(b=>b.onclick=async()=>{const i=+b.dataset.hs;const h=n.horses[i];const v=nsHorsePrice(h)*.8;const k=await nsPop({ic:'💰',title:`Vender ${h.n}?`,txt:`Oferta: ${money(v)}.`,opts:[['y','Vender']],ok:'Cancelar'});if(k!=='y')return;n.horses.splice(i,1);S.din+=v;nsRefresh()});
+  B.querySelectorAll('[data-hr]').forEach(b=>b.onclick=()=>nsHorseRaceMine(+b.dataset.hr))},
+ nav:[{ic:'🎰',t:'Cassino',fn:()=>nsPush(nsCasinoPage())}]}}
+function nsHorseTrainCost(h){return Math.round((.004+h.f*.00015)*1000)/1000}
+const NS_RACES=[{k:'c',n:'Páreo comum',fee:.005,m:45},{k:'q',n:'Clássico',fee:.02,m:62},{k:'g',n:'Grande Prêmio',fee:.08,m:78}];
+async function nsHorseRaceMine(i){const n=S.n;const h=n.horses[i];if(!h||h.rw===n.week)return;
+ const k=await nsPop({ic:'🏁',title:`Inscrever ${h.n}`,txt:`Força ${Math.round(h.f)}. Prêmio: 1º = 6× a inscrição, 2º = 2,5×, 3º = 1,2×.`,opts:NS_RACES.map(r=>[r.k,`${r.n} · inscrição ${money(r.fee)} · rivais ~${r.m}`]),ok:'Cancelar'});
+ const rc=NS_RACES.find(r=>r.k===k);if(!rc||!nsPay(rc.fee))return;h.rw=n.week;
+ const used=new Set([h.n]);const field=[{...h,me:true}];for(let j=0;j<5;j++){const nm=pick(NS_HN.filter(x=>!used.has(x)));used.add(nm);field.push({n:nm,f:clamp(rc.m+randn()*7,25,98),col:pick(NS_HC)})}
+ const order=shuffle(field);for(const x of order)x.sp=x.f/70*(.9+rnd()*.25);
+ await new Promise(res=>{$ov.hidden=false;$ov.innerHTML=`<div class="ovwrap nshrace"><div class="eyebrow">${esc(rc.n)}</div><h2 style="margin:4px 0 10px;font:900 26px var(--f-display)">${esc(h.n)} na pista</h2>
+  <div class="nstrack">${order.map((x,j)=>`<div class="ln ${x.me?'me':''}"><span class="nm">${j+1}. ${esc(x.n)}</span><span class="hz" id="hz${j}" style="--hc:${x.col}">🏇</span></div>`).join('')}<i class="fin"></i></div><div id="hrRes" class="pkres"></div></div>`;
+  const pos=order.map(()=>0);const fin=[];const els=order.map((_,j)=>document.getElementById('hz'+j));
+  const step=()=>{let all=true;for(let j=0;j<order.length;j++){if(pos[j]>=100)continue;all=false;pos[j]+=order[j].sp*(reduced?8:.9)*(.6+rnd()*.8);if(pos[j]>=100){pos[j]=100;fin.push(j)}els[j].style.left=`calc(${pos[j]}% - ${pos[j]*.34}px)`}
+   if(!all){requestAnimationFrame(step);return}
+   const place=fin.findIndex(j=>order[j].me)+1;const mult=place===1?6:place===2?2.5:place===3?1.2:0;const pay=rc.fee*mult;S.din+=pay;h.r++;h.earn+=pay;if(place===1){h.w++;n.horseW=(n.horseW||0)+1}
+   const hh=n.horses.find(z=>z.id===h.id);if(hh){hh.r=h.r;hh.w=h.w;hh.earn=h.earn;hh.rw=n.week}
+   document.getElementById('hrRes').innerHTML=`<div class="${place<=3?'good':'bad'}" style="font:900 22px var(--f-display)">${place}º lugar${pay?` · +${money(pay)}`:''}</div><button class="btn wide" id="hrOk" style="margin-top:10px">Continuar</button>`;
+   document.getElementById('hrOk').onclick=()=>{$ov.hidden=true;$ov.innerHTML='';res()}};requestAnimationFrame(step)});
+ try{nsAchCheck()}catch(e){}nsRefresh()}
+// cavalos envelhecem a cada temporada
+{const _bsH=buildSeason;buildSeason=function(...a){const r=_bsH.apply(this,a);try{if(S.n&&S.n.horses)for(const h of S.n.horses){h.age++;if(h.age>=8)h.f=clamp(h.f-RI(2,6),20,99)}}catch(e){}return r}}
+
+// ---------- realizações ----------
+const NS_ACH=[
+ ['contrato','Assine o primeiro contrato profissional',()=>!S.youth&&S.wage>0&&S.club],
+ ['gol1','Marque um gol',()=>S.n.cs.g>=1],['ast1','Dê uma assistência',()=>S.n.cs.a>=1],['ps5','Acerte 5 passes num jogo',c=>c.ps>=5],
+ ['motm1',"Ganhe o prêmio 'Estrela do jogo'",()=>S.n.cs.motm>=1],['win1','Vença um jogo da liga',c=>c.win],['ht1','Marque um hat-trick',()=>S.n.cs.ht>=1],
+ ['ps10','Acerte 10 passes num jogo',c=>c.ps>=10],['ast3','Dê 3 assistências num jogo',c=>c.a>=3],['nota9','Tire nota 9 num jogo',c=>c.nota>=9],['nota10','Tire nota 10',c=>c.nota>=10],
+ ['g10','10 gols na carreira',()=>S.n.cs.g>=10],['g50','50 gols na carreira',()=>S.n.cs.g>=50],['g100','100 gols na carreira',()=>S.n.cs.g>=100],['g250','250 gols na carreira',()=>S.n.cs.g>=250],['g500','500 gols na carreira',()=>S.n.cs.g>=500],
+ ['a25','25 assistências na carreira',()=>S.n.cs.a>=25],['a100','100 assistências na carreira',()=>S.n.cs.a>=100],
+ ['ap100','100 jogos na carreira',()=>S.n.cs.ap>=100],['ap300','300 jogos na carreira',()=>S.n.cs.ap>=300],['motm10','10 vezes Estrela do jogo',()=>S.n.cs.motm>=10],
+ ['star5','Nível de estrela 5',()=>S.n.star.l>=5],['star10','Nível de estrela 10',()=>S.n.star.l>=10],['star20','Nível de estrela 20',()=>S.n.star.l>=20],
+ ['ovr70','Chegue a OVR 70',()=>S.ovr>=70],['ovr80','Chegue a OVR 80',()=>S.ovr>=80],['ovr90','Chegue a OVR 90',()=>S.ovr>=90],['sk90','Leve uma habilidade a 90',()=>NSK.some(([k])=>S.n.sk[k].l>=90)],
+ ['treino50','Treine 50 vezes',()=>(S.n.trainT||0)>=50],['drink1','Tome um energético',()=>(S.n.drunk||0)>=1],['boot1','Compre uma chuteira',()=>!!S.n.boot],['bootLend','Calce a Lendária Dourada',()=>S.n.boot==='nb9'],
+ ['item1','Compre um item de estilo de vida',()=>S.n.items.length>0],['car','Compre um carro',()=>S.n.veh.some(v=>['popular','suv','esportivo','limo'].includes(v))],['house','Compre um imóvel',()=>(S.props||[]).length>0],
+ ['ls50','Estilo de vida em 50%',()=>S.n.ls>=50],['castelo','Compre um castelo',()=>(S.props||[]).includes('castelo')],['estabulo','Tenha um estábulo',()=>nsHasStable()],
+ ['cavalo','Compre um cavalo de corrida',()=>S.n.horses.length>0],['cavaloWin','Vença uma corrida com seu cavalo',()=>(S.n.horseW||0)>=1],['casino','Saia do cassino no lucro',()=>S.casino&&S.casino.net>0],
+ ['gf','Arrume uma namorada',()=>!!S.gf],['casar','Case-se',()=>S.rel==='casado'],['spon','Feche um patrocínio',()=>!!S.n.spon],
+ ['mi1','Junte €1 milhão',()=>S.din>=1],['mi10','Junte €10 milhões',()=>S.din>=10],['mi100','Junte €100 milhões',()=>S.din>=100],
+ ['title1','Ganhe um título',()=>(S.titles||[]).length>0],['liga','Seja campeão da liga',()=>(S.titles||[]).some(t=>t.t==='liga')],['cont','Ganhe um título continental',()=>(S.titles||[]).some(t=>t.t==='cont')],
+ ['sel','Jogue pela seleção',()=>(S.caps||0)>=1||S.n.is.ap>=1],['bola','Ganhe a Bola de Ouro',()=>(S.awards||[]).some(a=>a.t==='bola')],
+];
+function nsAchPct(){const n=S.n;if(!n)return 0;return Math.round(Object.keys(n.ach).filter(k=>NS_ACH.some(a=>a[0]===k)).length/NS_ACH.length*1000)/10}
+function nsAchCheck(ctx={},silent){const n=S.n;if(!n)return[];const out=[];for(const[id,t,f]of NS_ACH){if(n.ach[id])continue;let ok=false;try{ok=!!f(ctx)}catch(e){}if(ok){n.ach[id]=S.year;out.push({id,t});nsStarAdd(2)}}
+ if(!silent)for(const a of out)toast({ic:'🏅',title:'Realização!',txt:a.t,ms:2600,group:'nsach'});return out}
+function nsAchHit(id){const n=S.n;if(!n||n.ach[id])return;const a=NS_ACH.find(x=>x[0]===id);if(!a)return;n.ach[id]=S.year;nsStarAdd(2);toast({ic:'🏅',title:'Realização!',txt:a[1],ms:2600,group:'nsach'})}
+function nsAchPage(){return{t:'Realizações',cls:'ach',html:()=>{const n=S.n;const p=nsAchPct();
+  return`<div class="nsach-h"><b>${String(p).replace('.',',')}%</b>${nsBarHTML(p,'star')}<small>${Object.keys(n.ach).length} de ${NS_ACH.length}</small></div>${NS_ACH.map(([id,t])=>{const y=n.ach[id];return`<div class="nsach ${y?'on':''}"><span>${y?'🏅':'⚪'}</span><b>${esc(t)}</b><small>${y?seasonLbl(y):''}</small></div>`}).join('')}`}}}
+// ---------- sala de troféus ----------
+function nsTrophyPage(){return{t:'Prêmios',cls:'trophy',html:()=>{const n=S.n;const T=(S.titles||[]).length,A=(S.awards||[]).length;
+  return`<div class="nstro-h"><div><b>${T}</b><small>Títulos</small></div><div><b>${A}</b><small>Prêmios</small></div><div><b>${n.cs.motm}</b><small>Estrela do jogo</small></div><div><b>${Object.keys(n.ach).length}</b><small>Medalhas</small></div></div>
+  <div class="nstro">${galleryHTML(S.titles||[],S.awards||[],{filter:GALF,wish:true})}</div>`},
+ bind:()=>{try{bindGallery(S.titles||[],S.awards||[],f=>{GALF=f;nsRefresh()})}catch(e){}},
+ nav:[{ic:'🏅',t:'Realizações',fn:()=>nsPush(nsAchPage())}]}}
+
+{const st=document.createElement('style');st.textContent=`
+.nsshop{display:grid;gap:6px}.nstabs.wide.three{grid-template-columns:repeat(3,1fr)}
+.nsrow{display:grid;grid-template-columns:44px 1fr auto auto;gap:10px;align-items:center;background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line-2);border-radius:14px;padding:8px 10px}.nsrow .ic{font-size:30px;text-align:center}.nsrow b{font:800 16px var(--f-body)}.nsrow small{display:block;font-size:12.5px;color:var(--muted);line-height:1.3}.nsrow .own{font:900 20px var(--f-display);min-width:28px;text-align:center}.nsrow .act{display:grid;gap:4px;justify-items:end}.nsrow.owned{border-color:#2f7a45}
+.nsbt-h,.nsbt{display:grid;grid-template-columns:40px 1fr 36px 36px 36px 50px auto;gap:6px;align-items:center;text-align:center}.nsbt-h{font:800 11.5px var(--f-body);color:var(--muted);text-transform:uppercase}.nsbt{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line-2);border-radius:12px;padding:8px}.nsbt.on{border-color:var(--good);background:#1d4a2c}.nsbt .ic{font-size:24px;border-bottom:4px solid var(--bc);border-radius:4px}.nsbt .nm{text-align:left}.nsbt .nm b{display:block;font:800 14.5px var(--f-body)}.nsbt .nm em{font-style:normal;font-size:11.5px;color:var(--blue);margin-right:6px}.nsbt>span{font:800 14px var(--f-body)}
+.nsabl{display:grid;gap:4px;margin-top:6px}.nsabl div{display:grid;grid-template-columns:120px 1fr;gap:8px;font-size:13px}.nsabl span{color:var(--muted)}.nsbtd{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}.nsbtd span{background:#0d2118;border-radius:8px;padding:5px 9px;font:700 13px var(--f-body)}
+.nsls-h{display:grid;grid-template-columns:auto 1fr auto;gap:8px;align-items:center;font:800 13px var(--f-body);color:var(--muted);margin:2px 0 4px}
+.nscas-bank{display:grid;justify-items:center;gap:2px;background:#0d2118;border:1px solid var(--line-2);border-radius:14px;padding:10px}.nscas-bank span{font:800 12px var(--f-body);color:var(--muted);text-transform:uppercase}.nscas-bank b{font:900 28px var(--f-display);color:var(--gold)}.nscas-bank .good{color:var(--good)}.nscas-bank .bad{color:var(--bad)}
+.nscas{display:grid;gap:8px}.nscas-b{display:flex;align-items:center;gap:14px;padding:14px 16px;border-radius:14px;border:1px solid var(--line-2);background:linear-gradient(180deg,#efefef,#cfcfcf);color:#222}.nscas-b span{font-size:34px}.nscas-b b{font:800 20px var(--f-display);letter-spacing:.3px}.nscas-b:disabled{opacity:.4}
+.nsempty{display:grid;justify-items:center;gap:8px;text-align:center;padding:20px}.nsempty>span{font-size:54px}.nsempty b{font:800 20px var(--f-display)}
+.nsst-h{display:flex;justify-content:space-between;align-items:baseline;gap:8px;flex-wrap:wrap}.nshorse{display:grid;grid-template-columns:44px 1fr auto;gap:10px;align-items:center;background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line-2);border-radius:14px;padding:8px 10px}.nshorse .hi{font-size:30px;filter:drop-shadow(0 2px 0 var(--hc))}.nshorse b{font:800 16px var(--f-body)}.nshorse small{display:block;font-size:12.5px;color:var(--muted)}.nshorse .act{display:flex;gap:4px;flex-wrap:wrap;justify-content:flex-end}.nshorse.mk{opacity:.95;border-style:dashed}
+.nstrack{position:relative;display:grid;gap:4px;background:repeating-linear-gradient(90deg,#3a7d2a 0 40px,#357224 40px 80px);border-radius:12px;padding:8px 26px 8px 8px}.nstrack .ln{position:relative;height:30px;border-bottom:1px dashed #ffffff40}.nstrack .ln.me{background:#ffffff22;border-radius:6px}.nstrack .nm{position:absolute;left:4px;top:7px;font:700 11px var(--f-body);color:#fff9;white-space:nowrap}.nstrack .hz{position:absolute;left:0;top:0;font-size:24px;transform:scaleX(-1);filter:drop-shadow(0 2px 0 var(--hc))}.nstrack .fin{position:absolute;right:20px;top:0;bottom:0;width:4px;background:repeating-linear-gradient(180deg,#fff 0 6px,#111 6px 12px)}
+.nsach-h{display:grid;justify-items:center;gap:4px;background:#0d2118;border-radius:14px;padding:10px}.nsach-h b{font:900 30px var(--f-display);color:var(--gold)}.nsach-h small{color:var(--muted)}
+.nsach{display:grid;grid-template-columns:30px 1fr auto;gap:8px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:8px 10px;color:var(--muted)}.nsach.on{background:linear-gradient(90deg,#2f7a45,#1d4a2c);color:#fff;border-color:#4caf50}.nsach b{font:700 14.5px var(--f-body)}.nsach span{font-size:20px}
+.nstro-h{display:grid;grid-template-columns:repeat(4,1fr);gap:6px}.nstro-h div{display:grid;justify-items:center;background:#0d2118;border-radius:12px;padding:8px 4px}.nstro-h b{font:900 24px var(--f-display);color:var(--gold)}.nstro-h small{font-size:11.5px;color:var(--muted);text-align:center}
+@media (max-width:420px){.nsbt-h,.nsbt{grid-template-columns:32px 1fr 26px 26px 26px 40px auto;gap:4px}.nsbt .nm b{font-size:13px}.nsrow{grid-template-columns:36px 1fr auto auto;gap:6px}.nsrow b{font-size:14.5px}}
+`;document.head.appendChild(st)}
+
 // ================== LOGIN NO SITE (usuário + senha) ==================
 // Conta própria do jogo no Supabase, sem e-mail: usuário e senha. Logado, as carreiras ficam salvas na conta
 // e abrem em qualquer aparelho (iPad, celular, computador). Sem login, continua salvando só no aparelho.
