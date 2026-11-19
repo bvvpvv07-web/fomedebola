@@ -414,3 +414,47 @@ function nsBolaPage(){return{t:'Bola de Ouro',cls:'bola',html:()=>{const H=((typ
 .nsx-yw small{display:block;font:800 12px var(--f-body);color:#ffd84a;text-transform:uppercase}.nsx-yw b{font:900 17px var(--f-display)}.nsx-yw em{display:block;font:700 12.5px var(--f-body);font-style:normal;color:#a9c6b4}
 @media (max-width:560px){.nsx-art{padding:10px 12px}.nsx-art>span{font-size:26px}.nsx-art b{font-size:14px}.nsx-art em{font-size:12px}}
 `;document.head.appendChild(st)}
+
+// ================= INÍCIO SEM ROLAGEM =================
+// Vai compactando em níveis até tudo caber na tela (nunca some o próximo jogo nem o Fofocagram).
+function nsFitHome(){const nsh=document.querySelector('.nsh'),body=document.getElementById('nsBody');if(!nsh||!body)return;
+ if(NS_TAB!=='status'){delete nsh.dataset.fit;nsh.classList.remove('nsx-home');return}nsh.classList.add('nsx-home');
+ const over=()=>nsh.scrollHeight>nsh.clientHeight+1||body.scrollHeight>body.clientHeight+1;
+ for(let l=0;l<=7;l++){nsh.dataset.fit=l;if(!over())return}}
+{const _rnF=nsRenderHub;nsRenderHub=function(){const r=_rnF.apply(this,arguments);try{nsFitHome();requestAnimationFrame(nsFitHome);setTimeout(nsFitHome,300)}catch(e){}return r}}
+{let t=0;window.addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(()=>{try{if(document.body.classList.contains('nshub'))nsFitHome()}catch(e){}},120)})}
+{const st=document.createElement('style');const F=n=>[...Array(8-n)].map((_,i)=>`.nsh[data-fit="${n+i}"]`).join(',');
+ const sel=(n,x)=>F(n).split(',').map(a=>a+' '+x).join(',');
+ st.textContent=`
+.nsh.nsx-home #nsBody{overflow:hidden}
+${sel(1,'.nsx')}{gap:8px}
+${F(1)}{gap:8px}
+${sel(1,'.nsx-fofo.big')}{padding:10px 14px}
+${sel(1,'.nsx-fofo .lg')}{font-size:26px}
+${sel(1,'.nsx-fofo .av')}{width:40px;height:40px}
+${sel(1,'.nsx-st')}{padding:10px;gap:6px}
+${sel(1,'.nsx-st b')}{font-size:22px}
+${sel(1,'.nsx-act')}{min-height:62px;padding:10px 12px}
+${sel(1,'.nsx-act>span')}{font-size:30px}
+${sel(1,'.nsx-act b')}{font-size:19px}
+${sel(1,'.nsx .nsnext')}{padding:10px;gap:4px}
+${sel(1,'.nsx-art')}{padding:9px 12px}
+${sel(1,'.nsx-art>span')}{font-size:26px}
+${sel(2,'.nsx-st .nsmb')},${sel(2,'.nsx-act small')},${sel(2,'.nsx .nsnext .wk')}{display:none}
+${sel(2,'.nsx-fofo.big')}{flex-direction:row;align-items:center}
+${sel(2,'.nsx-fofo .tx small')}{display:none}
+${sel(2,'.nsx-act')}{min-height:52px}
+${sel(3,'.nsx-3')}{display:none}
+${sel(4,'.nsweek')}{display:none}
+${sel(5,'.nsx-fofo .lg')}{font-size:21px}
+${sel(5,'.nsx-fofo.big')}{padding:7px 12px}
+${sel(5,'.nsx-fofo .av')}{width:32px;height:32px;border-width:2px}
+${sel(5,'.nsx-act')}{min-height:44px;padding:6px 10px}
+${sel(5,'.nsx-act>span')}{font-size:22px}
+${sel(5,'.nsx-act b')}{font-size:16px}
+${sel(5,'.nsx .nsnext .tm b')}{font-size:15px}
+${sel(6,'.nsx-art small')}{display:none}
+${sel(6,'.nsx-art')}{padding:6px 10px}
+${sel(7,'.nsx-art')}{display:none}
+${sel(7,'.nsx-2')}{display:none}
+`;document.head.appendChild(st)}

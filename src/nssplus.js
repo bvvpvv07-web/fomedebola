@@ -184,7 +184,7 @@ function nsWeekStrip(){const n=S.n;const st=S.st;if(!st||st.done)return'';const 
 {const _rnh2=nsRenderHub;nsRenderHub=function(){const r=_rnh2.apply(this,arguments);try{const on=(id,fn)=>{const e=document.getElementById(id);if(e)e.onclick=fn};
   on('nwTr',()=>nsOpen(nsHabPage()));on('nwEn',()=>nsDrinkPick());on('nwOf',()=>{NS_MK='prop';nsOpen(nsMarketPage())});on('nwSp',async()=>{await nsSpOfferPop();renderHub()});
   // telas baixas: tira o que é extra até caber sem rolagem
-  const body=document.getElementById('nsBody');const nsh=document.querySelector('.nsh');if(body&&nsh){for(const sel of['.nsnext .last','.nsnext','.ns3b em']){if(nsh.scrollHeight<=nsh.clientHeight+1&&body.scrollHeight<=body.clientHeight+1)break;document.querySelectorAll(sel).forEach(e=>e.remove())}}}catch(e){console.error(e)}return r}}
+  const body=document.getElementById('nsBody');const nsh=document.querySelector('.nsh');if(body&&nsh&&NS_TAB!=='status'){for(const sel of['.nsnext .last','.nsnext','.ns3b em']){if(nsh.scrollHeight<=nsh.clientHeight+1&&body.scrollHeight<=body.clientHeight+1)break;document.querySelectorAll(sel).forEach(e=>e.remove())}}}catch(e){console.error(e)}return r}}
 if(typeof TOUR_HUB!=='undefined'){TOUR_HUB.splice(2,0,{sel:'.nsweek',t:'Sua semana',d:'O que dá pra fazer antes do jogo: <b>3 treinos</b> por rodada, energia, propostas de clubes e marcas.'});TOUR_HUB.push({sel:'[data-nt="contrato"]',t:'Contrato e mercado',d:'Renove com minigame de negociação, veja propostas, peça clubes ao agente ou vá emprestado.'})}
 
 {const st=document.createElement('style');st.textContent=`
