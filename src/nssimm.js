@@ -21,7 +21,7 @@ async function nsTrain3D(k){const L=(S.pos==='GOL'?NS_TR3D_GK:NS_TR3D)[k];const 
   if(!res||res.skip)break;
   let ok=false;try{ok=!!l3dResult(o,res).ok}catch(e){}if(ok)score++;else lives--}
  return score}
-{const _cfgT=l3dCfg;l3dCfg=function(o){const c=_cfgT(o);try{if(o&&o.quick)c.quick=true;if(o&&(o.drible||o.kind==='dribble'))c.drible=true;if(typeof NSSM!=='undefined'&&NSSM.cur)c.noSkip=true}catch(e){}return c}}
+{const _cfgT=l3dCfg;l3dCfg=function(o){const c=_cfgT(o);try{if(o&&o.quick)c.quick=true;if(o&&(o.drible||o.kind==='dribble'))c.drible=true;if(typeof NSSM!=='undefined'&&NSSM.cur)c.noSkip=true;if(o&&o.dribOnly)c.dribOnly=true}catch(e){}return c}}
 nsTrainSession=async function(k){const n=S.n;const cost=nsTrainCost();
  if((n.trainW||0)>=NS_TRAIN_MAX){await nsPop({ic:'🗓️',title:'Treinos da rodada feitos',txt:'Você já fez as 3 sessões desta rodada. Jogue a próxima partida pra liberar mais.'});return}
  if(n.en<cost){const q=await nsPop({ic:'❤️',title:'Sem energia pra treinar',txt:`O treino gasta ${cost}% e você está com ${Math.round(n.en)}%.`,opts:[['dr','🥤 Tomar energético']],ok:'Voltar'});if(q==='dr')await nsDrinkPick();return}

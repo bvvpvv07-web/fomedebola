@@ -471,3 +471,27 @@ ${sel(7,'.nsx-2')}{display:none}
 {const _mgL=nsMig;nsMig=function(){_mgL.apply(this,arguments);try{if(S.lances==='off'||S.lances==='decisivos')S.lances='todos';S.liveMode='all'}catch(e){}}}
 // pós-jogo: o "jogo do profissional" da base não aparece quando você jogou o da base
 {const _npm=nsPostMatch;nsPostMatch=async function(){try{const P=NSSM.post||[];if(P.some(p=>p.me&&p.me.play))NSSM.post=P.filter(p=>!(p.me&&!p.me.play&&p.me.why==='base'))}catch(e){}return _npm.apply(this,arguments)}}
+
+// ================= CUTSCENE DE FINAL =================
+// Antes de toda final: os times saem do túnel, se alinham atrás da taça e o hino toca. Toque em Pular se quiser.
+{const _cfgC=l3dCfg;l3dCfg=function(o){const c=_cfgC(o);try{if(o&&o.cut){c.cutscene=true;c.cut={comp:o.comp,us:o.usN,them:o.themN};c.noSkip=false}}catch(e){}return c}}
+function nsFinalCut2D(m){return new Promise(res=>{const us=m.o.us||{},th=m.o.them||{};const h=document.createElement('div');h.className='nsx-fc';let tro='🏆';try{const cp=Object.values((S.st&&S.st.comps)||{}).find(c=>c&&c.n===m.o.comp);tro=TROPHY(m.o.trophy||(cp&&cp.t)||'copa',{n:m.o.comp,code:cp&&cp.code})}catch(e){}
+ const row=(t,side)=>`<div class="fc-row ${side}">${Array.from({length:11},(_,i)=>`<i style="--d:${i*.12}s;background:${t.c1||'#c00'};border-color:${t.c2||'#fff'}"></i>`).join('')}</div>`;
+ h.innerHTML=`<div class="fc-cap"><small>${esc(m.o.comp||'Final')}</small><b>${esc(us.n||'')} × ${esc(th.n||'')}</b><em>🎺 Execução do hino</em></div>${row(us,'a')}<div class="fc-tro">${tro}</div>${row(th,'b')}<div class="fc-go">É A FINAL!</div><button class="btn ghost fc-skip">Pular</button>`;
+ document.body.appendChild(h);let done=false;const end=()=>{if(done)return;done=true;h.remove();res()};h.querySelector('.fc-skip').onclick=end;setTimeout(end,8500);
+ try{const ac=typeof FDB_AUDIO==='function'?FDB_AUDIO():null;if(ac){const N=[[196,2],[262,2],[330,2],[392,3],[440,1],[392,2],[330,2],[294,2],[349,2],[440,2],[392,4],[262,6]];let t=ac.currentTime+.6;for(const[f,d]of N){const o=ac.createOscillator(),g=ac.createGain();o.type='triangle';o.frequency.value=f;g.gain.setValueAtTime(.07,t);g.gain.exponentialRampToValueAtTime(.0001,t+d*.3);o.connect(g).connect(ac.destination);o.start(t);o.stop(t+d*.3+.05);t+=d*.3}}}catch(e){}})}
+async function nsFinalCut(m){const can=typeof lanceMode==='function'&&lanceMode()==='jogar'&&typeof L3D!=='undefined'&&!L3D.failed;
+ if(can){try{await lance3dPlay({cut:true,kind:'finish',scen:'cut',comp:`${m.o.comp} · Final`,usN:(m.o.us||{}).n,themN:(m.o.them||{}).n,title:'Final'});return}catch(e){console.warn(e)}}
+ await nsFinalCut2D(m)}
+{const _lsF=IO_UI.live.start;IO_UI.live.start=async function(m){try{if(nsOn()&&m&&m.o&&m.o.final&&!m.o._cut){m.o._cut=true;await nsFinalCut(m)}}catch(e){console.error(e)}return _lsF.apply(this,arguments)}}
+{const st=document.createElement('style');st.textContent=`
+.nsx-fc{position:fixed;inset:0;z-index:40;display:grid;align-content:center;justify-items:center;gap:18px;background:radial-gradient(80% 60% at 50% 40%,#1f6b3a,#06150c);overflow:hidden;animation:blfade .3s}
+.nsx-fc::before{content:'';position:absolute;inset:0;background:repeating-linear-gradient(90deg,rgba(255,255,255,.04) 0 60px,transparent 60px 120px);pointer-events:none}
+.fc-cap{display:grid;justify-items:center;gap:4px;color:#fff;text-align:center;z-index:1}.fc-cap small{font:900 13px var(--f-body);letter-spacing:.14em;color:#ffd84a;text-transform:uppercase}.fc-cap b{font:900 28px var(--f-display)}.fc-cap em{font:800 15px var(--f-body);font-style:normal;color:#ffd84a;animation:blfade 1s 2s both}
+.fc-row{display:flex;gap:8px;z-index:1}.fc-row i{width:22px;height:40px;border-radius:8px 8px 4px 4px;border:3px solid;box-shadow:0 6px 0 rgba(0,0,0,.3);opacity:0;animation:fcWalk 1.2s var(--d) forwards}
+.fc-row.b i{animation-name:fcWalkB}
+@keyframes fcWalk{from{opacity:0;transform:translateX(-60vw)}to{opacity:1;transform:none}}@keyframes fcWalkB{from{opacity:0;transform:translateX(60vw)}to{opacity:1;transform:none}}
+.fc-tro{width:120px;height:140px;display:grid;place-items:center;z-index:1;filter:drop-shadow(0 0 30px rgba(255,216,74,.6));animation:ninPop .8s 1.4s both}.fc-tro svg{width:100%;height:100%}
+.fc-go{font:900 44px var(--f-display);color:#ffd84a;text-shadow:0 4px 0 rgba(0,0,0,.4);opacity:0;animation:ninPop .6s 6.5s forwards;z-index:1}
+.fc-skip{position:absolute;top:calc(14px + env(safe-area-inset-top,0px));right:14px;z-index:2}
+`;document.head.appendChild(st)}

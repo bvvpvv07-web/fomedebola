@@ -79,22 +79,29 @@ async function nsLiveStart(m){
   push({m:L.min,side,t:t0})};
  // lance extra do seu jogador (esforço e foco no ataque criam mais)
  async function extraChance(){const P=S.pos;const atk=n.foc>=0;let type;
-  if(P==='GOL')return;
+  if(P==='GOL')return;if((x.x.lc||0)>=(x.x.cap||3))return;x.x.lc=(x.x.lc||0)+1;
   const r=rnd();if(['ATA','SA','PE','PD'].includes(P))type=r<.62?chanceType({}):assistType();else if(['MEI','MC','ME','MD'].includes(P))type=r<.45?chanceType({}):assistType();else type=r<(atk?.35:.2)?chanceType({}):assistType();
   if(!x.x.drK&&P!=='ZAG'&&ch(['ATA','SA','PE','PD','MEI','ME','MD'].includes(P)?.55:.3))type='dribble';else if(type==='dribble'&&x.x.drK)type=chanceType({})==='dribble'?'finish':type;if(type==='dribble')x.x.drK=1;
+  if(!x.x.tkK&&type!=='dribble'&&(['ZAG','LE','LD','VOL','MC'].includes(P)?ch(.55):ch(.2))){type='tackle';x.x.tkK=1}
+  if(type==='tackle'){x.x.ch=(x.x.ch||0)+1;L.lastX=L.min;push({m:L.min,side:'t',t:`Contra-ataque do ${esc(th.n)}! <b>${ME}</b> volta na marcação…`,k:'nme'});api.flash('🛡️ Marcação: dê o bote na hora certa');await sleep(800);x.inX=true;let okT=false;try{okT=await IO_UI.chance({type:'tackle',planned:false,comp:m.o.comp,min:L.min})}catch(e){}x.inX=false;draw();
+   if(okT){x.x.tk=(x.x.tk||0)+1;push({m:L.min,side:'u',t:`🛡️ <b>${ME}</b> desarma e mata o contra-ataque`,k:'nme'});api.flash('Desarme perfeito!')}
+   else if(ch(.38)){x.x.gt=(x.x.gt||0)+1;x.x.sc.push({m:L.min,w:nm(RT),us:false});push({m:L.min,side:'t',t:`⚽ Gol do ${esc(th.n)}. ${nm(RT)} passou por <b>${ME}</b>`,k:'ngl'});api.flash(`Gol do ${th.n}…`)}
+   else push({m:L.min,side:'t',t:`<b>${ME}</b> perde o lance, mas a zaga salva`,k:'nme nbad'});setScore();return}
+  const dOnly=type==='dribble'&&ch(.5);
   const isPass=['pass','long','cross'].includes(type);x.x.ch=(x.x.ch||0)+1;L.lastX=L.min;
   push({m:L.min,side:'u',t:isPass?`<b>${ME}</b> levanta a cabeça…`:type==='dribble'?`<b>${ME}</b> parte pra cima do marcador…`:`<b>${ME}</b> tem espaço pra finalizar…`,k:'nme'});
   let ok,auto=false;if(L.skip||S.lances==='off'||!lancesWanted(true)){ok=nsAutoChance({type});auto=true}
-  else{api.flash(type==='dribble'?'🌀 Um contra um: arraste pro lado e passe por ele':'⚡ A bola é sua…');await sleep(L.skip?0:900);x.inX=true;try{ok=await IO_UI.chance({type,planned:false,comp:m.o.comp,min:L.min})}catch(e){ok=false}x.inX=false;draw()}
+  else{api.flash(type==='dribble'?'🌀 Um contra um: arraste pro lado e passe por ele':'⚡ A bola é sua…');await sleep(L.skip?0:900);x.inX=true;try{ok=await IO_UI.chance({type,planned:false,comp:m.o.comp,min:L.min,passOnly:['pass','long','cross'].includes(type),dribOnly:dOnly})}catch(e){ok=false}x.inX=false;draw()}
   const self=!!NM.selfGoal,dma=!!NM.dmAssist,dps=!!NM.dribPass;NM.selfGoal=false;NM.dmAssist=false;NM.dribPass=false;
+  if(dOnly){const dr=NM.drib||1;NM.heroPasses=0;NM.drib=0;if(ok){x.x.dr=(x.x.dr||0)+dr;push({m:L.min,side:'u',t:`🌀 <b>${ME}</b> passa por ${dr>1?dr+' marcadores':'um, dois'} e cava a falta`,k:'nme'});api.flash('Que drible!')}else push({m:L.min,side:'u',t:`<b>${ME}</b> tenta o drible e é desarmado`,k:'nme nbad'});setScore();return}
   if(ok&&dps&&!dma){x.x.dr=(x.x.dr||0)+(NM.drib||0);NM.heroPasses=0;NM.drib=0;x.x.ps=(x.x.ps||0)+1;push({m:L.min,side:'u',t:`🌀 <b>${ME}</b> passa por dois e toca na medida`,k:'nme'});api.flash('Que jogada!');setScore();return}
   {const hp=NM.heroPasses||0,dr=NM.drib||0;NM.heroPasses=0;NM.drib=0;x.x.ps=(x.x.ps||0)+hp;x.x.dr=(x.x.dr||0)+dr;if(!ok&&(hp||dr))push({m:L.min,side:'u',t:`✓ ${[hp?`${hp} passe${hp>1?'s':''} certo${hp>1?'s':''}`:'',dr?`${dr} drible${dr>1?'s':''}`:''].filter(Boolean).join(' e ')} de <b>${ME}</b>`,k:'nme'})}
   if(ok&&(isPass?self:!dma)){x.x.gu=(x.x.gu||0)+1;x.x.g=(x.x.g||0)+1;x.x.sc.push({m:L.min,w:S.name,us:true});push({m:L.min,side:'u',t:`⚽ GOL! <b>${ME}</b> marca!`,k:'ngl nme'});api.flash('GOOOOL! É SEU!');goalFx(true)}
-  else if(ok&&(dma||(isPass&&(ch(.42)||(!auto&&nsIs3D()))))){const w=nm(RU);const full=(RU.find(p=>nsShort(p.n)===w)||{n:w}).n;x.x.gu=(x.x.gu||0)+1;x.x.a=(x.x.a||0)+1;x.x.sc.push({m:L.min,w:full,us:true});push({m:L.min,side:'u',t:`⚽ GOL de ${w}! Assistência de <b>${ME}</b>`,k:'ngl nme'});api.flash(`GOL do ${us.n}! Sua assistência`);goalFx(true)}
+  else if(ok&&(dma||(isPass&&ch(.45)))){const w=nm(RU);const full=(RU.find(p=>nsShort(p.n)===w)||{n:w}).n;x.x.gu=(x.x.gu||0)+1;x.x.a=(x.x.a||0)+1;x.x.sc.push({m:L.min,w:full,us:true});push({m:L.min,side:'u',t:`⚽ GOL de ${w}! Assistência de <b>${ME}</b>`,k:'ngl nme'});api.flash(`GOL do ${us.n}! Sua assistência`);goalFx(true)}
   else if(ok&&isPass){x.x.ps=(x.x.ps||0)+1;push({m:L.min,side:'u',t:`Passe na medida de <b>${ME}</b>, mas ${nm(RU)} não converte`,k:'nme'})}
   else push({m:L.min,side:'u',t:isPass?`O passe de <b>${ME}</b> é cortado`:pick([`<b>${ME}</b> finaliza… ${gkDef(RT)}`,`<b>${ME}</b> chuta pra fora`,`<b>${ME}</b> é travado na hora do chute`]),k:'nme nbad'});
   setScore()}
- async function setPiece(){const P=S.pos;if(P==='GOL')return;const bp=n.sk.bp.l;x.x.sp=(x.x.sp||0)+1;L.lastX=L.min;
+ async function setPiece(){const P=S.pos;if(P==='GOL')return;if((x.x.lc||0)>=(x.x.cap||3))return;x.x.lc=(x.x.lc||0)+1;const bp=n.sk.bp.l;x.x.sp=(x.x.sp||0)+1;L.lastX=L.min;
   const wide=['PE','PD','ME','MD','MEI','LE','LD','MC','VOL','SA'].includes(P);const r=rnd();
   const usedK=x.x.spK||(x.x.spK=[]);const aerial=['ATA','SA','ZAG','VOL','MC'].includes(P);
   const W=[['corner',wide||bp>=50?.42:.22],['head',aerial?.34:.14],['fk',S.taker.fk||bp>=52?.32:.2],['pen',S.taker.pen||bp>=58||ch(.3)?.13:0]].filter(([k,w])=>w>0&&!usedK.includes(k));
@@ -129,6 +136,8 @@ async function nsLiveStart(m){
     if(onPitch()&&S.pos!=='GOL'&&L.min-L.lastX>=8&&(x.x.ch||0)<4&&L.min<89){const b0=NS_ATKB[S.pos]||.4;const bt=nsBootStats();const faro=bt&&(bt.ab||[]).includes('faro')?1.25:1;
      const p=b0*(.45+.15*n.eff)*(n.foc>0?1.5:n.foc<0?.55:1)*faro*(.8+n.rel.team/250)*(n.en<25?.5:1)/90;if(ch(p))await extraChance()}
     if(onPitch()&&S.pos!=='GOL'&&L.min-L.lastX>=6&&(x.x.sp||0)<3&&L.min>3&&L.min<88&&ch((1.6+(n.foc>0?.35:0))/90))await setPiece();
+    // jogo sem lance nenhum é chato: se até os 62' / 80' você teve menos de 2, aparece um
+    {const fin=!!(m.o&&m.o.final);if(onPitch()&&S.pos!=='GOL'&&(x.x.lc||0)<(fin?4:2)&&(L.min===62||L.min===80||(fin&&(L.min===30||L.min===52)))&&L.min-L.lastX>=4)await extraChance()}
     // atacar demais abre espaço atrás
     if(n.foc>0&&onPitch()&&ch(.0035*n.eff/3)){x.x.gt=(x.x.gt||0)+1;const w=nm(RT);x.x.sc.push({m:L.min,w:(RT.find(p=>nsShort(p.n)===w)||{n:w}).n,us:false});push({m:L.min,side:'t',t:`⚽ Contra-ataque e gol de ${w}. O time ficou exposto.`,k:'ngl'});api.flash(`Gol do ${th.n}…`);goalFx(false);setScore()}
     const ms=minMs();if(ms)await sleep(L.min>=80?ms*1.3:ms)}},
@@ -161,14 +170,15 @@ async function nsLiveStart(m){
 {const _s0=IO_UI.live.start;IO_UI.live.start=async function(m){if(!nsOn()||!m||!m.part)return _s0.apply(this,arguments);try{LIVE_USED=true}catch(e){}return nsLiveStart(m)}}
 // conta chances e passes; "pular pro fim" resolve os lances sem abrir o 3D
 {const _chN=IO_UI.chance;IO_UI.chance=async function(c){const x=NSSM.cur;if(!nsOn()||!x||x.inX)return _chN(c);x.x.ch=(x.x.ch||0)+1;let ok;
-  NM.heroPasses=0;NM.drib=0;if(x.skip){ok=nsAutoChance(c);NM.selfGoal=false;NM.dmAssist=false}else ok=await _chN(c);
+  NM.heroPasses=0;NM.drib=0;const capP=(x.x.cap||3)-1;if(x.skip||(x.x.lc||0)>=capP){ok=nsAutoChance(c);NM.selfGoal=false;NM.dmAssist=false}else{x.x.lc=(x.x.lc||0)+1;const isP=['pass','long','cross','build'].includes(c.type);if(isP)c={...c,passOnly:true};ok=await _chN(c);
+   if(ok&&isP&&!NM.selfGoal&&!NM.dmAssist&&!ch(.5)){x.x.ps=(x.x.ps||0)+1;try{x.api&&x.api.note&&x.api.note(`✓ Passe na medida de <b>${esc(nsSur())}</b>, mas o companheiro não converte`)}catch(e){}ok=false}}
   {const hp=NM.heroPasses||0,dr=NM.drib||0;NM.heroPasses=0;NM.drib=0;x.x.ps=(x.x.ps||0)+hp;x.x.dr=(x.x.dr||0)+dr;const ME=nsSur();const ap=x.api;if(ap&&ap.note&&(hp||dr)&&!ok)ap.note(`✓ ${[hp?`${hp} passe${hp>1?'s':''} certo${hp>1?'s':''}`:'',dr?`${dr} drible${dr>1?'s':''}`:''].filter(Boolean).join(' e ')} de <b>${esc(ME)}</b>`)}
   if(ok&&['pass','long','cross','build'].includes(c.type))x.x.ps=(x.x.ps||0)+1;if(ok&&c.type==='tackle')x.x.tk=(x.x.tk||0)+1;return ok}}
 // no "tudo no 3D" o esforço/foco não aparece, mas a energia gasta igual
 
 // ---------- depois do apito: aplica extras, energia, estatísticas, relações, estrela ----------
 {const _pmN=playMine;playMine=async function(o,io){if(!nsOn())return _pmN(o,io);const n=nsEnsure();
-  const prev=NSSM.cur;const cur={o,x:{gu:0,gt:0,g:0,a:0,ch:0,ps:0,tk:0,blk:0,sc:[],rm:[]},live:null,skip:false};NSSM.cur=cur;let r;
+  const prev=NSSM.cur;const cur={o,x:{gu:0,gt:0,g:0,a:0,ch:0,ps:0,tk:0,blk:0,sc:[],rm:[],lc:0,cap:o&&o.final?5:3},live:null,skip:false};NSSM.cur=cur;let r;
   try{r=await _pmN(o,io)}finally{NSSM.cur=prev}
   try{const x=cur.x;const me=r.me;
    if(x.gu||x.gt||x.rm.length){r.gu+=x.gu;r.gt+=x.gt;if(me){me.g+=x.g;me.a+=x.a}

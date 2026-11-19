@@ -690,14 +690,23 @@ async function processItem(it,io){
   if(comp.youth){them=youthSide(them.id);usSide=youthSide(me.id)}
   const cat=comp.youth?'Base':isNat?'Seleção':(it.cid==='cont'||it.cid==='int'||it.cid==='usc'||it.cid==='rec'||it.cid==='mun')?'Continental':it.cid==='mlscup'?'Liga':'Copas';
   const legs=[];let ag=0,at=0;
-  for(let l=0;l<(rd.legs||1);l++){
+  // ida e volta separadas: joga a ida agora; a volta entra no calendário algumas rodadas depois
+  const two=rd.legs===2;let l0=0;
+  if(two&&it.leg2&&comp.leg1){const L1=comp.leg1;them=L1.them;usSide=L1.usSide;ag=L1.ag;at=L1.at;legs.push({r:L1.r,home:L1.home,stored:true});l0=1;comp.leg1=null}
+  else if(it.leg2)return null;
+  const usI0=isNat?{id:S.nat,n:NATS[S.nat].n,f:NATS[S.nat].f,nat:true}:null;
+  const mkLeg=(r,home,i,pz)=>mkRes(comp.n,rd.n+(rd.legs===2?` · ${i?'volta':'ida'}`:''),home?usSide.id:them.id,home?them.id:usSide.id,home?r.gu:r.gt,home?r.gt:r.gu,r,home,pz,it.cid,comp.youth?(home?usSide:them):home?usI0:them.nat?them:null,comp.youth?(home?them:usSide):home?(them.nat?them:null):usI0);
+  for(let l=l0;l<(rd.legs||1);l++){
    const home=rd.neutral?true:(rd.legs===2?l===1:ch(.5));
    const lbl=rd.n+(rd.legs===2?` · ${l?'volta':'ida'}`:'');
    const r=await playMine({us:usSide,them,home,neutral:!!rd.neutral,comp:comp.n,label:lbl,kind:isNat?'nat':'club',rotate:rd.rotate,youthS:comp.youth?usSide.s:null,live:wantLive('ko')||isDecisive(it),agg:l===1?[ag,at]:null,final:rd.n==='Final'},io);
    ag+=r.gu;at+=r.gt;record(cat,r.me);if(isNat){S.caps+=r.me.play?1:0;S.natGoals+=r.me.g}
    legs.push({r,home});
    if(r.live){const last=l===(rd.legs||1)-1;const tie=last&&ag===at;const decided=last&&!tie;
-    await r.live.finish({agg:rd.legs===2&&last?[ag,at]:null,msg:tie?'Empate! Vai pros pênaltis.':decided?(ag>at?(rd.n==='Final'?'É CAMPEÃO!':'Classificado!'):(rd.n==='Final'?'Vice-campeão.':'Eliminado.')):'Fim do primeiro jogo.',win:decided?ag>at:null,final:rd.n==='Final'})}
+    await r.live.finish({agg:rd.legs===2&&last?[ag,at]:null,msg:tie?'Empate! Vai pros pênaltis.':decided?(ag>at?(rd.n==='Final'?'É CAMPEÃO!':'Classificado!'):(rd.n==='Final'?'Vice-campeão.':'Eliminado.')):'Fim do jogo de ida. A volta é daqui a algumas rodadas.',win:decided?ag>at:null,final:rd.n==='Final'})}
+   if(two&&l===0){comp.leg1={them,usSide,ag,at,home,r:{gu:r.gu,gt:r.gt,me:r.me,scorers:r.scorers||[]}};
+    let j=st.cal.findIndex((x,i)=>i>st.idx&&x.k==='ko'&&x.cid===it.cid);if(j<0)j=st.cal.length;const pos=Math.min(j,st.idx+1+RI(2,3),st.cal.length);st.cal.splice(pos,0,{...it,leg2:true});
+    const res=mkLeg(r,home,0,null);comp.path.push(res);return{k:'multi',list:[res]}}
   }
   let pens=null;
   if(ag===at){
@@ -707,8 +716,8 @@ async function processItem(it,io){
   const win=pens?pens.win:ag>at;
   if(win&&comp.stage+1>=comp.rounds.length&&io.celebrate){st.celebrated=st.celebrated||[];st.celebrated.push(comp.n);await io.celebrate({t:comp.t,n:comp.n,ic:comp.ic,code:comp.code||null,club:isNat?null:me.id,nat:isNat?S.nat:null})}
   const out=[];
-  legs.forEach(({r,home},i)=>{const last=i===legs.length-1;const usI=isNat?{id:S.nat,n:NATS[S.nat].n,f:NATS[S.nat].f,nat:true}:null;
-   const res=mkRes(comp.n,rd.n+(rd.legs===2?` · ${i?'volta':'ida'}`:''),home?usSide.id:them.id,home?them.id:usSide.id,home?r.gu:r.gt,home?r.gt:r.gu,r,home,last&&pens?(home?[pens.a,pens.b]:[pens.b,pens.a]):null,it.cid,comp.youth?(home?usSide:them):home?usI:them.nat?them:null,comp.youth?(home?them:usSide):home?(them.nat?them:null):usI);
+  legs.forEach(({r,home,stored},i)=>{if(stored)return;const last=i===legs.length-1;
+   const res=mkLeg(r,home,i,last&&pens?(home?[pens.a,pens.b]:[pens.b,pens.a]):null);
    if(last){res.agg=rd.legs===2?[ag,at]:null;res.koWin=win;res.final=rd.n==='Final';res.note=win?(rd.n==='Final'?'CAMPEÃO':'Classificado'):(rd.n==='Final'?'Vice-campeão':'Eliminado')}
    comp.path.push(res);out.push(res)});
   if(win){comp.stage++;if(comp.stage>=comp.rounds.length){comp.won=true;comp.alive=false;st.titles.push({t:comp.t,n:comp.n,club:isNat?null:me.id,ic:comp.ic,code:comp.code||null})}}
