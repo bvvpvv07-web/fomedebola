@@ -11298,7 +11298,7 @@ function nsWeekStrip(){const n=S.n;const st=S.st;if(!st||st.done)return'';const 
 {const _rnh2=nsRenderHub;nsRenderHub=function(){const r=_rnh2.apply(this,arguments);try{const on=(id,fn)=>{const e=document.getElementById(id);if(e)e.onclick=fn};
   on('nwTr',()=>nsOpen(nsHabPage()));on('nwEn',()=>nsDrinkPick());on('nwOf',()=>{NS_MK='prop';nsOpen(nsMarketPage())});on('nwSp',async()=>{await nsSpOfferPop();renderHub()});
   // telas baixas: tira o que é extra até caber sem rolagem
-  const body=document.getElementById('nsBody');const nsh=document.querySelector('.nsh');if(body&&nsh){for(const sel of['.nsnext .last','.nsnext','.ns3b em']){if(nsh.scrollHeight<=nsh.clientHeight+1&&body.scrollHeight<=body.clientHeight+1)break;document.querySelectorAll(sel).forEach(e=>e.remove())}}}catch(e){console.error(e)}return r}}
+  const body=document.getElementById('nsBody');const nsh=document.querySelector('.nsh');if(body&&nsh&&NS_TAB!=='status'){for(const sel of['.nsnext .last','.nsnext','.ns3b em']){if(nsh.scrollHeight<=nsh.clientHeight+1&&body.scrollHeight<=body.clientHeight+1)break;document.querySelectorAll(sel).forEach(e=>e.remove())}}}catch(e){console.error(e)}return r}}
 if(typeof TOUR_HUB!=='undefined'){TOUR_HUB.splice(2,0,{sel:'.nsweek',t:'Sua semana',d:'O que dá pra fazer antes do jogo: <b>3 treinos</b> por rodada, energia, propostas de clubes e marcas.'});TOUR_HUB.push({sel:'[data-nt="contrato"]',t:'Contrato e mercado',d:'Renove com minigame de negociação, veja propostas, peça clubes ao agente ou vá emprestado.'})}
 
 {const st=document.createElement('style');st.textContent=`
@@ -12031,6 +12031,156 @@ function nsBolaPage(){return{t:'Bola de Ouro',cls:'bola',html:()=>{const H=((typ
 .nsx-yw>div.me{background:#3a2e08;border-color:#ffd84a}.nsx-yw span{font-size:26px;min-width:44px;text-align:center}.nsx-yw span.mono{font-size:15px;font-weight:900;color:#ffd84a}
 .nsx-yw small{display:block;font:800 12px var(--f-body);color:#ffd84a;text-transform:uppercase}.nsx-yw b{font:900 17px var(--f-display)}.nsx-yw em{display:block;font:700 12.5px var(--f-body);font-style:normal;color:#a9c6b4}
 @media (max-width:560px){.nsx-art{padding:10px 12px}.nsx-art>span{font-size:26px}.nsx-art b{font-size:14px}.nsx-art em{font-size:12px}}
+`;document.head.appendChild(st)}
+
+// ================= INÍCIO SEM ROLAGEM =================
+// Vai compactando em níveis até tudo caber na tela (nunca some o próximo jogo nem o Fofocagram).
+function nsFitHome(){const nsh=document.querySelector('.nsh'),body=document.getElementById('nsBody');if(!nsh||!body)return;
+ if(NS_TAB!=='status'){delete nsh.dataset.fit;nsh.classList.remove('nsx-home');return}nsh.classList.add('nsx-home');
+ const over=()=>nsh.scrollHeight>nsh.clientHeight+1||body.scrollHeight>body.clientHeight+1;
+ for(let l=0;l<=7;l++){nsh.dataset.fit=l;if(!over())return}}
+{const _rnF=nsRenderHub;nsRenderHub=function(){const r=_rnF.apply(this,arguments);try{nsFitHome();requestAnimationFrame(nsFitHome);setTimeout(nsFitHome,300)}catch(e){}return r}}
+{let t=0;window.addEventListener('resize',()=>{clearTimeout(t);t=setTimeout(()=>{try{if(document.body.classList.contains('nshub'))nsFitHome()}catch(e){}},120)})}
+{const st=document.createElement('style');const F=n=>[...Array(8-n)].map((_,i)=>`.nsh[data-fit="${n+i}"]`).join(',');
+ const sel=(n,x)=>F(n).split(',').map(a=>a+' '+x).join(',');
+ st.textContent=`
+.nsh.nsx-home #nsBody{overflow:hidden}
+${sel(1,'.nsx')}{gap:8px}
+${F(1)}{gap:8px}
+${sel(1,'.nsx-fofo.big')}{padding:10px 14px}
+${sel(1,'.nsx-fofo .lg')}{font-size:26px}
+${sel(1,'.nsx-fofo .av')}{width:40px;height:40px}
+${sel(1,'.nsx-st')}{padding:10px;gap:6px}
+${sel(1,'.nsx-st b')}{font-size:22px}
+${sel(1,'.nsx-act')}{min-height:62px;padding:10px 12px}
+${sel(1,'.nsx-act>span')}{font-size:30px}
+${sel(1,'.nsx-act b')}{font-size:19px}
+${sel(1,'.nsx .nsnext')}{padding:10px;gap:4px}
+${sel(1,'.nsx-art')}{padding:9px 12px}
+${sel(1,'.nsx-art>span')}{font-size:26px}
+${sel(2,'.nsx-st .nsmb')},${sel(2,'.nsx-act small')},${sel(2,'.nsx .nsnext .wk')}{display:none}
+${sel(2,'.nsx-fofo.big')}{flex-direction:row;align-items:center}
+${sel(2,'.nsx-fofo .tx small')}{display:none}
+${sel(2,'.nsx-act')}{min-height:52px}
+${sel(3,'.nsx-3')}{display:none}
+${sel(4,'.nsweek')}{display:none}
+${sel(5,'.nsx-fofo .lg')}{font-size:21px}
+${sel(5,'.nsx-fofo.big')}{padding:7px 12px}
+${sel(5,'.nsx-fofo .av')}{width:32px;height:32px;border-width:2px}
+${sel(5,'.nsx-act')}{min-height:44px;padding:6px 10px}
+${sel(5,'.nsx-act>span')}{font-size:22px}
+${sel(5,'.nsx-act b')}{font-size:16px}
+${sel(5,'.nsx .nsnext .tm b')}{font-size:15px}
+${sel(6,'.nsx-art small')}{display:none}
+${sel(6,'.nsx-art')}{padding:6px 10px}
+${sel(7,'.nsx-art')}{display:none}
+${sel(7,'.nsx-2')}{display:none}
+`;document.head.appendChild(st)}
+
+// ============ EVENTOS DE DECISÃO NA TELA PRINCIPAL ============
+// Toda semana, de volta ao Início, pode pintar um evento ligado a alguma parte do jogo:
+// técnico, elenco, torcida, namorada, marcas, agente, treinador, Fofocagram, treino, energético, chuteira, visual,
+// carro, casa, estilo de vida, BETTIGER, estábulo, mercado negro, hospital, academia, balada, viagem, escola, hobbies,
+// família, loteria, lado errado, tribunal, morar fora, contrato, mercado, troféus, artilharia, fama.
+// Você decide e o resultado aparece com o que mudou.
+const nsW=k=>Math.max(.002,((S.wage||5)/1000)*k); // em milhões, relativo ao salário semanal
+const nsHasV=()=>S.n&&S.n.veh&&S.n.veh.length>0,nsHasP=()=>(S.props||[]).length>0,nsHasH=()=>S.n&&S.n.horses&&S.n.horses.length>0;
+const NS_EVA={coach:['🪑','Técnico','#2a6a49'],team:['👕','Elenco','#1f6b8a'],fans:['🧣','Torcida','#b5452a'],gf:['🌹','Namorada','#b03a6b'],spon:['🤝','Marcas','#6a4c93'],ag:['💼','Agente','#3d5a80'],tr:['⏱️','Treinador','#2b9348'],
+ fofo:['📸','Fofocagram','#d62976'],train:['🏋️','Treino','#2a6a49'],drink:['🥤','Energético','#1b7fa8'],boot:['👟','Chuteira','#c75000'],look:['🎨','Visual','#7b2cbf'],car:['🏎️','Garagem','#495057'],home:['🏠','Casa','#33415c'],
+ lux:['💎','Estilo de vida','#a67c00'],bet:['🐯','BETTIGER','#a67c00'],horse:['🐎','Estábulo','#6b4f2a'],black:['🕶️','Mercado negro','#2d1b4e'],med:['🏥','Hospital','#0f7d84'],gym:['🏋️','Academia','#3d5a80'],party:['🪩','Balada','#7b2cbf'],
+ trip:['✈️','Viagem','#2a9df4'],edu:['🎓','Escola','#6a4c93'],hob:['🎸','Hobbies','#c75000'],fam:['👨‍👩‍👧','Família','#d1495b'],lot:['🎟️','Loteria','#2b9348'],crime:['🦹','Lado errado','#5c0f14'],law:['⚖️','Tribunal','#3c4048'],
+ abroad:['🌍','Exterior','#1b4965'],ct:['✍️','Contrato','#495057'],mkt:['📲','Mercado','#3d5a80'],troph:['🏆','Troféus','#a67c00'],art:['⚽','Artilharia','#a67c00'],tv:['📺','Fama','#b5452a']};
+const NS_EV=[
+ // ---- relações ----
+ {id:'c_lat',ar:'coach',t:'Improviso na lateral',d:'O técnico quer te testar na lateral no próximo jogo. "É pelo time."',o:[['Topar sem reclamar',()=>['Ele gostou da atitude.',{rel:{coach:7},happy:-4}]],['Dizer que rende mais na sua posição',()=>ch(.5)?['Ele entendeu e te deixou onde está.',{rel:{coach:1}}]:['Ele não gostou nada.',{rel:{coach:-7}}]]]},
+ {id:'c_vid',ar:'coach',t:'Sessão de vídeo',d:'O técnico chamou alguns jogadores pra ver vídeo do adversário no dia de folga.',o:[['Ir e anotar tudo',()=>['Saiu de lá entendendo o jogo.',{rel:{coach:5},sk:{vis:1},en:-8}]],['Inventar um compromisso',()=>['Ele percebeu a desculpa.',{rel:{coach:-5},en:6}]]]},
+ {id:'t_chur',ar:'team',t:'Churrasco do elenco',d:'O capitão marcou churrasco no sábado. Todo mundo vai.',o:[['Ir e levar a carne',()=>['Resenha boa, elenco fechado com você.',{rel:{team:7},din:-nsW(.15),en:-6}]],['Ficar em casa descansando',()=>['Comentaram que você é "estrela".',{rel:{team:-5},en:8}]]]},
+ {id:'t_trote',ar:'team',t:'Trote no vestiário',d:'Os veteranos esconderam suas roupas e você saiu de toalha pro estacionamento.',o:[['Rir junto',()=>['Virou um deles.',{rel:{team:6}}]],['Dar o troco no dia seguinte',()=>ch(.6)?['O troco foi lendário.',{rel:{team:8},happy:4}]:['Passou do ponto. Clima pesado.',{rel:{team:-6,coach:-3}}]],['Reclamar com o técnico',()=>['O vestiário não perdoou.',{rel:{team:-9,coach:2}}]]]},
+ {id:'f_foto',ar:'fans',t:'Fila de torcedores',d:'No shopping, uma fila de torcedores se forma pedindo foto e autógrafo.',o:[['Atender todo mundo',()=>['Uma hora de fotos e a torcida te ama.',{rel:{fans:7},en:-6}]],['Atender alguns e sair',()=>['Ok, mas uns ficaram chateados.',{rel:{fans:2}}]],['Fingir que não viu',()=>['Viralizou: "craque metido".',{rel:{fans:-8}}]]]},
+ {id:'f_crianca',ar:'fans',t:'Visita ao hospital infantil',d:'O clube organizou uma visita a um hospital infantil. É opcional.',o:[['Ir e passar a tarde',()=>['As crianças vão lembrar pra sempre.',{rel:{fans:6,coach:2},happy:6,en:-5}]],['Mandar camisas autografadas',()=>['Gesto bonito, mas de longe.',{rel:{fans:2}}]]]},
+ {id:'g_viag',ar:'gf',c:()=>!!S.gf,t:'Fim de semana a dois',d:()=>`${S.gf.n} quer viajar no fim de semana. Mas segunda tem treino cedo.`,o:[['Viajar',()=>['Fim de semana inesquecível.',{rel:{gf:9},din:-nsW(.4),en:-10,happy:6}]],['Dizer que precisa descansar',()=>['Ela ficou chateada.',{rel:{gf:-7},en:5}]]]},
+ {id:'g_jantar',ar:'gf',c:()=>!!S.gf,t:'Jantar com os sogros',d:()=>`Os pais de ${S.gf.n} te convidaram pra jantar. O sogro torce pro rival.`,o:[['Ir com a camisa do clube',()=>ch(.5)?['O sogro riu. Conquistou a família.',{rel:{gf:6}}]:['Climão na mesa.',{rel:{gf:-4}}]],['Ir de social e levar vinho',()=>['Genro nota 10.',{rel:{gf:8},din:-nsW(.05)}]]]},
+ {id:'g_sem',ar:'gf',c:()=>!S.gf&&S.age>=18,t:'Mensagem misteriosa',d:'Uma influenciadora famosa curtiu suas fotos antigas e mandou mensagem.',o:[['Responder',()=>ch(.6)?['Marcaram um café. Vai que…',{happy:6,rel:{fans:2}}]:['Era só pra divulgar um curso.',{happy:-2}]],['Ignorar',()=>['Foco no futebol.',{rel:{coach:1}}]]]},
+ {id:'s_post',ar:'spon',c:()=>typeof nsHasSp==='function'&&nsHasSp(),t:'Post patrocinado',d:'Uma das suas marcas quer um post com uma piada que pode pegar mal.',o:[['Postar do jeito deles',()=>['Pagaram bem, mas teve crítica.',{din:nsW(.8),rel:{spon:6,fans:-5}}]],['Postar do seu jeito',()=>ch(.6)?['Ficou ótimo e a marca aprovou.',{rel:{spon:4,fans:2}}]:['A marca não gostou da mudança.',{rel:{spon:-5}}]],['Recusar',()=>['Marca irritada.',{rel:{spon:-9}}]]]},
+ {id:'s_cand',ar:'spon',c:()=>!(typeof nsHasSp==='function'&&nsHasSp())&&S.n.star.l>=2,t:'Marca pequena interessada',d:'Uma marca local de suplementos quer te dar produtos em troca de stories.',o:[['Aceitar os produtos',()=>['Mochila cheia de energético.',{dr:2,rel:{fans:1}}]],['Esperar uma marca grande',()=>['Paciência é tudo.',{}]]]},
+ // ---- staff ----
+ {id:'a_troca',ar:'ag',t:'Ideia do agente',d:'Seu agente diz que um clube paga o dobro, mas você seria reserva lá.',o:[['Pedir pra ele ouvir a proposta',()=>{try{const c=CLUBS.filter(x=>x.s>(club().s||60)&&x.id!==club().id);const o=nsOfferFrom(pick(c));if(o){S.n.offers=S.n.offers||[];S.n.offers.push(o);return['Chegou proposta no Mercado.',{}]}}catch(e){}return['Não deu em nada.',{}]}],['Ficar e brigar por posição',()=>['O técnico soube e gostou.',{rel:{coach:5}}]]]},
+ {id:'a_comis',ar:'ag',c:()=>!!(S.n.staff&&S.n.staff.ag),t:'Comissão extra',d:'Seu agente pede um "bônus" por ter conseguido seu último contrato.',o:[['Pagar',()=>['Ele ficou motivado.',{din:-nsW(.5),rel:{spon:3}}]],['Negar',()=>['Ele ficou de cara feia, mas segue.',{happy:-2}]]]},
+ {id:'r_6h',ar:'tr',t:'Treino às 6 da manhã',d:'Seu preparador quer um treino extra de arrancada às 6h.',o:[['Acordar e ir',()=>['Pernas mais rápidas.',{sk:{vel:1},en:-12}]],['Dormir mais',()=>['Descansou.',{en:8}]]]},
+ // ---- fofocagram ----
+ {id:'n_balada',ar:'fofo',a:16,t:'Nardo Meses tem fotos suas',d:'O Nardo Meses conseguiu fotos suas numa festa às 3 da manhã, véspera de jogo.',o:[['Pagar pra não postar',()=>['Ele aceitou… por enquanto.',{din:-nsW(.6)}]],['Deixar postar',()=>['Bombou. Técnico e torcida não gostaram.',{rel:{coach:-6,fans:-3},star:.6}]],['Postar antes, com humor',()=>ch(.55)?['Virou meme do bem.',{rel:{fans:5},star:.5}]:['Pegou mal do mesmo jeito.',{rel:{coach:-4}}]]]},
+ {id:'n_ex',ar:'fofo',a:17,t:'A ex deu entrevista',d:'Uma ex sua falou no programa do Nardo que você "não sabe nem fritar um ovo".',o:[['Responder nas redes',()=>ch(.5)?['Resposta genial, a internet amou.',{rel:{fans:5},star:.4}]:['Brigou em público. Feio.',{rel:{fans:-4,gf:-3}}]],['Ficar quieto',()=>['O assunto morreu em 2 dias.',{}]]]},
+ // ---- treino / energia / chuteira / visual ----
+ {id:'tr_dor',ar:'train',t:'Pontada na coxa',d:'No fim do treino você sentiu uma pontada na coxa.',o:[['Parar e fazer gelo',()=>['Prevenção vale ouro.',{en:-4}]],['Terminar o treino',()=>ch(.7)?['Não era nada.',{sk:{for:1}}]:['Piorou. Vai jogar no sacrifício.',{en:-25}]]]},
+ {id:'tr_desafio',ar:'train',t:'Desafio de falta',d:'Depois do treino, o batedor oficial te desafia: 10 faltas, quem fizer mais paga o almoço.',o:[['Aceitar',()=>ch(.5)?['Ganhou! Almoço grátis e respeito.',{sk:{bp:1},rel:{team:3}}]:['Perdeu e pagou o almoço.',{din:-nsW(.05),sk:{bp:1}}]],['Deixar pra outro dia',()=>['Tudo bem.',{}]]]},
+ {id:'d_amostra',ar:'drink',t:'Amostras de energético',d:'Um representante deixou uma caixa de energético novo no CT.',o:[['Pegar a caixa',()=>['+2 energéticos na mochila.',{dr:2}]],['Recusar (pode ter coisa proibida)',()=>['O médico do clube elogiou o cuidado.',{rel:{coach:2}}]]]},
+ {id:'b_defeito',ar:'boot',c:()=>!!S.n.boot,t:'Chuteira rasgou',d:'Sua chuteira descolou a sola no aquecimento.',o:[['Jogar com a reserva',()=>['Não é a mesma coisa, mas dá.',{happy:-2}]],['Mandar o roupeiro colar',()=>ch(.6)?['Ficou nova.',{}]:['Descolou de novo no jogo.',{rel:{coach:-2}}]]]},
+ {id:'b_custom',ar:'boot',a:16,c:()=>S.n.star.l>=2,t:'Chuteira personalizada',d:'Um fabricante quer fazer uma chuteira com seu nome. Mas é de uma cor bem chamativa.',o:[['Aceitar',()=>['A torcida amou o modelo.',{rel:{fans:4},happy:4}]],['Recusar',()=>['Prefere as clássicas.',{}]]]},
+ {id:'l_barb',ar:'look',t:'Barbeiro dos famosos',d:'O barbeiro mais famoso da cidade quer fazer seu cabelo de graça e postar.',o:[['Deixar ele criar',()=>ch(.6)?['Ficou estiloso.',{rel:{fans:4},happy:3}]:['Ficou… diferente. Virou meme.',{rel:{fans:-2},star:.3}]],['Só o de sempre',()=>['Clássico.',{}]]]},
+ // ---- patrimônio / estilo de vida ----
+ {id:'v_risco',ar:'car',c:nsHasV,t:'Carro riscado',d:'Riscaram a lateral do seu carro no estacionamento do estádio.',o:[['Mandar pro funileiro',()=>['Ficou zero.',{din:-nsW(.3)}]],['Deixar assim',()=>['Todo mundo comenta o risco.',{happy:-3}]]]},
+ {id:'v_racha',ar:'car',a:18,c:nsHasV,t:'Convite pra racha',d:'Uns caras com carros importados te chamam pra um racha na madrugada.',o:[['Aceitar',()=>ch(.5)?['Ganhou e ninguém viu.',{happy:5,heat:10}]:['Polícia apareceu. Foto em todo lugar.',{heat:30,rel:{coach:-8,fans:-5}}]],['Ir embora',()=>['Decisão de adulto.',{}]]]},
+ {id:'v_test',ar:'car',c:()=>!nsHasV(),t:'Test drive',d:'Uma concessionária te empresta um esportivo por uma semana.',o:[['Aceitar e postar',()=>['Deu vontade de comprar um.',{happy:5,rel:{fans:1}}]],['Recusar',()=>['Pé no chão.',{}]]]},
+ {id:'h_festa',ar:'home',c:nsHasP,t:'Vizinho reclamou',d:'O vizinho reclamou do barulho da sua festa de aniversário.',o:[['Pedir desculpa e mandar bolo',()=>['Viraram amigos.',{happy:2}]],['Ignorar',()=>['Chamou a imprensa.',{rel:{fans:-3}}]]]},
+ {id:'h_vazam',ar:'home',c:nsHasP,t:'Vazamento',d:'Um cano estourou na sua casa e alagou a sala.',o:[['Chamar o melhor encanador',()=>['Resolvido no mesmo dia.',{din:-nsW(.4)}]],['Chamar o primo que "entende"',()=>ch(.4)?['O primo resolveu!',{din:-nsW(.05)}]:['O primo piorou. Ficou mais caro.',{din:-nsW(.8),happy:-4}]]]},
+ {id:'x_joia',ar:'lux',a:16,t:'Corrente de ouro',d:'Uma joalheria oferece uma corrente de ouro com desconto pra jogador.',o:[['Comprar',()=>['Brilha no aquecimento.',{din:-nsW(1.2),happy:5}]],['Guardar o dinheiro',()=>['Seu pai ficaria orgulhoso.',{}]]]},
+ // ---- BETTIGER / estábulo / mercado negro ----
+ {id:'bt_amigo',ar:'bet',a:18,t:'Aposta entre amigos',d:'Um amigo diz que tem "certeza" do placar de um jogo de outro campeonato e chama você pra apostar junto.',o:[['Apostar alto',()=>ch(.35)?['Deu certo! Lucro fácil… dessa vez.',{din:nsW(2)}]:['Perdeu tudo.',{din:-nsW(1),happy:-4}]],['Apostar pouco',()=>ch(.4)?['Ganhou um troco.',{din:nsW(.3)}]:['Perdeu pouco.',{din:-nsW(.15)}]],['Não apostar',()=>['Prudente.',{}]]]},
+ {id:'bt_jogo',ar:'bet',a:18,t:'Proposta suja',d:'Um desconhecido oferece dinheiro pra você levar um cartão amarelo no próximo jogo.',o:[['Recusar e avisar o clube',()=>['O clube te elogiou publicamente.',{rel:{coach:6,fans:4}}]],['Recusar e ficar quieto',()=>['Seguiu a vida.',{}]],['Aceitar',()=>ch(.6)?['Ninguém descobriu. Mas você sabe.',{din:nsW(3),happy:-6,heat:20}]:['Investigação! Preso por manipulação.',{preso:8,rel:{fans:-20}}]]]},
+ {id:'hs_lesao',ar:'horse',c:nsHasH,t:'Cavalo mancando',d:'Um dos seus cavalos voltou mancando do treino.',o:[['Chamar o veterinário',()=>['Repouso e ele volta logo.',{din:-nsW(.3)}]],['Correr assim mesmo',()=>ch(.5)?['Correu e chegou bem.',{happy:2}]:['Piorou. Vai ficar parado.',{happy:-5}]]]},
+ {id:'hs_compra',ar:'horse',a:18,c:()=>!nsHasH()&&(S.props||[]).length>0,t:'Cavalo à venda',d:'Um criador oferece um potro promissor pra você começar um estábulo.',o:[['Ver o estábulo',()=>['Abra o Estábulo na cidade da Vida.',{}]],['Agora não',()=>['Fica pra depois.',{}]]]},
+ {id:'k_vitam',ar:'black',a:18,t:'"Vitamina" no vestiário',d:'Um cara que ninguém conhece oferece uma "vitamina" que "ninguém pega no exame".',o:[['Aceitar',()=>['Fez efeito… e deixou rastro.',{sk:{for:2,vel:1},dope:30}]],['Recusar',()=>['Melhor assim.',{}]],['Avisar o médico do clube',()=>['O clube agradeceu.',{rel:{coach:4}}]]]},
+ // ---- cidade ----
+ {id:'m_joelho',ar:'med',t:'Dor no joelho',d:'Seu joelho dói depois dos jogos.',o:[['Fazer fisioterapia',()=>['Joelho novo.',{din:-nsW(.2),en:10}]],['Aguentar',()=>ch(.6)?['Passou sozinho.',{}]:['Piorou. Rendimento caiu.',{en:-20}]]]},
+ {id:'gy_desafio',ar:'gym',t:'Desafio na academia',d:'Um lutador famoso te desafia no supino na frente das câmeras.',o:[['Encarar',()=>ch(.45)?['Ganhou! Virou notícia.',{sk:{for:1},star:.4}]:['Perdeu feio, mas foi divertido.',{rel:{fans:1}}]],['Recusar com educação',()=>['Tudo bem.',{}]]]},
+ {id:'p_vip',ar:'party',a:16,t:'Camarote VIP',d:'Te chamaram pro camarote mais famoso da cidade. É véspera de jogo.',o:[['Ir',()=>['Noite incrível. Corpo cansado.',{happy:7,en:-20,rel:{coach:-4}}]],['Ir e voltar cedo',()=>['Equilíbrio.',{happy:3,en:-6}]],['Ficar em casa',()=>['Foco total.',{rel:{coach:2},en:4}]]]},
+ {id:'tp_pacote',ar:'trip',t:'Pacote de férias',d:'Uma agência oferece um pacote pro Caribe com desconto pra depois da temporada.',o:[['Comprar',()=>['Já está contando os dias.',{din:-nsW(.8),happy:6}]],['Passar as férias com a família',()=>['Sem gastar e com carinho.',{happy:3}]]]},
+ {id:'e_bolsa',ar:'edu',t:'Bolsa de faculdade',d:'Uma faculdade oferece bolsa a distância em Educação Física.',o:[['Aceitar e estudar à noite',()=>['Cansa, mas vale.',{en:-8,happy:4,sk:{vis:1}}]],['Agora não',()=>['Quem sabe depois da carreira.',{}]]]},
+ {id:'hb_musica',ar:'hob',t:'Feat. com cantor',d:'Um cantor de pagode quer você no clipe da música nova.',o:[['Gravar',()=>ch(.6)?['O clipe estourou.',{star:.6,rel:{fans:4},en:-6}]:['A música não pegou.',{en:-6}]],['Recusar',()=>['Cada um no seu.',{}]]]},
+ {id:'fm_reforma',ar:'fam',t:'Casa dos seus pais',d:'Seus pais precisam reformar a casa onde você cresceu.',o:[['Pagar tudo',()=>['Sua mãe chorou de alegria.',{din:-nsW(1.5),happy:8}]],['Ajudar com uma parte',()=>['Eles agradeceram.',{din:-nsW(.5),happy:3}]],['Dizer que agora não dá',()=>['Ficou um peso na consciência.',{happy:-5}]]]},
+ {id:'fm_primo',ar:'fam',t:'Primo pedindo dinheiro',d:'Um primo pede dinheiro emprestado "pra abrir um negócio".',o:[['Emprestar',()=>ch(.3)?['O negócio deu certo e ele pagou com juros!',{din:nsW(.6)}]:['Nunca mais viu o dinheiro.',{din:-nsW(.8)}]],['Negar',()=>['Ele sumiu do grupo da família.',{happy:-2}]]]},
+ {id:'lt_bilhete',ar:'lot',a:18,t:'Bilhete "premiado"',d:'Um homem jura que tem um bilhete premiado e quer vender pela metade do prêmio.',o:[['Comprar',()=>['Era golpe, claro.',{din:-nsW(.6),happy:-4}]],['Chamar a polícia',()=>['Golpista preso. Você virou herói.',{rel:{fans:4}}]],['Ignorar',()=>['Nem perdeu tempo.',{}]]]},
+ {id:'cr_mochila',ar:'crime',a:16,t:'Mochila do amigo',d:'Um amigo antigo da rua pede pra você guardar uma mochila por uns dias. Não diz o que tem.',o:[['Guardar',()=>ch(.5)?['Ele buscou e agradeceu.',{heat:10}]:['A polícia apareceu atrás dela.',{heat:40,rel:{coach:-6}}]],['Recusar',()=>['Ele entendeu. Ou não.',{}]]]},
+ {id:'lw_ex',ar:'law',a:17,t:'Processo',d:'Um ex-empresário diz que você deve comissão e entrou na justiça.',o:[['Fazer acordo',()=>['Assunto encerrado.',{din:-nsW(1)}]],['Brigar na justiça',()=>ch(.55)?['Ganhou o processo!',{happy:4}]:['Perdeu e pagou mais.',{din:-nsW(2),happy:-4}]]]},
+ {id:'ab_sonda',ar:'abroad',c:()=>S.n.star.l>=2,t:'Sondagem do exterior',d:'Um clube de fora do país perguntou ao seu agente se você toparia sair.',o:[['Mostrar interesse',()=>{try{const c=CLUBS.filter(x=>x.l&&LG[x.l]&&LG[x.l].c!==(LG[club().l]||{}).c&&x.s>=(club().s||60)-5);const o=nsOfferFrom(pick(c));if(o){S.n.offers=S.n.offers||[];S.n.offers.push(o);return['Proposta do exterior no Mercado!',{}]}}catch(e){}return['Eles desistiram.',{}]}],['Dizer que está feliz aqui',()=>['A torcida soube e aplaudiu.',{rel:{fans:4,coach:2}}]]]},
+ {id:'ct_atraso',ar:'ct',t:'Salário atrasado',d:'A diretoria atrasou os salários do elenco.',o:[['Cobrar publicamente',()=>['Pagaram no dia seguinte, mas não gostaram.',{rel:{coach:-3,team:4}}]],['Esperar em silêncio',()=>['Caiu na conta uma semana depois.',{happy:-3}]]]},
+ {id:'mk_rival',ar:'mkt',t:'Ligação do rival',d:'O diretor do maior rival te liga escondido.',o:[['Ouvir',()=>ch(.5)?['Vazou! Torcida furiosa.',{rel:{fans:-8}}]:['Ninguém soube. Fica a dúvida.',{}]],['Desligar na cara',()=>['Contou pros companheiros. Moral alta.',{rel:{team:4,fans:3}}]]]},
+ {id:'tf_museu',ar:'troph',c:()=>(S.titles||[]).length>0,t:'Museu do clube',d:'O museu quer expor a chuteira de um dos seus títulos.',o:[['Doar a chuteira',()=>['Seu nome na história do clube.',{rel:{fans:6}}]],['Guardar de lembrança',()=>['É sua.',{}]]]},
+ {id:'ar_capa',ar:'art',c:()=>{try{const R=nsRace();return R&&R.gl[0]&&R.gl[0].me&&R.gl[0].v>0}catch(e){return false}},t:'Capa de revista',d:'Uma revista quer você na capa como artilheiro do campeonato.',o:[['Fazer a sessão de fotos',()=>['Capa linda.',{star:.6,rel:{fans:4},en:-5}]],['Pedir pra esperar o fim do campeonato',()=>['Humildade.',{rel:{team:3}}]]]},
+ {id:'tv_prog',ar:'tv',c:()=>S.n.star.l>=3,t:'Programa de TV',d:'Um programa de domingo te convida pra um quadro de desafios.',o:[['Ir',()=>['Audiência recorde.',{din:nsW(.5),star:.5,en:-8}]],['Recusar',()=>['Domingo é dia de descanso.',{en:5}]]]}];
+
+function nsEvFx(fx){const n=S.n;const ch2=[];if(!fx)return ch2;const R=(t,v,good)=>ch2.push([t,good===undefined?(v>=0?'up':'down'):good?'up':'down']);
+ if(fx.din){S.din=Math.max(0,S.din+fx.din);R(`💰 ${fx.din>0?'+':'−'}${money(Math.abs(fx.din))}`,fx.din)}
+ if(fx.en){n.en=clamp(n.en+fx.en,0,100);R(`❤️ Energia ${fx.en>0?'+':''}${fx.en}%`,fx.en)}
+ if(fx.happy){n.happy=clamp(n.happy+fx.happy,0,100);R(`🙂 Felicidade ${fx.happy>0?'+':''}${fx.happy}`,fx.happy)}
+ if(fx.rel)for(const k in fx.rel){if(k==='gf'&&!S.gf)continue;const v=fx.rel[k];n.rel[k]=clamp(n.rel[k]+v,0,100);const w=(NS_RELWHO&&NS_RELWHO[k])||['','?'];R(`${w[0]} ${k==='gf'&&S.gf?S.gf.n:w[1]} ${v>0?'+':''}${v}`,v)}
+ if(fx.sk)for(const k in fx.sk){const v=fx.sk[k];n.sk[k].l=clamp(n.sk[k].l+v,1,99);R(`${NSK.find(z=>z[0]===k)[1]} ${v>0?'+':''}${v}`,v)}
+ if(fx.star){nsStarAdd(fx.star);R('⭐ Fama sobe',1)}
+ if(fx.dr){const id=NS_DRINKS[0].id;n.dr[id]=(n.dr[id]||0)+fx.dr;R(`🥤 +${fx.dr} energéticos`,1)}
+ if(fx.heat){S.heat=clamp((S.heat||0)+fx.heat,0,100);R(`🚨 Polícia +${fx.heat}`,-1)}
+ if(fx.dope){n.dopeR=clamp((n.dopeR||0)+fx.dope,0,100);R(`🧫 Risco no antidoping +${fx.dope}`,-1)}
+ if(fx.preso){try{prisonNow(fx.preso)}catch(e){}R(`🚔 Preso por ${fx.preso} jogos`,-1)}
+ try{nsSync()}catch(e){}return ch2}
+function nsEvPop(e){return new Promise(res=>{const[ic,ar,col]=NS_EVA[e.ar]||['🎲','Vida','#2a6a49'];const d=typeof e.d==='function'?e.d():e.d;const h=document.createElement('div');h.className='nsx-rg-host';document.body.appendChild(h);
+ h.innerHTML=`<div class="nsx-rg nsx-ev" style="--ec:${col}"><div class="ev-tag">${ic} ${esc(ar)} · decida agora</div><div class="ev-ic">${ic}</div><h3>${esc(e.t)}</h3><p>${esc(d)}</p><div class="ev-opts">${e.o.map((o,i)=>`<button class="btn wide ${i?'ghost':''}" data-eo="${i}">${esc(o[0])}</button>`).join('')}</div></div>`;
+ h.querySelectorAll('[data-eo]').forEach(b=>b.onclick=()=>{const[txt,fx]=e.o[+b.dataset.eo][1]();const chips=nsEvFx(fx);if(S.st)(S.st.evlog=S.st.evlog||[]).push({t:e.t,txt});
+  h.querySelector('.nsx-ev').innerHTML=`<div class="ev-tag">${ic} ${esc(ar)}</div><h3>${esc(e.t)}</h3><p class="ev-res">${esc(txt)}</p>${chips.length?`<div class="ev-chips">${chips.map(([t,c])=>`<span class="chip ${c}">${esc(t)}</span>`).join('')}</div>`:''}<button class="btn wide" id="evOk">Continuar</button>`;
+  h.querySelector('#evOk').onclick=()=>{h.remove();res()}})})}
+function nsEvPool(){const n=S.n;const seen=n.evSeen||[];return NS_EV.filter(e=>(!e.a||S.age>=e.a)&&(!e.c||(()=>{try{return e.c()}catch(x){return false}})())&&!seen.includes(e.id))}
+async function nsHomeEvent(force){const n=S.n;if(!n||(typeof inPrison==='function'&&inPrison())||!document.body.classList.contains('nshub'))return;
+ if(!force){if(n.evW===n.week)return;n.evW=n.week;if(!ch(.8))return}
+ let pool=nsEvPool();if(!pool.length){n.evSeen=[];pool=nsEvPool()}if(!pool.length)return;const e=pick(pool);n.evSeen=[...(n.evSeen||[]),e.id].slice(-30);
+ await nsEvPop(e);renderHub();try{if(typeof showPendingMoments==='function')await showPendingMoments()}catch(x){}try{saveNow('season')}catch(x){}}
+function nsUiFree(){const ph=document.getElementById('nspost');return!document.querySelector('.nspop-host,.nsx-rg-host,.bl-pophost')&&$ov.hidden!==false&&!(ph&&!ph.hidden&&ph.innerHTML)&&document.body.classList.contains('nshub')}
+{const _np=nsPlay;nsPlay=async function(){const r=await _np.apply(this,arguments);try{for(let i=0;i<60&&!nsUiFree();i++)await new Promise(z=>setTimeout(z,300));await new Promise(z=>setTimeout(z,250));if(nsUiFree())await nsHomeEvent()}catch(e){console.error(e)}return r}}
+{const st=document.createElement('style');st.textContent=`
+.nsx-ev{gap:10px;border-color:var(--ec);background:linear-gradient(180deg,color-mix(in srgb,var(--ec) 45%,#0b2216),#0b2216 70%)}
+.nsx-ev .ev-tag{justify-self:center;font:900 12px var(--f-body);letter-spacing:.08em;text-transform:uppercase;padding:5px 12px;border-radius:999px;background:rgba(0,0,0,.35);color:#ffd84a}
+.nsx-ev .ev-ic{font-size:64px;line-height:1;filter:drop-shadow(0 6px 6px rgba(0,0,0,.4));animation:ninPop .5s}
+.nsx-ev h3{margin:0;font:900 26px var(--f-display)}.nsx-ev p{margin:0;font:600 16px/1.45 var(--f-body);color:#e3efe6}.nsx-ev .ev-res{font-size:18px;font-weight:800}
+.nsx-ev .ev-opts{display:grid;gap:8px;margin-top:4px}.nsx-ev .ev-opts .btn{font-size:17px;padding:14px;white-space:normal}
+.nsx-ev .ev-chips{display:flex;flex-wrap:wrap;gap:6px;justify-content:center}
+@media (max-width:560px){.nsx-ev .ev-ic{font-size:48px}.nsx-ev h3{font-size:21px}.nsx-ev p{font-size:14.5px}.nsx-ev .ev-opts .btn{font-size:15px;padding:12px}}
 `;document.head.appendChild(st)}
 
 // ================== LOGIN NO SITE (usuário + senha) ==================
