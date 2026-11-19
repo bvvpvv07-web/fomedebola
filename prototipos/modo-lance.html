@@ -804,8 +804,8 @@ function setHint(){const h=$('hint');
 // ===================== CÂMERA =====================
 // Baixa e perto, atrás de quem tem a bola. Você pode girar (dois dedos girando / botão direito), inclinar (dois dedos pra cima e pra baixo),
 // dar zoom (pinça / roda) e trocar o ângulo no botão 🎥 (Perto, Média, Alta). Companheiros fora da tela aparecem na borda.
-const CAM_PRE=[{n:'Média',pitch:30,k:1.45,yb:-.32},{n:'Aberta',pitch:37,k:1.85,yb:-.26},{n:'Aérea',pitch:48,k:2.3,yb:-.2}];
-S.camPan=new T.Vector3();S.zoom=1;S.camYaw=0;S.camTilt=0;S.camPre=1;try{const v=localStorage.getItem('ml_cam3');if(v!=null)S.camPre=clamp(+v,0,2)}catch(e){}
+const CAM_PRE=[{n:'Atrás',pitch:15,k:1.42,yb:-.38},{n:'Média',pitch:23,k:1.62,yb:-.32},{n:'Alta',pitch:34,k:1.95,yb:-.24}];
+S.camPan=new T.Vector3();S.zoom=1;S.camYaw=0;S.camTilt=0;S.camPre=0;try{const v=localStorage.getItem('ml_cam4');if(v!=null)S.camPre=clamp(+v,0,2)}catch(e){}
 const camLook=new T.Vector3(0,.8,30),camPos=new T.Vector3(0,20,50);S.camDir=new T.Vector3(0,0,1);
 // atrás das arquibancadas a câmera sobe acima delas
 let camLim=p=>{p.x=clamp(p.x,-70,70);p.z=clamp(p.z,-40,120);p.y=Math.max(p.y,1.2);if(Math.abs(p.x)>37.3)p.y=Math.max(p.y,3.6);const over=Math.max(Math.abs(p.x)-42.5,-6-p.z,0);if(over>0)p.y=Math.max(p.y,2+over*.8+5);return p};
@@ -840,7 +840,7 @@ function camGoal(){
   const inBox=b.z<19&&Math.abs(b.x)<21;
   const cen=new T.Vector3();if(inBox)cen.set(0,0,0);else{tg.forEach(p=>cen.add(p));cen.multiplyScalar(1/tg.length)}
   const raw=new T.Vector3(b.x-cen.x,0,b.z-cen.z);if(raw.lengthSq()<1)raw.set(0,0,1);raw.normalize();
-  const dir=raw.lerp(new T.Vector3(0,0,1),.12).normalize();S.camDir.lerp(dir,S.camSnap?.5:.035).normalize();
+  const gd=new T.Vector3(b.x,0,b.z);const gl=gd.length()||1;gd.divideScalar(gl);const hk=S.carrier&&S.carrier===S.hero?.6:.3;const dir=raw.lerp(gd,hk).normalize();S.camDir.lerp(dir,S.camSnap?.5:.035).normalize();
   // a distância é calculada sem o giro do jogador: girar é só orbitar, sem aproximar/afastar
   const hd=camHDir(true),fwd=new T.Vector3(-hd.x,0,-hd.z);
   const pts=tg.filter(p=>{const v=new T.Vector3(p.x-b.x,0,p.z-b.z);const L=v.length();return L>1&&v.dot(fwd)/L>Math.cos(42*DEG)});
@@ -856,7 +856,7 @@ const camFov=()=>cam.aspect<1?60:44;
 function updCam(dt){const f=camFov();if(cam.fov!==f){cam.fov=f;cam.updateProjectionMatrix()}const hold=S.state==='drag'||S.state==='contact'||S.state==='kicking'||(S.state==='windup'&&S.role==='atk');const g=hold&&S.camF?S.camF:camGoal();S.camF=hold?g:null;const k=1-Math.exp(-dt*(S.state==='flight'?3.4:4.2));camLook.lerp(g.look,k);camPos.lerp(g.pos,k);
  cam.position.copy(camPos);if(S.shake>0){S.shake-=dt;cam.position.x+=R(-.2,.2)*S.shake*3;cam.position.y+=R(-.2,.2)*S.shake*3}cam.lookAt(camLook);
  sun.position.set(camLook.x-22,48,camLook.z+26);sun.target.position.copy(camLook);}
-function setCamPre(i,show){S.camPre=(i+3)%3;S.camTilt=0;try{localStorage.setItem('ml_cam3',String(S.camPre))}catch(e){}if(show){const t=$('camT');t.textContent='Câmera '+CAM_PRE[S.camPre].n.toLowerCase();t.hidden=false;clearTimeout(setCamPre.t);setCamPre.t=setTimeout(()=>t.hidden=true,1300)}}
+function setCamPre(i,show){S.camPre=(i+3)%3;S.camTilt=0;try{localStorage.setItem('ml_cam4',String(S.camPre))}catch(e){}if(show){const t=$('camT');t.textContent='Câmera '+CAM_PRE[S.camPre].n.toLowerCase();t.hidden=false;clearTimeout(setCamPre.t);setCamPre.t=setTimeout(()=>t.hidden=true,1300)}}
 // companheiros fora da tela: bolinha na borda com o número, apontando pra ele
 const edgeEls=new Map();
 function updEdges(){const box=$('edges');const show=S.mode==='play'&&(S.state==='aim'||S.state==='drag');if(!show){box.hidden=true;return}box.hidden=false;
@@ -1549,7 +1549,8 @@ function embedSend(res){S.embedDone=true;S.paused=true;try{parent.postMessage({t
 function embedPlay(c){S.paused=false;last=performance.now();S.ch=null;S.score={g:0,n:0};S.embedDone=false;applyCfg(c);startScen(c.scen);S.passGoal=c.goal==='pass'?1:0;
  $('scn').textContent=c.title||SC[c.scen].n;$('score').hidden=true;$('bMenu').textContent='Pular';$('bMenu').classList.remove('icon');
  S.introOpen=true;$('intro').hidden=false;$('inMin').textContent=c.min?c.min+"'":'Lance';$('inMin').hidden=!c.min;$('inT').textContent=c.head||SC[c.scen].n;$('inD').textContent=c.desc||SC[c.scen].d;
- $('inHow').textContent=S.passGoal?'Objetivo: acertar o passe. Puxe da bola na direção do companheiro.':S.role==='def'?'Toque na hora certa pra dar o bote. Arraste pra escolher a direção.':S.role==='gk'?'Arraste pro lado que a bola vai pra mergulhar.':'Puxe da bola pra trás e toque nela pra dar efeito.';$('hint').hidden=true}
+ $('inHow').textContent=S.passGoal?'Objetivo: acertar o passe. Puxe da bola na direção do companheiro.':S.role==='def'?'Toque na hora certa pra dar o bote. Arraste pra escolher a direção.':S.role==='gk'?'Arraste pro lado que a bola vai pra mergulhar.':'Puxe da bola pra trás e toque nela pra dar efeito.';$('hint').hidden=true
+ if(c.quick){S.introOpen=false;$('intro').hidden=true;flash(c.head||SC[c.scen].n);setHint()}}
 if(EMBED){$('inGo').onclick=()=>{sfxUnlock();S.introOpen=false;$('intro').hidden=true;setHint()};$('inSkip').onclick=()=>{$('intro').hidden=true;embedSend({skip:true})};
  addEventListener('message',e=>{const d=e.data||{};if(d.type==='ml-play'){resize();embedPlay(d.cfg||{})}});}
 /*SS_JS*/
