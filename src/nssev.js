@@ -70,7 +70,7 @@ const NS_EV=[
  {id:'ar_capa',ar:'art',c:()=>{try{const R=nsRace();return R&&R.gl[0]&&R.gl[0].me&&R.gl[0].v>0}catch(e){return false}},t:'Capa de revista',d:'Uma revista quer você na capa como artilheiro do campeonato.',o:[['Fazer a sessão de fotos',()=>['Capa linda.',{star:.6,rel:{fans:4},en:-5}]],['Pedir pra esperar o fim do campeonato',()=>['Humildade.',{rel:{team:3}}]]]},
  {id:'tv_prog',ar:'tv',c:()=>S.n.star.l>=3,t:'Programa de TV',d:'Um programa de domingo te convida pra um quadro de desafios.',o:[['Ir',()=>['Audiência recorde.',{din:nsW(.5),star:.5,en:-8}]],['Recusar',()=>['Domingo é dia de descanso.',{en:5}]]]}];
 
-function nsEvFx(fx){const n=S.n;const ch2=[];if(!fx)return ch2;const R=(t,v,good)=>ch2.push([t,good===undefined?(v>=0?'up':'down'):good?'up':'down']);
+function nsEvFx(fx){const n=S.n;const ch2=[];if(!fx)return ch2;if(fx.din&&Math.abs(fx.din)<1e-3){const k=fx.din/1e-6;fx={...fx,din:Math.sign(k)*Math.max(.002,((S.wage||5)/1000)*Math.abs(k))}}const R=(t,v,good)=>ch2.push([t,good===undefined?(v>=0?'up':'down'):good?'up':'down']);
  if(fx.din){S.din=Math.max(0,S.din+fx.din);R(`💰 ${fx.din>0?'+':'−'}${money(Math.abs(fx.din))}`,fx.din)}
  if(fx.en){n.en=clamp(n.en+fx.en,0,100);R(`❤️ Energia ${fx.en>0?'+':''}${fx.en}%`,fx.en)}
  if(fx.happy){n.happy=clamp(n.happy+fx.happy,0,100);R(`🙂 Felicidade ${fx.happy>0?'+':''}${fx.happy}`,fx.happy)}
