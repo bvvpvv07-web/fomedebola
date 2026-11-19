@@ -290,7 +290,7 @@ function renderHub(){
  $app.querySelectorAll('.ev .choice').forEach(b=>b.onclick=async()=>{
   if(EVRES)return;$app.querySelectorAll('.ev .choice').forEach(x=>x.disabled=true);b.classList.add('picked');
   document.getElementById('res').innerHTML='<div class="suspense"><i></i><i></i><i></i></div>';
-  await sleep(900);EVRES=resolveOption(PAUSE,+b.dataset.c);S.st.evlog.push({t:PAUSE.t,txt:EVRES.txt});renderHub();
+  const ev=PAUSE;await sleep(900);if(!ev||PAUSE!==ev)return;EVRES=resolveOption(ev,+b.dataset.c);S.st.evlog.push({t:ev.t,txt:EVRES.txt});renderHub();
  });
  on('evc',()=>{PAUSE=null;EVRES=null;renderHub();saveNow('season')});
 }

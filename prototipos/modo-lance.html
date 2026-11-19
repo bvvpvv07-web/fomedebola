@@ -813,7 +813,7 @@ function setHint(){const h=$('hint');
  if(S.state==='mate'){h.hidden=false;h.innerHTML=S.call?'Você pediu a bola! <b>Toque no campo</b> pra correr pro espaço.':'A bola está com o companheiro. <b>Toque no campo</b> pra correr · <b>toque em você</b> pra pedir a bola.';return}
  if(S.role==='def'&&(S.state==='defplay'||S.state==='defpass')){h.hidden=false;h.innerHTML=S.state==='defpass'?'Passe rolando! <b>Toque</b> pra se jogar na linha da bola.':S.runner&&S.carrier!==S.runner?'Marque o atacante. <b>Toque</b> quando ele tocar pra área.':'<b>Toque</b> pra dar o bote quando a bola sair do pé dele. <b>Arraste</b> pra escolher a direção.';return}
  if(S.role==='gk'&&(S.state==='gkwait'||S.state==='windup'||S.state==='flight')&&!S.gkUsed){h.hidden=false;h.innerHTML='<b>Arraste pro lado</b> que você acha que a bola vai. Pra cima pula alto, pra baixo cai rasteiro. Toque: fica no meio.';return}
- if(S.state==='aim'){h.hidden=false;h.innerHTML=S.press>1.7?'⚠️ Marcação em cima! <b>Arraste pro lado</b> pra driblar ou toque rápido.':S.presser&&S.hero&&S.carrier===S.hero&&Math.hypot(S.presser.pos.x-S.hero.pos.x,S.presser.pos.z-S.hero.pos.z)<4.6?'Marcador chegando! <b>↔ Arraste pro lado</b> pra DRIBLAR, ou puxe da bola pra tocar/chutar.':S.volley?'Bola quicando! <b>Puxe e solte</b> pra pegar de primeira.':S.scen==='rebote'&&S.chain===0&&S.gk&&S.gk.dive?'Rebote! <b>Chute rápido</b> antes de o goleiro levantar.':S.header?'Bola no alto! <b>Puxe o estilingue</b> pra cabecear ou pegar de primeira.':(S.passGoal?`Ache um <b style="color:#3ccf8e">círculo verde</b> (livre) e <b>puxe da bola pra trás</b> na direção dele. O número mostra a <b>força ideal</b>.`:S.chain?`Recebeu! Verde = <b>livre</b>, laranja = marcado. <b>Puxe da bola pra trás</b> pra tocar ou mire no gol pra chutar.`:`<b>Puxe a partir da bola pra trás</b> como um estilingue. <b style="color:#3ccf8e">Verde</b> = companheiro livre, <b style="color:#ff9f1c">laranja</b> = marcado. Fora da bola: <b>gira a câmera</b>.`)}else h.hidden=true}
+ if(S.state==='aim'){h.hidden=false;h.innerHTML=(S.fk||S.pen||(S.scen==='escanteio'&&S.chain===0))&&S.carrier===S.hero?'<b>Puxe pra trás</b> de qualquer lugar da tela e solte: o lado é a direção, o comprimento é a força. Depois toque na bola pro efeito.':S.press>1.7?'⚠️ Marcação em cima! <b>Chute ou toque rápido</b> antes de perder a bola.':S.presser&&S.hero&&S.carrier===S.hero&&Math.hypot(S.presser.pos.x-S.hero.pos.x,S.presser.pos.z-S.hero.pos.z)<4.6?'Marcador chegando! <b>Puxe da bola</b> e toque ou chute logo.':S.volley?'Bola quicando! <b>Puxe e solte</b> pra pegar de primeira.':S.scen==='rebote'&&S.chain===0&&S.gk&&S.gk.dive?'Rebote! <b>Chute rápido</b> antes de o goleiro levantar.':S.header?'Bola no alto! <b>Puxe o estilingue</b> pra cabecear ou pegar de primeira.':(S.passGoal?`Ache um <b style="color:#3ccf8e">círculo verde</b> (livre) e <b>puxe da bola pra trás</b> na direção dele. O número mostra a <b>força ideal</b>.`:S.chain?`Recebeu! Verde = <b>livre</b>, laranja = marcado. <b>Puxe da bola pra trás</b> pra tocar ou mire no gol pra chutar.`:`<b>Puxe a partir da bola pra trás</b> como um estilingue. <b style="color:#3ccf8e">Verde</b> = companheiro livre, <b style="color:#ff9f1c">laranja</b> = marcado. Fora da bola: <b>gira a câmera</b>.`)}else h.hidden=true}
 // ===================== CÂMERA =====================
 // Baixa e perto, atrás de quem tem a bola. Você pode girar (dois dedos girando / botão direito), inclinar (dois dedos pra cima e pra baixo),
 // dar zoom (pinça / roda) e trocar o ângulo no botão 🎥 (Perto, Média, Alta). Companheiros fora da tela aparecem na borda.
@@ -821,7 +821,7 @@ const CAM_PRE=[{n:'Atrás',pitch:14,k:1.12,yb:-.36},{n:'Média',pitch:23,k:1.62,
 S.camPan=new T.Vector3();S.zoom=1;S.camYaw=0;S.camTilt=0;S.camPre=0;try{const v=localStorage.getItem('ml_cam5');if(v!=null)S.camPre=clamp(+v,0,2)}catch(e){}
 const camLook=new T.Vector3(0,.8,30),camPos=new T.Vector3(0,20,50);S.camDir=new T.Vector3(0,0,1);
 // atrás das arquibancadas a câmera sobe acima delas
-let camLim=p=>{p.x=clamp(p.x,-70,70);p.z=clamp(p.z,-40,120);p.y=Math.max(p.y,1.2);if(Math.abs(p.x)>37.3)p.y=Math.max(p.y,3.6);const over=Math.max(Math.abs(p.x)-42.5,-6-p.z,0);if(over>0)p.y=Math.max(p.y,2+over*.8+5);return p};
+let camLim=p=>{p.x=clamp(p.x,-40.5,40.5);p.z=clamp(p.z,-9,114);p.y=Math.max(p.y,1.2);if(Math.abs(p.x)>37.3)p.y=Math.max(p.y,3.6);const over=Math.max(Math.abs(p.x)-42.5,-6-p.z,0);if(over>0)p.y=Math.max(p.y,2+over*.8+5);return p};
 const camPitch=()=>clamp(CAM_PRE[S.camPre].pitch+S.camTilt+(cam.aspect>1.2?7:0)+(S.scen==='escanteio'&&S.chain===0&&S.mode==='play'?(cam.aspect>1.2?-12:-5):0),7,78)*DEG;
 function camHDir(noUser){const d=S.camDir,y=(noUser?0:S.camYaw)+(S.camSide||0),c=Math.cos(y),s=Math.sin(y);return new T.Vector3(d.x*c+d.z*s,0,-d.x*s+d.z*c).normalize()}
 const fitCam=new T.PerspectiveCamera(50,1,.1,500);const _ray=new T.Vector3(),_fw=new T.Vector3();
@@ -844,7 +844,7 @@ function camGoal(){
   const fc=new T.Vector3(HP.x,1.2,HP.z).add(S.camPan);const look=anchorCam(o,fc,camHDir(),clamp(13+S.camTilt,5,60)*DEG,9.5*S.zoom,0,-.22);return{look,pos:o.position.clone()}}
  const spK=S.role==='atk'&&(S.pen||S.fk||(S.scen==='escanteio'&&S.chain===0));
  if(spK&&!flying&&S.carrier===S.hero&&S.mode==='play'){const cor=!S.pen&&!S.fk;const tgt=cor?new T.Vector3(0,0,9):new T.Vector3(0,0,0);const d0=new T.Vector3(b.x-tgt.x,0,b.z-tgt.z);if(d0.lengthSq()<.01)d0.set(0,0,1);d0.normalize();S.camDir.copy(d0);
-  const o=fitCam;o.fov=cam.fov;o.aspect=cam.aspect;o.updateProjectionMatrix();const Q=S.pen?{p:6,D:5.6,yb:-.46,xb:-.05}:S.fk?{p:8,D:6.6,yb:-.44,xb:-.1}:{p:17,D:8.4,yb:-.4,xb:-.2};
+  const o=fitCam;o.fov=cam.fov;o.aspect=cam.aspect;o.updateProjectionMatrix();const Q=S.pen?{p:7,D:6.2,yb:-.28,xb:-.05}:S.fk?{p:9,D:7,yb:-.26,xb:-.1}:{p:17,D:8.6,yb:-.2,xb:-.2};
   const fc=new T.Vector3(b.x,.35,b.z).add(S.camPan);const look=anchorCam(o,fc,camHDir(),clamp(Q.p+S.camTilt,4,60)*DEG,Q.D*S.zoom,Q.xb,Q.yb);S.spCam={look:look.clone(),pos:o.position.clone()};return{look,pos:o.position.clone()}}
  // falta e pênalti: a câmera fica atrás de quem bateu e você vê a bola ir pro gol
  if(flying&&S.role==='atk'&&(S.fkKick||S.pen)&&S.spCam&&!(S.result==='goal'&&S.now-S.resT>.9)){const L=S.spCam.look.clone().lerp(new T.Vector3(b.x,Math.min(b.y,3),b.z),.25);return{look:L,pos:S.spCam.pos.clone()}}
@@ -925,7 +925,7 @@ canvas.addEventListener('contextmenu',e=>e.preventDefault());
 // Dois dedos: arrastar move a câmera, pinça dá zoom, torcer também gira. No computador: botão direito move, roda dá zoom.
 S.yawVel=0;
 const orbitK=()=>2.3/Math.min(innerWidth,innerHeight);
-canvas.addEventListener('pointerdown',e=>{if(S.mode!=='play')return;canvas.setPointerCapture(e.pointerId);ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});sfxUnlock();S.yawVel=0;
+canvas.addEventListener('pointerdown',e=>{if(S.mode!=='play')return;try{canvas.setPointerCapture(e.pointerId)}catch(_){};ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});sfxUnlock();S.yawVel=0;
  if(S.role==='gk'){gest={type:'gk',sx:e.clientX,sy:e.clientY,done:false};return}
  if(S.role==='def'){gest={type:'def',sx:e.clientX,sy:e.clientY};return}
  if(ptrs.size===2){const[a,b]=[...ptrs.values()];const cx=(a.x+b.x)/2,cy=(a.y+b.y)/2;gest={type:'multi',d0:Math.hypot(a.x-b.x,a.y-b.y),a0:Math.atan2(b.y-a.y,b.x-a.x),z0:S.zoom,y0:S.camYaw,last:groundAt(cx,cy)};hideArrow();if(S.state==='drag'){S.state='aim';S.aim=null}return}
@@ -934,14 +934,15 @@ canvas.addEventListener('pointerdown',e=>{if(S.mode!=='play')return;canvas.setPo
  if(S.live&&S.state==='flight'&&S.role==='atk'){gest={type:'sling',live:true,sx:e.clientX,sy:e.clientY};return}
  const bs=toScreen(S.ball.p);const near=Math.hypot(e.clientX-bs.x,e.clientY-bs.y)<Math.max(86,Math.min(innerWidth,innerHeight)*.17);
  if(S.state==='aim'&&near&&!e.shiftKey){gest={type:'sling',sx:bs.x,sy:bs.y};S.state='drag'}
+ else if(S.state==='aim'&&!e.shiftKey&&S.role==='atk'&&S.carrier===S.hero&&(S.fk||S.pen||(S.scen==='escanteio'&&S.chain===0))){gest={type:'sling',virt:true,sx:e.clientX,sy:e.clientY};S.state='drag'}
  else if(S.state==='dribrun'){gest={type:'dswipe',sx:e.clientX,sy:e.clientY}}
  else gest={type:'orbit',lx:e.clientX,ly:e.clientY,lt:e.timeStamp,moved:0}});
-function panBy(g0,g1){if(!g0||!g1||g1.distanceTo(camPos)>140)return;const d=g0.clone().sub(g1);d.y=0;if(d.length()>4)d.setLength(4);S.camPan.add(d);S.camPan.x=clamp(S.camPan.x,-40,40);S.camPan.z=clamp(S.camPan.z,-30,60);camLook.add(d);camPos.add(d);cam.position.copy(camPos);cam.lookAt(camLook)}
+function panBy(g0,g1){if(!g0||!g1||g1.distanceTo(camPos)>140)return;const d=g0.clone().sub(g1);d.y=0;if(d.length()>4)d.setLength(4);S.camPan.add(d);if(S.camPan.length()>8)S.camPan.setLength(8);camLook.add(d);camPos.add(d);cam.position.copy(camPos);cam.lookAt(camLook)}
 canvas.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;ptrs.set(e.pointerId,{x:e.clientX,y:e.clientY});if(!gest)return;
  if(gest.type==='gk'){const dx=e.clientX-gest.sx,dy=e.clientY-gest.sy;if(!gest.done&&Math.hypot(dx,dy)>140){gest.done=true;userDive(dx,dy)}return}
  if(gest.type==='def'){const h=S.hero;if(!h)return;const len=Math.hypot(e.clientX-gest.sx,e.clientY-gest.sy);if(len<24){hideArrow();return}const g=groundAt(e.clientX,e.clientY);if(!g)return;const d=new T.Vector3(g.x-h.pos.x,0,g.z-h.pos.z);if(d.lengthSq()<.01)return;d.normalize();gest.tgt=g;showArrow(d,.55,.02);arrowG.position.set(h.pos.x,.02,h.pos.z);return}
- if(gest.type==='multi'){if(ptrs.size!==2)return;const[a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);S.zoom=clamp(gest.z0*gest.d0/Math.max(20,d),.5,1.8);
-  S.camYaw=gest.y0-wrapA(Math.atan2(b.y-a.y,b.x-a.x)-gest.a0);const g1=groundAt((a.x+b.x)/2,(a.y+b.y)/2);panBy(gest.last,g1);gest.last=groundAt((a.x+b.x)/2,(a.y+b.y)/2);return}
+ if(gest.type==='multi'){if(ptrs.size!==2)return;const[a,b]=[...ptrs.values()];const d=Math.hypot(a.x-b.x,a.y-b.y);S.zoom=clamp(gest.z0*gest.d0/Math.max(20,d),.6,1.45);
+  S.camYaw=gest.y0-wrapA(Math.atan2(b.y-a.y,b.x-a.x)-gest.a0);return}
  if(gest.type==='orbit'){const dx=e.clientX-gest.lx,dy=e.clientY-gest.ly,dt=Math.max(1,e.timeStamp-gest.lt)/1000;const dyaw=-dx*orbitK();S.camYaw+=dyaw;
   S.camTilt=clamp(S.camTilt+dy*.2,-14,42);S.yawVel=lerp(S.yawVel,dyaw/dt,.5);gest.lx=e.clientX;gest.ly=e.clientY;gest.lt=e.timeStamp;gest.moved+=Math.abs(dx)+Math.abs(dy);return}
  if(gest.type==='pan'){const g1=groundAt(e.clientX,e.clientY);panBy(gest.last,g1);gest.last=groundAt(e.clientX,e.clientY);return}
@@ -955,11 +956,11 @@ const endPtr=e=>{if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);if(!g
  if(gest.type==='hflick'){if(S.live&&S.live.head)headStrike(e.clientX-gest.sx,e.clientY-gest.sy);if(ptrs.size===0)gest=null;return}
  if(gest.type==='sling'&&gest.live){const mv=Math.hypot(e.clientX-gest.sx,e.clientY-gest.sy);hideArrow();try{hideTraj();$('pct').hidden=true;$('tgt').hidden=true}catch(_){}if(S.live&&S.state==='flight'){if(mv<14)liveTrap();else if(S.aim&&S.aim.power>=.07)liveStrike()}if(ptrs.size===0)gest=null;return}
  if(gest.type==='sling'&&S.state==='drag'){slingRelease()}
- if(gest.type==='orbit'){if(e.timeStamp-gest.lt>80)S.yawVel=0;S.yawVel=clamp(S.yawVel,-5,5)}
+ if(gest.type==='orbit'){if(e.timeStamp-gest.lt>80)S.yawVel=0;S.yawVel=clamp(S.yawVel,-5,5);if(gest.moved<10){if(e.timeStamp-(S.lastTap||0)<330){S.camPan.set(0,0,0);S.zoom=1;S.camYaw=0;S.camTilt=0;S.yawVel=0;flash('CÂMERA NORMAL')}S.lastTap=e.timeStamp}}
  if(ptrs.size===0)gest=null};
 canvas.addEventListener('pointerup',endPtr);canvas.addEventListener('pointercancel',e=>{ptrs.delete(e.pointerId);if(gest&&gest.type==='sling'){hideArrow();if(!gest.live)S.state='aim'}gest=null});
-canvas.addEventListener('wheel',e=>{e.preventDefault();S.zoom=clamp(S.zoom*(e.deltaY>0?1.08:.93),.5,1.8)},{passive:false});
-function slingMove(x,y){const bp=S.ball.p;const h=S.header?bp.y:S.volley?bp.y*.5:0;const gp=groundAt(x,y,h);const len=Math.hypot(x-gest.sx,y-gest.sy);
+canvas.addEventListener('wheel',e=>{e.preventDefault();S.zoom=clamp(S.zoom*(e.deltaY>0?1.08:.93),.6,1.45)},{passive:false});
+function slingMove(x,y){const bp=S.ball.p;const h=S.header?bp.y:S.volley?bp.y*.5:0;const len=Math.hypot(x-gest.sx,y-gest.sy);let gp;if(gest.virt){const bs=toScreen(bp);gp=groundAt(bs.x+(x-gest.sx),bs.y+(y-gest.sy),h)}else gp=groundAt(x,y,h);
  const power=clamp((len-14)/(Math.min(innerWidth,innerHeight)*.36),0,1);
  if(!gp||len<14){hideArrow();S.aim=null;return}
  let dir;if(gest.live){const g0=groundAt(gest.sx,gest.sy,h);if(!g0){hideArrow();return}dir=new T.Vector3(g0.x-gp.x,0,g0.z-gp.z)}else dir=new T.Vector3(bp.x-gp.x,0,bp.z-gp.z);if(dir.lengthSq()<1e-4){hideArrow();return}dir.normalize();
@@ -974,7 +975,7 @@ function slingMove(x,y){const bp=S.ball.p;const h=S.header?bp.y:S.volley?bp.y*.5
  else if(lab.t){const s2=toScreen(new T.Vector3(0,GH+.9,0));tg.hidden=false;tg.className='lbl shot';tg.textContent=lab.t;tg.style.transform=`translate(${s2.x}px,${s2.y}px) translate(-50%,-100%)`}
  else tg.hidden=true;
  showTraj(dir,power,0,0,lab.t)}
-function aimLabel(dir,power){const b=S.ball.p;let best=null,ba=9*DEG;if(S.fk||S.pen)return{t:S.pen?'PÊNALTI':'FALTA'};
+function aimLabel(dir,power){const b=S.ball.p;let best=null,ba=9*DEG;if(S.fk||S.pen)return{t:S.pen?'PÊNALTI':S.scen==='escanteio'||S.scen==='escCurto'?'ESCANTEIO':'FALTA'};
  // mirando dentro do gol (de perto) é chute, mesmo com companheiro na frente
  if(dir.z<-.05&&b.z<36){const gx=b.x+dir.x*(-b.z/dir.z);if(Math.abs(gx)<GW+.8){const gd=Math.hypot(gx-b.x,b.z);let pm=null;
   for(const m of S.mates){if(m===S.carrier)continue;const v=new T.Vector3(m.pos.x-b.x,0,m.pos.z-b.z);const d=v.length();if(d<2||d>gd*.75)continue;if(v.normalize().angleTo(dir)<7*DEG)pm=m}
