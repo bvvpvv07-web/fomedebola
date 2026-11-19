@@ -115,7 +115,7 @@ const DM_MATCH=[
   {t:'Reclamar firme com o árbitro',a:'MEN',b:.4,ok:'Ele ouviu e disse que vai prestar mais atenção.',bad:'Cartão amarelo por reclamação.',yBad:true,fx:{fama:1}},
   {t:'Bater boca com todo mundo',a:'MEN',b:.15,ok:'Sobrou pra todo mundo, menos pra você.',bad:'Perdeu a cabeça: cartão vermelho direto!',rBad:true,fxBad:{disc:-6,fama:-3}}]},
  {id:'cansaco',ic:'🥵',t:'Aos 75 minutos, você está morto',d:'As pernas pesam. O preparador físico olha pra você do banco.',o:[
-  {t:'Pedir pra sair',a:'MEN',b:.9,ok:'Saiu aplaudido. Corpo preservado.',bad:'Saiu e o time sentiu.',fx:{corpo:2}},
+  {t:'Pedir pra sair',out:true,a:'MEN',b:.9,ok:'Saiu aplaudido. Corpo preservado.',bad:'Saiu e o time sentiu.',fx:{corpo:2}},
   {t:'Seguir no sacrifício',a:'FIS',b:.55,ok:'Na raça, ainda deu um passe que virou gol. Assistência!',bad:'Sentiu a coxa. Lesão leve.',ast:true,injBad:2},
   {t:'Ficar mais recuado e economizar',a:'MEN',b:.7,ok:'Segurou o resultado ajudando na marcação.',bad:'Fez pouco, mas também não comprometeu.'}]},
  {id:'falta_comp',ic:'🤝',t:'Quem bate a falta?',d:'Falta perigosa. O camisa 10 do seu time já pegou a bola.',o:[
@@ -138,7 +138,7 @@ const DM_MATCH=[
   {t:'Provocar a torcida rival',a:'MEN',b:.6,ok:'Viralizou. Odiado por uns, idolatrado por outros.',bad:'Cartão amarelo por provocação.',yBad:true,fx:{fama:4,disc:-2}},
   {t:'Abraçar o banco de reservas',a:'MEN',b:.95,ok:'O vestiário gostou. Time unido.',bad:'O vestiário gostou.',fx:{cab:2,board:1}}],cond:o=>o.gu>0},
  {id:'lesao',ic:'🩹',t:'Você sentiu a coxa',d:'Uma fisgada depois de um pique. O médico pergunta se dá pra continuar.',o:[
-  {t:'Pedir substituição',a:'MEN',b:.9,ok:'Saiu na hora certa. Nada grave.',bad:'Saiu na hora certa.',fx:{corpo:1}},
+  {t:'Pedir substituição',out:true,a:'MEN',b:.9,ok:'Saiu na hora certa. Nada grave.',bad:'Saiu na hora certa.',fx:{corpo:1}},
   {t:'Continuar com dor',a:'FIS',b:.45,ok:'Aguentou e ainda participou do gol. Assistência!',bad:'Piorou. Vai ficar uns jogos fora.',ast:true,injBad:3}]},
  {id:'contra',ic:'💨',t:'Contra-ataque 3 contra 2',d:'Você puxa no meio, um companheiro de cada lado.',o:[
   {t:'Tocar pro da direita',a:'PAS',b:.55,ok:'Passe na medida, ele bateu cruzado. Gol, assistência sua!',bad:'Passe forte demais, saiu.',ast:true},
@@ -189,7 +189,7 @@ async function matchDecision(ctx){const pool=DM_MATCH.filter(m=>(!m.pos||m.pos==
    const big=ok?(op.goal?'GOOOL!':op.ast?'ASSISTÊNCIA!':op.assistOk?'PÊNALTI!':op.teamGoal?'GOL DO TIME!':'BOA!'):(op.rBad?'EXPULSO!':op.yBad?'AMARELO':op.injBad?'LESÃO':'NÃO DEU');return{big,good:ok&&!(op.fx&&Object.values(op.fx).some(v=>v<0)),chips:ch2}}});
  const op=r.o,ok=r.ok;const fx=ok?(op.fx||{}):(op.fxBad||op.fx||{});
  try{for(const k of['cab','fama','disc','corpo'])if(fx[k])S.life[k]=clamp(S.life[k]+fx[k],0,100);if(fx.board)S.board=clamp((S.board??50)+fx.board,0,100);if(fx.fans&&S.club){S.fans=S.fans||{};S.fans[S.club]=clamp((S.fans[S.club]??55)+fx.fans,0,100)}}catch(e){}
- return{goal:ok&&!!op.goal,assist:ok&&!!(op.ast||op.assistOk||op.teamGoal),teamOnly:ok&&(op.assistOk&&!op.ast||op.teamGoal),y:!ok&&!!op.yBad,r:!ok&&!!op.rBad,inj:!ok&&op.injBad?op.injBad:0}}
+ return{out:!!op.out,goal:ok&&!!op.goal,assist:ok&&!!(op.ast||op.assistOk||op.teamGoal),teamOnly:ok&&(op.assistOk&&!op.ast||op.teamGoal),y:!ok&&!!op.yBad,r:!ok&&!!op.rBad,inj:!ok&&op.injBad?op.injBad:0}}
 IO_UI.matchDecision=matchDecision;
 // ---------- estilo ----------
 {const st=document.createElement('style');st.textContent=`

@@ -345,7 +345,9 @@ async function playMine(o,io){
  const ashare=part.play?clamp(P.sa*clamp(1+(perf-base)/18,.4,1.7)*(part.min/90),0,.4):0;
  const usR=sideRoster(o.us,kind==='nat');const thR=sideRoster(o.them);
  // janela em campo
- const onFrom=part.play?(part.start?0:90-part.min):999,onTo=part.play?(part.start?part.min:90):-1;
+ const onFrom=part.play?(part.start?0:90-part.min):999;let onTo=part.play?(part.start?part.min:90):-1;
+ // saiu de campo (expulso, lesionado ou pediu pra sair): não volta mais
+ const leave=(m,k)=>{if(m>=onFrom&&m<onTo){onTo=m;if(live&&live.out)live.out(k)}};
  const onPitch=m=>m>=onFrom&&m<=onTo;
  const mMine=()=>RI(Math.max(1,onFrom),Math.max(Math.max(1,onFrom),onTo));
  const tl=[];
@@ -398,7 +400,7 @@ async function playMine(o,io){
   let feed=null;
   if(e.t==='dm'){if(onPitch(e.m)&&!r&&io.matchDecision){if(live){live.flash('🧠 Momento de decisão!');await sleep(S.liveSpeed===3?500:1100)}
     const d=await io.matchDecision({comp:o.comp,min:e.m,gu,gt});if(live)live.redraw();
-    if(d){if(d.y){if(y){r=1;y=0}else y=1}if(d.r){r=1;y=0}if(d.inj)inj=Math.max(inj,d.inj);
+    if(d){if(d.y){if(y){r=1;y=0}else y=1}if(d.r){r=1;y=0}if(d.inj)inj=Math.max(inj,d.inj);if(d.r||d.inj||d.out)leave(e.m,d.r?'r':d.inj?'inj':'out');
      if(d.goal){gu++;myG++;scorers.push({m:e.m,w:S.name,us:true});feed={t:'g',us:true,mine:true,w:S.name,m:e.m,gu,gt}}
      else if(d.assist){const w=scorerFrom(usR,S.name);gu++;if(!d.teamOnly)myA++;scorers.push({m:e.m,w,us:true});feed={t:'g',us:true,ast:!d.teamOnly,w,m:e.m,gu,gt}}}}
    e={...e,t:'skip'}}
@@ -422,6 +424,7 @@ async function playMine(o,io){
    }else if(ch(.76)){gt++;scorers.push({m:e.m,w:w+' (pên.)',us:false});feed={t:'g',us:false,w:w+' (pên.)',m:e.m,gu,gt}}else feed={t:'pmiss',us:false,w,m:e.m}
   }
   else feed=e;
+  if(feed&&(feed.t==='r'||feed.t==='inj')&&feed.m!=null)leave(feed.m,feed.t);
   if(live&&feed)await live.event(feed,gu,gt);
  }
  if(live)await live.until(90);
@@ -432,7 +435,7 @@ async function playMine(o,io){
  const cs=part.play&&S.pos==='GOL'&&gt===0&&part.min>=60;
  let nota=null;
  if(part.play){nota=6.35+(gu>gt?.4:gu<gt?-.35:0)+myG*.85+myA*.5+myD*.3+myP*.15-myPx*.06+(S.pos==='GOL'?(gt===0?.8:-.25*gt):0)+(perf-base)/18+(penNote==='defendeu pênalti'?.8:0)+randn()*.45-(r?1.5:0);nota=Math.round(clamp(nota,3,10)*10)/10}
- const me={play:part.play,why:part.why,start:part.start,min:part.play?part.min:0,g:myG,a:myA,nota,y,r,cs,inj,pen:penNote,fk:fkNote};
+ const me={play:part.play,why:part.why,start:part.start,min:part.play?Math.max(1,Math.min(part.min,Math.min(90,onTo)-onFrom)):0,g:myG,a:myA,nota,y,r,cs,inj,pen:penNote,fk:fkNote};
  return{gu,gt,me,scorers,perf,live};
 }
 // Registra nas estatísticas

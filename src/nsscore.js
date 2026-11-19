@@ -61,7 +61,8 @@ function nsGain(k,mul=1){const n=S.n;const s=n.sk[k];
 function nsAddP(k,g,chips){const n=S.n;const s=n.sk[k];s.p+=g;let up=0;while(s.p>=100&&s.l<99){s.p-=100;s.l++;up++}if(s.l>=99)s.p=Math.min(s.p,99);
  if(up){const before=S.ovr;nsSync();const nm=NSK.find(x=>x[0]===k)[1];if(chips)chips.push([`${nm} ${s.l}`,'up']);try{toast({ic:'📈',title:`${nm} subiu para ${s.l}!`,txt:S.ovr>before?`OVR ${before} → ${S.ovr}`:'Continue treinando.',ms:2200,group:'nsup'})}catch(e){}try{nsAchCheck()}catch(e){}}
  return up}
-function nsTrain(k,opt={}){const n=nsEnsure();const cost=opt.cost??nsTrainCost();
+const NS_TRAIN_MAX=3;
+function nsTrain(k,opt={}){const n=nsEnsure();const cost=opt.cost??nsTrainCost();if((n.trainW||0)>=NS_TRAIN_MAX&&!opt.free)return{ok:false,txt:'Você já fez as 3 sessões de treino desta rodada. Jogue a próxima partida.'};
  if(n.en<cost+(opt.min||0))return{ok:false,txt:`Energia baixa (${Math.round(n.en)}%). Descanse, jogue ou tome um energético.`};
  n.en=clamp(n.en-cost,0,100);const g=nsGain(k,opt.mul||1);const up=nsAddP(k,g);n.last[k]=n.week;n.trainW=(n.trainW||0)+1;n.trainT=(n.trainT||0)+1;
  if(n.rel.coach<100&&ch(.35))n.rel.coach=clamp(n.rel.coach+1,0,100);
@@ -103,9 +104,8 @@ function nsWeek(info={}){const n=nsEnsure();if(!n)return null;const st=S.st;n.we
  // estilo de vida e felicidade
  nsLsCalc();const tgt=32+(S.gf?n.rel.gf*.16:4)+n.ls*.22+n.rel.team*.1+n.rel.fans*.06+(S.din<0?-15:0)+(n.en<25?-6:0)+(info.res==='V'?6:info.res==='D'?-5:0);
  n.happy=clamp(n.happy+(tgt-n.happy)*.25,0,100);
+ let autoN=0;if(n.auto&&n.auto!=='off'){const keep=65;let guard=0;while(n.en-nsTrainCost()>=keep&&(n.trainW||0)<NS_TRAIN_MAX&&guard++<6){const k=n.auto==='eq'?nsWeakest():n.auto;const r=nsTrain(k,{mul:.7,auto:true});if(!r.ok)break;autoN++}}
  n.trainW=0;
- // treino automático (opcional)
- let autoN=0;if(n.auto&&n.auto!=='off'){const keep=65;let guard=0;while(n.en-nsTrainCost()>=keep&&guard++<6){const k=n.auto==='eq'?nsWeakest():n.auto;const r=nsTrain(k,{mul:.85});if(!r.ok)break;autoN++}}
  nsSync();
  n.wk={rows,tot,rent:rent*1000,en0,base,coach,props,en:n.en,drops,autoN,wk:st.nsWk,y:S.year,res:info.res||null,did:!!info.played};
  return n.wk}
