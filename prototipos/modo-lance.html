@@ -168,6 +168,7 @@ body.ss-on #banner{top:36%}
 @media (max-width:380px){.ss-t{min-width:40px;font-size:14px}#ssS{font-size:22px}.ss-me{min-width:50px}}
 #banner.rp{opacity:0}
 /*SS_CSS_END*/
+#hRing{position:fixed;left:0;top:0;width:0;height:0;z-index:12;pointer-events:none}#hRing[hidden]{display:none}#hRing i{position:absolute;left:0;top:0;width:64px;height:64px;border-radius:50%;transform:translate(-50%,-50%)}#hRing .c{border:4px solid #fff;box-shadow:0 0 0 3px rgba(0,0,0,.35)}#hRing .o{border:5px solid #ffd84a;box-shadow:0 0 12px rgba(255,216,74,.7)}#hRing.ok .c,#hRing.ok .o{border-color:#5fe06a;box-shadow:0 0 18px #5fe06a}#hRing b{position:absolute;left:0;top:48px;transform:translateX(-50%);white-space:nowrap;font:900 15px system-ui,sans-serif;color:#fff;text-shadow:0 2px 4px #000;letter-spacing:.04em}
 #cutCap{position:fixed;left:50%;top:calc(14px + env(safe-area-inset-top,0px));transform:translateX(-50%);z-index:30;display:grid;justify-items:center;gap:2px;padding:10px 18px;border-radius:16px;background:rgba(0,0,0,.55);color:#fff;text-align:center;font-family:system-ui,sans-serif;pointer-events:none;animation:cutIn .6s}#cutCap small{font-weight:900;font-size:12px;letter-spacing:.12em;text-transform:uppercase;color:#ffd84a}#cutCap b{font-weight:900;font-size:20px}#cutCap em{font-style:normal;font-weight:800;font-size:14px;color:#ffd84a;animation:cutFade .6s}@keyframes cutFade{from{opacity:0}to{opacity:1}}@keyframes cutIn{from{opacity:0;transform:translate(-50%,-10px)}to{opacity:1;transform:translate(-50%,0)}}
 </style>
 
@@ -791,7 +792,7 @@ function startScen(key){
  S.chain=0;S.header=false;S.result=null;S.firstShot=false;S.touches=[];assignRoles();
  if(S.ballSpot){S.ball.p.copy(S.ballSpot)}else placeBallAtFeet(S.carrier);
  S.ball.v.set(0,0,0);S.ball.w.set(0,0,0);S.ball.inGoal=false;if(S.role==='atk'){setupShape();assignRoles()}LINO.cele=null;LINO.vel.set(0,0,0);LINO.pos.set(35.6,0,clamp(Math.min(offLine(),S.ball.p.z),2,HALF));if(S.headHero){S.chain=-1;receive(S.headHero,true);S.chain=0;S.headHero=null;$('chainB').hidden=true}S.shotFrom=S.ball.p.clone();S.shooterFrom=S.shooter?S.shooter.pos.clone():null;if(S.gk&&!S.gk.mine)S.gk.pos.copy(gkSpot());if(sc.after)sc.after();
- S.slo=1;RP.buf=[];S.camPan.set(0,0,0);S.zoom=1;S.camYaw=0;S.camTilt=0;S.yawVel=0;S.state=S.role==='gk'?'gkwait':S.role==='def'?'defplay':'aim';S.mode='play';S.gkT=S.gkT0||R(1.4,2.2);S.gkT0=0;S.camFix=null;S.camFixRefresh=true;S.mateN=0;S.call=false;S.spCam=null;S.live=null;S.liveGone=false;S.flightTo=null;S.crossPlan=null;S.forceVel=null;S.heroPasses=0;S.dribN=0;S.drib=null;S.inPassV=null;S.wantHero=false;if(S.hero&&S.hero.ring){S.hero._mr=false}
+ S.slo=1;RP.buf=[];S.camPan.set(0,0,0);S.zoom=1;S.camYaw=0;S.camTilt=0;S.yawVel=0;S.state=S.role==='gk'?'gkwait':S.role==='def'?'defplay':'aim';S.mode='play';S.gkT=S.gkT0||R(1.4,2.2);S.gkT0=0;S.camFix=null;S.camFixRefresh=true;S.mateN=0;S.call=false;S.spCam=null;try{headRingHide()}catch(e){}S.live=null;S.liveGone=false;S.flightTo=null;S.crossPlan=null;S.forceVel=null;S.heroPasses=0;S.dribN=0;S.drib=null;S.inPassV=null;S.wantHero=false;if(S.hero&&S.hero.ring){S.hero._mr=false}
  S.dribLance=!!sc.drib;S.drib=null;S.dribUpT=0;S.dribCar=0;if(sc.drib&&S.role==='atk'&&S.carrier===S.hero){S.dribDefs=S.opps.filter(o=>o.role0==='dd').sort((a,b)=>b.pos.z-a.pos.z);S.dribDefs.forEach(o=>{o.beaten=false;o.sp=7});S.state='dribrun'}
  if(S.onlyHero&&S.incoming&&S.role==='atk'&&S.carrier===S.hero&&!sc.drib&&!S.fk&&!S.pen&&!S.header&&!S.volley&&!S.ballSpot&&!KG.cur&&!['escanteio','escCurto','lateral','tiroMeta','saida'].includes(key))incomingStart();
  if(S.onlyHero&&S.role==='atk'&&S.carrier&&S.hero&&S.carrier!==S.hero&&!S.fk&&!S.pen&&!S.header)mateBegin(S.carrier,true);
@@ -805,6 +806,7 @@ function placeBallAtFeet(p){const fx=-Math.sin(p.face),fz=-Math.cos(p.face);S.ba
 function updateScore(){if(S.ch&&S.ch.type==='pen'){const c=S.ch,d=a=>a.map(x=>x?'●':'○').join('');$('score').innerHTML=`<b>${d(c.ku)||'–'}</b>&nbsp;·&nbsp;${d(c.kt)||'–'}`;return}
  $('score').innerHTML=S.role==='def'?`🛡️ <b>${S.score.g}</b>&nbsp;desarme${S.score.g===1?'':'s'} · ${S.score.n}`:S.role==='gk'?`🧤 <b>${S.score.g}</b>&nbsp;defesa${S.score.g===1?'':'s'} · ${S.score.n}`:`⚽ <b>${S.score.g}</b>&nbsp;gol${S.score.g===1?'':'s'} · ${S.score.n} lance${S.score.n===1?'':'s'}`}
 function setHint(){const h=$('hint');
+ if(S.live&&S.live.head){h.hidden=false;h.innerHTML='🗣️ Quando o círculo <b>fechar e ficar verde</b>, arraste na direção do canto (pra cima = mais alto). Toque = no meio';return}
  if(S.live){h.hidden=false;h.innerHTML=S.ball.p.y>1.45?'⚡ Bola no alto! <b>Arraste e solte</b> pra cabecear · <b>toque</b> pra dominar':'⚡ De primeira! <b>Arraste e solte</b> pra bater · <b>toque</b> pra dominar';return}
  if(S.state==='dribble'){h.hidden=true;return}
  if(S.state==='dribrun'){h.hidden=false;h.innerHTML='Corra com a bola! Quando o marcador chegar: <b>arraste pro lado</b> pra driblar · <b>↑↑</b> carretilha';return}
@@ -837,6 +839,9 @@ function camGoal(){
   const pos=o.clone().addScaledVector(d,S.pen?5.6:6.4).addScaledVector(r,o.x<0?1.6:-1.6);pos.y=S.pen?4:S.fk?5.4:4.7;return{pos,look:new T.Vector3(S.shotFrom.x*.12,1.05,.4)}}const flying=S.state==='flight'||S.state==='result';const pitch=camPitch(),pre=CAM_PRE[S.camPre];
  if(S.role==='atk'&&S.state==='dribrun'&&S.hero){const h=S.hero;const gl=Math.hypot(h.pos.x,h.pos.z)||1;S.camDir.set(h.pos.x/gl*.35,0,1).normalize();const fc=new T.Vector3(h.pos.x,.9,h.pos.z-2.2).add(S.camPan);const o=fitCam;o.fov=cam.fov;o.aspect=cam.aspect;o.updateProjectionMatrix();
   const look=anchorCam(o,fc,camHDir(),clamp(12+S.camTilt,6,60)*DEG,8.2*S.zoom,0,-.3);return{look,pos:o.position.clone()}}
+ // cabeceio: câmera atrás do ponto onde você vai cabecear, olhando o gol
+ if(S.role==='atk'&&S.live&&S.live.head&&!S.live.head.missed){const HP=S.live.head.p;const d0=new T.Vector3(HP.x,0,HP.z);const L0=d0.length()||1;S.camDir.set(HP.x/L0,0,HP.z/L0);const o=fitCam;o.fov=cam.fov;o.aspect=cam.aspect;o.updateProjectionMatrix();
+  const fc=new T.Vector3(HP.x,1.2,HP.z).add(S.camPan);const look=anchorCam(o,fc,camHDir(),clamp(13+S.camTilt,5,60)*DEG,9.5*S.zoom,0,-.22);return{look,pos:o.position.clone()}}
  const spK=S.role==='atk'&&(S.pen||S.fk||(S.scen==='escanteio'&&S.chain===0));
  if(spK&&!flying&&S.carrier===S.hero&&S.mode==='play'){const cor=!S.pen&&!S.fk;const tgt=cor?new T.Vector3(0,0,9):new T.Vector3(0,0,0);const d0=new T.Vector3(b.x-tgt.x,0,b.z-tgt.z);if(d0.lengthSq()<.01)d0.set(0,0,1);d0.normalize();S.camDir.copy(d0);
   const o=fitCam;o.fov=cam.fov;o.aspect=cam.aspect;o.updateProjectionMatrix();const Q=S.pen?{p:6,D:5.6,yb:-.46,xb:-.05}:S.fk?{p:8,D:6.6,yb:-.44,xb:-.1}:{p:17,D:8.4,yb:-.4,xb:-.2};
@@ -925,6 +930,7 @@ canvas.addEventListener('pointerdown',e=>{if(S.mode!=='play')return;canvas.setPo
  if(S.role==='def'){gest={type:'def',sx:e.clientX,sy:e.clientY};return}
  if(ptrs.size===2){const[a,b]=[...ptrs.values()];const cx=(a.x+b.x)/2,cy=(a.y+b.y)/2;gest={type:'multi',d0:Math.hypot(a.x-b.x,a.y-b.y),a0:Math.atan2(b.y-a.y,b.x-a.x),z0:S.zoom,y0:S.camYaw,last:groundAt(cx,cy)};hideArrow();if(S.state==='drag'){S.state='aim';S.aim=null}return}
  if(e.button===2){gest={type:'pan',last:groundAt(e.clientX,e.clientY)};return}
+ if(S.live&&S.live.head&&!S.live.head.missed&&S.state==='flight'&&S.role==='atk'){gest={type:'hflick',sx:e.clientX,sy:e.clientY};return}
  if(S.live&&S.state==='flight'&&S.role==='atk'){gest={type:'sling',live:true,sx:e.clientX,sy:e.clientY};return}
  const bs=toScreen(S.ball.p);const near=Math.hypot(e.clientX-bs.x,e.clientY-bs.y)<Math.max(86,Math.min(innerWidth,innerHeight)*.17);
  if(S.state==='aim'&&near&&!e.shiftKey){gest={type:'sling',sx:bs.x,sy:bs.y};S.state='drag'}
@@ -939,12 +945,14 @@ canvas.addEventListener('pointermove',e=>{if(!ptrs.has(e.pointerId))return;ptrs.
  if(gest.type==='orbit'){const dx=e.clientX-gest.lx,dy=e.clientY-gest.ly,dt=Math.max(1,e.timeStamp-gest.lt)/1000;const dyaw=-dx*orbitK();S.camYaw+=dyaw;
   S.camTilt=clamp(S.camTilt+dy*.2,-14,42);S.yawVel=lerp(S.yawVel,dyaw/dt,.5);gest.lx=e.clientX;gest.ly=e.clientY;gest.lt=e.timeStamp;gest.moved+=Math.abs(dx)+Math.abs(dy);return}
  if(gest.type==='pan'){const g1=groundAt(e.clientX,e.clientY);panBy(gest.last,g1);gest.last=groundAt(e.clientX,e.clientY);return}
+ if(gest.type==='hflick'){const dx=e.clientX-gest.sx,dy=e.clientY-gest.sy;if(Math.hypot(dx,dy)>34){headStrike(dx,dy);gest=null}return}
  if(gest.type==='dswipe'){const dx=e.clientX-gest.sx,dy=e.clientY-gest.sy;if(Math.abs(dx)>36&&Math.abs(dx)>Math.abs(dy)*1.1){dribDodge(Math.sign(dx));gest=null}else if(dy<-36&&-dy>Math.abs(dx)*1.15){dribUp();gest=null}return}
  if(gest.type==='sling')slingMove(e.clientX,e.clientY)});
 const endPtr=e=>{if(!ptrs.has(e.pointerId))return;ptrs.delete(e.pointerId);if(!gest)return;
  if(gest.type==='orbit'&&gest.moved<14&&S.hero&&(S.state==='mate'||(S.state==='flight'&&S.carrier!==S.hero&&S.lastKicker===S.hero))){mateTap(e.clientX,e.clientY)}
  if(gest.type==='gk'){if(!gest.done){const dx=e.clientX-gest.sx,dy=e.clientY-gest.sy;Math.hypot(dx,dy)>16?userDive(dx*1.15,dy*1.15):userDive(0,0)}if(ptrs.size===0)gest=null;return}
  if(gest.type==='def'){const len=Math.hypot(e.clientX-gest.sx,e.clientY-gest.sy);defLunge(len>=24?gest.tgt:null);hideArrow()}
+ if(gest.type==='hflick'){if(S.live&&S.live.head)headStrike(e.clientX-gest.sx,e.clientY-gest.sy);if(ptrs.size===0)gest=null;return}
  if(gest.type==='sling'&&gest.live){const mv=Math.hypot(e.clientX-gest.sx,e.clientY-gest.sy);hideArrow();try{hideTraj();$('pct').hidden=true;$('tgt').hidden=true}catch(_){}if(S.live&&S.state==='flight'){if(mv<14)liveTrap();else if(S.aim&&S.aim.power>=.07)liveStrike()}if(ptrs.size===0)gest=null;return}
  if(gest.type==='sling'&&S.state==='drag'){slingRelease()}
  if(gest.type==='orbit'){if(e.timeStamp-gest.lt>80)S.yawVel=0;S.yawVel=clamp(S.yawVel,-5,5)}
@@ -1493,12 +1501,35 @@ function incomingStart(){const h=S.hero;if(offAllowed()&&offPos(h,offLine(),S.ba
 // ===================== BOLA VIVA =====================
 // Passe ou cruzamento vindo pra você: a bola NÃO para no seu pé. Câmera lenta; arraste e solte pra bater de primeira
 // (cabeçada se vier alta, voleio na meia altura). Rasteira sem toque: você domina. Alta sem toque: passa direto.
-function liveStart(){S.live={t:0};S.liveGone=false;sfx('tick');setHint();const y=S.ball.p.y;flash(y>1.6?'DE CABEÇA!':y>.45?'DE PRIMEIRA!':'BOLA CHEGANDO!')}
-function liveEnd(gone){S.live=null;if(gone){S.liveGone=true;flash('PASSOU…')}setHint()}
+function liveStart(){S.live={t:0};S.liveGone=false;sfx('tick');
+ // cabeceio: acha onde a bola passa mais perto de você; se for na altura da cabeça, liga o modo cabeceio (círculo de tempo + arrastar pro canto)
+ try{const h=S.hero;const pr=predict(S.ball,2.4);let best=null;for(const q of pr){const d=Math.hypot(q.x-h.pos.x,q.z-h.pos.z);if(!best||d<best.d)best={...q,d}}
+  if(best&&best.d<4.2&&best.y>=1.3&&best.y<=3.2&&best.z<34){const hy=clamp(best.y,1.5,2.6);const pt=pr.find(q=>q.t>=best.t*.6&&q.y<=2.7&&q.y>=1.4&&Math.hypot(q.x-h.pos.x,q.z-h.pos.z)<4.2)||best;S.live.head={tc:S.now+pt.t,T0:Math.max(.35,pt.t),p:new T.Vector3(pt.x,pt.y,pt.z)}}}catch(e){}
+ setHint();const y=S.ball.p.y;flash(S.live.head?'CABEÇADA!':y>.45?'DE PRIMEIRA!':'BOLA CHEGANDO!')}
+function liveEnd(gone){S.live=null;headRingHide();if(gone){S.liveGone=true;flash('PASSOU…')}setHint()}
 function liveTick(dt){const h=S.hero,b=S.ball.p;if(!h)return;const d=Math.hypot(b.x-h.pos.x,b.z-h.pos.z);const ap=(h.pos.x-b.x)*S.ball.v.x+(h.pos.z-b.z)*S.ball.v.z;
  if(!S.live){if(S.role==='atk'&&S.onlyHero&&!S.liveGone&&S.flightTo===h&&S.kicker!==h&&d<10&&ap>0&&!S.introOpen)liveStart();return}
  S.live.t+=dt;
+ const HD=S.live.head;if(HD&&!HD.missed){// você vai sozinho pro ponto de encontro; o círculo fecha na hora certa
+  const tgt=new T.Vector3(HD.p.x,0,HD.p.z);if(Math.hypot(tgt.x-h.pos.x,tgt.z-h.pos.z)>.25)steer(h,tgt,7.2,dt);setFacing(h,-h.pos.x,-h.pos.z,dt,6);headRingTick();
+  if(S.now>HD.tc+.34){HD.missed=true;headRingHide();flash('PASSOU DA HORA…')}}
  if((ap<0&&d>2.4)||S.live.t>2.6)liveEnd(true)}
+function headRingTick(){const HD=S.live&&S.live.head;if(!HD)return;let el=document.getElementById('hRing');if(!el){el=document.createElement('div');el.id='hRing';el.innerHTML='<i class="o"></i><i class="c"></i><b>⟵ ARRASTE PRO CANTO ⟶</b>';document.body.appendChild(el)}
+ const sp=toScreen(new T.Vector3(HD.p.x,clamp(HD.p.y,1.5,2.4),HD.p.z));const left=HD.tc-S.now;const k=clamp(left/HD.T0,0,1);const ok=Math.abs(left)<.16;
+ el.hidden=false;el.style.left=sp.x+'px';el.style.top=sp.y+'px';el.querySelector('.o').style.transform=`translate(-50%,-50%) scale(${1+k*2.4})`;el.classList.toggle('ok',ok)}
+function hRandn(){let u=0,v=0;while(!u)u=Math.random();while(!v)v=Math.random();return Math.sqrt(-2*Math.log(u))*Math.cos(2*Math.PI*v)}
+function headRingHide(){const el=document.getElementById('hRing');if(el)el.hidden=true}
+// arrastou durante a bola alta: horizontal escolhe o canto, pra cima deixa mais alta. O tempo (círculo) define força e precisão.
+function headStrike(dx,dy){const L=S.live;if(!L||!L.head||L.head.missed)return false;const h=S.hero,b=S.ball.p;const dtc=S.now-L.head.tc;const q=clamp(1-Math.abs(dtc)/.34,0,1);
+ const d=Math.hypot(b.x-h.pos.x,b.z-h.pos.z);
+ if(q<=0||d>3.4||b.y>3.2||b.y<.9){flash(dtc<0?'CEDO DEMAIS!':'TARDE DEMAIS!');L.head.missed=true;headRingHide();return false}
+ const W=Math.min(innerWidth,innerHeight);const nx=clamp(dx/(W*.28),-1.25,1.25),ny=clamp(-dy/(W*.28),-1,1.4);
+ const r=new T.Vector3().setFromMatrixColumn(cam.matrixWorld,0);const sg=r.x>=0?1:-1;
+ let gx=clamp(nx*3.5*sg,-3.9,3.9),gy=clamp(.85+ny*1.25,.12,2.7);const nz=(1-q)*1.3+(S.noiseK||.8)*.25;gx+=hRandn()*(.2+nz*.7);gy+=hRandn()*(.12+nz*.35);
+ h.pos.set(b.x+(h.pos.x-b.x)*.15,0,b.z+.25);if(h.vel)h.vel.set(0,0,0);
+ const P=b.clone(),Tg=new T.Vector3(gx,gy,0);const sp=12.5+8*q;const t=Math.max(.15,P.distanceTo(Tg)/sp);const v=Tg.clone().sub(P).divideScalar(t);v.y+=.5*G*t;
+ S.forceVel=v;S.header=true;S.volley=false;S.carrier=h;S.live=null;S.slo=1;S.chain++;S.receiver=null;S.passTo=null;S.passLead=null;S.passIdeal=null;S.aim={dir:new T.Vector3(v.x,0,v.z).normalize(),power:.6,label:'CABEÇADA'};
+ headRingHide();hideArrow();sfx('touch');flash(q>.82?'CABEÇADA PERFEITA!':q>.5?'BOA CABEÇADA!':'CABECEOU!');startKick(0,0);return true}
 function liveStrike(){const h=S.hero,b=S.ball.p;if(!S.live||!h||!S.aim)return false;const d=Math.hypot(b.x-h.pos.x,b.z-h.pos.z);if(d>3.6||b.y>2.75){flash('ESPERE A BOLA CHEGAR');return false}
  S.header=b.y>=1.45&&b.z<32;S.volley=!S.header&&b.y>.3;
  const dir=S.aim.dir;h.pos.set(b.x-dir.x*.42,0,b.z-dir.z*.42);if(h.vel)h.vel.set(0,0,0);h.face=Math.atan2(-dir.x,-dir.z);
@@ -2001,7 +2032,7 @@ function frame(now){const real=(now-last)/1000;const rdt=Math.min(.05,real);last
  update(rdt);renderer.render(scene,cam);adaptQ(real);requestAnimationFrame(frame)}
 showMenu();if(EMBED){S.paused=true;$('menu').hidden=true;try{parent.postMessage({type:'ml-ready'},'*')}catch(e){}}requestAnimationFrame(frame);
 // gancho de teste
-window.__defLunge=t=>defLunge(t);window.__SS={SS,ssDemo,ssStart,ssClock,ssEvent,ssEnd,ssLance,RP,rpStart,rpStop};window.__ML={applyCfg,cutStart,mateTap,toScreen,doDribble,liveStrike,liveTrap,dribDodge,dribUp,slingT:(sx,sy,x,y)=>{gest={type:'sling',sx,sy};S.state='drag';slingMove(x,y)},releaseT:()=>slingRelease(),kickT:(u,v)=>startKick(u,v),S,LINO,startScen,update,renderer,scene,camObj:cam,setEnv:e=>setEnv(e),render:()=>renderer.render(scene,cam),
+window.__defLunge=t=>defLunge(t);window.__SS={SS,ssDemo,ssStart,ssClock,ssEvent,ssEnd,ssLance,RP,rpStart,rpStop};window.__ML={applyCfg,cutStart,headStrike,mateTap,toScreen,doDribble,liveStrike,liveTrap,dribDodge,dribUp,slingT:(sx,sy,x,y)=>{gest={type:'sling',sx,sy};S.state='drag';slingMove(x,y)},releaseT:()=>slingRelease(),kickT:(u,v)=>startKick(u,v),S,LINO,startScen,update,renderer,scene,camObj:cam,setEnv:e=>setEnv(e),render:()=>renderer.render(scene,cam),
  kick:(dx,dz,p,u,v)=>{const dir=new T.Vector3(dx,0,dz).normalize();S.aim={dir,power:p,label:aimLabel(dir,p).t||'TOQUE'};kick(u,v)},
  shoot:(dx,dz,p,u,v)=>{const dir=new T.Vector3(dx,0,dz).normalize();S.aim={dir,power:p,label:aimLabel(dir,p).t||'TOQUE'};hideArrow();startKick(u,v)},
  drag:(dx,dz,p)=>{const dir=new T.Vector3(dx,0,dz).normalize();S.aim={dir,power:p};S.state='drag';showArrow(dir,p,.02)},

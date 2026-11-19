@@ -5,7 +5,7 @@
 // Tela principal: cartão do jogador com as cores do clube, rosto, OVR, estrela e energia.
 
 // ---------- treino em lances 3D ----------
-const NS_TR3D={vel:[['contra','finish'],['mano','dribble'],['lanca','long'],['contra3','pass']],for:[['longe','finish'],['escCab','header'],['voleio','finish'],['cabeca','header']],
+const NS_TR3D={vel:[['contra','finish'],['mano','dribble'],['lanca','long'],['contra3','pass']],for:[['longe','finish'],['escCab','header'],['voleio','finish'],['area','finish']],
  tec:[['driblar','dribble'],['driblarP','dribble'],['driblar','dribble'],['driblarP','dribble'],['driblar','dribble']],vis:[['enfiada','pass',1],['virada','pass',1],['tabela','pass',1],['saida','pass',1],['cruz','cross',1]],
  bp:[['falta','fk'],['escanteio','cross',1],['penalti','pen'],['faltaLonge','fk'],['faltaLat','cross',1]]};
 const NS_TR3D_GK={vel:[['gkMano','keeper'],['gkShot','keeper']],for:[['gkCab','keeper'],['gkShot','keeper']],tec:[['tiroMeta','pass',1],['gkShot','keeper']],vis:[['tiroMeta','pass',1],['gkMano','keeper']],bp:[['gkPen','keeper'],['gkFk','keeper']]};

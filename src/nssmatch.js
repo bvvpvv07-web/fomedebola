@@ -81,7 +81,7 @@ async function nsLiveStart(m){
  async function extraChance(){const P=S.pos;const atk=n.foc>=0;let type;
   if(P==='GOL')return;if((x.x.lc||0)>=(x.x.cap||3))return;x.x.lc=(x.x.lc||0)+1;
   const r=rnd();if(['ATA','SA','PE','PD'].includes(P))type=r<.62?chanceType({}):assistType();else if(['MEI','MC','ME','MD'].includes(P))type=r<.45?chanceType({}):assistType();else type=r<(atk?.35:.2)?chanceType({}):assistType();
-  if(!x.x.drK&&P!=='ZAG'&&ch(['ATA','SA','PE','PD','MEI','ME','MD'].includes(P)?.55:.3))type='dribble';else if(type==='dribble'&&x.x.drK)type=chanceType({})==='dribble'?'finish':type;if(type==='dribble')x.x.drK=1;
+  if(!x.x.drK&&P!=='ZAG'&&ch(['ATA','SA','PE','PD','MEI','ME','MD'].includes(P)?.55:.3))type='dribble';else if(type==='dribble'&&x.x.drK)type=chanceType({})==='dribble'?'finish':type;if(type==='dribble')x.x.drK=1;if(type==='header'&&ch(.65))type='finish';
   if(!x.x.tkK&&type!=='dribble'&&(['ZAG','LE','LD','VOL','MC'].includes(P)?ch(.55):ch(.2))){type='tackle';x.x.tkK=1}
   if(type==='tackle'){x.x.ch=(x.x.ch||0)+1;L.lastX=L.min;push({m:L.min,side:'t',t:`Contra-ataque do ${esc(th.n)}! <b>${ME}</b> volta na marcação…`,k:'nme'});api.flash('🛡️ Marcação: dê o bote na hora certa');await sleep(800);x.inX=true;let okT=false;try{okT=await IO_UI.chance({type:'tackle',planned:false,comp:m.o.comp,min:L.min})}catch(e){}x.inX=false;draw();
    if(okT){x.x.tk=(x.x.tk||0)+1;push({m:L.min,side:'u',t:`🛡️ <b>${ME}</b> desarma e mata o contra-ataque`,k:'nme'});api.flash('Desarme perfeito!')}
@@ -104,9 +104,9 @@ async function nsLiveStart(m){
  async function setPiece(){const P=S.pos;if(P==='GOL')return;if((x.x.lc||0)>=(x.x.cap||3))return;x.x.lc=(x.x.lc||0)+1;const bp=n.sk.bp.l;x.x.sp=(x.x.sp||0)+1;L.lastX=L.min;
   const wide=['PE','PD','ME','MD','MEI','LE','LD','MC','VOL','SA'].includes(P);const r=rnd();
   const usedK=x.x.spK||(x.x.spK=[]);const aerial=['ATA','SA','ZAG','VOL','MC'].includes(P);
-  const W=[['corner',wide||bp>=50?.42:.22],['head',aerial?.34:.14],['fk',S.taker.fk||bp>=52?.32:.2],['pen',S.taker.pen||bp>=58||ch(.3)?.13:0]].filter(([k,w])=>w>0&&!usedK.includes(k));
+  const W=[['corner',wide||bp>=50?.5:.32],['head',aerial?.12:.05],['fk',S.taker.fk||bp>=52?.32:.2],['pen',S.taker.pen||bp>=58||ch(.3)?.13:0]].filter(([k,w])=>w>0&&!usedK.includes(k));
   // o primeiro lance parado do jogo é sempre um escanteio (cobrar ou subir pra cabecear)
-  let kind;if(!usedK.includes('corner')&&!usedK.includes('head'))kind=(wide||bp>=50)&&!(aerial&&ch(.5))?'corner':'head';else{const tot=W.reduce((a,[,w])=>a+w,0);let q=rnd()*tot;kind=(W.find(([,w])=>(q-=w)<=0)||W[0]||['fk'])[0]}usedK.push(kind);void r;
+  let kind;if(!usedK.includes('corner')&&!usedK.includes('head'))kind='corner';else{const tot=W.reduce((a,[,w])=>a+w,0);let q=rnd()*tot;kind=(W.find(([,w])=>(q-=w)<=0)||W[0]||['fk'])[0]}usedK.push(kind);void r;
   const T={pen:['🎯 PÊNALTI! A bola é sua','Pênalti! <b>'+ME+'</b> vai pra bola'],fk:['🧱 Falta perigosa: você bate','Falta na entrada da área. <b>'+ME+'</b> ajeita a bola'],corner:['🚩 Escanteio: você cobra','Escanteio. <b>'+ME+'</b> vai pra bandeirinha'],head:['🚩 Escanteio: suba pra cabecear','Escanteio pro '+esc(us.n)+'. <b>'+ME+'</b> entra na área']}[kind];
   push({m:L.min,side:'u',t:T[1],k:'nme'});x.x.ch=(x.x.ch||0)+1;
   let ok,auto=false;const sk=k=>typeof skillOf==='function'?skillOf(k):.6;
