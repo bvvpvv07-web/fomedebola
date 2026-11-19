@@ -352,6 +352,7 @@ function ceremonyUI(c){
    rev.innerHTML=`<div class="winner ${w.me?'me':''}"><div class="tro rise">${TROPHY('bola',{n:'Bola de Ouro'})}</div>${nomCard(w,'big')}${w.me?'<h3 class="champ">VOCÊ É O MELHOR DO MUNDO</h3>':''}</div>`;
    rev.scrollIntoView({block:'center',behavior:reduced?'auto':'smooth'});
    if(w.me)confetti($ov,['#f2c443','#fff4c4','#e2ad34','#ffffff'],5200);
+   if(!w.me)rev.insertAdjacentHTML('beforeend',`<p class="muted" style="text-align:center;margin:8px 0 0">${c.place>0&&c.place<=10?`Você ficou em ${c.place}º lugar.`:c.place>10?`Você ficou em ${c.place}º na votação. Faça uma temporada histórica pra entrar no top 10.`:'Você não jogou o suficiente pra entrar na votação (mínimo 20 jogos).'}</p>`);
    done();return;
   }
   $ov.innerHTML=`<div class="ovwrap cer"><div class="spot"></div><div class="eyebrow">${esc(c.sub||'Premiação')}</div><h2 class="pkh">${esc(c.title)}</h2>${c.stat?`<div class="muted mono" style="font-size:13px">${esc(c.stat)}</div>`:''}

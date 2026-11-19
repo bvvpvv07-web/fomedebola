@@ -865,7 +865,8 @@ function endSeason(){
  if(wc&&wc.called){const g=wc.path.reduce((s,r)=>s+(r.me&&r.me.g||0),0);if(g>=5)awards.push({t:'chuteira',n:'Chuteira de Ouro da Copa',d:`${g} gols na Copa`});const ns=wc.path.filter(r=>r.me&&r.me.nota).map(r=>r.me.nota);if(ns.length>=5&&ns.reduce((a,b)=>a+b,0)/ns.length>=7.7&&['Semifinal','Final'].includes(wc.out||'Final'))awards.push({t:'bola',n:'Bola de Ouro da Copa',d:'Melhor jogador do Mundial',minor:true})}
  // ordem: liga, posição, artilheiro, golden boy, chuteira, luva, bola de ouro (principal)
  const ORD={pos:0,art:1,liga:2,gb:3,chut:4,luva:5};cer.sort((a,b)=>ORD[a.k]-ORD[b.k]);
- if(place<=10&&tot.j>=20)cer.push({k:'bola',ic:'bola',title:'Bola de Ouro',sub:`Cerimônia ${S.year+1}`,top10,place,winner:top10[0].n});
+ // a cerimônia da Bola de Ouro acontece todo ano, você indicado ou não
+ if(S.age>=16)cer.push({k:'bola',ic:'bola',title:'Bola de Ouro',sub:`Cerimônia ${S.year+1}`,top10,place:tot.j>=20?place:0,winner:top10[0].n});
  // ---- registros ----
  const cs=S.clubs[me.id]||(S.clubs[me.id]={seasons:0,games:0,goals:0,assists:0,cs:0,titles:[],first:S.year});
  const clubGames=tot.j-(st.stats['Seleção']?st.stats['Seleção'].j:0);
