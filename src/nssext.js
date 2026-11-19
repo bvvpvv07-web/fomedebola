@@ -5,12 +5,12 @@
 
 // ---------- um jogo por vez ----------
 {const _nsS2=nsSync;nsSync=function(){const r=_nsS2.apply(this,arguments);try{if(S&&S.n){S.fast=false;S.liveMode='all'}}catch(e){}return r}}
-{const _ff=typeof fastForward==='function'?fastForward:null;if(_ff)fastForward=function(...a){if(nsOn()){toast({ic:'⚽',title:'Um jogo de cada vez',txt:'Jogue a partida ou use ⏭ dentro dela pra simular só aquele jogo.',ms:2600});return}return _ff.apply(this,a)}}
+{const _ff=typeof fastForward==='function'?fastForward:null;if(_ff)fastForward=function(...a){if(nsOn()){toast({ic:'⚽',title:'Um jogo de cada vez',txt:'Todo jogo é jogado. Toque em Jogar pra entrar em campo. Nada é simulado.',ms:2600});return}return _ff.apply(this,a)}}
 nsCfgSheet=function(){const v=S.matchMode||'old',lm=S.lanceMode||'jogar',lc=S.lances||'todos';
  nsPop({ic:'⚙️',title:'Opções do jogo',html:`<div class="nscfg">
   <div class="livemode"><span class="eyebrow">Partida</span><button class="lmbtn ${v==='old'?'on':''}" data-cf="mm:old">📋 Narração + lances 3D</button><button class="lmbtn ${v==='sess'?'on':''}" data-cf="mm:sess">🏟️ Tudo no 3D</button></div>
-  <div class="livemode"><span class="eyebrow">Seus lances</span><button class="lmbtn ${lc!=='off'&&lm==='jogar'?'on':''}" data-cf="lm:jogar">🎮 Jogar</button><button class="lmbtn ${lc!=='off'&&lm==='decidir'?'on':''}" data-cf="lm:decidir">🧠 Decidir</button><button class="lmbtn ${lc==='off'?'on':''}" data-cf="lm:off">Automático</button></div>
-  <p class="muted" style="margin:0;font-size:13px">Cada jogo é um por vez. Pra simular só o jogo de agora, toque em <b>⏭</b> durante a partida.</p></div>`,
+  <div class="livemode"><span class="eyebrow">Seus lances</span><button class="lmbtn ${lc!=='off'&&lm==='jogar'?'on':''}" data-cf="lm:jogar">🎮 Jogar</button><button class="lmbtn ${lc!=='off'&&lm==='decidir'?'on':''}" data-cf="lm:decidir">🧠 Decidir</button></div>
+  <p class="muted" style="margin:0;font-size:13px">Todo jogo é jogado, um por vez, do começo ao fim. Nada é simulado.</p></div>`,
   bind:h=>h.querySelectorAll('[data-cf]').forEach(b=>b.onclick=()=>{const[k,val]=b.dataset.cf.split(':');if(k==='mm')S.matchMode=val;else if(k==='lm'){if(val==='off')S.lances='off';else{S.lances='todos';S.lanceMode=val}}
    b.parentElement.querySelectorAll('.lmbtn').forEach(x=>x.classList.toggle('on',x===b));try{saveNow('opts')}catch(e){}})})};
 // sem pré-temporada: depois do balanço e das propostas, direto pra tela principal

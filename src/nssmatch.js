@@ -38,7 +38,7 @@ async function nsLiveStart(m){
  const drinks=()=>Object.values(n.dr).reduce((s,v)=>s+v,0);
  const draw=()=>{$ov.hidden=false;const[hg,ag]=sc();
   $ov.innerHTML=`<div class="nslive">
-  <div class="nsl-top"><span class="nspc">${esc(m.o.comp)}${m.o.label?' · '+esc(m.o.label):''}</span><b class="clk" id="nlClk">${L.ended?'Fim':L.min+"'"}</b><div class="spd">${[[1,'▶'],[3,'▶▶'],[0,'⏭']].map(([k,t])=>`<button data-sp="${k}" class="${spd()===k?'on':''}" aria-label="${k===0?'Pular pro fim':k===3?'Rápido':'Normal'}">${t}</button>`).join('')}</div></div>
+  <div class="nsl-top"><span class="nspc">${esc(m.o.comp)}${m.o.label?' · '+esc(m.o.label):''}</span><b class="clk" id="nlClk">${L.ended?'Fim':L.min+"'"}</b><div class="spd">${[[1,'▶'],[3,'▶▶']].map(([k,t])=>`<button data-sp="${k}" class="${spd()===k?'on':''}" aria-label="${k===0?'Pular pro fim':k===3?'Rápido':'Normal'}">${t}</button>`).join('')}</div></div>
   <div class="nsl-score"><div class="tm" style="background:${cH[0]};color:${pickInk(cH[0])}">${esc(H.n)}</div><b id="nlH">${hg}</b><b id="nlA">${ag}</b><div class="tm" style="background:${cA[0]};color:${pickInk(cA[0])}">${esc(A.n)}</div></div>
   ${m.agg?`<div class="nsl-agg">Ida ${m.agg[0]}–${m.agg[1]} · agregado <span id="nlAgg">${m.agg[0]+L.gu+(x.x.gu||0)}–${m.agg[1]+L.gt+(x.x.gt||0)}</span></div>`:''}
   <div class="nsl-time"><i id="nlBar" style="width:${L.min/90*100}%"></i></div>

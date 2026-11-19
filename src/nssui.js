@@ -458,3 +458,16 @@ ${sel(6,'.nsx-art')}{padding:6px 10px}
 ${sel(7,'.nsx-art')}{display:none}
 ${sel(7,'.nsx-2')}{display:none}
 `;document.head.appendChild(st)}
+
+// ================= TODO JOGO É JOGADO (INCLUSIVE NA BASE) =================
+// Na base, o jogo do profissional não passa mais só como resultado: logo depois você joga o jogo da base, ao vivo, como titular.
+{const _paB=participation;participation=function(k,o){const r=_paB(k,o);if(o&&o.nsBase&&!r.play&&(r.why==='banco'||r.why==='base'))return{play:true,start:true,min:90,role:'Titular'};return r}}
+{const _pmB=playMine;playMine=async function(o,io){const r=await _pmB.apply(this,arguments);
+ try{if(nsOn()&&S.youth&&io&&io.live&&(o.kind||'club')==='club'&&!o.youthS&&!o.debut&&!o.nsBase&&r&&r.me&&!r.me.play&&r.me.why==='base'&&o.them&&o.them.id&&CLUB[o.them.id]){
+  const c=club();const us=youthSide(c.id),them=youthSide(o.them.id);const cat=S.age<=17?'Sub-17':'Sub-20';
+  const r2=await playMine({us,them,home:o.home,neutral:o.neutral,comp:`Base · ${cat}`,label:'Jogo da base',kind:'club',youthS:us.s,live:true,nsBase:true},io);
+  if(r2&&r2.live)await r2.live.finish({msg:'Fim do jogo da base.'})}}catch(e){console.error(e)}return r}}
+// nada de lance automático
+{const _mgL=nsMig;nsMig=function(){_mgL.apply(this,arguments);try{if(S.lances==='off'||S.lances==='decisivos')S.lances='todos';S.liveMode='all'}catch(e){}}}
+// pós-jogo: o "jogo do profissional" da base não aparece quando você jogou o da base
+{const _npm=nsPostMatch;nsPostMatch=async function(){try{const P=NSSM.post||[];if(P.some(p=>p.me&&p.me.play))NSSM.post=P.filter(p=>!(p.me&&!p.me.play&&p.me.why==='base'))}catch(e){}return _npm.apply(this,arguments)}}
