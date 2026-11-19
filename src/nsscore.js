@@ -57,7 +57,7 @@ function nsTrainCost(){const n=S.n;return clamp(Math.round(11-(n.rel.coach-50)/2
 function nsAgeF(){const a=S.age;return a<=18?1.35:a<=21?1.2:a<=24?1:a<=27?.8:a<=30?.55:a<=33?.35:.2}
 function nsGain(k,mul=1){const n=S.n;const s=n.sk[k];
  const capF=clamp((n.cap[k]-s.l)/10+.15,.1,1.3),lvlF=clamp(1.25-(s.l-50)/100,.6,1.4),coachF=.85+n.rel.coach/333;
- return clamp(Math.round(10*nsAgeF()*capF*lvlF*coachF*mul*R(.85,1.15)),1,60)}
+ return clamp(Math.round(10*nsAgeF()*capF*lvlF*coachF*mul*(1+((nsTrK()||{}).tg||0))*R(.85,1.15)),1,60)}
 function nsAddP(k,g,chips){const n=S.n;const s=n.sk[k];s.p+=g;let up=0;while(s.p>=100&&s.l<99){s.p-=100;s.l++;up++}if(s.l>=99)s.p=Math.min(s.p,99);
  if(up){const before=S.ovr;nsSync();const nm=NSK.find(x=>x[0]===k)[1];if(chips)chips.push([`${nm} ${s.l}`,'up']);try{toast({ic:'📈',title:`${nm} subiu para ${s.l}!`,txt:S.ovr>before?`OVR ${before} → ${S.ovr}`:'Continue treinando.',ms:2200,group:'nsup'})}catch(e){}try{nsAchCheck()}catch(e){}}
  return up}
@@ -76,18 +76,21 @@ function nsCt(){const n=S.n;if(!n)return null;const w=S.wage||0;
  if(!n.ct||n.ct.wage!==w){const rg=n.ct&&n.ct.rg||.22,ra=n.ct&&n.ct.ra||.13;n.ct={wage:w,rg,ra,gb:Math.max(w>0?1:0,Math.round(w*rg)),ab:Math.max(w>0?1:0,Math.round(w*ra))}}
  return n.ct}
 const NS_AGENT={tubarao:.12,normal:.07,pai:.03};
-function nsAgentPct(){return NS_AGENT[S.agent]??.06}
+function nsAgentPct(){try{const a=S.n&&S.n.staff&&S.n.staff.ag;return a?(NS_STAFF.ag[a.t-1]||{}).pct||0:0}catch(e){return 0}}
+function nsTrK(){try{const a=S.n&&S.n.staff&&S.n.staff.tr;return a?NS_STAFF.tr[a.t-1]||null:null}catch(e){return null}}
+function nsHasSp(){const n=S.n;return!!(n&&n.sps&&Object.keys(n.sps).length)}
+function nsSpW(){const n=S.n;if(!n||!n.sps)return 0;let t=0;for(const k in n.sps)t+=n.sps[k].w||0;return t}
 // ---------- semana: dinheiro, energia, decadência, relacionamentos ----------
 function nsMatchItems(){const st=S.st;if(!st)return 40;if(!st.nsN){st.nsN=Math.max(30,st.cal.filter(it=>it.k!=='ev'&&it.k!=='debut').length)}return st.nsN}
 function nsWeek(info={}){const n=nsEnsure();if(!n)return null;const st=S.st;n.week++;st.nsWk=(st.nsWk||0)+1;
  const f=52/nsMatchItems();const net=.5;const ag=nsAgentPct();const ct=nsCt();
- const sal=(S.wage||0)*f*net,gb=(info.g||0)*ct.gb*net,ab=(info.a||0)*ct.ab*net,sp=n.spon?n.spon.w*f*net:0;
+ const sal=(S.wage||0)*f*net,gb=(info.g||0)*ct.gb*net,ab=(info.a||0)*ct.ab*net,sp=nsSpW()*net*(S.captain?1.1:1);
  const rows={sal:[sal,sal*ag],g:[gb,gb*ag],a:[ab,ab*ag],sp:[sp,sp*ag],gN:info.g||0,aN:info.a||0};
  let tot=0;for(const k of['sal','g','a','sp'])tot+=rows[k][0]+rows[k][1];
  let rent=0;try{rent=rentWeek()*f}catch(e){}
  tot+=rent*1000;S.din+=tot/1000;st.paid=(st.paid||0)+sal/1000;
  // energia: 6 dias de descanso + treinador + imóveis
- const base=51,coach=Math.round(n.rel.coach/100*30),props=nsPropEn();const en0=n.en;n.en=clamp(n.en+base+coach+props,0,100);
+ const base=51+Math.round(n.rel.coach/100*8),coach=(nsTrK()||{}).en||0,props=nsPropEn();const en0=n.en;n.en=clamp(n.en+base+coach+props,0,100);
  // habilidades sem treino caem
  const drops=[];const P=POS[S.pos];const old=S.age>P.peak+1?(S.age-P.peak-1):0;
  for(const[k,nm]of NSK){const s=n.sk[k];const idle=n.week-(n.last[k]||0);let d=0;
@@ -96,7 +99,7 @@ function nsWeek(info={}){const n=nsEnsure();if(!n)return null;const st=S.st;n.we
  // relacionamentos esfriam aos poucos
  const R0={...n.rel};n.rel.coach=clamp(n.rel.coach-1.2+(n.trainW>=2?1:0),0,100);n.rel.team=clamp(n.rel.team-.9,0,100);n.rel.fans=clamp(n.rel.fans-(n.star.l>=10?.6:1.1),0,100);
  if(S.gf)n.rel.gf=clamp(n.rel.gf-(S.rel==='casado'?1:1.6),0,100);
- if(n.spon){n.rel.spon=clamp(n.rel.spon-1,0,100);if(n.rel.spon<12){(st.lifeNews=st.lifeNews||[]).push(`A ${n.spon.n} encerrou o patrocínio. Faltou aparecer.`);n.spon=null;n.rel.spon=0}}
+ try{nsSpWeek(st);nsStaffWeek(st)}catch(e){console.error(e)}
  // estilo de vida e felicidade
  nsLsCalc();const tgt=32+(S.gf?n.rel.gf*.16:4)+n.ls*.22+n.rel.team*.1+n.rel.fans*.06+(S.din<0?-15:0)+(n.en<25?-6:0)+(info.res==='V'?6:info.res==='D'?-5:0);
  n.happy=clamp(n.happy+(tgt-n.happy)*.25,0,100);
@@ -301,8 +304,8 @@ async function nsRelAct(k){const n=S.n;const cost=nsRelCost(k);let txt='',chips=
  nsSync();await nsPop({ic,title:NS_REL.find(x=>x[0]===k)[1],txt,chips});nsRefresh()}
 function nsVidaPage(){return{t:'Vida',cls:'vida',html:()=>{const n=S.n;
   return`<div class="nsv-top"><div class="nsv-b"><small>Felicidade</small>${nsBarHTML(n.happy,'hap')}<b>${Math.round(n.happy)}%</b></div><div class="nsv-b"><small>Energia</small>${nsBarHTML(n.en)}<b>${Math.round(n.en)}%</b></div></div>
-  ${NS_REL.map(([k,nm,ic])=>{const I=nsRelInfo(k);const v=n.rel[k];const off=(k==='gf'&&!S.gf)||(k==='spon'&&!n.spon);
-   return`<div class="nsrel ${off?'off':''}"><button class="nsrel-m" data-ri="${k}"><b>${nm}${k==='gf'&&S.gf?' · '+esc(S.gf.n):k==='spon'&&n.spon?' · '+esc(n.spon.n):''}</b>${nsBarHTML(off?0:v,'rel')}<small>${esc(I.act)} · ${esc(I.sub)}</small></button><button class="nsrel-go" data-ra="${k}" aria-label="${esc(I.act)}">${ic}</button></div>`}).join('')}
+  ${NS_REL.map(([k,nm,ic])=>{const I=nsRelInfo(k);const v=n.rel[k];const off=(k==='gf'&&!S.gf)||(k==='spon'&&!nsHasSp());
+   return`<div class="nsrel ${off?'off':''}"><button class="nsrel-m" data-ri="${k}"><b>${nm}${k==='gf'&&S.gf?' · '+esc(S.gf.n):k==='spon'&&nsHasSp()?' · '+Object.keys(n.sps).length+' marca'+(Object.keys(n.sps).length>1?'s':''):''}</b>${nsBarHTML(off?0:v,'rel')}<small>${esc(I.act)} · ${esc(I.sub)}</small></button><button class="nsrel-go" data-ra="${k}" aria-label="${esc(I.act)}">${ic}</button></div>`}).join('')}
   <div class="nsv-more"><button class="nsc b" id="nsMoreB"><span>🌍</span><div><b>Mais da vida</b><small>médico, academia, balada, estudos, música, hobbies, o lado errado…</small></div></button><button class="nsc b" id="nsNews2"><span>📰</span><div><b>Notícias</b><small>feed das redes e jornal</small></div></button></div>`},
  bind:B=>{B.querySelectorAll('[data-ra]').forEach(b=>b.onclick=()=>nsRelAct(b.dataset.ra));B.querySelectorAll('[data-ri]').forEach(b=>b.onclick=()=>{const I=nsRelInfo(b.dataset.ri);nsPop({ic:NS_REL.find(x=>x[0]===b.dataset.ri)[2],title:NS_REL.find(x=>x[0]===b.dataset.ri)[1],txt:I.d})});
   const m=B.querySelector('#nsMoreB');if(m)m.onclick=()=>{try{nsHost().hidden=true;blOpen(vidaPage())}catch(e){console.error(e);nsHost().hidden=false}};const nw=B.querySelector('#nsNews2');if(nw)nw.onclick=nsNews},
@@ -328,12 +331,12 @@ async function nsDrinkPick(){const n=S.n;const have=NS_DRINKS.filter(d=>n.dr[d.i
  const d=NS_DRINKS.find(x=>x.id===k);if(!d)return null;const chips=nsDrink(d);await nsPop({ic:d.ic,title:d.n,txt:`Energia agora em ${Math.round(n.en)}%.`,chips});nsRefresh();if(!NSP.stack.length)renderHub();return d}
 function nsDrink(d){const n=S.n;n.dr[d.id]--;const chips=[];const e0=n.en;n.en=clamp(n.en+d.en,0,100);chips.push([`Energia +${Math.round(n.en-e0)}%`,'up']);
  if(d.sk){const ks=d.sk>=3?NSK.map(x=>x[0]):[nsWeakest()];for(const k of ks){const g=Math.round(d.skp*R(.8,1.2));nsAddP(k,g);chips.push([`${NSK.find(x=>x[0]===k)[1]} +${g}%`,'gold'])}}
- if(d.rel){for(const[k]of NS_REL){if(k==='gf'&&!S.gf)continue;if(k==='spon'&&!n.spon)continue;n.rel[k]=clamp(n.rel[k]+d.rel,0,100)}chips.push([`Relações +${d.rel}`,'up'])}
+ if(d.rel){for(const[k]of NS_REL){if(k==='gf'&&!S.gf)continue;if(k==='spon'&&!nsHasSp())continue;n.rel[k]=clamp(n.rel[k]+d.rel,0,100)}chips.push([`Relações +${d.rel}`,'up'])}
  n.drunk=(n.drunk||0)+1;try{nsAchCheck()}catch(e){}nsSync();return chips}
 
 // ---------- contrato e agente ----------
 async function nsContractSheet(){const n=S.n;const ct=nsCt();const c=club();
- const k=await nsPop({ic:'📝',title:`Contrato · ${c.n}`,html:`<table class="nstab small"><tbody><tr><th>Salário</th><td>${nsK(ct.wage)} por semana</td></tr><tr><th>Bônus por gol</th><td>${nsK(ct.gb)}</td></tr><tr><th>Bônus por assistência</th><td>${nsK(ct.ab)}</td></tr><tr><th>Até</th><td>${S.year+Math.max(0,S.contract)}${S.loan?' (emprestado)':''}</td></tr><tr><th>Agente</th><td>+${Math.round(nsAgentPct()*100)}% em tudo</td></tr><tr><th>Patrocínio</th><td>${n.spon?`${esc(n.spon.n)} · ${nsK(n.spon.w)}/sem`:'nenhum'}</td></tr></tbody></table>`,
+ const k=await nsPop({ic:'📝',title:`Contrato · ${c.n}`,html:`<table class="nstab small"><tbody><tr><th>Salário</th><td>${nsK(ct.wage)} por semana</td></tr><tr><th>Bônus por gol</th><td>${nsK(ct.gb)}</td></tr><tr><th>Bônus por assistência</th><td>${nsK(ct.ab)}</td></tr><tr><th>Até</th><td>${S.year+Math.max(0,S.contract)}${S.loan?' (emprestado)':''}</td></tr><tr><th>Agente</th><td>+${Math.round(nsAgentPct()*100)}% em tudo</td></tr><tr><th>Patrocínio</th><td>${nsHasSp()?`${Object.keys(n.sps).length} marca(s) · ${nsK(nsSpW())}/jogo`:'nenhum'}</td></tr></tbody></table>`,
   opts:[['raise','💰 Pedir aumento'],['bonus','⚽ Pedir mais bônus'],['agent','💼 Falar com o agente'],['taker','🎯 Pedir as bolas paradas','ghost']],ok:'Fechar'});
  if(k==='raise'){const r=askRaise();nsSync();await nsPop({ic:r.ok?'💰':'🙅',title:r.ok?'Aumento!':'Não rolou',txt:r.txt,chips:r.chips})}
  else if(k==='bonus'){const p=clamp(.3+(n.star.l-5)*.03+(n.rel.coach-50)/150+(S.ovr-c.s)/25,.08,.85);if(ch(p)){n.ct.rg=Math.round(n.ct.rg*1.25*100)/100;n.ct.ra=Math.round(n.ct.ra*1.25*100)/100;n.ct.wage=-1;nsCt();await nsPop({ic:'⚽',title:'Bônus maior',txt:`Agora: ${nsK(n.ct.gb)} por gol e ${nsK(n.ct.ab)} por assistência.`})}else{n.rel.coach=clamp(n.rel.coach-4,0,100);S.board=clamp((S.board||50)-6,0,100);await nsPop({ic:'🙅',title:'A diretoria negou',txt:'E ficou meio de cara.',chips:[['Treinador −4','down']]})}}

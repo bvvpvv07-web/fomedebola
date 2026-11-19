@@ -158,7 +158,7 @@ function nsAfterMatch(r,o,cur){const n=S.n;const me=r.me;const x=cur.x;const res
   for(const b of B){b.ap++;b.g+=me.g;b.a+=me.a;if(me.g>=3)b.ht++;b.ps+=ps;b.ch+=chN;if(motm)b.motm++}
   const nt=me.nota;const dC=nt>=8?5:nt>=7.2?3:nt>=6.5?1:nt<5?-5:nt<5.8?-3:0;
   const dT=(res==='V'?2:res==='D'?-2:0)+(me.a?2:0)+(ps>=10?1:0);const dF=me.g*3+(res==='V'?1:res==='D'?-2:0)+(motm?3:0)+(nt<5.5?-3:0);
-  n.rel.coach=clamp(n.rel.coach+dC,0,100);n.rel.team=clamp(n.rel.team+dT,0,100);n.rel.fans=clamp(n.rel.fans+dF,0,100);if(n.spon&&nt>=7.5)n.rel.spon=clamp(n.rel.spon+2,0,100);
+  n.rel.coach=clamp(n.rel.coach+dC,0,100);n.rel.team=clamp(n.rel.team+dT,0,100);n.rel.fans=clamp(n.rel.fans+dF,0,100);if(nsHasSp()&&nt>=7.5)n.rel.spon=clamp(n.rel.spon+2,0,100);
   const imp=(o.decisive||/final|semi/i.test(o.label||'')?1.5:1)*(kind==='nat'?1.3:1);
   nsStarAdd(Math.max(1,((nt-6)*8+me.g*8+me.a*5+(motm?12:0)+(res==='V'?2:0))*imp));
   {const ks=NSK.map(x=>x[0]).sort((a,b)=>nsImp(b)-nsImp(a)+R(-1.2,1.2)).slice(0,2);for(const k of ks)nsAddP(k,RI(2,5))}
@@ -175,7 +175,7 @@ function nsPostHost(){let h=document.getElementById('nspost');if(!h){h=document.
 function nsPostScreen(html,bind){return new Promise(res=>{const h=nsPostHost();h.innerHTML=`<div class="nspost">${html}</div>`;h.scrollTop=0;try{if(bind)bind(h,res)}catch(e){console.error(e)}
  const c=h.querySelector('[data-pc]');if(c)c.onclick=()=>res(c.dataset.pc)})}
 function nsPostClose(){const h=document.getElementById('nspost');if(h){h.hidden=true;h.innerHTML=''}}
-function nsRelChips(p){return NS_REL.map(([k,nm])=>{const d=Math.round(p.rel1[k]-p.rel0[k]);if(!d||(k==='gf'&&!S.gf)||(k==='spon'&&!S.n.spon))return'';return`<span class="nsd ${d>0?'up':'down'}">${nm} ${d>0?'+':''}${d}</span>`}).join('')}
+function nsRelChips(p){return NS_REL.map(([k,nm])=>{const d=Math.round(p.rel1[k]-p.rel0[k]);if(!d||(k==='gf'&&!S.gf)||(k==='spon'&&!nsHasSp()))return'';return`<span class="nsd ${d>0?'up':'down'}">${nm} ${d>0?'+':''}${d}</span>`}).join('')}
 function nsStarRowHTML(p){const lvUp=p.st1.l>p.st0.l;return`<div class="nspst"><span class="ic">⭐<i>${p.st1.l}</i></span><div><b>Nível de estrela${lvUp?` · subiu pro ${p.st1.l}!`:''}</b><span class="nsmb star"><i id="psStar" style="width:${lvUp?0:Math.round(p.st0.p)}%"></i></span></div></div>`}
 function nsSideName(s){return esc(s&&s.n||'')}
 async function nsPostMatch(){const posts=(NSSM.post||[]).slice();NSSM.post=[];if(!posts.length&&!(S.n&&S.n.wk))return;
@@ -210,10 +210,10 @@ function nsWeekScreen(){const n=S.n;const w=n.wk;const R=w.rows;const m=v=>v?nsK
  <tr><th>Salário (líquido)</th><td>${m(R.sal[0])}</td><td>+${m(R.sal[1])}</td></tr>
  <tr><th>Bônus por gol (${R.gN})</th><td>${m(R.g[0])}</td><td>+${m(R.g[1])}</td></tr>
  <tr><th>Bônus por assistência (${R.aN})</th><td>${m(R.a[0])}</td><td>+${m(R.a[1])}</td></tr>
- <tr><th>Patrocínio</th><td>${m(R.sp[0])}</td><td>+${m(R.sp[1])}</td></tr>${w.rent?`<tr><th>Aluguéis e imóveis</th><td>${m(w.rent)}</td><td></td></tr>`:''}
+ <tr><th>Patrocínio${S.captain?' (capitão +10%)':''}</th><td>${m(R.sp[0])}</td><td>+${m(R.sp[1])}</td></tr>${w.rent?`<tr><th>Aluguéis e imóveis</th><td>${m(w.rent)}</td><td></td></tr>`:''}
  <tr class="tot"><th>Total da semana</th><td colspan="2">${nsK(w.tot)}</td></tr></tbody></table>
  <table class="nstab nswk"><thead><tr><th>Energia</th><th>Básico</th><th>Treinador</th></tr></thead><tbody>
- <tr><th>Dias de descanso (6)</th><td>+${w.base}%</td><td>+${w.coach}%</td></tr><tr><th>Imóveis</th><td>${w.props?'+'+w.props+'%':'—'}</td><td></td></tr>
+ <tr><th>Dias de descanso (6)</th><td>+${w.base}%</td><td>${w.coach?'+'+w.coach+'%':'sem contrato'}</td></tr><tr><th>Imóveis</th><td>${w.props?'+'+w.props+'%':'—'}</td><td></td></tr>
  <tr class="tot"><th>Energia agora</th><td colspan="2"><span class="nsmb"><i style="width:${Math.round(w.en)}%"></i></span> ${Math.round(w.en)}%</td></tr></tbody></table>
  ${w.drops.length?`<div class="nsp-warn">⚠️ Sem treino, caiu: ${[...new Set(w.drops)].join(', ')}</div>`:''}${w.autoN?`<div class="nsp-ok">🏋️ Treino automático: ${w.autoN} sessão${w.autoN>1?'ões':''}</div>`:''}
  <div class="nsp-btns"><button class="btn ghost" id="wkAg">💼 Agente</button><button class="btn ghost" id="wkCo">🪑 Treinador</button><button class="btn" data-pc="ok">Continuar</button></div>`;

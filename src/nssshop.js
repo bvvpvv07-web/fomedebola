@@ -147,7 +147,7 @@ const NS_ACH=[
  ['item1','Compre um item de estilo de vida',()=>S.n.items.length>0],['car','Compre um carro',()=>S.n.veh.some(v=>['popular','suv','esportivo','limo'].includes(v))],['house','Compre um imóvel',()=>(S.props||[]).length>0],
  ['ls50','Estilo de vida em 50%',()=>S.n.ls>=50],['castelo','Compre um castelo',()=>(S.props||[]).includes('castelo')],['estabulo','Tenha um estábulo',()=>nsHasStable()],
  ['cavalo','Compre um cavalo de corrida',()=>S.n.horses.length>0],['cavaloWin','Vença uma corrida com seu cavalo',()=>(S.n.horseW||0)>=1],['casino','Saia do cassino no lucro',()=>S.casino&&S.casino.net>0],
- ['gf','Arrume uma namorada',()=>!!S.gf],['casar','Case-se',()=>S.rel==='casado'],['spon','Feche um patrocínio',()=>!!S.n.spon],
+ ['gf','Arrume uma namorada',()=>!!S.gf],['casar','Case-se',()=>S.rel==='casado'],['spon','Feche um patrocínio',()=>nsHasSp()],
  ['mi1','Junte €1 milhão',()=>S.din>=1],['mi10','Junte €10 milhões',()=>S.din>=10],['mi100','Junte €100 milhões',()=>S.din>=100],
  ['title1','Ganhe um título',()=>(S.titles||[]).length>0],['liga','Seja campeão da liga',()=>(S.titles||[]).some(t=>t.t==='liga')],['cont','Ganhe um título continental',()=>(S.titles||[]).some(t=>t.t==='cont')],
  ['sel','Jogue pela seleção',()=>(S.caps||0)>=1||S.n.is.ap>=1],['bola','Ganhe a Bola de Ouro',()=>(S.awards||[]).some(a=>a.t==='bola')],
