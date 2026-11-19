@@ -2394,7 +2394,8 @@ function endSeason(){
  if(wc&&wc.called){const g=wc.path.reduce((s,r)=>s+(r.me&&r.me.g||0),0);if(g>=5)awards.push({t:'chuteira',n:'Chuteira de Ouro da Copa',d:`${g} gols na Copa`});const ns=wc.path.filter(r=>r.me&&r.me.nota).map(r=>r.me.nota);if(ns.length>=5&&ns.reduce((a,b)=>a+b,0)/ns.length>=7.7&&['Semifinal','Final'].includes(wc.out||'Final'))awards.push({t:'bola',n:'Bola de Ouro da Copa',d:'Melhor jogador do Mundial',minor:true})}
  // ordem: liga, posição, artilheiro, golden boy, chuteira, luva, bola de ouro (principal)
  const ORD={pos:0,art:1,liga:2,gb:3,chut:4,luva:5};cer.sort((a,b)=>ORD[a.k]-ORD[b.k]);
- if(place<=10&&tot.j>=20)cer.push({k:'bola',ic:'bola',title:'Bola de Ouro',sub:`Cerimônia ${S.year+1}`,top10,place,winner:top10[0].n});
+ // a cerimônia da Bola de Ouro acontece todo ano, você indicado ou não
+ if(S.age>=16)cer.push({k:'bola',ic:'bola',title:'Bola de Ouro',sub:`Cerimônia ${S.year+1}`,top10,place:tot.j>=20?place:0,winner:top10[0].n});
  // ---- registros ----
  const cs=S.clubs[me.id]||(S.clubs[me.id]={seasons:0,games:0,goals:0,assists:0,cs:0,titles:[],first:S.year});
  const clubGames=tot.j-(st.stats['Seleção']?st.stats['Seleção'].j:0);
@@ -3683,6 +3684,7 @@ function ceremonyUI(c){
    rev.innerHTML=`<div class="winner ${w.me?'me':''}"><div class="tro rise">${TROPHY('bola',{n:'Bola de Ouro'})}</div>${nomCard(w,'big')}${w.me?'<h3 class="champ">VOCÊ É O MELHOR DO MUNDO</h3>':''}</div>`;
    rev.scrollIntoView({block:'center',behavior:reduced?'auto':'smooth'});
    if(w.me)confetti($ov,['#f2c443','#fff4c4','#e2ad34','#ffffff'],5200);
+   if(!w.me)rev.insertAdjacentHTML('beforeend',`<p class="muted" style="text-align:center;margin:8px 0 0">${c.place>0&&c.place<=10?`Você ficou em ${c.place}º lugar.`:c.place>10?`Você ficou em ${c.place}º na votação. Faça uma temporada histórica pra entrar no top 10.`:'Você não jogou o suficiente pra entrar na votação (mínimo 20 jogos).'}</p>`);
    done();return;
   }
   $ov.innerHTML=`<div class="ovwrap cer"><div class="spot"></div><div class="eyebrow">${esc(c.sub||'Premiação')}</div><h2 class="pkh">${esc(c.title)}</h2>${c.stat?`<div class="muted mono" style="font-size:13px">${esc(c.stat)}</div>`:''}
@@ -11962,6 +11964,74 @@ penCircuit=async function(){PEN.circ=PEN.circ||[];const sts=penStations();const 
 {const _rpN=renderPeneira;renderPeneira=function(){if(PEN.step===1||PEN.step===2)PEN.step=3;if(PEN.step===4||PEN.step===5)PEN.step=6;return _rpN.apply(this,arguments)}}
 {const _ps=penShell;penShell=function(inner){_ps(inner);try{const pr=$app.querySelector('.penprog');if(pr){const st=PEN.step;pr.innerHTML=[['Local',0],['Circuito de lances',3],['Olheiros',6]].map(([t,k])=>`<span class="${st>k?'done':st===k?'on':''}">${t}</span>`).join('')}
   const j=$app.querySelector('.journey .jtip, .journey p');if(j&&PEN.step===0)j.textContent='Escolha onde fazer a peneira. Depois vem o circuito: cada estação ensina um lance do jogo, e os olheiros decidem.'}catch(e){}}}
+
+// ================= MERCADO NEGRO =================
+// Anabolizante e cia.: sobem a habilidade na hora, mas deixam rastro. Depois de cada jogo pode cair no antidoping:
+// deu positivo, você é preso. O risco cai um pouco por semana.
+const NS_BLACK=[
+ {id:'anab',ic:'💉',n:'Anabolizante',d:'+4 Força e +2 Velocidade na hora.',p:.025,r:35,sk:{for:4,vel:2}},
+ {id:'estim',ic:'💊',n:'Estimulante',d:'Energia volta a 100%.',p:.01,r:18,en:true},
+ {id:'epo',ic:'🩸',n:'Doping sanguíneo',d:'+5 Velocidade. O corpo aguenta mais.',p:.04,r:40,sk:{vel:5}},
+ {id:'hgh',ic:'🧪',n:'Hormônio do crescimento',d:'+2 em todas as habilidades.',p:.06,r:50,sk:{vel:2,for:2,tec:2,vis:2,bp:2}},
+ {id:'mask',ic:'🧼',n:'Mascarador',d:'Esconde o rastro no exame (−40 de risco). Nem sempre funciona.',p:.03,r:-40,mask:true}];
+function nsDopeP(){const r=(S.n&&S.n.dopeR)||0;return r>0?Math.min(.6,r/100*.38):0}
+function nsBlackPage(){return{t:'Mercado negro',cls:'place',html:()=>{const n=S.n;const P=Math.round(nsDopeP()*100);
+ return`<div class="nsx-place-hd" style="--pc:#2d1b4e"><span>🕶️</span><div><b>Mercado negro</b><small>Beco atrás do estádio. Ninguém viu nada.</small></div></div>
+ <div class="nsx-note bad">🧫 Antidoping: chance de dar <b>positivo</b> no próximo jogo: <b>${P}%</b>. Positivo = <b>preso</b>, contrato rescindido e as marcas vão embora. O rastro some aos poucos a cada semana.<div class="nsx-risk"><i style="width:${Math.min(100,(n.dopeR||0))}%"></i></div></div>
+ <div class="nsx-acts">${NS_BLACK.map(x=>`<button class="nsx-actc warn" data-bk="${x.id}"><span>${x.ic}</span><div><b>${esc(x.n)}</b><small>${esc(x.d)}</small>${x.r>0?`<em>Risco +${x.r}</em>`:''}</div><i>${money(x.p)}</i></button>`).join('')}</div>`},
+ bind:B=>B.querySelectorAll('[data-bk]').forEach(b=>b.onclick=async()=>{const x=NS_BLACK.find(y=>y.id===b.dataset.bk);const n=S.n;
+  const q=await nsPop({ic:x.ic,title:x.n,txt:`${x.d} ${x.r>0?`O risco no exame sobe ${x.r} pontos.`:''} Custa ${money(x.p)}.`,opts:[['y','Comprar e usar']],ok:'Melhor não'});if(q!=='y')return;
+  if(!nsPay(x.p))return;
+  if(x.mask){if(ch(.7)){n.dopeR=Math.max(0,(n.dopeR||0)-40);toast({ic:'🧼',title:'Rastro mascarado',txt:'Por enquanto…',ms:2000})}else{n.dopeR=Math.min(100,(n.dopeR||0)+10);toast({ic:'⚠️',title:'Mascarador falsificado',txt:'Não funcionou e ainda deixou mais rastro.',ms:2400})}}
+  else{n.dopeR=Math.min(100,(n.dopeR||0)+x.r);if(x.sk)for(const k in x.sk){n.sk[k].l=Math.min(99,n.sk[k].l+x.sk[k])}if(x.en)n.en=100;n.dopeN=(n.dopeN||0)+1;nsSync();toast({ic:x.ic,title:'Fez efeito',txt:x.sk?Object.entries(x.sk).map(([k,v])=>`+${v} ${NSK.find(z=>z[0]===k)[1]}`).join(' · '):'Energia 100%',ms:2200})}
+  nsRefresh()})}}
+function nsDopeCaught(){const n=S.n;const g=RI(8,14);n.dopeR=0;n.dopeCaught=(n.dopeCaught||0)+1;
+ for(const k in n.sk)n.sk[k].l=Math.max(1,n.sk[k].l-2);n.rel.fans=clamp(n.rel.fans-25,0,100);n.rel.coach=clamp(n.rel.coach-20,0,100);n.sps={};
+ prisonNow(g);const m=(S.pendingMoments||[]).slice().reverse().find(x=>x.k==='preso');if(m){m.eyebrow='Antidoping';m.big='POSITIVO!';m.title='O exame antidoping deu positivo. A polícia te leva direto do vestiário.';m.lines=[`Preso por ${g} jogos`,'As marcas cancelaram os contratos','Torcida e técnico revoltados']}}
+{const _wkD=nsWeek;nsWeek=function(info){const r=_wkD.apply(this,arguments);try{const n=S.n;if(n&&n.dopeR)n.dopeR=Math.max(0,n.dopeR-8)}catch(e){}return r}}
+{const _pmD=playMine;playMine=async function(o,io){const L0=(NSSM.post||[]).length;const r=await _pmD.apply(this,arguments);
+ try{const n=S.n;const p=(NSSM.post||[])[L0];if(n&&n.dopeR>0&&p&&p.me&&p.me.play&&!(typeof inPrison==='function'&&inPrison())&&ch(nsDopeP()))nsDopeCaught()}catch(e){console.error(e)}return r}}
+NS_PLACES.splice(NS_PLACES.findIndex(x=>x[0]==='crime')+1,0,['negro','🕶️','Mercado negro','Anabolizante e cia. · proibido','#2d1b4e',null]);
+{const _mvp=nsMaisVidaPage;nsMaisVidaPage=function(){const pg=_mvp();const b0=pg.bind;const h0=pg.html;
+ pg.html=()=>h0().replace(/<button class="nsx-pl( off)?" data-pl="negro"([^>]*)><span>🕶️<\/span><b>Mercado negro<\/b><small>[^<]*<\/small>/,(m,o,rest)=>`<button class="nsx-pl${S.age<18?' off':''}" data-pl="negro"${rest}><span>🕶️</span><b>Mercado negro</b><small>${S.age<18?'A partir dos 18 anos':'Anabolizante e cia. · proibido'}</small>`);
+ pg.bind=B=>{b0(B);const e=B.querySelector('[data-pl="negro"]');if(e)e.onclick=()=>{if(S.age<18)return toast({ic:'🔞',title:'A partir dos 18 anos',ms:1800});nsPush(nsBlackPage())}};return pg}}
+
+// ================= ARTILHARIA NA TELA PRINCIPAL =================
+function nsRace(){const st=S.st;const c=club();if(!st||!c||!st.table||!st.lg||typeof campRace!=='function')return null;const wk=(st.nsWk||0)+'|'+(st.r||0);
+ if(st._race&&st._race.k===wk)return st._race.v;let v=null;try{const rows=sortTable(st.table,st.lg);const lgS=(st.stats&&st.stats['Liga'])||{g:0,a:0};if(rows.some(r=>r.j>0)||true)v=campRace(st.lg,rows,c.id,lgS.g||0,lgS.a||0)}catch(e){console.warn(e)}st._race={k:wk,v};return v}
+function nsArtCard(){const R=nsRace();if(!R||!R.gl.length)return'';const L=LG[S.st.lg];const top=R.gl[0];const mi=R.gl.findIndex(x=>x.me);const me=R.gl[mi];const tc=CLUB[top.club];
+ const lead=top.v===0?'Ninguém marcou ainda':top.me?`Você lidera com ${top.v} gol${top.v===1?'':'s'}!`:`${esc(top.n)}${tc?` (${esc(tc.n)})`:''} · ${top.v} gol${top.v===1?'':'s'}`;
+ return`<button class="nsx-art ${top.me&&top.v?'lead':''}" id="nsArtB"><span>⚽</span><div><small>Artilharia · ${esc(L?L.n:'Liga')}</small><b>${lead}</b></div><em>${S.pos==='GOL'?'ver':me?`Você: ${mi+1}º · ${me.v}`:'ver'}</em></button>`}
+function nsArtPage(){let tab='gl';return{t:'Artilharia',cls:'art',html:()=>{const R=nsRace();if(!R)return'<p class="muted">A liga ainda não começou.</p>';const L=LG[S.st.lg];const list=tab==='gl'?R.gl:R.as;const mi=list.findIndex(x=>x.me);
+  return`<div class="nsx-sh"><b>${tab==='gl'?'⚽ Artilheiros':'🎯 Garçons'} · ${esc(L.n)}</b><small>${tab==='gl'?'Quem mais fez gol na liga até agora.':'Quem mais deu assistência na liga.'} ${mi>=0&&list[0]?(mi===0&&list[0].v?'Você está na frente!':`Faltam ${list[0].v-list[mi].v} pra você alcançar o líder.`):''}</small></div>
+  <div class="nstabs n2 nsx-art-t"><button data-at="gl" class="${tab==='gl'?'on':''}">Gols</button><button data-at="as" class="${tab==='as'?'on':''}">Assistências</button></div>
+  <div class="nsx-art-l">${(()=>{const u=tab==='gl'?'gols':'assist.';const row=(x,i)=>{const c=CLUB[x.club];return`<div class="cp-rr nsx-rr2 ${x.me?'me':''}"><span class="pos mono">${i+1}º</span>${c?shieldHTML(c):''}<div class="nm"><b>${esc(x.n)}${x.me?' (você)':''}</b><small>${esc(c?c.n:'')}</small></div><span class="v mono">${x.v}<small> ${u}</small></span></div>`};
+   const top=list.slice(0,15).map(row).join('');return top+(mi>=15?`<div class="cp-gap">···</div>${row(list[mi],mi)}`:'')||'<p class="muted">Ninguém marcou ainda.</p>'})()}</div>`},
+ bind:B=>B.querySelectorAll('[data-at]').forEach(b=>b.onclick=()=>{tab=b.dataset.at;nsRefresh()})}}
+{const _ini=nsInicioHTML;nsInicioHTML=function(){const h=_ini();const a=nsArtCard();return a?h.replace(/<\/div>$/,a+'</div>'):h}}
+{const _rnA=nsRenderHub;nsRenderHub=function(){const r=_rnA.apply(this,arguments);try{const e=document.getElementById('nsArtB');if(e)e.onclick=()=>nsOpen(nsArtPage())}catch(e){}return r}}
+
+// ================= PRÊMIOS DO ANO: SEMPRE MOSTRA QUEM GANHOU =================
+{const _rse=runSeasonEndShow;runSeasonEndShow=async function(ls){const r=await _rse.apply(this,arguments);try{const Y=(ls&&ls.yearWinners||[]).filter(x=>x.w);if(Y.length){const ic={bola:'⚽🏆',gb:'🌟',chut:'👟',luva:'🧤'};
+  await campPop({ic:'🏆',eyebrow:`Prêmios de ${S.year}`,title:'Os vencedores do ano',body:`<div class="nsx-yw">${Y.map(x=>{const c=x.w.club&&CLUB[x.w.club];return`<div class="${x.w.me?'me':''}"><span>${ic[x.k]||'🏅'}</span><div><small>${esc(x.n)}</small><b>${x.w.f||''} ${esc(x.w.n)}${x.w.me?' (VOCÊ!)':''}</b>${c?`<em>${esc(c.n)}</em>`:''}</div></div>`}).join('')}</div>`,last:true})}}catch(e){console.warn(e)}return r}}
+function nsBolaPage(){return{t:'Bola de Ouro',cls:'bola',html:()=>{const H=((typeof W!=='undefined'&&W.bolaHist)||[]).slice().reverse();
+ return`<div class="nsx-place-hd" style="--pc:#a67c00"><span>⚽</span><div><b>Bola de Ouro</b><small>O melhor jogador do mundo, todo ano. ${(S.awards||[]).filter(a=>a.t==='bola').length?`Você já ganhou ${(S.awards||[]).filter(a=>a.t==='bola').length}!`:'Seu nome ainda não está aqui.'}</small></div></div>
+ ${H.length?`<div class="nsx-yw">${H.map(x=>{const c=x.club&&CLUB[x.club];return`<div class="${x.me?'me':''}"><span class="mono">${x.y}</span><div><b>${x.f||''} ${esc(x.n)}${x.me?' (VOCÊ!)':''}</b>${c?`<em>${esc(c.n)}</em>`:''}</div></div>`}).join('')}</div>`:'<p class="muted">A primeira cerimônia é no fim desta temporada.</p>'}`}}}
+{const _ct2=nsCarreiraTiles;nsCarreiraTiles=function(){const h=_ct2();const H=(typeof W!=='undefined'&&W.bolaHist)||[];const last=H[H.length-1];
+ return h.replace(/<\/div>$/,`<button class="nsx-tile" id="nsBolaB"><span>⚽</span><b>Bola de Ouro</b><small>${last?`${last.y}: ${esc(last.n)}`:'Cerimônia no fim do ano'}</small></button><button class="nsx-tile" id="nsArtB2"><span>🥇</span><b>Artilharia</b><small>Gols e assistências da liga</small></button></div>`)}}
+{const _rnB=nsRenderHub;nsRenderHub=function(){const r=_rnB.apply(this,arguments);try{const e=document.getElementById('nsBolaB');if(e)e.onclick=()=>nsOpen(nsBolaPage());const a=document.getElementById('nsArtB2');if(a)a.onclick=()=>nsOpen(nsArtPage())}catch(e){}return r}}
+{const st=document.createElement('style');st.textContent=`
+.nsx-risk{height:10px;border-radius:5px;background:#1a0c0b;overflow:hidden;margin-top:8px}.nsx-risk i{display:block;height:100%;background:linear-gradient(90deg,#ffb347,#ff3b2f)}
+.nsx-art{display:grid;grid-template-columns:auto 1fr auto;gap:12px;align-items:center;width:100%;padding:14px 16px;border-radius:18px;border:1px solid #d6a21e66;text-align:left;color:var(--chalk);background:linear-gradient(110deg,#2c2205,#13261a 70%)}
+.nsx-art>span{font-size:34px}.nsx-art small{display:block;font:900 12px var(--f-body);color:#ffd84a;text-transform:uppercase;letter-spacing:.06em}.nsx-art b{display:block;font:900 18px var(--f-display);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.nsx-art em{font:900 15px var(--f-mono);font-style:normal;color:#ffd84a;white-space:nowrap}.nsx-art.lead{border-color:#ffd84a;box-shadow:0 0 0 2px #ffd84a55}
+.nsx-art-t{display:grid;grid-template-columns:1fr 1fr;margin:8px 0}.nsx-art-t button{min-height:44px;font:900 15px var(--f-body)}
+.nsx-art-l{display:grid;gap:4px}.nsx-rr2{padding:10px 12px;background:#10261b;border:1px solid var(--line-2)}.nsx-rr2.me{background:#3a2e08;border-color:#ffd84a}
+.nsx-yw{display:grid;gap:8px}.nsx-yw>div{display:grid;grid-template-columns:auto 1fr;gap:12px;align-items:center;padding:10px 12px;border-radius:14px;background:#10261b;border:1px solid var(--line-2)}
+.nsx-yw>div.me{background:#3a2e08;border-color:#ffd84a}.nsx-yw span{font-size:26px;min-width:44px;text-align:center}.nsx-yw span.mono{font-size:15px;font-weight:900;color:#ffd84a}
+.nsx-yw small{display:block;font:800 12px var(--f-body);color:#ffd84a;text-transform:uppercase}.nsx-yw b{font:900 17px var(--f-display)}.nsx-yw em{display:block;font:700 12.5px var(--f-body);font-style:normal;color:#a9c6b4}
+@media (max-width:560px){.nsx-art{padding:10px 12px}.nsx-art>span{font-size:26px}.nsx-art b{font-size:14px}.nsx-art em{font-size:12px}}
+`;document.head.appendChild(st)}
 
 // ================== LOGIN NO SITE (usuário + senha) ==================
 // Conta própria do jogo no Supabase, sem e-mail: usuário e senha. Logado, as carreiras ficam salvas na conta
