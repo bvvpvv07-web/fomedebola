@@ -33,7 +33,7 @@ function l3dScene(o){const K=o.kind||'finish';const pos=(S&&S.pos)||'ATA';const 
  if(K==='keeper')return o.pen?'gkPen':pick(['gkShot','gkShot','gkFk','gkMano','gkCab']);
  if(K==='pen')return'penalti';if(K==='fk')return pick(['falta','falta','faltaLonge']);if(K==='chip')return'mano';if(K==='combo')return'tabela';
  if(K==='header')return pick(P.header||['cabeca','cabeca','voleio']);
- const base={long:['lanca','lanca','saida','contra3'],cross:['cruz','cruz','escanteio','escCurto','lateral'],pass:o.planned?['contra','saida','contra3']:['contra','saida','tabela','area','contra3','pivo'],dribble:['mano','area','contra','pivo','lateral'],
+ const base={long:['lanca','lanca','saida','contra3'],cross:['cruz','cruz','escanteio','escCurto','lateral'],pass:o.planned?['contra','saida','contra3']:['contra','saida','tabela','area','contra3','pivo'],dribble:['driblar','driblar','driblarP'],
   finish:o.planned?['mano','area','contra','rebote','voleio']:['area','longe','contra','rebote','voleio','pivo']}[K]||['area'];
  if(o.passOnly){const L=(P.pass||[]).concat(P.long||[]).filter(x=>x!=='area');return pick(L.length?L:['saida','virada','enfiada','tabela'])}
  const mine=P[K];if(pos==='GOL'&&mine)return pick(mine);return pick(mine&&Math.random()<.75?mine:base)}
@@ -60,7 +60,7 @@ function l3dResult(o,res){const K=o.kind||'finish';
  const GK=K==='keeper';const isPassK=['pass','long','cross'].includes(K);const train=/Peneira|Treino/i.test(o.comp||'');
  NM.netHit=null;NM.intc=null;NM.dmAssist=false;NM.selfGoal=false;let ok;
  if(GK){ok=o.pen?(res.kind==='save'||res.kind==='claim'):!res.goal;NM.last=res.goal?'Foi no canto.':ok?(o.okTxt||'DEFENDEU!'):'Pra fora!'}
- else{ok=!!res.goal||(train&&isPassK&&res.chain>=1);
+ else{ok=!!res.goal||(train&&isPassK&&res.chain>=1);NM.dribPass=false;if(!ok&&K==='dribble'&&(res.drib|0)>=2&&(res.passes|0)>=1){ok=true;NM.dribPass=true}
   if(res.goal){if(isPassK||o.ast){if(res.heroGoal)NM.selfGoal=true}else if(!res.heroGoal&&res.heroAssist&&K!=='pen')NM.dmAssist=true}
   NM.last=ok?(o.okTxt||'GOL!'):res.kind==='off'?'Impedimento.':res.kind==='tackle'?'Desarmado.':res.kind==='block'?'Bloqueado.':K==='pen'?(res.kind==='save'||res.kind==='claim'?'O goleiro segurou.':'Pra fora!'):isPassK?'Interceptado.':res.kind==='save'||res.kind==='claim'?'O goleiro pegou.':'Pra fora!'}
  const perfect=ok&&!!(res.fk||res.header||res.chain>=2||(GK&&res.dived&&res.kind==='save')||res.caught);NM.grade=ok?(perfect?92:78):40;NM.why='Lance jogado';

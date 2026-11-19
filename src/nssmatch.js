@@ -86,7 +86,8 @@ async function nsLiveStart(m){
   push({m:L.min,side:'u',t:isPass?`<b>${ME}</b> levanta a cabeça…`:type==='dribble'?`<b>${ME}</b> parte pra cima do marcador…`:`<b>${ME}</b> tem espaço pra finalizar…`,k:'nme'});
   let ok,auto=false;if(L.skip||S.lances==='off'||!lancesWanted(true)){ok=nsAutoChance({type});auto=true}
   else{api.flash(type==='dribble'?'🌀 Um contra um: arraste pro lado e passe por ele':'⚡ A bola é sua…');await sleep(L.skip?0:900);x.inX=true;try{ok=await IO_UI.chance({type,planned:false,comp:m.o.comp,min:L.min})}catch(e){ok=false}x.inX=false;draw()}
-  const self=!!NM.selfGoal,dma=!!NM.dmAssist;NM.selfGoal=false;NM.dmAssist=false;
+  const self=!!NM.selfGoal,dma=!!NM.dmAssist,dps=!!NM.dribPass;NM.selfGoal=false;NM.dmAssist=false;NM.dribPass=false;
+  if(ok&&dps&&!dma){x.x.dr=(x.x.dr||0)+(NM.drib||0);NM.heroPasses=0;NM.drib=0;x.x.ps=(x.x.ps||0)+1;push({m:L.min,side:'u',t:`🌀 <b>${ME}</b> passa por dois e toca na medida`,k:'nme'});api.flash('Que jogada!');setScore();return}
   {const hp=NM.heroPasses||0,dr=NM.drib||0;NM.heroPasses=0;NM.drib=0;x.x.ps=(x.x.ps||0)+hp;x.x.dr=(x.x.dr||0)+dr;if(!ok&&(hp||dr))push({m:L.min,side:'u',t:`✓ ${[hp?`${hp} passe${hp>1?'s':''} certo${hp>1?'s':''}`:'',dr?`${dr} drible${dr>1?'s':''}`:''].filter(Boolean).join(' e ')} de <b>${ME}</b>`,k:'nme'})}
   if(ok&&(isPass?self:!dma)){x.x.gu=(x.x.gu||0)+1;x.x.g=(x.x.g||0)+1;x.x.sc.push({m:L.min,w:S.name,us:true});push({m:L.min,side:'u',t:`⚽ GOL! <b>${ME}</b> marca!`,k:'ngl nme'});api.flash('GOOOOL! É SEU!');goalFx(true)}
   else if(ok&&(dma||(isPass&&(ch(.42)||(!auto&&nsIs3D()))))){const w=nm(RU);const full=(RU.find(p=>nsShort(p.n)===w)||{n:w}).n;x.x.gu=(x.x.gu||0)+1;x.x.a=(x.x.a||0)+1;x.x.sc.push({m:L.min,w:full,us:true});push({m:L.min,side:'u',t:`⚽ GOL de ${w}! Assistência de <b>${ME}</b>`,k:'ngl nme'});api.flash(`GOL do ${us.n}! Sua assistência`);goalFx(true)}
@@ -179,18 +180,19 @@ async function nsLiveStart(m){
   return r}}
 function nsIs3D(){try{return lanceMode()==='jogar'&&!L3D.failed}catch(e){return false}}
 // lance com cena pedida (falta, pênalti, escanteio)
-{const _scN=l3dScene;const ALT={falta:'faltaLonge',faltaLonge:'falta',escanteio:'escCurto',escCurto:'escanteio',escCab:'cabeca',cabeca:'escCab'};
+{const _scN=l3dScene;const ALT={falta:'faltaLonge',faltaLonge:'falta',escanteio:'escCurto',escCurto:'escanteio',escCab:'cabeca',cabeca:'escCab',driblar:'driblarP',driblarP:'driblar'};
  l3dScene=function(o){const cur=NSSM.cur;let sc=o&&o.scen?o.scen:_scN(o);if(cur){const U=cur.usedSc||(cur.usedSc=new Set());if(U.has(sc)){if(o&&o.scen){if(ALT[sc]&&!U.has(ALT[sc]))sc=ALT[sc]}else{let g=0;while(U.has(sc)&&g++<14)sc=_scN(o)}}U.add(sc)}return sc}}
 // o lance conta passes certos e dribles do seu jogador
 {const _lr=l3dResult;l3dResult=function(o,res){const r=_lr(o,res);try{NM.heroPasses=(res&&res.passes)||0;NM.drib=(res&&res.drib)||0}catch(e){}return r}}
 function nsMotm(me,res){return!!(me&&me.play&&me.nota!=null&&(me.nota>=8.2||(me.nota>=7.6&&res==='V')||me.g>=3||(me.nota>=7.3&&me.g+me.a>=2&&res!=='D')))}
 function nsAfterMatch(r,o,cur){const n=S.n;const me=r.me;const x=cur.x;const res=r.gu>r.gt?'V':r.gu<r.gt?'D':'E';const kind=o.kind||'club';
- const rel0={...n.rel},st0={l:n.star.l,p:n.star.p};const motm=nsMotm(me,res);let ps=0,chN=0;const ach0=Object.keys(n.ach).length;
+ const rel0={...n.rel},st0={l:n.star.l,p:n.star.p};const why={};const motm=nsMotm(me,res);let ps=0,chN=0;const ach0=Object.keys(n.ach).length;
  if(me&&me.play){const B=kind==='nat'?[n.is]:[n.ss,n.cs];
   ps=(x.ps||0)+Math.round(me.min/90*R(3,9)*(NS_PASSB[S.pos]||1)*(n.sk.vis.l/70));chN=Math.max(x.ch||0,me.g+(x.ch?0:RI(0,2)));
   for(const b of B){b.ap++;b.g+=me.g;b.a+=me.a;if(me.g>=3)b.ht++;b.ps+=ps;b.ch+=chN;if(motm)b.motm++}
   const nt=me.nota;const dC=nt>=8?5:nt>=7.2?3:nt>=6.5?1:nt<5?-5:nt<5.8?-3:0;
   const dT=(res==='V'?2:res==='D'?-2:0)+(me.a?2:0)+(ps>=10?1:0);const dF=me.g*3+(res==='V'?1:res==='D'?-2:0)+(motm?3:0)+(nt<5.5?-3:0);
+  why.coach=`nota ${fmt1(nt)}`;why.team=[res==='V'?'vitória':res==='D'?'derrota':'',me.a?`${me.a} assistência${me.a>1?'s':''}`:'',ps>=10?`${ps} passes certos`:''].filter(Boolean).join(' · ')||'empate';why.fans=[me.g?`${me.g} gol${me.g>1?'s':''}`:'',motm?'estrela do jogo':'',res==='V'?'vitória':res==='D'?'derrota':'',nt<5.5?'atuação ruim':''].filter(Boolean).join(' · ')||'jogo morno';why.spon=nt>=7.5?'boa atuação':'';
   n.rel.coach=clamp(n.rel.coach+dC,0,100);n.rel.team=clamp(n.rel.team+dT,0,100);n.rel.fans=clamp(n.rel.fans+dF,0,100);if(nsHasSp()&&nt>=7.5)n.rel.spon=clamp(n.rel.spon+2,0,100);
   const imp=(o.decisive||/final|semi/i.test(o.label||'')?1.5:1)*(kind==='nat'?1.3:1);
   nsStarAdd(Math.max(1,((nt-6)*8+me.g*8+me.a*5+(motm?12:0)+(res==='V'?2:0))*imp));
@@ -199,7 +201,7 @@ function nsAfterMatch(r,o,cur){const n=S.n;const me=r.me;const x=cur.x;const res
  const isLg=!!(S.st&&club()&&o.comp===LG[club().l].n);
  const unlocked=[];try{unlocked.push(...nsAchCheck({ps,a:me&&me.a||0,g:me&&me.g||0,nota:me&&me.nota,win:res==='V'&&isLg&&me&&me.play,motm,en:n.en},true))}catch(e){}
  nsSync();
- return{o,r,me,res,ps,ch:chN,motm,rel0,rel1:{...n.rel},st0,st1:{l:n.star.l,p:n.star.p},ach:unlocked,x:{...x},kind,isLg,us:o.us,them:o.them,home:o.home,neutral:o.neutral}}
+ return{o,r,me,res,ps,ch:chN,motm,why,rel0,rel1:{...n.rel},st0,st1:{l:n.star.l,p:n.star.p},ach:unlocked,x:{...x},kind,isLg,us:o.us,them:o.them,home:o.home,neutral:o.neutral}}
 
 // a decisão da semana (pop-up) espera as telas do pós-jogo terminarem
 {const _bwN=bindWeek;bindWeek=function(...a){if(NSSM.inPost)return;return _bwN.apply(this,a)}}
@@ -213,20 +215,31 @@ function nsStarRowHTML(p){const lvUp=p.st1.l>p.st0.l;return`<div class="nspst"><
 function nsSideName(s){return esc(s&&s.n||'')}
 async function nsPostMatch(){const posts=(NSSM.post||[]).slice();NSSM.post=[];if(!posts.length&&!(S.n&&S.n.wk))return;
  const n=S.n;
+ // 1 e 2: como foi a rodada e como ficou a tabela
+ const R0=S.st&&S.st.nsRound;if(R0&&!R0.shown&&posts.some(p=>p.isLg)){R0.shown=true;await nsRoundScreen()}
+ // 3: o seu jogo
  for(const p of posts){const r=p.r,me=p.me;const home=p.neutral?true:p.home;const[hg,ag]=home?[r.gu,r.gt]:[r.gt,r.gu];const H=home?p.us:p.them,A=home?p.them:p.us;
   const head=`<div class="nsp-res"><span class="nspc">${esc(p.o.comp)}${p.o.label?' · '+esc(p.o.label):''}</span><div class="sc"><span>${nsSideName(H)}</span><b>${hg} – ${ag}</b><span>${nsSideName(A)}</span></div></div>`;
   let body;
   if(me&&me.play){const nt=me.nota;
-   body=`<h2 class="nsp-t">${p.motm?'⭐ Estrela do jogo!':p.res==='V'?'Vitória':p.res==='D'?'Derrota':'Empate'}</h2>${head}
-   <div class="nsp-stats">${[['Chances',p.ch],['Gols',me.g],['Assistências',me.a],['Passes certos',p.ps],['Minutos',me.min]].map(([t,v])=>`<div><span>${t}</span><b>${v}</b></div>`).join('')}<div class="nota ${nt>=7.5?'good':nt<6?'bad':''}"><span>Nota do jogo</span><b>${fmt1(nt)}</b></div></div>
-   <div class="nsp-rel">${nsRelChips(p)||'<span class="muted">Relações sem mudança</span>'}</div>${nsStarRowHTML(p)}
+   body=`<div class="nsp-step">Seu jogo</div><h2 class="nsp-t">${p.motm?'⭐ Estrela do jogo!':p.res==='V'?'Vitória':p.res==='D'?'Derrota':'Empate'}</h2>${head}
+   <div class="nsp-stats">${[['Finalizações',p.ch],['Gols',me.g],['Assistências',me.a],['Passes certos',p.ps],['Minutos',me.min]].map(([t,v])=>`<div><span>${t}</span><b>${v}</b></div>`).join('')}<div class="nota ${nt>=7.5?'good':nt<6?'bad':''}"><span>Nota do jogo</span><b>${fmt1(nt)}</b></div></div>
+   ${nsStarRowHTML(p)}
    ${p.ach.length?`<div class="nsp-ach">${p.ach.map(a=>`<div><span>🏅</span><b>${esc(a.t)}</b></div>`).join('')}</div>`:''}`}
-  else{const why=me&&me.why;body=`<h2 class="nsp-t">${why==='lesionado'?'🚑 Fora por lesão':why==='suspenso'?'🟥 Suspenso':why==='base'?'🌱 Jogo do profissional':'🪑 No banco'}</h2>${head}<p class="muted">${why==='banco'?'O técnico não te colocou. Treinar e melhorar a relação com ele ajuda.':why==='lesionado'?`Mais ${S.st.injLeft} jogo${S.st.injLeft===1?'':'s'} de recuperação.`:'Você assistiu de fora.'}</p><div class="nsp-rel">${nsRelChips(p)}</div>`}
-  await nsPostScreen(body+`<button class="btn wide" data-pc="ok">Continuar</button>`,h=>{setTimeout(()=>{const s=h.querySelector('#psStar');if(s)s.style.width=Math.round(p.st1.p)+'%'},80)});
-  if(me&&me.play&&(p.motm||me.g>=2||me.nota<=5||(n.cs.g===me.g&&me.g>0)||(n.cs.ap===1)))await nsPostScreen(nsPaperHTML(p)+`<button class="btn wide" data-pc="ok">Continuar</button>`)}
+  else{const why=me&&me.why;body=`<div class="nsp-step">Seu jogo</div><h2 class="nsp-t">${why==='lesionado'?'🚑 Fora por lesão':why==='suspenso'?'🟥 Suspenso':why==='base'?'🌱 Jogo do profissional':'🪑 No banco'}</h2>${head}<p class="muted">${why==='banco'?'O técnico não te colocou. Treinar e melhorar a relação com ele ajuda.':why==='lesionado'?`Mais ${S.st.injLeft} jogo${S.st.injLeft===1?'':'s'} de recuperação.`:'Você assistiu de fora.'}</p>`}
+  await nsPostScreen(body+`<button class="btn wide" data-pc="ok">Continuar ➜</button>`,h=>{setTimeout(()=>{const s=h.querySelector('#psStar');if(s)s.style.width=Math.round(p.st1.p)+'%'},80)});
+  if(me&&me.play&&(p.motm||me.g>=2||me.nota<=5||(n.cs.g===me.g&&me.g>0)||(n.cs.ap===1)))await nsPostScreen(nsPaperHTML(p)+`<button class="btn wide" data-pc="ok">Continuar ➜</button>`)
+  // 4: relações, barra por barra
+  await nsRelScreen(p)}
+ // 5: o dinheiro e a energia da semana
  if(n.wk&&!n.wk.shown){n.wk.shown=true;await nsWeekScreen()}
- const R0=S.st&&S.st.nsRound;if(R0&&!R0.shown&&posts.some(p=>p.isLg)){R0.shown=true;await nsRoundScreen()}
  nsPostClose()}
+const NS_RELWHO={coach:['🪑','Técnico'],team:['👕','Elenco'],fans:['🧣','Torcida'],gf:['🌹','Namorada'],spon:['🤝','Marcas']};
+function nsRelScreen(p){const rows=NS_REL.filter(([k])=>!(k==='gf'&&!S.gf)&&!(k==='spon'&&!nsHasSp())).map(([k,nm])=>{const a=p.rel0[k]||0,b=p.rel1[k]||0,d=Math.round(b-a);const[ic,who]=NS_RELWHO[k];const lo=Math.min(a,b),hi=Math.max(a,b);
+  const why=(p.why&&p.why[k])||'';const nm2=k==='gf'&&S.gf?S.gf.n:who;
+  return`<div class="nsx-rr ${d>0?'up':d<0?'down':''}"><span class="ic">${ic}</span><div class="mid"><b>${esc(nm2)}</b><div class="bar"><i class="base" style="width:${lo}%"></i><i class="dlt" data-w="${hi-lo}" style="left:${lo}%;width:0"></i></div><small>${d?esc(why):'sem mudança'}</small></div><em>${d>0?'+':''}${d||'='}</em><small class="v">${Math.round(b)}%</small></div>`}).join('');
+ return nsPostScreen(`<div class="nsp-step">Relacionamentos</div><h2 class="nsp-t">Como ficou com cada um</h2><div class="nsx-rrs">${rows}</div><p class="muted nshelp">Treinar o que o técnico pede, jogar bem e o quebra-cabeça da Vida sobem as relações. Atuação ruim e sumir dos treinos derrubam.</p><button class="btn wide" data-pc="ok">Continuar ➜</button>`,
+  h=>{setTimeout(()=>h.querySelectorAll('.dlt').forEach(e=>e.style.width=e.dataset.w+'%'),120)})}
 function nsPaperHTML(p){const me=p.me;const c=club();const opp=p.them&&p.them.n||'adversário';const first=(S.name||'').split(' ')[0],sur=nsSur();const r=typeof npRand==='function'?npRand(hash(S.name+S.year+S.st.idx)):Math.random;
  let kick='NOTÍCIAS DO ESPORTE',head,txt,ic='⭐';
  if(me.g>=3){head='HAT-TRICK!';ic='⚽';txt=`${S.name} marcou ${me.g} vezes contra o ${opp} e levou a bola pra casa. Nas arquibancadas, a torcida já fala em ídolo.`}
@@ -237,19 +250,24 @@ function nsPaperHTML(p){const me=p.me;const c=club();const opp=p.them&&p.them.n|
  else{head='NOITE PARA ESQUECER';ic='📉';kick='CADERNO DE ESPORTES';txt=`Nota ${fmt1(me.nota)} para ${S.name} contra o ${opp}. A cobrança vai aumentar no próximo treino.`}
  return`<div class="nspaper"><div class="kick">${kick}</div><div class="hd"><span>${ic}</span><b>${head}</b></div><p>${esc(txt)}</p><small>${esc(c.n)} · ${seasonLbl(S.year)}</small></div>`}
 const n0=v=>v|0;
-function nsWeekScreen(){const n=S.n;const w=n.wk;const R=w.rows;const m=v=>v?nsK(v):'—';const pl=v=>v?'+'+nsK(v):'—';
- const html=`<h2 class="nsp-t">Atualização semanal</h2>
- <table class="nstab nswk"><thead><tr><th>Dinheiro</th><th>Básico</th><th>Agente</th></tr></thead><tbody>
- <tr><th>Salário (líquido)</th><td>${m(R.sal[0])}</td><td>${pl(R.sal[1])}</td></tr>
- <tr><th>Bônus por gol (${R.gN})</th><td>${m(R.g[0])}</td><td>${pl(R.g[1])}</td></tr>
- <tr><th>Bônus por assistência (${R.aN})</th><td>${m(R.a[0])}</td><td>${pl(R.a[1])}</td></tr>
- <tr><th>Patrocínio${S.captain?' (capitão +10%)':''}</th><td>${m(R.sp[0])}</td><td>${pl(R.sp[1])}</td></tr>${w.rent?`<tr><th>Aluguéis e imóveis</th><td>${m(w.rent)}</td><td></td></tr>`:''}
- <tr class="tot"><th>Total da semana</th><td colspan="2">${nsK(w.tot)}</td></tr></tbody></table>
- <table class="nstab nswk"><thead><tr><th>Energia</th><th>Básico</th><th>Treinador</th></tr></thead><tbody>
- <tr><th>Dias de descanso (6)</th><td>+${w.base}%</td><td>${w.coach?'+'+w.coach+'%':'sem contrato'}</td></tr><tr><th>Imóveis</th><td>${w.props?'+'+w.props+'%':'—'}</td><td></td></tr>
- <tr class="tot"><th>Energia agora</th><td colspan="2"><span class="nsmb"><i style="width:${Math.round(w.en)}%"></i></span> ${Math.round(w.en)}%</td></tr></tbody></table>
+function nsK2(v){v=+v||0;return v>0&&v<1?`€${Math.round(v*1000)}`:nsK(v)}
+function nsWeekScreen(){const n=S.n;const w=n.wk;const R=w.rows;const ct=nsCt()||{};const one=k=>(R[k]?R[k][0]+R[k][1]:0);
+ const line=(ic,t,sub,v)=>`<div class="nsx-mn ${v?'':'zero'}"><span>${ic}</span><div><b>${t}</b><small>${sub}</small></div><em>${v?'+'+nsK2(v):'—'}</em></div>`;
+ const agp=R.ag?Math.round(R.ag*100):0;const eff=(R.net||.5)*(1+(R.ag||0));
+ const html=`<div class="nsp-step">Dinheiro da semana</div><h2 class="nsp-t">💰 Você ganhou ${nsK(w.tot)}</h2>
+ <div class="nsx-mns">
+  ${line('💼','Salário',`${nsK(S.wage||0)} por semana · metade vai pra impostos e despesas`,one('sal'))}
+  ${line('⚽','Gols',`${R.gN} × ${nsK2((ct.gb||0)*eff)}`,one('g'))}
+  ${line('🅰️','Assistências',`${R.aN} × ${nsK2((ct.ab||0)*eff)}`,one('a'))}
+  ${line('🎯','Passes certos',`${R.psN||0} × ${nsK2((ct.pb||0)*eff)}`,one('ps'))}
+  ${line('🥅','Finalizações',`${R.fzN||0} × ${nsK2((ct.fb||0)*eff)}`,one('fz'))}
+  ${line('🤝','Patrocínio',nsHasSp()?`${Object.keys(n.sps).length} marca${Object.keys(n.sps).length>1?'s':''}${S.captain?' · capitão +10%':''}`:'nenhuma marca ainda',one('sp'))}
+  ${w.rent?line('🏠','Aluguéis e imóveis','o que seus imóveis rendem',w.rent):''}
+ </div>
+ <div class="nsx-note">Valores já com impostos${agp?` e com o seu agente (<b>+${agp}%</b>)`:''}. ${agp?'':'💼 Com um agente tudo isso rende mais. '} Saldo agora: <b>${money(S.din)}</b>.</div>
+ <div class="nsx-en"><span>❤️ Energia</span><div class="bar"><i style="width:${Math.round(w.en)}%"></i></div><b>${Math.round(w.en)}%</b><small>+${w.base}% descanso${w.coach?` · +${w.coach}% treinador`:''}${w.props?` · +${w.props}% imóveis`:''}</small></div>
  ${w.drops.length?`<div class="nsp-warn">⚠️ Sem treino, caiu: ${[...new Set(w.drops)].join(', ')}</div>`:''}${w.autoN?`<div class="nsp-ok">🏋️ Treino automático: ${w.autoN} sessão${w.autoN>1?'ões':''}</div>`:''}
- <div class="nsp-btns"><button class="btn ghost" id="wkAg">💼 Agente</button><button class="btn ghost" id="wkCo">🪑 Treinador</button><button class="btn" data-pc="ok">Continuar</button></div>`;
+ <div class="nsp-btns"><button class="btn ghost" id="wkAg">💼 Agente</button><button class="btn ghost" id="wkCo">🪑 Treinador</button><button class="btn" data-pc="ok">Continuar ➜</button></div>`;
  return nsPostScreen(html,(h,res)=>{h.querySelector('#wkAg').onclick=async()=>{h.hidden=true;await nsContractSheet0();h.hidden=false};h.querySelector('#wkCo').onclick=async()=>{h.hidden=true;await nsCoachTalk();h.hidden=false}})}
 // versão sem re-render do hub (para usar no meio da sequência)
 async function nsContractSheet0(){const keep=renderHub;renderHub=function(){};try{await nsContractSheet()}finally{renderHub=keep}}
@@ -258,9 +276,8 @@ async function nsCoachTalk(){const n=S.n;const k=await nsPop({ic:'🪑',title:`T
  else if(k==='pen'||k==='fk'){const r=askTaker(k);await nsPop({ic:'🎯',title:k==='pen'?'Pênaltis':'Faltas',txt:r.txt,chips:r.chips})}}
 {const _partP=participation;participation=function(kind,o){const p=_partP(kind,o);try{const n=S.n;if(nsOn()&&n.promise>0&&kind==='club'&&!S.youth&&(p.why==='banco'||(p.play&&!p.start))){n.promise--;return{play:true,start:true,min:ch(.3)?RI(60,85):90,role:p.role||'Rotação'}}}catch(e){}return p}}
 function nsRoundScreen(){const st=S.st;const R0=st.nsRound;let tab=false;
- const draw=h=>{h.querySelector('.nspost').innerHTML=`<h2 class="nsp-t">${tab?esc(LG[st.lg||club().l].n):`Rodada ${R0.r+1}`}</h2><div class="nsp-rd">${tab?nsTableHTML():nsRoundHTML()}</div><div class="nsp-btns"><button class="btn ghost" id="rdT">${tab?'⚽ Rodada':'📊 Tabela'}</button><button class="btn" id="rdOk">Continuar ➜</button></div>`;
-  h.querySelector('#rdT').onclick=()=>{tab=!tab;draw(h)}};
- return new Promise(res=>{const h=nsPostHost();h.innerHTML='<div class="nspost"></div>';draw(h);h.addEventListener('click',function f(e){if(e.target&&e.target.id==='rdOk'){h.removeEventListener('click',f);res()}})})}
+ const draw=h=>{h.querySelector('.nspost').innerHTML=`<div class="nsp-step">${tab?'Tabela':'Rodada'}</div><h2 class="nsp-t">${tab?esc(LG[st.lg||club().l].n):`Rodada ${R0.r+1}`}</h2><div class="nsp-rd">${tab?nsTableHTML():nsRoundHTML()}</div><div class="nsp-btns"><button class="btn wide" id="rdOk">${tab?'Ver o seu jogo ➜':'Ver a tabela ➜'}</button></div>`};
+ return new Promise(res=>{const h=nsPostHost();h.innerHTML='<div class="nspost"></div>';draw(h);h.addEventListener('click',function f(e){if(e.target&&e.target.id==='rdOk'){if(!tab){tab=true;draw(h);h.scrollTop=0;return}h.removeEventListener('click',f);res()}})})}
 function nsTableHTML(){const st=S.st;const T=sortTable(st.table);const me=S.club;const R0=st.nsRound||{prev:{}};
  return`<table class="nstab nslt"><thead><tr><th>#</th><th>Time</th><th>J</th><th>V</th><th>E</th><th>D</th><th>SG</th><th>Pts</th></tr></thead><tbody>${T.map((x,i)=>{const c=CLUB[x.id];const pv=R0.prev&&R0.prev[x.id];const mv=pv?pv-(i+1):0;
   return`<tr class="${x.id===me?'me':''}"><td>${i+1}${mv?`<i class="${mv>0?'up':'dn'}">${mv>0?'▲':'▼'}</i>`:''}</td><td class="cl">${esc(c?(c.a||mkAbbr(c.n)):x.id)}</td><td>${x.j}</td><td>${x.v}</td><td>${x.e}</td><td>${x.d}</td><td>${x.gp-x.gc}</td><td><b>${x.p}</b></td></tr>`}).join('')}</tbody></table>`}

@@ -6,12 +6,17 @@
 
 // ---------- treino em lances 3D ----------
 const NS_TR3D={vel:[['contra','finish'],['mano','dribble'],['lanca','long'],['contra3','pass']],for:[['longe','finish'],['escCab','header'],['voleio','finish'],['cabeca','header']],
- tec:[['mano','dribble'],['area','finish'],['pivo','dribble'],['rebote','finish']],vis:[['enfiada','pass',1],['virada','pass',1],['tabela','pass',1],['saida','pass',1],['cruz','cross',1]],
+ tec:[['driblar','dribble'],['driblarP','dribble'],['driblar','dribble'],['driblarP','dribble'],['driblar','dribble']],vis:[['enfiada','pass',1],['virada','pass',1],['tabela','pass',1],['saida','pass',1],['cruz','cross',1]],
  bp:[['falta','fk'],['escanteio','cross',1],['penalti','pen'],['faltaLonge','fk'],['faltaLat','cross',1]]};
 const NS_TR3D_GK={vel:[['gkMano','keeper'],['gkShot','keeper']],for:[['gkCab','keeper'],['gkShot','keeper']],tec:[['tiroMeta','pass',1],['gkShot','keeper']],vis:[['tiroMeta','pass',1],['gkMano','keeper']],bp:[['gkPen','keeper'],['gkFk','keeper']]};
-async function nsTrain3D(k){const L=(S.pos==='GOL'?NS_TR3D_GK:NS_TR3D)[k];const nm=NSK.find(x=>x[0]===k)[1];let lives=3,score=0,i=0;const off=RI(0,L.length-1);
- while(lives>0&&i<15){const[sc,kind,po]=L[(i+off)%L.length];i++;
-  const o={kind,scen:sc,passOnly:!!po,planned:true,quick:i>1,comp:`Treino · ${nm} · ${'❤️'.repeat(lives)}${'🖤'.repeat(3-lives)} · ${score} acerto${score===1?'':'s'}`,title:`Treino de ${nm}`,skill:.6,keeper:.5,okTxt:'Boa!',pen:sc==='gkPen'};
+// cada treino é uma jogada: arrancada, finalização, drible, passe, bola parada
+const NS_TRNM={vel:['🏃','Arrancada'],for:['🥅','Finalização'],tec:['🌀','Drible'],vis:['🎯','Passe'],bp:['🧱','Bola parada']};
+const NS_TRNM_GK={vel:['🧤','Saída do gol'],for:['🧤','Bolas altas'],tec:['🦶','Reposição'],vis:['👀','Leitura'],bp:['🧱','Pênalti e falta']};
+function nsTrNm(k){return((S&&S.pos==='GOL'?NS_TRNM_GK:NS_TRNM)[k]||['⚽',k])}
+// 3 vidas e 3 acertos: acertou 3, o treino acaba (nota máxima); errou 3, acaba também
+async function nsTrain3D(k){const L=(S.pos==='GOL'?NS_TR3D_GK:NS_TR3D)[k];const nm=nsTrNm(k)[1];let lives=3,score=0,i=0;const off=RI(0,L.length-1);
+ while(lives>0&&score<3&&i<6){const[sc,kind,po]=L[(i+off)%L.length];i++;
+  const o={kind,scen:sc,passOnly:!!po,planned:true,quick:i>1,comp:`Treino de ${nm} · ${'❤️'.repeat(lives)}${'🖤'.repeat(3-lives)} · ${score}/3 acertos`,title:`Treino de ${nm}`,skill:.6,keeper:.5,okTxt:'Boa!',pen:sc==='gkPen'};
   let res;try{res=await lance3dPlay(o)}catch(e){L3D.failed=true;return i>1?score:null}
   if(!res||res.skip)break;
   let ok=false;try{ok=!!l3dResult(o,res).ok}catch(e){}if(ok)score++;else lives--}
@@ -20,17 +25,17 @@ async function nsTrain3D(k){const L=(S.pos==='GOL'?NS_TR3D_GK:NS_TR3D)[k];const 
 nsTrainSession=async function(k){const n=S.n;const cost=nsTrainCost();
  if((n.trainW||0)>=NS_TRAIN_MAX){await nsPop({ic:'🗓️',title:'Treinos da rodada feitos',txt:'Você já fez as 3 sessões desta rodada. Jogue a próxima partida pra liberar mais.'});return}
  if(n.en<cost){const q=await nsPop({ic:'❤️',title:'Sem energia pra treinar',txt:`O treino gasta ${cost}% e você está com ${Math.round(n.en)}%.`,opts:[['dr','🥤 Tomar energético']],ok:'Voltar'});if(q==='dr')await nsDrinkPick();return}
- const nm=NSK.find(x=>x[0]===k)[1];const in3d=typeof lanceMode==='function'&&lanceMode()==='jogar'&&!L3D.failed;
- const q=await nsPop({ic:NSK.find(x=>x[0]===k)[2],title:`Treino de ${nm}`,txt:in3d?'Lances de jogo em 3D, um atrás do outro. Você tem 3 vidas: cada lance que não der certo tira uma. Quanto mais acertos, mais a habilidade sobe.':'Minigame com 3 vidas. Quanto mais acertos, mais a habilidade sobe.',opts:[['go','▶ Começar']],ok:'Voltar'});if(q!=='go')return;
+ const nm=nsTrNm(k)[1];const in3d=typeof lanceMode==='function'&&lanceMode()==='jogar'&&!L3D.failed;
+ const q=await nsPop({ic:nsTrNm(k)[0],title:`Treino de ${nm}`,txt:in3d?`Lances de ${nm.toLowerCase()} em 3D. Acerte 3 e o treino acaba com nota máxima. Você tem 3 vidas: errou 3, acabou. Sobe ${NSK.find(x=>x[0]===k)[1]}.`:'Minigame com 3 vidas. Quanto mais acertos, mais a habilidade sobe.',opts:[['go','▶ Começar']],ok:'Voltar'});if(q!=='go')return;
  n.en=clamp(n.en-cost,0,100);const h=nsHost();const was=!h.hidden;h.hidden=true;let sc=null,d3=false;
  try{if(in3d){sc=await nsTrain3D(k);d3=sc!=null}if(sc==null)sc=await nsTrainGame(k)}catch(e){console.error(e);sc=sc||0}
  $ov.hidden=true;$ov.innerHTML='';if(was)h.hidden=false;
  n.tbest=n.tbest||{};const rec=sc>(n.tbest[k]||0);if(rec)n.tbest[k]=sc;
- const mul=d3?clamp(.5+sc*.32,.5,2.8):clamp(.45+sc*.11,.45,2.8);const g=nsGain(k,mul);const s=n.sk[k];const l0=s.l;nsAddP(k,g);n.last[k]=n.week;n.trainW=(n.trainW||0)+1;n.trainT=(n.trainT||0)+1;
+ const mul=d3?[.45,1,1.6,2.4][clamp(sc,0,3)]:clamp(.45+sc*.11,.45,2.8);const g=nsGain(k,mul);const s=n.sk[k];const l0=s.l;nsAddP(k,g);n.last[k]=n.week;n.trainW=(n.trainW||0)+1;n.trainT=(n.trainT||0)+1;
  if(n.coachAsk===k&&!n.coachAskDone){n.coachAskDone=true;n.rel.coach=clamp(n.rel.coach+5,0,100);toast({ic:'🪑',title:'O técnico viu',txt:'Você treinou o que ele pediu. Relação +5.',ms:2400})}
  nsSync();try{nsAchCheck()}catch(e){}
- const big=d3?sc>=4:sc>=10,mid=d3?sc>=2:sc>=5;
- await nsPop({ic:big?'🔥':mid?'👍':'😅',title:big?'Treino de craque!':mid?'Bom treino':'Treino fraco',html:`<div class="nstg-res"><b>${sc}</b><span>acerto${sc===1?'':'s'}${rec?' · NOVO RECORDE':''}</span></div>`,txt:`${nm}: +${g}% de progresso${s.l>l0?` e subiu pro nível ${s.l}!`:'.'} Treinos: ${n.trainW} de ${NS_TRAIN_MAX}.`});nsRefresh()};
+ const big=d3?sc>=3:sc>=10,mid=d3?sc>=2:sc>=5;
+ await nsPop({ic:big?'🔥':mid?'👍':'😅',title:big?'Treino de craque!':mid?'Bom treino':'Treino fraco',html:`<div class="nstg-res"><b>${sc}${d3?'/3':''}</b><span>acerto${sc===1?'':'s'}${rec?' · NOVO RECORDE':''}</span></div>`,txt:`${nm}: +${g}% de progresso${s.l>l0?` e subiu pro nível ${s.l}!`:'.'} Treinos: ${n.trainW} de ${NS_TRAIN_MAX}.`});nsRefresh()};
 
 // ---------- Fofocagram: Nardo Meses posta do perfil dele, com a sua foto ----------
 const NS_NARDO={custom:{skin:'#e3b088',hairC:'#3a2a1a',style:'lateral',beard:'cavanhaque',acc:''}};

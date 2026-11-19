@@ -75,7 +75,7 @@ function nsStarAdd(x){const n=S.n;if(!n||!x)return 0;const st=n.star;const k=1/(
 // ---------- contrato: salário, bônus por gol e por assistência ----------
 function nsCt(){const n=S.n;if(!n)return null;const w=S.wage||0;
  if(!n.ct||n.ct.wage!==w){const rg=n.ct&&n.ct.rg||.22,ra=n.ct&&n.ct.ra||.13;n.ct={wage:w,rg,ra,gb:Math.max(w>0?1:0,Math.round(w*rg)),ab:Math.max(w>0?1:0,Math.round(w*ra))}}
- return n.ct}
+ n.ct.pb=Math.round(w*.025*1000)/1000;n.ct.fb=Math.round(w*.05*1000)/1000;return n.ct}
 const NS_AGENT={tubarao:.12,normal:.07,pai:.03};
 function nsAgentPct(){try{const a=S.n&&S.n.staff&&S.n.staff.ag;return a?(NS_STAFF.ag[a.t-1]||{}).pct||0:0}catch(e){return 0}}
 function nsTrK(){try{const a=S.n&&S.n.staff&&S.n.staff.tr;return a?NS_STAFF.tr[a.t-1]||null:null}catch(e){return null}}
@@ -85,9 +85,9 @@ function nsSpW(){const n=S.n;if(!n||!n.sps)return 0;let t=0;for(const k in n.sps
 function nsMatchItems(){const st=S.st;if(!st)return 40;if(!st.nsN){st.nsN=Math.max(30,st.cal.filter(it=>it.k!=='ev'&&it.k!=='debut').length)}return st.nsN}
 function nsWeek(info={}){const n=nsEnsure();if(!n)return null;const st=S.st;n.week++;st.nsWk=(st.nsWk||0)+1;
  const f=52/nsMatchItems();const net=.5;const ag=nsAgentPct();const ct=nsCt();
- const sal=(S.wage||0)*f*net,gb=(info.g||0)*ct.gb*net,ab=(info.a||0)*ct.ab*net,sp=nsSpW()*net*(S.captain?1.1:1);
- const rows={sal:[sal,sal*ag],g:[gb,gb*ag],a:[ab,ab*ag],sp:[sp,sp*ag],gN:info.g||0,aN:info.a||0};
- let tot=0;for(const k of['sal','g','a','sp'])tot+=rows[k][0]+rows[k][1];
+ const sal=(S.wage||0)*f*net,gb=(info.g||0)*ct.gb*net,ab=(info.a||0)*ct.ab*net,sp=nsSpW()*net*(S.captain?1.1:1),pb=(info.ps||0)*(ct.pb||0)*net,fb=(info.fz||0)*(ct.fb||0)*net;
+ const rows={sal:[sal,sal*ag],g:[gb,gb*ag],a:[ab,ab*ag],ps:[pb,pb*ag],fz:[fb,fb*ag],sp:[sp,sp*ag],gN:info.g||0,aN:info.a||0,psN:info.ps||0,fzN:info.fz||0,gross:(S.wage||0)*f,net,ag};
+ let tot=0;for(const k of['sal','g','a','ps','fz','sp'])tot+=rows[k][0]+rows[k][1];
  let rent=0;try{rent=rentWeek()*f}catch(e){}
  tot+=rent*1000;S.din+=tot/1000;st.paid=(st.paid||0)+sal/1000;
  // energia: 6 dias de descanso + treinador + imóveis
@@ -142,9 +142,9 @@ function nsPerfMod(){const n=S.n;let m=fit(nsAttrsOf(nsEffLv()),S.pos)-S.ovr;m+=
   NSSM.items=[];const r=await _pi(it,io);
   try{if(snap&&st.rounds[it.r]){const list=st.rounds[it.r].map(([h,a])=>{const H=st.table[h],b=snap[h];return H&&b?[h,a,H.gp-b.gp,H.gc-b.gc]:null}).filter(Boolean);const T=sortTable(st.table);const pos={};T.forEach((x,i)=>pos[x.id]=i+1);st.nsRound={r:it.r,list,pos,prev:Object.fromEntries(Object.entries(snap).map(([k,v])=>[k,v.pos]))}}}catch(e){}
   const isWeek=r&&(r.k==='match'||r.k==='multi'||r.k==='bye');
-  if(isWeek){let g=0,a=0,played=false,res=null;for(const m of NSSM.items){if(m.me&&m.me.play){g+=m.me.g||0;a+=m.me.a||0;played=true}}
+  if(isWeek){let g=0,a=0,ps=0,fz=0,played=false,res=null;for(const m of NSSM.items){if(m.me&&m.me.play){g+=m.me.g||0;a+=m.me.a||0;ps+=(m.post&&m.post.ps)||0;fz+=(m.post&&m.post.ch)||0;played=true}}
    const L=r.k==='multi'?r.list:[r];const mm=L.find(x=>x&&x.k==='match');if(mm)res=mm.wdl;
-   nsWeek({g,a,played,res})}
+   nsWeek({g,a,ps,fz,played,res})}
   return r}}
 // contrato novo: dá pra negociar salário e bônus como no NSS
 {const _ao=acceptOffer;acceptOffer=function(o){const w0=S.wage;const r=_ao.apply(this,arguments);try{if(nsOn()&&o&&!o.loan&&S.wage>0){nsSync();setTimeout(()=>nsNegotiate(o),60)}}catch(e){}return r}}
