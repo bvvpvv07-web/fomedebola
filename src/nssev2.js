@@ -143,7 +143,7 @@ NS_EV.push(
  E('ab2_idioma','abroad','Aprender o idioma','Você joga fora e ainda não fala a língua local.',[O('Aulas intensivas','Já conversa com o elenco.',{rel:{team:5},en:-4}),O('Usar tradutor','Funciona mais ou menos.',{})],{c:()=>{try{return LG[club().l].c!=='BRA'}catch(e){return false}}}),
  E('ab2_saudade','abroad','Saudade de casa','Você sente falta da comida e da família.',[O('Trazer a família','Tudo melhor.',{happy:8,din:-nsW(.5)}),O('Achar um restaurante brasileiro','Feijão salvou.',{happy:3})],{c:()=>{try{return LG[club().l].c!=='BRA'}catch(e){return false}}}),
  // ---------- CONTRATO ----------
- E('ct2_aum','ct','Pedir aumento','Você está jogando bem. Hora de pedir aumento?',[OC('Pedir',.45,'A diretoria deu um aumento!',{din:nsW(.5),happy:4},'Disseram que só na renovação.',{happy:-2}),O('Esperar a renovação','Paciência.',{})]),
+ E('ct2_aum','ct','Pedir aumento','Você está jogando bem. Hora de pedir aumento?',[OC('Pedir',.45,'A diretoria deu um aumento de salário!',{wageK:1.12,happy:4},'Disseram que só na renovação.',{happy:-2}),O('Esperar a renovação','Paciência.',{})],{c:()=>S.wage>0&&!S.youth&&!(S.n&&S.n.raiseY===S.year)}),
  E('ct2_multa','ct','Multa rescisória','Você descobre que sua multa é baixa e clubes grandes sabem disso.',[O('Pedir pra aumentar a multa','O clube adorou.',{rel:{coach:3}}),O('Deixar como está','Porta aberta.',{})]),
  E('ct2_luvas','ct','Bônus de permanência','A diretoria oferece bônus se você prometer ficar até o fim do ano.',[O('Aceitar','Dinheiro na conta.',{din:nsW(.8),rel:{coach:2}}),O('Recusar','Liberdade.',{})]),
  // ---------- MERCADO ----------

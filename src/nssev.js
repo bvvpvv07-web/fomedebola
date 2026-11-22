@@ -72,6 +72,7 @@ const NS_EV=[
 
 function nsEvFx(fx){const n=S.n;const ch2=[];if(!fx)return ch2;if(fx.din&&Math.abs(fx.din)<1e-3){const k=fx.din/1e-6;fx={...fx,din:Math.sign(k)*Math.max(.002,((S.wage||5)/1000)*Math.abs(k))}}const R=(t,v,good)=>ch2.push([t,good===undefined?(v>=0?'up':'down'):good?'up':'down']);
  if(fx.din){S.din=Math.max(0,S.din+fx.din);R(`💰 ${fx.din>0?'+':'−'}${money(Math.abs(fx.din))}`,fx.din)}
+ if(fx.wageK&&S.wage>0&&!S.youth){const old=S.wage;S.wage=Math.round(S.wage*fx.wageK);n.raiseY=S.year;try{nsCt()}catch(e){}R(`💼 Salário ${money(old/1000)} → ${money(S.wage/1000)} por semana`,1)}
  if(fx.en){n.en=clamp(n.en+fx.en,0,100);R(`❤️ Energia ${fx.en>0?'+':''}${fx.en}%`,fx.en)}
  if(fx.happy){n.happy=clamp(n.happy+fx.happy,0,100);R(`🙂 Felicidade ${fx.happy>0?'+':''}${fx.happy}`,fx.happy)}
  if(fx.rel)for(const k in fx.rel){if(k==='gf'&&!S.gf)continue;const v=fx.rel[k];n.rel[k]=clamp(n.rel[k]+v,0,100);const w=(NS_RELWHO&&NS_RELWHO[k])||['','?'];R(`${w[0]} ${k==='gf'&&S.gf?S.gf.n:w[1]} ${v>0?'+':''}${v}`,v)}

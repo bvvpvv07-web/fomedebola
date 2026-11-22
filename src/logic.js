@@ -377,7 +377,7 @@ async function playMine(o,io){
  let interN=0;
  for(let e of tl){
   if(live)await live.until(e.m);let lanced=false;
-  if(io.chance&&part.play&&interN<(SESS?7:live?6:5)&&onPitch(e.m)&&(typeof lancesWanted!=='function'||lancesWanted(live))){
+  if(io.chance&&part.play&&interN<(typeof nsOn==='function'&&nsOn()&&typeof nsLanceCap==='function'?nsLanceCap()+3:(SESS?7:live?6:5))&&onPitch(e.m)&&(typeof lancesWanted!=='function'||lancesWanted(live))){
    let c=null;
    if(e.t==='g'&&e.us&&e.mine)c={type:chanceType(e),planned:true};
    else if(e.t==='g'&&e.us&&e.ast&&typeof assistType==='function')c={type:assistType(),planned:true,ast:true};

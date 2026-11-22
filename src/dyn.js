@@ -79,7 +79,7 @@ weekHTML=function(){return _weekHTMLd().replace(/<section class="card wildev">[\
 const _bindWeekd=bindWeek;
 bindWeek=function(){_bindWeekd();
  const ev=S.week&&S.week.ev&&!S.week.evDone&&!S.week.evShown&&typeof WILD!=='undefined'?WILD.find(e=>e.id===S.week.ev):null;
- if(ev&&$ov.hidden){const wk=S.week;wk.evShown=true;setTimeout(async()=>{if(S.week!==wk)return;if(!$ov.hidden){wk.evShown=false;return}
+ if(ev&&$ov.hidden){const wk=S.week;wk.evShown=true;setTimeout(async()=>{if(S.week!==wk)return;const np=document.getElementById('nspost');if(!$ov.hidden||(typeof NSSM!=='undefined'&&NSSM.inPost)||(np&&!np.hidden)||document.querySelector('.nsgo-host,.nspop-host')||BUSY){wk.evShown=false;return}
   await choicePopup({tag:'Aconteceu',tagc:'vida',eyebrow:'decida agora',ic:'🎲',title:ev.t,text:wk.evD||'',options:ev.o.map(o=>o[0]),pick:i=>{const[txt,fx]=ev.o[i][1]();wk.evDone=true;(S.st.evlog=S.st.evlog||[]).push({t:ev.t,txt});return{txt,chips:applyFx(fx)}}});
   KEEPSC=true;renderHub();if(typeof showPendingMoments==='function')showPendingMoments()},450)}
 };

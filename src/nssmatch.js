@@ -26,23 +26,40 @@ async function nsLiveStart(m){
  const ME=nsSur();
  const onFrom=part&&part.play?(part.start?0:90-part.min):0,onTo=part&&part.play?(part.start?part.min:90):90;
  const L={wasOn:null,entered:false,min:0,gu:0,gt:0,rows:[],msg:'',ended:false,skip:false,out:false,lastAmb:0,poss:true,lastX:-99,ht:false,lowWarn:false,drained:0};
- x.live=L;L.decN=m.o&&m.o.final?3:2;L.nextDec=Math.max(onFrom+4,RI(12,26));x.x.mods={block:0,boost:0};
+ x.live=L;L.homeU=home;L.scFn=()=>sc();L.us=us.n;L.th=th.n;L.RU=RU;L.RT=RT;L.ME=ME;L.cU=cU;L.cT=cT;L.Hn=(home?us:th).n;L.An=(home?th:us).n;L.decN=m.o&&m.o.final?3:2;L.nextDec=Math.max(onFrom+4,RI(12,26));x.x.mods={block:0,boost:0};
  const spd=()=>L.skip?0:(S.liveSpeed===3?3:1);const minMs=()=>({1:300,3:110,0:0})[spd()];
  const dU=(us.s||70)-(th.s||70)+(home&&!m.neutral?2:0);
  const onPitch=()=>!bench&&!L.out&&L.min>=onFrom&&L.min<=onTo;x.onPitch=onPitch;
  const sc=()=>{const gu=L.gu+(x.x.gu||0),gt=L.gt+(x.x.gt||0);return home?[gu,gt]:[gt,gu]};
  const H=home?us:th,A=home?th:us,cH=home?cU:cT,cA=home?cT:cU;
  const ab=s=>esc((s.a||mkAbbr(s.n||'')).slice(0,3).toUpperCase());
- const rowHTML=r=>{const c=r.side==='u'?cU:r.side==='t'?cT:['#26352c','#eef2e4'];return`<div class="nfr ${r.k||''}${r.dim?' ndim':''}" style="--c:${c[0]};--k:${pickInk(c[0])}"><b>${r.m!=null?r.m+"'":''}</b><span>${r.t}</span></div>`};
+ const rowHTML=r=>{const c=r.side==='u'?cU:r.side==='t'?cT:['#26352c','#eef2e4'];const gl=/\bngl\b/.test(r.k||'');return`<div class="nfr ${r.k||''}${r.dim?' ndim':''}" style="--c:${c[0]};--k:${pickInk(c[0])}"><b>${r.m!=null?r.m+"'":''}</b><span>${gl?'<strong class="gtl">GOL!</strong>':''}${r.t}${gl?nsSofaPitch(r):''}</span></div>`};
  const effPips=()=>[1,2,3,4,5].map(i=>`<i class="${i<=n.eff?'on':''}"></i>`).join('');
  const drinks=()=>Object.values(n.dr).reduce((s,v)=>s+v,0);
  const draw=()=>{$ov.hidden=false;const[hg,ag]=sc();
-  $ov.innerHTML=`<div class="nslive">
-  <div class="nsl-top"><span class="nspc">${esc(m.o.comp)}${m.o.label?' · '+esc(m.o.label):''}</span><b class="clk" id="nlClk">${L.ended?'Fim':L.min+"'"}</b><div class="spd">${[[1,'▶'],[3,'▶▶']].map(([k,t])=>`<button data-sp="${k}" class="${spd()===k?'on':''}" aria-label="${k===0?'Pular pro fim':k===3?'Rápido':'Normal'}">${t}</button>`).join('')}</div></div>
-  <div class="nsl-score"><div class="tm" style="background:${cH[0]};color:${pickInk(cH[0])}">${esc(H.n)}</div><b id="nlH">${hg}</b><b id="nlA">${ag}</b><div class="tm" style="background:${cA[0]};color:${pickInk(cA[0])}">${esc(A.n)}</div></div>
-  ${m.agg?`<div class="nsl-agg">Ida ${m.agg[0]}–${m.agg[1]} · agregado <span id="nlAgg">${m.agg[0]+L.gu+(x.x.gu||0)}–${m.agg[1]+L.gt+(x.x.gt||0)}</span></div>`:''}
-  <div class="nsl-time"><i id="nlBar" style="width:${L.min/90*100}%"></i></div>
-  <div class="nsl-off" id="nlOff" ${onPitch()||L.ended?'hidden':''}>${offTxt()}</div><div class="nsl-feed ${onPitch()||L.ended?'':'off'}" id="nlFeed">${L.rows.slice(-14).map(rowHTML).join('')}</div>
+  const crest=sd=>{try{const c=sd&&sd.id&&CLUB[sd.id];if(c&&!sd.nat)return shieldHTML(c);return`<span class="ssflag">${(sd&&sd.f)||'⚽'}</span>`}catch(e){return''}};
+  const tab=L.tab||'det';
+  $ov.innerHTML=`<div class="nslive sofa">
+  <div class="ss-hd" style="--hc:${cH[0]};--ac:${cA[0]}">
+   <div class="ss-top"><span class="nspc">${esc(m.o.comp)}${m.o.label?' · '+esc(m.o.label):''}</span><div class="spd">${[[1,'▶'],[3,'▶▶']].map(([k,t])=>`<button data-sp="${k}" class="${spd()===k?'on':''}" aria-label="${k===3?'Rápido':'Normal'}">${t}</button>`).join('')}</div></div>
+   <div class="ss-sc"><div class="tm">${crest(H)}<b>${esc(H.n)}</b></div><div class="mid"><div class="sc"><b id="nlH">${hg}</b><i>-</i><b id="nlA">${ag}</b></div><span class="st ${L.ended?'':'live'}" id="nlClk">${L.ended?'Encerrado':L.ht&&L.min===45?'Intervalo':L.min+"'"}</span></div><div class="tm">${crest(A)}<b>${esc(A.n)}</b></div></div>
+   <div class="ss-scr" id="nlScr">${nsSofaScorers(L)}</div>
+   ${m.agg?`<div class="nsl-agg">Ida ${m.agg[0]}–${m.agg[1]} · agregado <span id="nlAgg">${m.agg[0]+L.gu+(x.x.gu||0)}–${m.agg[1]+L.gt+(x.x.gt||0)}</span></div>`:''}
+   <div class="nsl-time"><i id="nlBar" style="width:${L.min/90*100}%"></i></div>
+   <div class="ss-tabs">${[['det','Detalhes'],['com','Comentário'],['est','Estatísticas'],['esc','Escalação']].map(([k,t])=>`<button data-tb="${k}" class="${tab===k?'on':''}">${t}</button>`).join('')}</div>
+  </div>
+  <div class="ss-body" data-tab="${tab}">
+   <div class="nsl-off" id="nlOff" ${onPitch()||L.ended?'hidden':''}>${offTxt()}</div>
+   <div class="ss-pane" data-pane="det">
+    <div class="ss-card ss-comp"><span>⚽</span><b>${esc(m.o.comp)}${m.o.label?', '+esc(m.o.label):''}</b><em>›</em></div>
+    <div class="ss-card ss-flowc"><h4>Fluxo da partida</h4><div class="nsl-flow" id="nlFlow">${nsFlowSVG(L)}</div></div>
+    <div class="ss-card ss-livec"><h4><i class="dot"></i>Ao vivo</h4><div id="nlLive">${nsSofaLive(L)}</div></div>
+    <div class="ss-card" id="nlEvents">${nsSofaEvents(L)}</div>
+   </div>
+   <div class="ss-pane" data-pane="com"><div class="nsl-feed ${onPitch()||L.ended?'':'off'}" id="nlFeed">${L.rows.slice(-30).map(rowHTML).join('')}</div></div>
+   <div class="ss-pane" data-pane="est"><div class="ss-card" id="nlStats">${nsSofaStats(L)}</div></div>
+   <div class="ss-pane" data-pane="esc"><div class="ss-card" id="nlLine">${nsSofaLine(L)}</div></div>
+  </div>
   <div class="nsl-msg" id="nlMsg">${esc(L.msg)}</div>
   <div id="nlEnd"></div>
   <div class="nsl-ctl ${onPitch()?'':'off'}" ${L.ended||bench?'hidden':''}>
@@ -51,6 +68,8 @@ async function nsLiveStart(m){
    <div class="nsl-foc"><small>Foco</small><div>${[[-1,'🛡️','Defender'],[0,'⚖️','Equilibrado'],[1,'⚔️','Atacar']].map(([k,ic,t])=>`<button data-fc="${k}" class="${n.foc===k?'on':''}" aria-label="${t}">${ic}</button>`).join('')}</div></div>
   </div>
   <div class="nsl-en"><span>Energia</span><span class="nsmb ${n.en<30?'low':''}"><i id="nlEn" style="width:${Math.round(n.en)}%"></i></span><b id="nlEnV">${Math.round(n.en)}%</b></div></div>`;
+  $ov.querySelectorAll('[data-tb]').forEach(b=>b.onclick=()=>{L.tab=b.dataset.tb;const bd=$ov.querySelector('.ss-body');if(bd)bd.dataset.tab=L.tab;$ov.querySelectorAll('[data-tb]').forEach(y=>y.classList.toggle('on',y===b));if(L.tab==='est'){const e=document.getElementById('nlStats');if(e)e.innerHTML=nsSofaStats(L)}if(L.tab==='esc'){const e=document.getElementById('nlLine');if(e)e.innerHTML=nsSofaLine(L)}const f=document.getElementById('nlFeed');if(f)f.scrollTop=f.scrollHeight});
+  $ov.querySelectorAll('[data-rp]').forEach(b=>b.onclick=()=>nsSofaReplay(L,+b.dataset.rp));
   $ov.querySelectorAll('[data-sp]').forEach(b=>b.onclick=()=>{const v=+b.dataset.sp;if(v===0){L.skip=true;x.skip=true}else{L.skip=false;x.skip=false;S.liveSpeed=v}$ov.querySelectorAll('[data-sp]').forEach(y=>y.classList.toggle('on',y===b))});
   const em=document.getElementById('nlEm'),ep=document.getElementById('nlEp');if(em)em.onclick=()=>{n.eff=clamp(n.eff-1,1,5);document.getElementById('nlEv').innerHTML=effPips()};if(ep)ep.onclick=()=>{n.eff=clamp(n.eff+1,1,5);document.getElementById('nlEv').innerHTML=effPips()};
   $ov.querySelectorAll('[data-fc]').forEach(b=>b.onclick=()=>{n.foc=+b.dataset.fc;$ov.querySelectorAll('[data-fc]').forEach(y=>y.classList.toggle('on',y===b));api.flash(n.foc>0?'⚔️ Você sobe pro ataque':n.foc<0?'🛡️ Você recua pra ajudar a defesa':'⚖️ Posicionamento equilibrado')});
@@ -59,7 +78,7 @@ async function nsLiveStart(m){
  const setEn=()=>{const e=document.getElementById('nlEn'),v=document.getElementById('nlEnV');if(e){e.style.width=Math.round(n.en)+'%';e.parentElement.classList.toggle('low',n.en<30)}if(v)v.textContent=Math.round(n.en)+'%'};
  const setScore=()=>{const[hg,ag]=sc();const h=document.getElementById('nlH'),a=document.getElementById('nlA');if(h){h.textContent=hg;a.textContent=ag}const g=document.getElementById('nlAgg');if(g&&m.agg)g.textContent=`${m.agg[0]+L.gu+(x.x.gu||0)}–${m.agg[1]+L.gt+(x.x.gt||0)}`};
  const offTxt=()=>L.out||L.entered?'🚪 Você saiu do jogo · só acompanhando':(bench?'🪑 Você está no banco · só acompanhando':'🪑 No banco · espere a sua vez');
- const push=r=>{if(r.dim==null)r.dim=!onPitch()&&!L.ended&&!/\b(nme|nin|nbn)\b/.test(r.k||'');L.rows.push(r);if(L.rows.length>40)L.rows.splice(0,L.rows.length-40);const f=document.getElementById('nlFeed');if(f){f.insertAdjacentHTML('beforeend',rowHTML(r));while(f.children.length>14)f.firstElementChild.remove();f.scrollTop=f.scrollHeight}};
+ const push=r=>{try{nsFlowAdd(L,r)}catch(e){}if(r.dim==null)r.dim=!onPitch()&&!L.ended&&!/\b(nme|nin|nbn)\b/.test(r.k||'');L.rows.push(r);if(L.rows.length>40)L.rows.splice(0,L.rows.length-40);const f=document.getElementById('nlFeed');if(f){f.insertAdjacentHTML('beforeend',rowHTML(r));while(f.children.length>30)f.firstElementChild.remove();f.scrollTop=f.scrollHeight}try{nsSofaPush(L,r)}catch(e){}};
  const chkOn=()=>{const on=onPitch();if(on===L.wasOn)return;L.wasOn=on;const f=document.getElementById('nlFeed'),b=document.getElementById('nlOff');if(f)f.classList.toggle('off',!on);const cl=$ov.querySelector('.nsl-ctl');if(cl)cl.classList.toggle('off',!on);if(b){b.hidden=on;b.textContent=offTxt()}
   if(on&&!L.entered){L.entered=true;push({m:L.min,side:'u',t:`🔥 VOCÊ ENTROU EM CAMPO!<small>Agora é com você, ${ME}</small>`,k:'nme nin'});api.flash('🔥 Você entrou! Agora é com você');const lv=$ov.querySelector('.nslive');if(lv&&!reduced){lv.classList.remove('enter');void lv.offsetWidth;lv.classList.add('enter')}try{SFX.whistle()}catch(e){}}};
  async function nlDrink(){const have=NS_DRINKS.filter(d=>n.dr[d.id]>0);if(!have.length)return;let d=have[0];if(have.length>1){const kk=await nsPop({ic:'🥤',title:'Qual energético?',opts:have.map(d=>[d.id,`${d.ic} ${d.n} (${n.dr[d.id]})`]),ok:'Cancelar'});d=NS_DRINKS.find(z=>z.id===kk)}if(!d)return;nsDrink(d);setEn();const c=document.getElementById('nlDrN');if(c)c.textContent=drinks();if(!drinks()){const b=document.getElementById('nlDr');if(b)b.disabled=true}api.flash(`🥤 ${d.n}: energia em ${Math.round(n.en)}%`)}
@@ -103,19 +122,19 @@ async function nsLiveStart(m){
   else push({m:L.min,side:'u',t:isPass?`O passe de <b>${ME}</b> é cortado`:pick([`<b>${ME}</b> finaliza… ${gkDef(RT)}`,`<b>${ME}</b> chuta pra fora`,`<b>${ME}</b> é travado na hora do chute`]),k:'nme nbad'});
   setScore()}
  // ---- momentos de decisão: a escolha mexe no jogo na hora ----
- const goalUs=(t,ast)=>{const w=nm(RU);const full=(RU.find(p=>nsShort(p.n)===w)||{n:w}).n;x.x.gu=(x.x.gu||0)+1;if(ast)x.x.a=(x.x.a||0)+1;x.x.sc.push({m:L.min,w:full,us:true});push({m:L.min,side:'u',t:t.replace('{w}',w),k:'ngl nme'});api.flash(`GOL do ${us.n}!`);goalFx(true);setScore()};
- const goalThem=t=>{const w=nm(RT);x.x.gt=(x.x.gt||0)+1;x.x.sc.push({m:L.min,w:(RT.find(p=>nsShort(p.n)===w)||{n:w}).n,us:false});push({m:L.min,side:'t',t:t.replace('{w}',w),k:'ngl'});api.flash(`Gol do ${th.n}…`);goalFx(false);setScore()};
+ const goalUs=async(t,ast)=>{const w=nm(RU);try{await nsGoalClip({side:'us',who:w,min:L.min})}catch(_){}const full=(RU.find(p=>nsShort(p.n)===w)||{n:w}).n;x.x.gu=(x.x.gu||0)+1;if(ast)x.x.a=(x.x.a||0)+1;x.x.sc.push({m:L.min,w:full,us:true});push({m:L.min,side:'u',t:t.replace('{w}',w),k:'ngl nme'});api.flash(`GOL do ${us.n}!`);goalFx(true);setScore()};
+ const goalThem=async t=>{const w=nm(RT);try{await nsGoalClip({side:'them',who:w,min:L.min})}catch(_){}x.x.gt=(x.x.gt||0)+1;x.x.sc.push({m:L.min,w:(RT.find(p=>nsShort(p.n)===w)||{n:w}).n,us:false});push({m:L.min,side:'t',t:t.replace('{w}',w),k:'ngl'});api.flash(`Gol do ${th.n}…`);goalFx(false);setScore()};
  const rel=(k,v)=>{n.rel[k]=clamp((n.rel[k]||50)+v,0,100)};
  const decPool=()=>{const[hg,ag]=sc();const dif=home?hg-ag:ag-hg;const P=S.pos,GK=P==='GOL';const T=nm(RU),Z=nm(RT);const L2=[];
-  if(GK){L2.push({ic:'🧤',t:'Cara a cara!',d:`${Z} escapou sozinho e vem pro seu gol.`,o:[['Sair do gol e fechar o ângulo',async()=>{x.inX=true;let ok=false;try{ok=await IO_UI.chance({type:'reflex',planned:true,comp:m.o.comp,min:L.min})}catch(e){}x.inX=false;draw();if(ok){push({m:L.min,side:'u',t:`🧤 <b>${ME}</b> sai do gol e fecha ${Z}!`,k:'nme'});return['Fechou o ângulo!',1]}goalThem('⚽ {w} tira do goleiro e marca');return['Ele tirou de você.',0]}],['Ficar na linha e esperar',async()=>ch(.5)?(push({m:L.min,side:'u',t:`${Z} chuta e a bola passa raspando`,k:'nme'}),['Ele errou o chute.',1]):(goalThem('⚽ {w} escolhe o canto e marca'),['Ele escolheu o canto.',0])]]});
-   L2.push({ic:'🦶',t:'Reposição',d:'Você está com a bola nas mãos. O time pede velocidade.',o:[['Lançar rápido no contra-ataque',async()=>{const r=rnd();if(r<.28){goalUs('⚽ Contra-ataque relâmpago e gol de {w}! Tudo começou na sua reposição',true);return['Virou gol!',1]}if(r<.38){goalThem('⚽ A bola volta rápido e {w} marca');return['Perderam a bola e tomaram.',0]}x.x.mods.boost++;return['O time ganhou campo.',1]}],['Cadenciar e segurar o jogo',async()=>{rel('coach',3);x.x.mods.block++;return['O técnico gostou da calma.',1]}]]});
+  if(GK){L2.push({ic:'🧤',t:'Cara a cara!',d:`${Z} escapou sozinho e vem pro seu gol.`,o:[['Sair do gol e fechar o ângulo',async()=>{x.inX=true;let ok=false;try{ok=await IO_UI.chance({type:'reflex',planned:true,comp:m.o.comp,min:L.min})}catch(e){}x.inX=false;draw();if(ok){push({m:L.min,side:'u',t:`🧤 <b>${ME}</b> sai do gol e fecha ${Z}!`,k:'nme'});return['Fechou o ângulo!',1]}await goalThem('⚽ {w} tira do goleiro e marca');return['Ele tirou de você.',0]}],['Ficar na linha e esperar',async()=>ch(.5)?(push({m:L.min,side:'u',t:`${Z} chuta e a bola passa raspando`,k:'nme'}),['Ele errou o chute.',1]):(await goalThem('⚽ {w} escolhe o canto e marca'),['Ele escolheu o canto.',0])]]});
+   L2.push({ic:'🦶',t:'Reposição',d:'Você está com a bola nas mãos. O time pede velocidade.',o:[['Lançar rápido no contra-ataque',async()=>{const r=rnd();if(r<.28){await goalUs('⚽ Contra-ataque relâmpago e gol de {w}! Tudo começou na sua reposição',true);return['Virou gol!',1]}if(r<.38){await goalThem('⚽ A bola volta rápido e {w} marca');return['Perderam a bola e tomaram.',0]}x.x.mods.boost++;return['O time ganhou campo.',1]}],['Cadenciar e segurar o jogo',async()=>{rel('coach',3);x.x.mods.block++;return['O técnico gostou da calma.',1]}]]});
    return L2}
   L2.push({ic:'😤',t:'Provocação',d:`O zagueiro ${Z} pisa no seu pé e fala no seu ouvido.`,o:[['Revidar',async()=>{if(ch(.35)){push({m:L.min,side:'u',t:`🟥 <b>${ME}</b> revida e é expulso!`,k:'nme nbad'});x.x.dn=(x.x.dn||0)-1.2;S.st.suspLeft=(S.st.suspLeft||0)+1;rel('coach',-8);L.out=true;chkOn();return['EXPULSO! Suspenso 1 jogo.',0]}push({m:L.min,side:'u',t:`🟨 ${Z} leva amarelo e o ${esc(us.n)} cresce no jogo`,k:'nme'});x.x.mods.boost++;rel('team',3);return['Ele levou amarelo e o time cresceu.',1]}],['Ignorar e jogar bola',async()=>{rel('coach',3);x.x.dn=(x.x.dn||0)+.2;return['Cabeça fria. O técnico viu.',1]}],['Cavar a falta',async()=>{if(ch(.55)){api.flash('Falta! Você bate');await setPiece('fk');return['O juiz deu a falta.',1]}push({m:L.min,side:'u',t:`🟨 Amarelo pra <b>${ME}</b> por simulação`,k:'nme nbad'});x.x.dn=(x.x.dn||0)-.3;return['Amarelo por simulação.',0]}]]});
-  L2.push({ic:'⚡',t:'Contra-ataque 2 contra 1',d:`Você e ${T} disparam contra um zagueiro só.`,o:[[`Tocar pro ${T}`,async()=>{if(ch(.5)){goalUs(`⚽ GOL de {w}! Assistência de <b>${ME}</b> no contra-ataque`,true);return['Assistência!',1]}push({m:L.min,side:'u',t:`O zagueiro corta o passe de <b>${ME}</b>`,k:'nme nbad'});return['O zagueiro cortou.',0]}],['Ir sozinho e chutar',async()=>{await extraChance('finish');return['Você decidiu.',1]}]]});
-  if(dif>0)L2.push({ic:'🛡️',t:'Segurar o resultado',d:'Vocês estão ganhando. O técnico grita pra você voltar e ajudar na marcação.',o:[['Obedecer e marcar',async()=>{x.x.mods.block++;rel('coach',4);n.en=clamp(n.en-5,0,100);return['O time fechou a porta.',1]}],['Ficar lá na frente',async()=>{rel('coach',-4);if(ch(.3)){goalThem('⚽ O time ficou aberto e {w} empata o lance');return['Abriu espaço atrás e tomaram.',0]}await extraChance('finish');return['Ficou na frente e a bola veio.',1]}]]});
+  L2.push({ic:'⚡',t:'Contra-ataque 2 contra 1',d:`Você e ${T} disparam contra um zagueiro só.`,o:[[`Tocar pro ${T}`,async()=>{if(ch(.5)){await goalUs(`⚽ GOL de {w}! Assistência de <b>${ME}</b> no contra-ataque`,true);return['Assistência!',1]}push({m:L.min,side:'u',t:`O zagueiro corta o passe de <b>${ME}</b>`,k:'nme nbad'});return['O zagueiro cortou.',0]}],['Ir sozinho e chutar',async()=>{await extraChance('finish');return['Você decidiu.',1]}]]});
+  if(dif>0)L2.push({ic:'🛡️',t:'Segurar o resultado',d:'Vocês estão ganhando. O técnico grita pra você voltar e ajudar na marcação.',o:[['Obedecer e marcar',async()=>{x.x.mods.block++;rel('coach',4);n.en=clamp(n.en-5,0,100);return['O time fechou a porta.',1]}],['Ficar lá na frente',async()=>{rel('coach',-4);if(ch(.3)){await goalThem('⚽ O time ficou aberto e {w} empata o lance');return['Abriu espaço atrás e tomaram.',0]}await extraChance('finish');return['Ficou na frente e a bola veio.',1]}]]});
   if(dif<0)L2.push({ic:'📣',t:'Torcida na bronca',d:`Vocês estão perdendo de ${-dif}. A torcida vaia.`,o:[['Chamar a responsabilidade',async()=>{await extraChance(ch(.5)?'dribble':'finish');return['Você pediu a bola.',1]}],['Organizar o time',async()=>{x.x.mods.boost++;rel('team',3);return['O time acordou.',1]}],['Reclamar com o juiz',async()=>{if(ch(.5)){push({m:L.min,side:'u',t:`🟨 Amarelo pra <b>${ME}</b> por reclamação`,k:'nme nbad'});x.x.dn=(x.x.dn||0)-.2;return['Amarelo por reclamação.',0]}x.x.mods.boost++;return['O juiz deu uma falta boa pra vocês.',1]}]]});
-  L2.push({ic:'🎯',t:'Pênalti pra vocês!',d:`O batedor oficial é ${T}. Você está com a bola na mão.`,o:[['Eu bato',async()=>{if(!S.taker.pen)rel('team',-2);api.flash('Você vai pra bola');await setPiece('pen');return['Você assumiu.',1]}],[`Entregar pro ${T}`,async()=>{rel('team',3);if(ch(.72)){goalUs('⚽ {w} converte o pênalti!',false);return['Ele converteu.',1]}push({m:L.min,side:'u',t:`❌ ${T} perde o pênalti`,k:'nbad'});return['Ele perdeu.',0]}]]});
-  L2.push({ic:'🧱',t:'Falta frontal',d:`Falta na entrada da área. ${T} quer bater.`,o:[['Eu bato',async()=>{await setPiece('fk');return['Você foi pra bola.',1]}],['Deixar ele bater',async()=>{rel('team',2);if(ch(.2)){goalUs('⚽ Golaço de falta de {w}!',false);return['Golaço dele!',1]}push({m:L.min,side:'u',t:`A falta de ${T} vai na barreira`,k:''});return['Foi na barreira.',0]}]]});
+  L2.push({ic:'🎯',t:'Pênalti pra vocês!',d:`O batedor oficial é ${T}. Você está com a bola na mão.`,o:[['Eu bato',async()=>{if(!S.taker.pen)rel('team',-2);api.flash('Você vai pra bola');await setPiece('pen');return['Você assumiu.',1]}],[`Entregar pro ${T}`,async()=>{rel('team',3);if(ch(.72)){await goalUs('⚽ {w} converte o pênalti!',false);return['Ele converteu.',1]}push({m:L.min,side:'u',t:`❌ ${T} perde o pênalti`,k:'nbad'});return['Ele perdeu.',0]}]]});
+  L2.push({ic:'🧱',t:'Falta frontal',d:`Falta na entrada da área. ${T} quer bater.`,o:[['Eu bato',async()=>{await setPiece('fk');return['Você foi pra bola.',1]}],['Deixar ele bater',async()=>{rel('team',2);if(ch(.2)){await goalUs('⚽ Golaço de falta de {w}!',false);return['Golaço dele!',1]}push({m:L.min,side:'u',t:`A falta de ${T} vai na barreira`,k:''});return['Foi na barreira.',0]}]]});
   if(L.min>=55||n.en<50)L2.push({ic:'🦵',t:'Dor na coxa',d:'Você sente a parte de trás da coxa depois de um pique.',o:[['Pedir pra sair',async()=>{api.out('out');return['Saiu inteiro. Sem lesão.',1]}],['Seguir no sacrifício',async()=>{n.en=clamp(n.en-10,0,100);if(ch(.3)){push({m:L.min,side:'u',t:`🚑 <b>${ME}</b> sente a lesão e sai de campo`,k:'nme nbad'});S.st.injLeft=(S.st.injLeft||0)+RI(1,3);L.out=true;chkOn();return['Lesionou. Fora por uns jogos.',0]}rel('fans',3);x.x.mods.boost++;return['A torcida aplaudiu a raça.',1]}]]});
   return L2};
  async function decision(){const pool=decPool();const used=L.decUsed||(L.decUsed=[]);let c=pool.filter(d=>!used.includes(d.t));if(!c.length)c=pool;const d=pick(c);used.push(d.t);
@@ -151,17 +170,17 @@ async function nsLiveStart(m){
  const api={
   async until(t){
    if(L.min===0&&t>0&&!L.kick){L.kick=true;push({m:0,side:'n',t:`Bola rolando: ${esc(us.n)} × ${esc(th.n)}`,k:'nht'});if(bench)push({m:0,side:'n',t:`🪑 Você está no banco hoje. Treine e ganhe o técnico pra jogar.`,k:'nht nbn'});else if(part&&!part.start)push({m:0,side:'n',t:`🪑 Você começa no banco. Fique pronto pra entrar.`,k:'nht nbn'});try{SFX.whistle()}catch(e){}if(!L.skip)await sleep(600)}
-   while(L.min<t){L.min++;chkOn();const c=document.getElementById('nlClk'),b=document.getElementById('nlBar');if(c)c.textContent=L.min+"'";if(b)b.style.width=(L.min/90*100)+'%';
+   while(L.min<t){L.min++;try{nsFlowTick(L)}catch(e){}chkOn();const c=document.getElementById('nlClk'),b=document.getElementById('nlBar');if(c)c.textContent=L.min+"'";if(b)b.style.width=(L.min/90*100)+'%';
     if(onPitch()){const d=(16+n.eff*6.5)/90*(S.age>30?1+(S.age-30)*.03:1);n.en=clamp(n.en-d,0,100);L.drained+=d;setEn();if(n.en<15&&!L.lowWarn){L.lowWarn=true;api.flash('🥵 Você está exausto. Tome um energético ou baixe o esforço.')}}
     if(L.min===45&&!L.ht){L.ht=true;await halftime()}
     if(onPitch()&&!L.ended&&L.decN>0&&L.min>=L.nextDec&&L.min<87&&L.min-L.lastX>=3&&L.min!==45){L.decN--;L.nextDec=L.min+RI(16,26);await decision()}
     if(!L.skip&&L.min-L.lastAmb>=(spd()===3?2:1)&&ch(.62)&&L.min!==45){L.lastAmb=L.min;amb()}
     // seu jogador cria mais com esforço e foco no ataque
-    if(onPitch()&&S.pos!=='GOL'&&L.min-L.lastX>=8&&(x.x.ch||0)<4&&L.min<89){const b0=NS_ATKB[S.pos]||.4;const bt=nsBootStats();const faro=bt&&(bt.ab||[]).includes('faro')?1.25:1;
+    if(onPitch()&&S.pos!=='GOL'&&L.min-L.lastX>=7&&(x.x.ch||0)<(x.x.cap||3)+1&&L.min<89){const b0=(NS_ATKB[S.pos]||.4)*nsOvrK();const bt=nsBootStats();const faro=bt&&(bt.ab||[]).includes('faro')?1.25:1;
      const p=b0*(.45+.15*n.eff)*(n.foc>0?1.5:n.foc<0?.55:1)*faro*(.8+n.rel.team/250)*(n.en<25?.5:1)/90;if(ch(p))await extraChance()}
     if(onPitch()&&S.pos!=='GOL'&&L.min-L.lastX>=6&&(x.x.sp||0)<3&&L.min>3&&L.min<88&&ch((1.6+(n.foc>0?.35:0))/90))await setPiece();
     // jogo sem lance nenhum é chato: se até os 62' / 80' você teve menos de 2, aparece um
-    {const fin=!!(m.o&&m.o.final);if(onPitch()&&S.pos!=='GOL'&&(x.x.lc||0)<(fin?4:2)&&(L.min===62||L.min===80||(fin&&(L.min===30||L.min===52)))&&L.min-L.lastX>=4)await extraChance()}
+    {const fin=!!(m.o&&m.o.final);if(onPitch()&&S.pos!=='GOL'&&(x.x.lc||0)<Math.min(x.x.cap||3,fin?4:3)&&(L.min===62||L.min===80||(fin&&(L.min===30||L.min===52)))&&L.min-L.lastX>=4)await extraChance()}
     // atacar demais abre espaço atrás
     if(n.foc>0&&onPitch()&&ch(.0035*n.eff/3)){x.x.gt=(x.x.gt||0)+1;const w=nm(RT);x.x.sc.push({m:L.min,w:(RT.find(p=>nsShort(p.n)===w)||{n:w}).n,us:false});push({m:L.min,side:'t',t:`⚽ Contra-ataque e gol de ${w}. O time ficou exposto.`,k:'ngl'});api.flash(`Gol do ${th.n}…`);goalFx(false);setScore()}
     const ms=minMs();if(ms)await sleep(L.min>=80?ms*1.3:ms)}},
@@ -172,7 +191,7 @@ async function nsLiveStart(m){
   async event(e,gu,gt){const k=L.skip?0:spd()===3?.4:1;const mine=e.mine;
    // foco na defesa: às vezes você salva um gol certo
    if(e.t==='g'&&!e.us&&onPitch()&&S.pos!=='GOL'&&x.x.mods&&x.x.mods.block>0){x.x.mods.block--;{x.x.gt=(x.x.gt||0)-1;x.x.rm.push({m:e.m,w:e.w});x.x.blk=(x.x.blk||0)+1;L.gu=gu;L.gt=gt;push({m:e.m,side:'u',t:`🛡️ A marcação que você pediu funcionou: ${esc(nsShort(e.w))} é travado na hora do gol!`,k:'nme'});api.flash('Sua decisão salvou um gol!');setScore();if(k)await sleep(1400*k);return}}
-   if(e.t==='g'){L.gu=gu;L.gt=gt;setScore();const w=esc(nsShort(e.w));push({m:e.m,side:e.us?'u':'t',t:e.us?(mine?`⚽ GOL! <b>${ME}</b> marca!`:`⚽ GOL de ${w}!${e.ast?` Assistência de <b>${ME}</b>`:''}`):`⚽ Gol de ${w}`,k:'ngl'+(mine||e.ast?' nme':'')});api.flash(e.us?(mine?'GOOOOL! É SEU!':`GOL do ${us.n}!`):`Gol do ${th.n}…`);goalFx(!!e.us);if(k)await sleep(2000*k);return}
+   if(e.t==='g'){if(!L.skip&&!mine)try{await nsGoalClip({side:e.us?'us':'them',who:nsShort(e.w||''),min:e.m})}catch(_){}L.gu=gu;L.gt=gt;setScore();const w=esc(nsShort(e.w));push({m:e.m,side:e.us?'u':'t',t:e.us?(mine?`⚽ GOL! <b>${ME}</b> marca!`:`⚽ GOL de ${w}!${e.ast?` Assistência de <b>${ME}</b>`:''}`):`⚽ Gol de ${w}`,k:'ngl'+(mine||e.ast?' nme':'')});api.flash(e.us?(mine?'GOOOOL! É SEU!':`GOL do ${us.n}!`):`Gol do ${th.n}…`);goalFx(!!e.us);if(k)await sleep(2000*k);return}
    let r=null;const w=esc(nsShort(e.w||''));
    if(e.t==='c'&&e.missed)r={side:'u',t:`<b>${ME}</b> perde a chance!`,k:'nme nbad'};
    else if(e.t==='c')r={side:e.us?'u':'t',t:esc(pick(e.us?LIVE_TXT.c_us:LIVE_TXT.c_th).replace('{w}',nsShort(e.w||''))),k:mine?'nme':''};
@@ -202,7 +221,7 @@ async function nsLiveStart(m){
 
 // ---------- depois do apito: aplica extras, energia, estatísticas, relações, estrela ----------
 {const _pmN=playMine;playMine=async function(o,io){if(!nsOn())return _pmN(o,io);const n=nsEnsure();
-  const prev=NSSM.cur;const cur={o,x:{gu:0,gt:0,g:0,a:0,ch:0,ps:0,tk:0,blk:0,sc:[],rm:[],lc:0,cap:o&&o.final?5:3},live:null,skip:false};NSSM.cur=cur;let r;
+  const prev=NSSM.cur;const cur={o,x:{gu:0,gt:0,g:0,a:0,ch:0,ps:0,tk:0,blk:0,sc:[],rm:[],lc:0,cap:nsLanceCap(o&&o.final)},live:null,skip:false};NSSM.cur=cur;let r;
   try{r=await _pmN(o,io)}finally{NSSM.cur=prev}
   try{const x=cur.x;const me=r.me;
    if(x.gu||x.gt||x.rm.length){r.gu+=x.gu;r.gt+=x.gt;if(me){me.g+=x.g;me.a+=x.a}
