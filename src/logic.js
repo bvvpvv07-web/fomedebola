@@ -370,13 +370,13 @@ async function playMine(o,io){
  const MINEPk=SESS?1.15:1;const MINEP0={ATA:.46,SA:.44,PE:.42,PD:.42,MEI:.4,MC:.3,ME:.32,MD:.32,VOL:.2,LD:.21,LE:.21,ZAG:.16,GOL:0}[S.pos]??.3;const MINEP=Math.min(.75,MINEP0*MINEPk);const DEFP=Math.min(.85,({ZAG:.72,VOL:.6,LD:.52,LE:.52,MC:.32,ME:.22,MD:.22}[S.pos]||0)*(SESS?1.15:1));let myD=0,myP=0,myPx=0;
  const nf=SESS?RI(8,12):RI(6,10);for(let i=0;i<nf;i++){const us=ch(clamp(.5+d/40,.2,.8));const mine=us&&part.play&&ch(MINEP);tl.push({m:mine?mMine():RI(1,90),t:'c',us,mine,w:mine?S.name:us?scorerFrom(usR,S.name):scorerFrom(thR)})}
  {const pw={VOL:1,MC:1.2,MEI:1.1,LD:.8,LE:.8,ME:.8,MD:.8,ZAG:.6,PE:.6,PD:.6,SA:.6,ATA:.4,GOL:.3}[S.pos]||.6;const nB=part.play?Math.round((SESS?R(1.2,2.4):R(.2,1))*pw):0;for(let i=0;i<nB;i++)tl.push({m:mMine(),t:'pp',us:true,mine:true,w:S.name})}
- {const nDM=io.matchDecision&&part.play&&(typeof lancesWanted!=='function'||lancesWanted(!!o.live))?(o.live?RI(1,2):(ch(.6)?1:0)):0;for(let i=0;i<nDM;i++){const m=mMine();if(m)tl.push({m,t:'dm'})}}
+ {const nDM=io.matchDecision&&!(typeof nsOn==='function'&&nsOn())&&part.play&&(typeof lancesWanted!=='function'||lancesWanted(!!o.live))?(o.live?RI(1,2):(ch(.6)?1:0)):0;for(let i=0;i<nDM;i++){const m=mMine();if(m)tl.push({m,t:'dm'})}}
  tl.sort((a,b)=>a.m-b.m);
  const live=o.live&&io.live?await io.live.start({o,us:o.us,them:o.them,home:o.home,neutral:o.neutral,agg:o.agg,part}):null;
  let gu=0,gt=0,myG=0,myA=0,penNote=null,fkNote=false;const scorers=[];
  let interN=0;
  for(let e of tl){
-  if(live)await live.until(e.m);
+  if(live)await live.until(e.m);let lanced=false;
   if(io.chance&&part.play&&interN<(SESS?7:live?6:5)&&onPitch(e.m)&&(typeof lancesWanted!=='function'||lancesWanted(live))){
    let c=null;
    if(e.t==='g'&&e.us&&e.mine)c={type:chanceType(e),planned:true};
@@ -387,7 +387,7 @@ async function playMine(o,io){
    else if(DEFP&&!e.us&&(e.t==='g'||e.t==='c')&&ch(e.t==='g'?DEFP:DEFP*.6))c={type:'tackle',planned:e.t==='g'};
    else if(S.pos==='GOL'&&!e.us&&(e.t==='g'||e.t==='c')&&ch(e.t==='g'?(SESS?.9:.75):(SESS?.55:.35)))c={type:'reflex',planned:e.t==='g'};
    if(c){interN++;if(live){live.flash(c.type==='tackle'?'🛡️ Ataque deles! É com você…':c.type==='reflex'?'⚠️ Perigo no seu gol!':c.ast?'⚡ Você tem a bola pra criar…':'⚡ A bola é sua…');await sleep(live.sess?120:S.liveSpeed===3?600:1400)}
-    const ok=await io.chance({...c,comp:o.comp,min:e.m});if(live)live.redraw();
+    const ok=await io.chance({...c,comp:o.comp,min:e.m});if(live)live.redraw();const notMe=!!NM.notMe;NM.notMe=false;if(!notMe){lanced=true;
     const asst=!!NM.dmAssist;NM.dmAssist=false;const selfG=!!NM.selfGoal;NM.selfGoal=false;
     if(ok&&asst&&!c.ast&&c.type!=='reflex'){e={...e,t:'g',ast:true,mine:false,w:scorerFrom(usR,S.name)}}else
     if(c.type==='build'){if(ok){myP++;if(ch(.24)){e={...e,t:'g',us:true,ast:true,mine:false,w:scorerFrom(usR,S.name)}}else e={...e,t:'ppok'}}else{myPx++;e={...e,t:'ppx'}}}
@@ -395,8 +395,11 @@ async function playMine(o,io){
     else if(c.type==='reflex'){if(e.t==='g'&&ok)e={...e,t:'gks'};else if(e.t==='c'&&!ok)e={...e,t:'g'};else if(e.t==='c'&&ok)e={...e,t:'gks'}}
     else if(c.ast){if(e.t==='g'&&!ok)e={...e,t:'c',ast:false};else if(ok&&selfG)e={...e,t:'g',ast:false,mine:true,w:S.name};else if(e.t==='c'&&ok)e={...e,t:'g',ast:true,mine:false}}
     else if(e.t==='g'&&!ok)e={...e,t:'c',fk:false,missed:true};
-    else if(e.t==='c'&&ok)e={...e,t:'g',w:S.name,mine:true}}
+    else if(e.t==='c'&&ok)e={...e,t:'g',w:S.name,mine:true}}}
   }
+  // no modo carreira (NSS) o seu jogador só faz alguma coisa quando você joga o lance
+  if(!lanced&&typeof nsOn==='function'&&nsOn()&&(e.mine||e.ast)&&(e.t==='g'||e.t==='c'))e={...e,mine:false,ast:false,w:e.mine?scorerFrom(usR,S.name):e.w};
+  if(!lanced&&typeof nsEvHook==='function'){const e2=nsEvHook(e);if(e2)e=e2}
   let feed=null;
   if(e.t==='dm'){if(onPitch(e.m)&&!r&&io.matchDecision){if(live){live.flash('🧠 Momento de decisão!');await sleep(S.liveSpeed===3?500:1100)}
     const d=await io.matchDecision({comp:o.comp,min:e.m,gu,gt});if(live)live.redraw();

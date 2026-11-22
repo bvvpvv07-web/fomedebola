@@ -69,7 +69,7 @@ async function nsTrainSession(k){const n=S.n;const cost=nsTrainCost();
 // Habilidades: › abre o minigame da habilidade
 {const _hp=nsHabPage;nsHabPage=function(){const p=_hp();const html0=p.html;
  p.html=()=>{const n=S.n;const left=NS_TRAIN_MAX-(n.trainW||0);let h=html0();
-  h=h.replace(/<p class="muted nshelp">[\s\S]*?<\/p>/,`<div class="nsses"><span>Treinos da rodada</span>${[0,1,2].map(i=>`<i class="${i<(n.trainW||0)?'used':''}"></i>`).join('')}<b>${left>0?`${left} restante${left>1?'s':''} · −${nsTrainCost()}% energia cada`:'feitos! Jogue a partida'}</b></div>`);
+  h=h.replace(/<p class="muted nshelp">[\s\S]*?<\/p>/,`<div class="nsses"><span>Treinos da rodada</span>${Array.from({length:NS_TRAIN_MAX},(_,i)=>`<i class="${i<(n.trainW||0)?'used':''}"></i>`).join('')}<b>${left>0?`${left} restante${left>1?'s':''} · −${nsTrainCost()}% energia cada`:'feitos! Jogue a partida'}</b></div>`);
   if(left<=0)h=h.replace(/<button class="nshr-go"/g,'<button class="nshr-go done"');
   h=h.replace(/<div class="nsauto">[\s\S]*$/,`<label class="nsauto2"><span>🤖 Treino automático</span><select class="input" id="hAuto">${[['off','Desligado'],['eq','Equilibrado'],...NSK.map(([k,nm])=>[k,nm])].map(([k,t])=>`<option value="${k}" ${(n.auto||'off')===k?'selected':''}>${t}</option>`).join('')}</select></label>`);return h};
  const b0=p.bind;p.bind=B=>{b0(B);B.querySelectorAll('[data-tr]').forEach(b=>b.onclick=()=>nsTrainSession(b.dataset.tr));const au=B.querySelector('#hAuto');if(au)au.onchange=()=>{S.n.auto=au.value;toast({ic:'🤖',title:au.value==='off'?'Treino automático desligado':'Treino automático ligado',txt:au.value==='off'?'':'Usa as sessões que sobrarem no fim da rodada.',ms:1800})}};

@@ -61,8 +61,8 @@ function nsGain(k,mul=1){const n=S.n;const s=n.sk[k];
 function nsAddP(k,g,chips){const n=S.n;const s=n.sk[k];s.p+=g;let up=0;while(s.p>=100&&s.l<99){s.p-=100;s.l++;up++}if(s.l>=99)s.p=Math.min(s.p,99);
  if(up){const before=S.ovr;nsSync();const nm=NSK.find(x=>x[0]===k)[1];if(chips)chips.push([`${nm} ${s.l}`,'up']);try{toast({ic:'📈',title:`${nm} subiu para ${s.l}!`,txt:S.ovr>before?`OVR ${before} → ${S.ovr}`:'Continue treinando.',ms:2200,group:'nsup'})}catch(e){}try{nsAchCheck()}catch(e){}}
  return up}
-const NS_TRAIN_MAX=3;
-function nsTrain(k,opt={}){const n=nsEnsure();const cost=opt.cost??nsTrainCost();if((n.trainW||0)>=NS_TRAIN_MAX&&!opt.free)return{ok:false,txt:'Você já fez as 3 sessões de treino desta rodada. Jogue a próxima partida.'};
+const NS_TRAIN_MAX=2;
+function nsTrain(k,opt={}){const n=nsEnsure();const cost=opt.cost??nsTrainCost();if((n.trainW||0)>=NS_TRAIN_MAX&&!opt.free)return{ok:false,txt:`Você já fez os ${NS_TRAIN_MAX} treinos desta rodada. Jogue a próxima partida.`};
  if(n.en<cost+(opt.min||0))return{ok:false,txt:`Energia baixa (${Math.round(n.en)}%). Descanse, jogue ou tome um energético.`};
  n.en=clamp(n.en-cost,0,100);const g=nsGain(k,opt.mul||1);const up=nsAddP(k,g);n.last[k]=n.week;n.trainW=(n.trainW||0)+1;n.trainT=(n.trainT||0)+1;
  if(n.rel.coach<100&&ch(.35))n.rel.coach=clamp(n.rel.coach+1,0,100);
