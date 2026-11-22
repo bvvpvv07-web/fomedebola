@@ -388,7 +388,8 @@ async function playMine(o,io){
    else if(S.pos==='GOL'&&!e.us&&(e.t==='g'||e.t==='c')&&ch(e.t==='g'?(SESS?.9:.75):(SESS?.55:.35)))c={type:'reflex',planned:e.t==='g'};
    if(c){interN++;if(live){live.flash(c.type==='tackle'?'🛡️ Ataque deles! É com você…':c.type==='reflex'?'⚠️ Perigo no seu gol!':c.ast?'⚡ Você tem a bola pra criar…':'⚡ A bola é sua…');await sleep(live.sess?120:S.liveSpeed===3?600:1400)}
     const ok=await io.chance({...c,comp:o.comp,min:e.m});if(live)live.redraw();const notMe=!!NM.notMe;NM.notMe=false;if(!notMe){lanced=true;
-    const asst=!!NM.dmAssist;NM.dmAssist=false;const selfG=!!NM.selfGoal;NM.selfGoal=false;
+    const asst=!!NM.dmAssist;NM.dmAssist=false;const selfG=!!NM.selfGoal;NM.selfGoal=false;const teamG=!!NM.teamGoal;NM.teamGoal=false;
+    if(ok&&teamG&&c.type!=='reflex'&&c.type!=='tackle'&&c.type!=='build'){e={...e,t:'g',us:true,mine:false,ast:false,w:scorerFrom(usR,S.name)}}else
     if(ok&&asst&&!c.ast&&c.type!=='reflex'){e={...e,t:'g',ast:true,mine:false,w:scorerFrom(usR,S.name)}}else
     if(c.type==='build'){if(ok){myP++;if(ch(.24)){e={...e,t:'g',us:true,ast:true,mine:false,w:scorerFrom(usR,S.name)}}else e={...e,t:'ppok'}}else{myPx++;e={...e,t:'ppx'}}}
     else if(c.type==='tackle'){if(ok){e={...e,t:'dsr'};myD++}else if(e.t==='c'&&ch(.3))e={...e,t:'g'}}

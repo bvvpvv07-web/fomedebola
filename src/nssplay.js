@@ -211,3 +211,9 @@ async function nsBetSettle(){const n=S.n;const B=n&&n.bet;if(!B)return;n.bet=nul
 .sofa .nsl-msg{background:#17181cee;color:#ffd84a;border-radius:999px;padding:8px 16px;font:800 15px var(--f-body);min-height:0;top:auto;bottom:150px;opacity:0}.sofa .nsl-msg.pop{animation:sofaMsg 2.8s ease forwards}@keyframes sofaMsg{0%{opacity:0;transform:translate(-50%,10px)}10%,78%{opacity:1;transform:translate(-50%,0)}100%{opacity:0}}
 .sofa .nsl-en b{color:#222226}.sofa .nsl-feed{display:flex!important;flex-direction:column-reverse;gap:8px}
 `;document.head.appendChild(st)}
+// ---------- menos gente em campo no lance: zaga conforme o adversário, contra-ataque com 1 a 3 ----------
+const NS_OPEN=['contra','contra3','area','mano','rebote','longe','voleio','pivo','tabela','enfiada','virada','lanca','cruz','saida','driblar','driblarP'];
+const NS_COUNTER=['contra','contra3','mano','driblar','driblarP'];
+{const _cfgD=l3dCfg;l3dCfg=function(o){const c=_cfgD(o);try{if(nsOn()&&c&&NS_OPEN.includes(c.scen)&&!/Treino|Peneira/i.test((o&&o.comp)||'')){const ctx=L3D.ctx||{};const us=ctx.us||club()||{s:70},th=ctx.them||{s:70};const d=((th&&th.s)||70)-((us&&us.s)||70);
+  let md=NS_COUNTER.includes(c.scen)?pick([1,2,2,3]):2+(d>6?1:0)+(d>14?1:0)-(d<-8?1:0);md=clamp(md,1,4);
+  const mm=clamp(2+(((us&&us.s)||70)>78?1:0)+(c.scen==='cruz'?1:0),1,3);c.var={...(c.var||{}),maxDef:md,maxMate:mm}}}catch(e){}return c}}
