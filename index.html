@@ -7786,7 +7786,13 @@ function rerenderNav(){const s=CLOUD.screen;if(s==='home')renderIntro();else if(
 // ---------- salvar / carregar ----------
 const LOCAL_IDX='fdb3_index';
 function localIndex(){try{return JSON.parse(localStorage.getItem(LOCAL_IDX)||'{}')}catch(e){return{}}}
-function localSet(cid,body){try{localStorage.setItem('fdb3_'+cid,JSON.stringify(body));const ix=localIndex();ix[cid]=body.meta;localStorage.setItem(LOCAL_IDX,JSON.stringify(ix))}catch(e){}}
+// gzip + base64 (o save fica ~8x menor). Sem CompressionStream (navegador velho), salva normal.
+async function fdbGz(str){if(typeof CompressionStream==='undefined')return null;try{const st=new Blob([str]).stream().pipeThrough(new CompressionStream('gzip'));const buf=new Uint8Array(await new Response(st).arrayBuffer());let b='';for(let i=0;i<buf.length;i+=0x8000)b+=String.fromCharCode.apply(null,buf.subarray(i,i+0x8000));return'gz:'+btoa(b)}catch(e){return null}}
+async function fdbUngz(s){if(typeof s!=='string'||!s.startsWith('gz:'))return s;const bin=atob(s.slice(3));const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text()}
+function localSet(cid,body){const ixUp=()=>{const ix=localIndex();ix[cid]=body.meta;localStorage.setItem(LOCAL_IDX,JSON.stringify(ix))};
+ try{localStorage.setItem('fdb3_'+cid,JSON.stringify(body));ixUp();return true}catch(e){}
+ // aparelho cheio: tenta a versão comprimida
+ fdbGz(body.data).then(z=>{if(!z)return;try{localStorage.setItem('fdb3_'+cid,JSON.stringify({meta:body.meta,data:z}));ixUp()}catch(e){SAVE_STATE.localFail=true}});return false}
 function localGet(cid){try{return JSON.parse(localStorage.getItem('fdb3_'+cid)||'null')}catch(e){return null}}
 function localDel(cid){try{localStorage.removeItem('fdb3_'+cid);const ix=localIndex();delete ix[cid];localStorage.setItem(LOCAL_IDX,JSON.stringify(ix))}catch(e){}}
 function buildBody(phase){
@@ -7796,28 +7802,54 @@ function buildBody(phase){
  return{meta:{cid:S.cid,name:S.name,nat:S.nat,pos:S.pos,age:S.age,club:c?c.n:'',ovr:S.ovr,peak:S.peak,phase,done:!!S.done,tier:L?L.tier:null,pts:L?L.pts:null,year:S.year,updated:Date.now()},data};
 }
 let SAVING=false,DIRTY=null;const SAVE_STATE={msg:''};
-async function saveNow(phase){
+// nuvem do Claude: cada documento aceita no máximo 256 KB, então o save vai comprimido e, se ainda for grande, em partes
+const FDB_PART=190000;
+async function cloudPut(cid,body){const col=CLOUD.db.collection('data/users/'+CLOUD.uid);
+ if(CLOUD.web){try{await col.doc(cid).set(body);return}catch(e){if(e.code!=='grande_demais')throw e}const z=await fdbGz(body.data);if(!z)throw new Error('grande');await col.doc(cid).set({meta:body.meta,data:z});return}
+ let data=body.data;if(data.length>FDB_PART){const z=await fdbGz(data);if(z)data=z}
+ if(data.length<=FDB_PART){await col.doc(cid).set({meta:body.meta,data});return}
+ const n=Math.ceil(data.length/FDB_PART);for(let i=0;i<n;i++)await col.doc(cid+'__p'+i).set({of:cid,i,d:data.slice(i*FDB_PART,(i+1)*FDB_PART)});
+ await col.doc(cid).set({meta:{...body.meta,parts:n},data:''})}
+async function cloudGet(cid){const col=CLOUD.db.collection('data/users/'+CLOUD.uid);const d=await col.doc(cid).get();if(!d.exists)return null;const b=d.data();if(!b||!b.meta)return null;
+ let data=b.data||'';const n=b.meta.parts||0;if(n){const ps=[];for(let i=0;i<n;i++){const x=await col.doc(cid+'__p'+i).get();if(!x.exists)throw new Error('parte faltando');ps.push(x.data().d)}data=ps.join('')}
+ return{meta:b.meta,data:await fdbUngz(data)}}
+function saveErr(e){const c=e&&(e.code||e.message)||'';return /invalid_argument|too_large|grande/.test(c)?'save grande demais':c==='quota_exceeded'?'a nuvem encheu: apague carreiras antigas':c==='rate_limited'?'muitos salvamentos seguidos, tentando de novo':c==='sessao_invalida'?'sua sessão expirou, entre de novo':/fetch|network|internet|Failed/i.test(c)?'sem internet agora':'erro '+String(c).slice(0,40)}
+async function saveNow(phase,now){
  if(!S||!S.cid)return;
- if(SAVING){DIRTY=phase;return}
- SAVING=true;
- try{const body=buildBody(phase);localSet(S.cid,body);
-  if(online()){await CLOUD.db.collection('data/users/'+CLOUD.uid).doc(S.cid).set(body);SAVE_STATE.msg='Salvo na sua conta'}else SAVE_STATE.msg='Salvo neste aparelho';
- }catch(e){SAVE_STATE.msg=e&&e.code==='quota_exceeded'?'Espaço cheio: apague carreiras antigas':'Salvo neste aparelho'}
- SAVING=false;const el=document.getElementById('saveflag');if(el)el.textContent=SAVE_STATE.msg;
- if(DIRTY){const p=DIRTY;DIRTY=null;saveNow(p)}
+ let body=null;try{body=buildBody(phase)}catch(e){console.error(e);return}
+ const okLocal=localSet(S.cid,body);
+ if(online())cloudSoon(now);else{SAVE_STATE.msg=okLocal?'Salvo neste aparelho':'Salvo neste aparelho (comprimido)';const el=document.getElementById('saveflag');if(el)el.textContent=SAVE_STATE.msg}
 }
+// a nuvem recebe no máximo um salvamento a cada 6 s (o último estado sempre vai); fechar o app manda na hora
+function cloudSoon(now){if(SAVE_STATE.t&&!now)return;clearTimeout(SAVE_STATE.t);const wait=now?0:Math.max(0,6000-(Date.now()-(SAVE_STATE.last||0)));SAVE_STATE.t=setTimeout(cloudFlush,wait)}
+async function cloudFlush(){SAVE_STATE.t=null;if(!S||!S.cid||!online())return;if(SAVING){DIRTY=true;return}
+ SAVING=true;SAVE_STATE.last=Date.now();
+ try{const body=buildBody(S.phase||'season');await cloudPut(S.cid,body);SAVE_STATE.msg='Salvo na sua conta';SAVE_STATE.fails=0;SAVE_STATE.warned=false}
+ catch(e){console.error('save nuvem',e);SAVE_STATE.fails=(SAVE_STATE.fails||0)+1;SAVE_STATE.msg='Salvo só neste aparelho ('+saveErr(e)+')';
+  if(!SAVE_STATE.warned){SAVE_STATE.warned=true;try{toast({ic:'☁️',title:'Não salvou na nuvem',txt:`Ficou salvo neste aparelho. Motivo: ${saveErr(e)}. Vou tentar de novo sozinho.`,ms:4200})}catch(x){}}
+  if(SAVE_STATE.fails<6&&!SAVE_STATE.t)SAVE_STATE.t=setTimeout(cloudFlush,8000*SAVE_STATE.fails)}
+ SAVING=false;const el=document.getElementById('saveflag');if(el)el.textContent=SAVE_STATE.msg;
+ if(DIRTY){DIRTY=null;cloudSoon()}
+}
+// salva quando o app vai pro fundo ou fecha (trocar de app no iPad, fechar a aba)
+{const bg=()=>{try{if(S&&S.cid&&!S.done&&CLOUD.screen==='game'){const ph=S.st&&S.st.ended?'post':S.phase||'season';saveNow(ph,true)}}catch(e){}};
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')bg()});addEventListener('pagehide',bg)}
 async function listSaves(){
  let list=[];
- if(online()){try{const q=await CLOUD.db.collection('data/users/'+CLOUD.uid).get();list=q.docs.map(d=>({...d.data().meta,src:'conta'}))}catch(e){}}
+ if(online()){try{const q=await CLOUD.db.collection('data/users/'+CLOUD.uid).get();list=q.docs.map(d=>d.data()).filter(x=>x&&x.meta&&x.meta.cid).map(x=>({...x.meta,src:'conta'}))}catch(e){}}
  const ix=localIndex();for(const k in ix)if(!list.find(x=>x.cid===k))list.push({...ix[k],src:'aparelho'});
  return list.sort((a,b)=>b.updated-a.updated);
 }
 async function loadSave(cid){
- let body=null;
- if(online()){try{const d=await CLOUD.db.collection('data/users/'+CLOUD.uid).doc(cid).get();if(d.exists)body=d.data()}catch(e){}}
- if(!body)body=localGet(cid);
- if(!body)return false;
- const o=JSON.parse(body.data);
+ // abre a versão MAIS NOVA entre a nuvem e o aparelho (antes a nuvem sempre ganhava, mesmo velha)
+ let cloud=null,local=null;
+ if(online()){try{cloud=await cloudGet(cid)}catch(e){console.error('load nuvem',e)}}
+ try{local=localGet(cid);if(local&&local.data)local.data=await fdbUngz(local.data)}catch(e){local=null}
+ const tu=b=>(b&&b.meta&&b.meta.updated)||0;
+ let body=cloud&&local?(tu(local)>tu(cloud)?local:cloud):(cloud||local);
+ if(!body||!body.data)return false;
+ let o;try{o=JSON.parse(body.data)}catch(e){const alt=body===cloud?local:cloud;if(!alt||!alt.data)return false;body=alt;o=JSON.parse(body.data)}
+ if(online()&&body===local&&tu(local)>tu(cloud))setTimeout(()=>{try{saveNow(S.phase||'season',true)}catch(e){}},1500);
  buildClubs();for(const[id,l,s]of o.clubs)if(CLUB[id]){CLUB[id].l=l;CLUB[id].s=o.cp2?s:clubPower(s)}
  W=o.W;S=o.S;if(POS_ALIAS[S.pos])S.pos=POS_ALIAS[S.pos];for(const s of (W.stars||[]))if(POS_ALIAS[s.pos])s.pos=POS_ALIAS[s.pos];REQ=o.req||{};RENEW=o.renew||null;RENEW_MSG=o.renewMsg||'';
  PAUSE=S.pauseId?EV.find(e=>e.id===S.pauseId)||null:null;if(PAUSE){try{PAUSE._d=PAUSE.d()}catch(e){PAUSE=null}}
@@ -7829,8 +7861,8 @@ async function loadSave(cid){
  else renderHub();
  return true;
 }
-async function deleteSave(cid){localDel(cid);if(online()){try{await CLOUD.db.collection('data/users/'+CLOUD.uid).doc(cid).delete()}catch(e){}}}
-function goHome(){if(S&&S.cid&&!S.done){const ph=S.st&&S.st.ended?'post':(PAUSE||S.st&&S.st.idx>0)?'season':S.phase||'pre';saveNow(ph)}$ov.hidden=true;$ov.innerHTML='';buildClubs();CLOUD.screen='home';renderIntro()}
+async function deleteSave(cid){localDel(cid);if(online()){try{const col=CLOUD.db.collection('data/users/'+CLOUD.uid);await col.doc(cid).delete();if(!CLOUD.web)for(let i=0;i<12;i++){try{await col.doc(cid+'__p'+i).delete()}catch(e){break}}}catch(e){}}}
+function goHome(){if(S&&S.cid&&!S.done){const ph=S.st&&S.st.ended?'post':(PAUSE||S.st&&S.st.idx>0)?'season':S.phase||'pre';saveNow(ph,true)}$ov.hidden=true;$ov.innerHTML='';buildClubs();CLOUD.screen='home';renderIntro()}
 
 // ---------- navegação ----------
 function navHTML(active){
@@ -8048,7 +8080,7 @@ function buildBody(phase){
 }
 async function listSaves(all){
  let list=[];
- if(online()){try{const q=await CLOUD.db.collection('data/users/'+CLOUD.uid).get();list=q.docs.map(d=>({...d.data().meta,src:'conta'}))}catch(e){}}
+ if(online()){try{const q=await CLOUD.db.collection('data/users/'+CLOUD.uid).get();list=q.docs.map(d=>d.data()).filter(x=>x&&x.meta&&x.meta.cid).map(x=>({...x.meta,src:'conta'}))}catch(e){}}
  const ix=localIndex();for(const k in ix)if(!list.find(x=>x.cid===k))list.push({...ix[k],src:'aparelho'});
  const pid=activeProfile().id;if(!all)list=list.filter(x=>(x.profile||'p0')===pid);
  return list.sort((a,b)=>b.updated-a.updated);
@@ -11184,6 +11216,24 @@ horseRace=function(){return new Promise(res=>{const SUM={txt:'Você foi embora s
 .nsbet-l{display:grid;gap:5px}.nsbet-l button{display:grid;grid-template-columns:40px 80px 1fr auto;gap:8px;align-items:center;padding:8px 10px;border-radius:10px;border:2px solid var(--line-2);background:var(--panel-2);color:var(--chalk);text-align:left}.nsbet-l button.on{border-color:var(--accent)}.nsbet-l b{display:grid;place-items:center;width:34px;height:34px;border-radius:8px;color:#111;font:900 18px var(--f-display)}.nsbet-l .st{color:var(--gold);letter-spacing:-1px}.nsbet-l em{font-style:normal;font-weight:800}.nsbet-l small{font:800 14px var(--f-body);color:var(--gold)}
 @media (max-width:420px){.nstabs.n4 button{padding:6px 7px;font-size:11.5px}.nslk-prev{gap:6px;padding:8px}.jer.back b{font-size:40px}.nstabs.wide.lk button{font-size:10.5px}}
 `;document.head.appendChild(st)}
+// corrida de cavalos: cabe na tela (iPad dentro do app do Claude também) e os botões de sair ficam sempre visíveis
+{const st=document.createElement('style');st.id='nsRaceFit';st.textContent=`
+#overlay .nsrace{height:100dvh;min-height:0;max-height:100dvh}
+.nsrace .nsr-sky{height:8vh;min-height:44px}.nsrace .nsr-stand{height:5vh;min-height:24px}.nsrace .nsr-board{padding:2px 0;font-size:13px}
+.nsrace .nsr-track{flex:1 1 auto;min-height:0}
+.nsrace .nsr-res{flex:none;min-height:0;max-height:46dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+@media (min-width:600px){.nsrace .nsr-res:has(.nsr-row){grid-template-columns:1fr 1fr;column-gap:14px}}
+.nsrace .nsr-row{grid-template-columns:34px 24px 1fr auto;min-width:0}.nsrace .nsr-row em{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nsrace .nsr-res>.nsr-out,.nsrace .nsr-res>.row,.nsrace .nsr-res>#rzOk,.nsrace .nsr-res>.nsr-wait{grid-column:1/-1}
+.nsrace .nsr-out{font-size:19px;margin:4px 0}
+.nsrace .nsr-res>.row,.nsrace .nsr-res>#rzOk{position:sticky;bottom:0;background:#24461a;padding-top:6px;z-index:2}
+.nsr-x{position:absolute;top:calc(8px + env(safe-area-inset-top));right:10px;z-index:5;width:40px;height:40px;border-radius:50%;border:0;background:#000a;color:#fff;font-size:18px;font-weight:900;display:none}
+.nsrace.done .nsr-x{display:block}
+`;document.head.appendChild(st)}
+// botão ✕ no canto quando a corrida termina, mesmo se a lista de resultados ficar comprida
+{const _rs=nsRaceScene;nsRaceScene=function(field,title,pickI){const pr=_rs(field,title,pickI);try{const r=$ov.querySelector('.nsrace');if(r){r.style.position='relative';r.insertAdjacentHTML('beforeend','<button class="nsr-x" aria-label="Sair">✕</button>');
+  r.querySelector('.nsr-x').onclick=()=>{const b=document.getElementById('rzOut')||document.getElementById('rzOk');if(b)b.click();else{$ov.hidden=true;$ov.innerHTML=''}}}}catch(e){}
+ return pr.then(fin=>{try{const r=$ov.querySelector('.nsrace');if(r)r.classList.add('done')}catch(e){}return fin})}}
 
 // ================== TREINO JOGÁVEL, NEGOCIAÇÃO, MERCADO E TELAS SEM ROLAGEM ==================
 // Treino: cada habilidade tem um minigame com 3 vidas; 3 sessões por rodada. Quanto mais acertos, mais sobe.
@@ -13447,7 +13497,7 @@ async function wlStart(){if(typeof WEB_CFG==='undefined')return;CLOUD.db=makeWeb
  try{const me=await wlRpc('fdb_me',{p_token:WL.tok});CLOUD.uid=me.id;CLOUD.me={name:me.name};wlNameProfile();if(['home','careers','account'].includes(CLOUD.screen))rerenderNav()}catch(e){}}
 function wlNameProfile(){try{const q=profiles();const a=q.list.find(x=>x.id===q.active);if(a&&/^Jogador( \d+)?$/.test(a.name)&&CLOUD.me){a.name=CLOUD.me.name.slice(0,16);saveProfiles(q)}}catch(e){}}
 // entrou: as carreiras que estavam só no aparelho sobem pra conta
-async function wlUploadLocal(){const ix=localIndex();let n=0;for(const cid in ix){const b=localGet(cid);if(!b||!b.meta||!b.data)continue;try{await wlRpc('fdb_save',{p_token:WL.tok,p_cid:cid,p_meta:b.meta,p_data:b.data});n++}catch(e){if(e.code==='muitas_carreiras')break}}return n}
+async function wlUploadLocal(){const ix=localIndex();let n=0;for(const cid in ix){const b=localGet(cid);if(!b||!b.meta||!b.data)continue;try{b.data=await fdbUngz(b.data)}catch(e){continue}try{await wlRpc('fdb_save',{p_token:WL.tok,p_cid:cid,p_meta:b.meta,p_data:b.data});n++}catch(e){if(e.code==='muitas_carreiras')break}}return n}
 async function wlSubmit(mode,user,pass){if(WL.busy)return;WL.busy=true;const msg=document.getElementById('wlMsg');if(msg){msg.textContent=mode==='signup'?'Criando a conta…':'Entrando…';msg.className='wl-msg'}
  try{const r=await wlRpc(mode==='signup'?'fdb_signup':'fdb_login',{p_user:user,p_pass:pass});WL.tok=r.token;try{localStorage.setItem('fdb_tok',r.token)}catch(e){}
   CLOUD.uid=r.id;CLOUD.me={name:r.name};wlNameProfile();const n=await wlUploadLocal();
@@ -13469,6 +13519,59 @@ function wlBind(){const f=document.getElementById('wlForm');if(f){const go=m=>{c
 {const st=document.createElement('style');st.textContent=`.account.wl{display:grid;gap:10px}.wl-form{display:grid;gap:8px}.wl-form .row{display:flex;gap:8px;flex-wrap:wrap}.wl-form .btn{flex:1}
 .wl-msg{min-height:1.2em;font-size:13.5px;color:var(--muted)}.wl-msg.bad{color:#ff8a7a}.wl-in{display:flex;gap:12px;align-items:center}.wl-av{flex:none;width:44px;height:44px;border-radius:50%;display:grid;place-items:center;background:var(--gold);color:#111;font:900 20px var(--f-display)}`;document.head.appendChild(st)}
 wlStart();
+
+// ================== ENTRAR COM GOOGLE OU FACEBOOK (versão site) ==================
+// Usa o login do Supabase (Google/Facebook). Os saves dessas contas ficam na tabela fdb_saves_auth, protegida por
+// RLS: cada conta só lê e grava as próprias carreiras. Usuário e senha continuam funcionando como antes.
+// Pra funcionar, o servidor precisa ter o Google e o Facebook ligados (Supabase › Authentication › Providers)
+// e rodado o SQL de supabase/oauth_saves.sql. Enquanto não estiver ligado, o botão avisa isso.
+const OA={s:null,uid:null,prov:null};
+try{OA.s=JSON.parse(localStorage.getItem('fdb_oa')||'null')}catch(e){}
+function oaKeep(s){OA.s=s;try{s?localStorage.setItem('fdb_oa',JSON.stringify(s)):localStorage.removeItem('fdb_oa')}catch(e){}}
+async function oaProviders(){if(OA.prov)return OA.prov;try{const r=await fetch(WEB_CFG.url+'/auth/v1/settings',{headers:{apikey:WEB_CFG.key}});const j=await r.json();OA.prov=j.external||{}}catch(e){OA.prov={}}return OA.prov}
+const OA_NAME={google:'Google',facebook:'Facebook'};
+async function oaGo(p){const m=document.getElementById('wlMsg');const pv=await oaProviders();
+ if(!pv[p]){if(m){m.textContent=`O login com ${OA_NAME[p]} ainda não foi ligado no servidor do jogo. Por enquanto, use usuário e senha.`;m.className='wl-msg bad'}return}
+ if(m){m.textContent=`Abrindo o ${OA_NAME[p]}…`;m.className='wl-msg'}
+ location.href=WEB_CFG.url+'/auth/v1/authorize?provider='+p+'&redirect_to='+encodeURIComponent(location.origin+location.pathname)}
+// voltando do Google/Facebook: os tokens chegam depois do #
+function oaCatch(){const h=location.hash||'';if(!/access_token=|error_description=/.test(h))return false;const q=new URLSearchParams(h.slice(1));history.replaceState(null,'',location.pathname+location.search);
+ if(q.get('error_description')){setTimeout(()=>toast({ic:'⚠️',title:'Não deu pra entrar',txt:q.get('error_description').replace(/\+/g,' ').slice(0,140),ms:4000}),600);return false}
+ oaKeep({at:q.get('access_token'),rt:q.get('refresh_token'),exp:Date.now()+(+q.get('expires_in')||3600)*1000});try{wlDrop()}catch(e){}return true}
+async function oaToken(){if(!OA.s)throw Object.assign(new Error('sessao_invalida'),{code:'sessao_invalida'});if(OA.s.exp-Date.now()>90000)return OA.s.at;
+ const r=await fetch(WEB_CFG.url+'/auth/v1/token?grant_type=refresh_token',{method:'POST',headers:{apikey:WEB_CFG.key,'Content-Type':'application/json'},body:JSON.stringify({refresh_token:OA.s.rt})});
+ if(!r.ok){oaDrop();throw Object.assign(new Error('sessao_invalida'),{code:'sessao_invalida'})}const j=await r.json();oaKeep({at:j.access_token,rt:j.refresh_token,exp:Date.now()+(j.expires_in||3600)*1000});return OA.s.at}
+async function oaRest(path,opt={}){const at=await oaToken();const r=await fetch(WEB_CFG.url+'/rest/v1/'+path,{...opt,headers:{apikey:WEB_CFG.key,Authorization:'Bearer '+at,'Content-Type':'application/json',...(opt.headers||{})}});
+ const t=await r.text();let j=null;try{j=t?JSON.parse(t):null}catch(e){}
+ if(!r.ok){const msg=(j&&(j.message||j.hint))||('http_'+r.status);const e=new Error(msg);e.code=/muitas_carreiras/.test(msg)?'muitas_carreiras':/check constraint|too large/i.test(msg)?'grande_demais':r.status===401?'sessao_invalida':msg;throw e}return j}
+function oaDrop(){oaKeep(null);OA.uid=null;if(String(CLOUD.uid||'').startsWith('oa:')){CLOUD.uid=null;CLOUD.me=null}}
+// as carreiras da conta Google/Facebook entram no mesmo caminho do jogo (data/users/<id>)
+{const _mkO=makeWebDb;makeWebDb=function(){const db=_mkO();const col0=db.collection.bind(db);
+ db.collection=function(p){if(!(/^data\/users\//.test(p)&&OA.s&&String(CLOUD.uid||'').startsWith('oa:')))return col0(p);
+  return{async get(){const L=await oaRest('fdb_saves_auth?select=cid,meta')||[];return{docs:L.map(x=>({id:x.cid,data:()=>({meta:x.meta})}))}},
+   doc(cid){const q='fdb_saves_auth?cid=eq.'+encodeURIComponent(cid);return{async get(){const L=await oaRest(q+'&select=meta,data')||[];return L[0]?{exists:true,data:()=>L[0]}:{exists:false}},
+    async set(b){await oaRest('fdb_saves_auth?on_conflict=uid,cid',{method:'POST',headers:{Prefer:'resolution=merge-duplicates,return=minimal'},body:JSON.stringify({uid:OA.uid,cid,meta:b.meta,data:b.data,updated_at:new Date().toISOString()})})},
+    async delete(){await oaRest(q,{method:'DELETE'})}}}}};return db}}
+async function oaStart(){if(typeof WEB_CFG==='undefined')return;const fresh=oaCatch();if(!OA.s)return;
+ try{const at=await oaToken();const r=await fetch(WEB_CFG.url+'/auth/v1/user',{headers:{apikey:WEB_CFG.key,Authorization:'Bearer '+at}});if(!r.ok)throw new Error('user');const u=await r.json();
+  const md=u.user_metadata||{};OA.uid=u.id;CLOUD.db=makeWebDb();CLOUD.uid='oa:'+u.id;CLOUD.me={name:(md.full_name||md.name||(u.email||'Jogador').split('@')[0]).slice(0,40),avatarUrl:/^https:\/\//.test(md.avatar_url||'')?md.avatar_url:null,prov:(u.app_metadata||{}).provider};
+  try{wlNameProfile()}catch(e){}
+  if(fresh){let n=0;const ix=localIndex();for(const cid in ix){const b=localGet(cid);if(!b||!b.meta||!b.data)continue;try{await cloudPut(cid,{meta:b.meta,data:await fdbUngz(b.data)});n++}catch(e){if(e.code==='muitas_carreiras')break}}
+   toast({ic:'✅',title:`Olá, ${CLOUD.me.name}!`,txt:n?`${n} carreira${n>1?'s':''} deste aparelho ${n>1?'foram':'foi'} pra sua conta.`:'Suas carreiras agora ficam salvas na conta.',ms:3200})}
+  if(['home','careers','account'].includes(CLOUD.screen))rerenderNav()}
+ catch(e){console.error('oauth',e);if(fresh)toast({ic:'⚠️',title:'Não deu pra entrar',txt:'Tente de novo em instantes.',ms:3000})}}
+// caixa da conta: botões do Google e do Facebook em cima do usuário e senha
+{const _bx=wlBoxHTML;wlBoxHTML=function(){if(online()){let h=_bx();if(CLOUD.me&&CLOUD.me.prov){h=h.replace('Conectado.',`Conectado com ${OA_NAME[CLOUD.me.prov]||CLOUD.me.prov}.`);if(CLOUD.me.avatarUrl)h=h.replace(/<span class="wl-av">[^<]*<\/span>/,`<img class="wl-av" src="${esc(CLOUD.me.avatarUrl)}" alt="">`)}return h}
+ return`<div class="oa-btns"><button class="oa-b g" type="button" data-oa="google"><svg viewBox="0 0 48 48" width="20" height="20"><path fill="#FFC107" d="M43.6 20.5H42V20H24v8h11.3C33.7 32.7 29.2 36 24 36c-6.6 0-12-5.4-12-12s5.4-12 12-12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 12.9 4 4 12.9 4 24s8.9 20 20 20 20-8.9 20-20c0-1.3-.1-2.4-.4-3.5z"/><path fill="#FF3D00" d="M6.3 14.7l6.6 4.8C14.7 15.1 19 12 24 12c3.1 0 5.8 1.2 7.9 3.1l5.7-5.7C34 6.1 29.3 4 24 4 16.3 4 9.7 8.3 6.3 14.7z"/><path fill="#4CAF50" d="M24 44c5.2 0 9.9-2 13.4-5.2l-6.2-5.2C29.2 35.1 26.7 36 24 36c-5.2 0-9.6-3.3-11.3-7.9l-6.5 5C9.5 39.6 16.2 44 24 44z"/><path fill="#1976D2" d="M43.6 20.5H42V20H24v8h11.3c-.8 2.2-2.2 4.2-4.1 5.6l6.2 5.2C37 38.2 44 33 44 24c0-1.3-.1-2.4-.4-3.5z"/></svg>Entrar com Google</button>
+  <button class="oa-b f" type="button" data-oa="facebook"><svg viewBox="0 0 24 24" width="20" height="20"><path fill="#fff" d="M13.5 22v-8.2h2.8l.4-3.2h-3.2V8.5c0-.9.3-1.6 1.6-1.6h1.7V4.1c-.3 0-1.3-.1-2.5-.1-2.5 0-4.2 1.5-4.2 4.3v2.4H7.3v3.2h2.8V22h3.4z"/></svg>Entrar com Facebook</button></div>
+  <div class="oa-or"><span>ou com usuário e senha</span></div>`+_bx()}}
+{const _bd=wlBind;wlBind=function(){_bd();document.querySelectorAll('[data-oa]').forEach(b=>b.onclick=()=>oaGo(b.dataset.oa));const o=document.getElementById('wlOut');if(o&&OA.s)o.onclick=oaLogout}}
+async function oaLogout(){try{const at=OA.s&&OA.s.at;if(at)await fetch(WEB_CFG.url+'/auth/v1/logout',{method:'POST',headers:{apikey:WEB_CFG.key,Authorization:'Bearer '+at}})}catch(e){}oaDrop();
+ toast({ic:'👋',title:'Você saiu da conta',txt:'As carreiras continuam na conta. Neste aparelho fica só o que já estava salvo nele.',ms:3000});rerenderNav()}
+{const st=document.createElement('style');st.textContent=`.oa-btns{display:grid;gap:8px}.oa-b{display:flex;align-items:center;justify-content:center;gap:10px;min-height:46px;border-radius:12px;border:1px solid #0000;font:700 15px var(--f-body,inherit);cursor:pointer}
+.oa-b.g{background:#fff;color:#1f1f1f;border-color:#dadce0}.oa-b.f{background:#1877F2;color:#fff}.oa-or{display:flex;align-items:center;gap:10px;color:var(--muted);font-size:12.5px;margin:4px 0}.oa-or:before,.oa-or:after{content:'';flex:1;height:1px;background:currentColor;opacity:.3}
+img.wl-av{object-fit:cover;padding:0}`;document.head.appendChild(st)}
+oaStart();
 
 // ================== TRILHA SONORA: hip hop, rap e trap feitos na hora ==================
 // Nada de música gravada: as batidas são tocadas pelo próprio navegador (Web Audio). Bumbo, 808 com distorção e
