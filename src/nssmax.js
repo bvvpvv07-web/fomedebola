@@ -93,7 +93,7 @@ function nsBootLock(b){const r=NS_BOOT_REQ[b.id];if(!r)return'';const n=S.n;if(r
   return h.replace('<div class="nsbt-h">','<p class="muted nshelp">Chuteira boa muda o jogo: sobe as habilidades, deixa o chute mais certo e o goleiro sofre mais. As melhores só saem pra quem já é estrela, e a Lendária tem um par por ano.</p><div class="nsbt-h">')};
  const b0=p.bind;p.bind=B=>{b0(B);B.querySelectorAll('[data-bb]').forEach(b=>{const f=b.onclick;b.onclick=async e=>{const bt=NS_BOOTS.find(x=>x.id===b.dataset.bb);const lk=bt&&nsBootLock(bt);if(lk&&!b.classList.contains('ghost')){toast({ic:'🔒',title:bt.n,txt:`Precisa de ${lk}.`,ms:2000});return}
    const had=S.n.boot;await f(e);if(bt&&bt.id==='nb9'&&S.n.boot==='nb9'&&had!=='nb9'){S.n.bootSold=S.n.bootSold||{};S.n.bootSold[S.year]=1}}})};return p}}
-{const _cfgB=l3dCfg;l3dCfg=function(o){const c=_cfgB(o);try{if(nsOn()){const b=nsBootStats();const t=nsBootTier(b);if(t){c.noiseK=(c.noiseK||1)*(1-.035*t);c.gkK=(c.gkK||0)-.06*t}}}catch(e){}return c}}
+{const _cfgB=l3dCfg;l3dCfg=function(o){const c=_cfgB(o);try{if(nsOn()){const b=nsBootStats();const t=nsBootTier(b);if(t){c.noiseK=(c.noiseK||1)*(1-.035*t);c.gkK=(c.gkK||0)-.035*t}}}catch(e){}return c}}
 // ---------- vida de moleque (menor de 18) ----------
 const age18k=()=>S.age<18?null:'Só pra menores de 18';
 function kidActs(){const n=S.n;const sk=k=>{try{const g=nsGain(k,.6);nsAddP(k,g);return g}catch(e){return 0}};return[

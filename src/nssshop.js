@@ -76,7 +76,7 @@ function nsShopPage(tab){if(tab)NS_SHOP=tab;return{t:'Lojas',cls:'shop',html:()=
 // poderes da chuteira no lance em 3D (e energia baixa atrapalha a mira)
 {const _cfgN=l3dCfg;l3dCfg=function(o){const c=_cfgN(o);try{if(nsOn()){const b=nsBootStats();const ab=b&&b.ab||[];
   if(b&&c.hero)c.hero.boot=b.col;
-  if(ab.includes('mira'))c.noiseK=(c.noiseK||1)*.75;if(ab.includes('canhao'))c.gkK=(c.gkK||0)-.35;if(ab.includes('curva')){c.noiseK=(c.noiseK||1)*.88;c.gkK=(c.gkK||0)-.15}
+  if(ab.includes('mira'))c.noiseK=(c.noiseK||1)*.75;if(ab.includes('canhao'))c.gkK=(c.gkK||0)-.2;if(ab.includes('curva')){c.noiseK=(c.noiseK||1)*.88;c.gkK=(c.gkK||0)-.08}
   if(ab.includes('muralha'))c.myGkK=(c.myGkK||1)+.15;if(ab.includes('faro'))c.noiseK=(c.noiseK||1)*.92;
   const e=S.n.en;if(e<35)c.noiseK=(c.noiseK||1)*(1+(35-e)/70)}}catch(e){}return c}}
 

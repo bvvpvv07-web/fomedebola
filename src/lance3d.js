@@ -48,7 +48,7 @@ function l3dCfg(o){const ctx=L3D.ctx||{};const us=ctx.us||club()||null,them=ctx.
  const tag=o.passOnly?'Construção':o.kind==='tackle'?'Desarme':GK?'Defesa':({pass:'Passe',long:'Lançamento',cross:'Cruzamento',dribble:'Um contra um',header:'Cabeçada',fk:'Falta',pen:'Pênalti',chip:'Cobertura',combo:'Tabela'})[o.kind]||'Finalização';
  return{scen:sc,goal:o.passOnly?'pass':null,us:U,them:Tm,gkUs:{shirt:'#20c4bd',shirt2:'#0b2626',shorts:'#0b2626',socks:'#20c4bd'},hero,min:o.min||0,
   title:`${o.min?o.min+"' · ":''}${o.comp||tag}`,head:o.title&&!/^(finish|pass|keeper)$/.test(o.title)?o.title:tag,desc:null,
-  noiseK:clamp(1.45-.9*sk,.5,1.3),gkK:clamp((kp-.45)*4,-1,1),myGkK:.85+.3*sk,shNoise:clamp(1.6-(((them&&them.s)||70)-50)/50,.75,1.4),
+  noiseK:clamp(1.45-.9*sk,.5,1.3),gkK:clamp((kp-.45)*4,-1,1),myGkK:.85+.3*sk,shNoise:clamp(1.6-(((them&&them.s)||70)-50)/50,.75,1.4),oppQ:clamp((((them&&them.s)||72)-62)/30,0,1),usQ:clamp((((us&&us.s)||72)-62)/30,0,1),
   crowd:[U.shirt,U.shirt2,Tm.shirt]}}
 // no presídio o lance é no pátio: chão de barro, coletes laranja × listrado, policiais em volta e sem torcida
 {const _cfg=l3dCfg;l3dCfg=function(o){const c=_cfg(o);try{if(o.env==='prison'||(typeof inPrison==='function'&&inPrison())||/presídio|prisão|pátio/i.test(o.comp||'')){c.env='prison';delete c.us;delete c.them;delete c.gkUs;c.crowd=null;if(c.hero)c.hero.boot='#e9e6df'}}catch(e){}return c}}

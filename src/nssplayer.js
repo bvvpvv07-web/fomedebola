@@ -148,11 +148,11 @@ nsRelAct=async function(k){const n=S.n;let txt='',chips=[],ic='✅';const nm=NS_
 // ---------- corrida de cavalos com pista ----------
 function nsRaceScene(field,title,pickI){return new Promise(res=>{const L=field.length;
  $ov.hidden=false;$ov.innerHTML=`<div class="nsrace"><div class="nsr-sky"><b>${esc(title)}</b></div><div class="nsr-stand"></div><div class="nsr-board">${'<span>★ FOME DE BOLA ★</span>'.repeat(6)}</div>
-  <div class="nsr-track">${field.map((h,i)=>`<div class="nsr-lane"><div class="nsr-hz" id="rz${i}"><i style="background:${h.col}"></i><span>🏇</span></div></div>`).join('')}<div class="nsr-fin"></div></div>
-  <div class="nsr-res" id="rzRes"><div class="nsr-wait">Largada…</div></div></div>`;
+  <div class="nsr-track">${field.map((h,i)=>`<div class="nsr-lane ${i===pickI||h.me?'mine':''}"><b class="nsr-no" style="background:${h.col}">${i+1}</b><div class="nsr-hz" id="rz${i}"><b class="nsr-tag" style="--c:${h.col}">${esc(h.n)}${i===pickI||h.me?' ★':''}</b><i style="background:${h.col}"></i><span>🏇</span></div></div>`).join('')}<div class="nsr-fin"></div></div>
+  <div class="nsr-res" id="rzRes"><div class="nsr-wait">${pickI!=null&&field[pickI]?`Seu cavalo: <b style="color:${field[pickI].col}">${pickI+1} · ${esc(field[pickI].n)}</b> (com ★)<br>`:''}<b id="rzCd">Largada em 3…</b></div></div></div>`;
  const pos=field.map(()=>0),fin=[],els=field.map((_,i)=>document.getElementById('rz'+i));let t0=performance.now();
- const step=()=>{const t=(performance.now()-t0)/1000;if(t>.9){for(let i=0;i<L;i++){if(pos[i]>=100)continue;pos[i]+=field[i].sp*(reduced?9:.55)*(.5+rnd()*1)*(1+Math.sin(t*2+i)*.15);if(pos[i]>=100){pos[i]=100;fin.push(i)}}}
-  for(let i=0;i<L;i++)els[i].style.left=`calc(${pos[i]*.86}% )`;
+ const step=()=>{const t=(performance.now()-t0)/1000;const cd=document.getElementById('rzCd');if(cd)cd.textContent=t<2.6?`Largada em ${Math.max(1,3-Math.floor(t/.87))}…`:'Valendo! 🏁';if(t>2.6){for(let i=0;i<L;i++){if(pos[i]>=100)continue;pos[i]+=field[i].sp*(reduced?9:.55)*(.5+rnd()*1)*(1+Math.sin(t*2+i)*.15);if(pos[i]>=100){pos[i]=100;fin.push(i)}}}
+  for(let i=0;i<L;i++)els[i].style.left=`calc(${7+pos[i]*.8}% )`;
   if(fin.length<L){requestAnimationFrame(step);return}
   document.getElementById('rzRes').innerHTML=fin.map((i,j)=>`<div class="nsr-row"><b>${j+1}º</b><span>${i===pickI?'💰':''}</span><em style="color:${field[i].col}">${esc(field[i].n)}</em>${field[i].me?'<small>seu</small>':''}</div>`).join('');res(fin)};
  requestAnimationFrame(step)})}
@@ -230,3 +230,10 @@ horseRace=function(){return new Promise(res=>{const SUM={txt:'Você foi embora s
 {const _rs=nsRaceScene;nsRaceScene=function(field,title,pickI){const pr=_rs(field,title,pickI);try{const r=$ov.querySelector('.nsrace');if(r){r.style.position='relative';r.insertAdjacentHTML('beforeend','<button class="nsr-x" aria-label="Sair">✕</button>');
   r.querySelector('.nsr-x').onclick=()=>{const b=document.getElementById('rzOut')||document.getElementById('rzOk');if(b)b.click();else{$ov.hidden=true;$ov.innerHTML=''}}}}catch(e){}
  return pr.then(fin=>{try{const r=$ov.querySelector('.nsrace');if(r)r.classList.add('done')}catch(e){}return fin})}}
+
+{const st=document.createElement('style');st.id='nsRaceNames';st.textContent=`
+.nsr-lane{display:flex;align-items:center}.nsr-no{position:absolute;left:4px;top:50%;transform:translateY(-50%);z-index:1;min-width:20px;height:20px;border-radius:6px;display:grid;place-items:center;font:900 12px var(--f-display);color:#111;box-shadow:0 1px 3px #0006}
+.nsr-lane.mine{background:linear-gradient(90deg,#ffd23c33,transparent 70%)}
+.nsr-tag{position:absolute;left:50%;bottom:86%;transform:translateX(-50%) scaleX(-1);white-space:nowrap;font:800 11px/1.1 var(--f-body,system-ui);color:#fff;background:#000b;border-left:4px solid var(--c);border-radius:6px;padding:2px 6px;pointer-events:none}
+.nsr-lane.mine .nsr-tag{background:#ffd23c;color:#111}
+`;document.head.appendChild(st)}
