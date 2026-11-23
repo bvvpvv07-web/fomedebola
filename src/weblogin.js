@@ -18,7 +18,7 @@ async function wlStart(){if(typeof WEB_CFG==='undefined')return;CLOUD.db=makeWeb
  try{const me=await wlRpc('fdb_me',{p_token:WL.tok});CLOUD.uid=me.id;CLOUD.me={name:me.name};wlNameProfile();if(['home','careers','account'].includes(CLOUD.screen))rerenderNav()}catch(e){}}
 function wlNameProfile(){try{const q=profiles();const a=q.list.find(x=>x.id===q.active);if(a&&/^Jogador( \d+)?$/.test(a.name)&&CLOUD.me){a.name=CLOUD.me.name.slice(0,16);saveProfiles(q)}}catch(e){}}
 // entrou: as carreiras que estavam só no aparelho sobem pra conta
-async function wlUploadLocal(){const ix=localIndex();let n=0;for(const cid in ix){const b=localGet(cid);if(!b||!b.meta||!b.data)continue;try{await wlRpc('fdb_save',{p_token:WL.tok,p_cid:cid,p_meta:b.meta,p_data:b.data});n++}catch(e){if(e.code==='muitas_carreiras')break}}return n}
+async function wlUploadLocal(){const ix=localIndex();let n=0;for(const cid in ix){const b=localGet(cid);if(!b||!b.meta||!b.data)continue;try{b.data=await fdbUngz(b.data)}catch(e){continue}try{await wlRpc('fdb_save',{p_token:WL.tok,p_cid:cid,p_meta:b.meta,p_data:b.data});n++}catch(e){if(e.code==='muitas_carreiras')break}}return n}
 async function wlSubmit(mode,user,pass){if(WL.busy)return;WL.busy=true;const msg=document.getElementById('wlMsg');if(msg){msg.textContent=mode==='signup'?'Criando a conta…':'Entrando…';msg.className='wl-msg'}
  try{const r=await wlRpc(mode==='signup'?'fdb_signup':'fdb_login',{p_user:user,p_pass:pass});WL.tok=r.token;try{localStorage.setItem('fdb_tok',r.token)}catch(e){}
   CLOUD.uid=r.id;CLOUD.me={name:r.name};wlNameProfile();const n=await wlUploadLocal();

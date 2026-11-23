@@ -16,7 +16,7 @@ function buildBody(phase){
 }
 async function listSaves(all){
  let list=[];
- if(online()){try{const q=await CLOUD.db.collection('data/users/'+CLOUD.uid).get();list=q.docs.map(d=>({...d.data().meta,src:'conta'}))}catch(e){}}
+ if(online()){try{const q=await CLOUD.db.collection('data/users/'+CLOUD.uid).get();list=q.docs.map(d=>d.data()).filter(x=>x&&x.meta&&x.meta.cid).map(x=>({...x.meta,src:'conta'}))}catch(e){}}
  const ix=localIndex();for(const k in ix)if(!list.find(x=>x.cid===k))list.push({...ix[k],src:'aparelho'});
  const pid=activeProfile().id;if(!all)list=list.filter(x=>(x.profile||'p0')===pid);
  return list.sort((a,b)=>b.updated-a.updated);

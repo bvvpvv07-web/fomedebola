@@ -20,7 +20,13 @@ function rerenderNav(){const s=CLOUD.screen;if(s==='home')renderIntro();else if(
 // ---------- salvar / carregar ----------
 const LOCAL_IDX='fdb3_index';
 function localIndex(){try{return JSON.parse(localStorage.getItem(LOCAL_IDX)||'{}')}catch(e){return{}}}
-function localSet(cid,body){try{localStorage.setItem('fdb3_'+cid,JSON.stringify(body));const ix=localIndex();ix[cid]=body.meta;localStorage.setItem(LOCAL_IDX,JSON.stringify(ix))}catch(e){}}
+// gzip + base64 (o save fica ~8x menor). Sem CompressionStream (navegador velho), salva normal.
+async function fdbGz(str){if(typeof CompressionStream==='undefined')return null;try{const st=new Blob([str]).stream().pipeThrough(new CompressionStream('gzip'));const buf=new Uint8Array(await new Response(st).arrayBuffer());let b='';for(let i=0;i<buf.length;i+=0x8000)b+=String.fromCharCode.apply(null,buf.subarray(i,i+0x8000));return'gz:'+btoa(b)}catch(e){return null}}
+async function fdbUngz(s){if(typeof s!=='string'||!s.startsWith('gz:'))return s;const bin=atob(s.slice(3));const u=new Uint8Array(bin.length);for(let i=0;i<bin.length;i++)u[i]=bin.charCodeAt(i);return await new Response(new Blob([u]).stream().pipeThrough(new DecompressionStream('gzip'))).text()}
+function localSet(cid,body){const ixUp=()=>{const ix=localIndex();ix[cid]=body.meta;localStorage.setItem(LOCAL_IDX,JSON.stringify(ix))};
+ try{localStorage.setItem('fdb3_'+cid,JSON.stringify(body));ixUp();return true}catch(e){}
+ // aparelho cheio: tenta a versão comprimida
+ fdbGz(body.data).then(z=>{if(!z)return;try{localStorage.setItem('fdb3_'+cid,JSON.stringify({meta:body.meta,data:z}));ixUp()}catch(e){SAVE_STATE.localFail=true}});return false}
 function localGet(cid){try{return JSON.parse(localStorage.getItem('fdb3_'+cid)||'null')}catch(e){return null}}
 function localDel(cid){try{localStorage.removeItem('fdb3_'+cid);const ix=localIndex();delete ix[cid];localStorage.setItem(LOCAL_IDX,JSON.stringify(ix))}catch(e){}}
 function buildBody(phase){
@@ -30,28 +36,54 @@ function buildBody(phase){
  return{meta:{cid:S.cid,name:S.name,nat:S.nat,pos:S.pos,age:S.age,club:c?c.n:'',ovr:S.ovr,peak:S.peak,phase,done:!!S.done,tier:L?L.tier:null,pts:L?L.pts:null,year:S.year,updated:Date.now()},data};
 }
 let SAVING=false,DIRTY=null;const SAVE_STATE={msg:''};
-async function saveNow(phase){
+// nuvem do Claude: cada documento aceita no máximo 256 KB, então o save vai comprimido e, se ainda for grande, em partes
+const FDB_PART=190000;
+async function cloudPut(cid,body){const col=CLOUD.db.collection('data/users/'+CLOUD.uid);
+ if(CLOUD.web){try{await col.doc(cid).set(body);return}catch(e){if(e.code!=='grande_demais')throw e}const z=await fdbGz(body.data);if(!z)throw new Error('grande');await col.doc(cid).set({meta:body.meta,data:z});return}
+ let data=body.data;if(data.length>FDB_PART){const z=await fdbGz(data);if(z)data=z}
+ if(data.length<=FDB_PART){await col.doc(cid).set({meta:body.meta,data});return}
+ const n=Math.ceil(data.length/FDB_PART);for(let i=0;i<n;i++)await col.doc(cid+'__p'+i).set({of:cid,i,d:data.slice(i*FDB_PART,(i+1)*FDB_PART)});
+ await col.doc(cid).set({meta:{...body.meta,parts:n},data:''})}
+async function cloudGet(cid){const col=CLOUD.db.collection('data/users/'+CLOUD.uid);const d=await col.doc(cid).get();if(!d.exists)return null;const b=d.data();if(!b||!b.meta)return null;
+ let data=b.data||'';const n=b.meta.parts||0;if(n){const ps=[];for(let i=0;i<n;i++){const x=await col.doc(cid+'__p'+i).get();if(!x.exists)throw new Error('parte faltando');ps.push(x.data().d)}data=ps.join('')}
+ return{meta:b.meta,data:await fdbUngz(data)}}
+function saveErr(e){const c=e&&(e.code||e.message)||'';return /invalid_argument|too_large|grande/.test(c)?'save grande demais':c==='quota_exceeded'?'a nuvem encheu: apague carreiras antigas':c==='rate_limited'?'muitos salvamentos seguidos, tentando de novo':c==='sessao_invalida'?'sua sessão expirou, entre de novo':/fetch|network|internet|Failed/i.test(c)?'sem internet agora':'erro '+String(c).slice(0,40)}
+async function saveNow(phase,now){
  if(!S||!S.cid)return;
- if(SAVING){DIRTY=phase;return}
- SAVING=true;
- try{const body=buildBody(phase);localSet(S.cid,body);
-  if(online()){await CLOUD.db.collection('data/users/'+CLOUD.uid).doc(S.cid).set(body);SAVE_STATE.msg='Salvo na sua conta'}else SAVE_STATE.msg='Salvo neste aparelho';
- }catch(e){SAVE_STATE.msg=e&&e.code==='quota_exceeded'?'Espaço cheio: apague carreiras antigas':'Salvo neste aparelho'}
- SAVING=false;const el=document.getElementById('saveflag');if(el)el.textContent=SAVE_STATE.msg;
- if(DIRTY){const p=DIRTY;DIRTY=null;saveNow(p)}
+ let body=null;try{body=buildBody(phase)}catch(e){console.error(e);return}
+ const okLocal=localSet(S.cid,body);
+ if(online())cloudSoon(now);else{SAVE_STATE.msg=okLocal?'Salvo neste aparelho':'Salvo neste aparelho (comprimido)';const el=document.getElementById('saveflag');if(el)el.textContent=SAVE_STATE.msg}
 }
+// a nuvem recebe no máximo um salvamento a cada 6 s (o último estado sempre vai); fechar o app manda na hora
+function cloudSoon(now){if(SAVE_STATE.t&&!now)return;clearTimeout(SAVE_STATE.t);const wait=now?0:Math.max(0,6000-(Date.now()-(SAVE_STATE.last||0)));SAVE_STATE.t=setTimeout(cloudFlush,wait)}
+async function cloudFlush(){SAVE_STATE.t=null;if(!S||!S.cid||!online())return;if(SAVING){DIRTY=true;return}
+ SAVING=true;SAVE_STATE.last=Date.now();
+ try{const body=buildBody(S.phase||'season');await cloudPut(S.cid,body);SAVE_STATE.msg='Salvo na sua conta';SAVE_STATE.fails=0;SAVE_STATE.warned=false}
+ catch(e){console.error('save nuvem',e);SAVE_STATE.fails=(SAVE_STATE.fails||0)+1;SAVE_STATE.msg='Salvo só neste aparelho ('+saveErr(e)+')';
+  if(!SAVE_STATE.warned){SAVE_STATE.warned=true;try{toast({ic:'☁️',title:'Não salvou na nuvem',txt:`Ficou salvo neste aparelho. Motivo: ${saveErr(e)}. Vou tentar de novo sozinho.`,ms:4200})}catch(x){}}
+  if(SAVE_STATE.fails<6&&!SAVE_STATE.t)SAVE_STATE.t=setTimeout(cloudFlush,8000*SAVE_STATE.fails)}
+ SAVING=false;const el=document.getElementById('saveflag');if(el)el.textContent=SAVE_STATE.msg;
+ if(DIRTY){DIRTY=null;cloudSoon()}
+}
+// salva quando o app vai pro fundo ou fecha (trocar de app no iPad, fechar a aba)
+{const bg=()=>{try{if(S&&S.cid&&!S.done&&CLOUD.screen==='game'){const ph=S.st&&S.st.ended?'post':S.phase||'season';saveNow(ph,true)}}catch(e){}};
+ document.addEventListener('visibilitychange',()=>{if(document.visibilityState==='hidden')bg()});addEventListener('pagehide',bg)}
 async function listSaves(){
  let list=[];
- if(online()){try{const q=await CLOUD.db.collection('data/users/'+CLOUD.uid).get();list=q.docs.map(d=>({...d.data().meta,src:'conta'}))}catch(e){}}
+ if(online()){try{const q=await CLOUD.db.collection('data/users/'+CLOUD.uid).get();list=q.docs.map(d=>d.data()).filter(x=>x&&x.meta&&x.meta.cid).map(x=>({...x.meta,src:'conta'}))}catch(e){}}
  const ix=localIndex();for(const k in ix)if(!list.find(x=>x.cid===k))list.push({...ix[k],src:'aparelho'});
  return list.sort((a,b)=>b.updated-a.updated);
 }
 async function loadSave(cid){
- let body=null;
- if(online()){try{const d=await CLOUD.db.collection('data/users/'+CLOUD.uid).doc(cid).get();if(d.exists)body=d.data()}catch(e){}}
- if(!body)body=localGet(cid);
- if(!body)return false;
- const o=JSON.parse(body.data);
+ // abre a versão MAIS NOVA entre a nuvem e o aparelho (antes a nuvem sempre ganhava, mesmo velha)
+ let cloud=null,local=null;
+ if(online()){try{cloud=await cloudGet(cid)}catch(e){console.error('load nuvem',e)}}
+ try{local=localGet(cid);if(local&&local.data)local.data=await fdbUngz(local.data)}catch(e){local=null}
+ const tu=b=>(b&&b.meta&&b.meta.updated)||0;
+ let body=cloud&&local?(tu(local)>tu(cloud)?local:cloud):(cloud||local);
+ if(!body||!body.data)return false;
+ let o;try{o=JSON.parse(body.data)}catch(e){const alt=body===cloud?local:cloud;if(!alt||!alt.data)return false;body=alt;o=JSON.parse(body.data)}
+ if(online()&&body===local&&tu(local)>tu(cloud))setTimeout(()=>{try{saveNow(S.phase||'season',true)}catch(e){}},1500);
  buildClubs();for(const[id,l,s]of o.clubs)if(CLUB[id]){CLUB[id].l=l;CLUB[id].s=o.cp2?s:clubPower(s)}
  W=o.W;S=o.S;if(POS_ALIAS[S.pos])S.pos=POS_ALIAS[S.pos];for(const s of (W.stars||[]))if(POS_ALIAS[s.pos])s.pos=POS_ALIAS[s.pos];REQ=o.req||{};RENEW=o.renew||null;RENEW_MSG=o.renewMsg||'';
  PAUSE=S.pauseId?EV.find(e=>e.id===S.pauseId)||null:null;if(PAUSE){try{PAUSE._d=PAUSE.d()}catch(e){PAUSE=null}}
@@ -63,8 +95,8 @@ async function loadSave(cid){
  else renderHub();
  return true;
 }
-async function deleteSave(cid){localDel(cid);if(online()){try{await CLOUD.db.collection('data/users/'+CLOUD.uid).doc(cid).delete()}catch(e){}}}
-function goHome(){if(S&&S.cid&&!S.done){const ph=S.st&&S.st.ended?'post':(PAUSE||S.st&&S.st.idx>0)?'season':S.phase||'pre';saveNow(ph)}$ov.hidden=true;$ov.innerHTML='';buildClubs();CLOUD.screen='home';renderIntro()}
+async function deleteSave(cid){localDel(cid);if(online()){try{const col=CLOUD.db.collection('data/users/'+CLOUD.uid);await col.doc(cid).delete();if(!CLOUD.web)for(let i=0;i<12;i++){try{await col.doc(cid+'__p'+i).delete()}catch(e){break}}}catch(e){}}}
+function goHome(){if(S&&S.cid&&!S.done){const ph=S.st&&S.st.ended?'post':(PAUSE||S.st&&S.st.idx>0)?'season':S.phase||'pre';saveNow(ph,true)}$ov.hidden=true;$ov.innerHTML='';buildClubs();CLOUD.screen='home';renderIntro()}
 
 // ---------- navegação ----------
 function navHTML(active){

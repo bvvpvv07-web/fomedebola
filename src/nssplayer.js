@@ -212,3 +212,21 @@ horseRace=function(){return new Promise(res=>{const SUM={txt:'Você foi embora s
 .nsbet-l{display:grid;gap:5px}.nsbet-l button{display:grid;grid-template-columns:40px 80px 1fr auto;gap:8px;align-items:center;padding:8px 10px;border-radius:10px;border:2px solid var(--line-2);background:var(--panel-2);color:var(--chalk);text-align:left}.nsbet-l button.on{border-color:var(--accent)}.nsbet-l b{display:grid;place-items:center;width:34px;height:34px;border-radius:8px;color:#111;font:900 18px var(--f-display)}.nsbet-l .st{color:var(--gold);letter-spacing:-1px}.nsbet-l em{font-style:normal;font-weight:800}.nsbet-l small{font:800 14px var(--f-body);color:var(--gold)}
 @media (max-width:420px){.nstabs.n4 button{padding:6px 7px;font-size:11.5px}.nslk-prev{gap:6px;padding:8px}.jer.back b{font-size:40px}.nstabs.wide.lk button{font-size:10.5px}}
 `;document.head.appendChild(st)}
+// corrida de cavalos: cabe na tela (iPad dentro do app do Claude também) e os botões de sair ficam sempre visíveis
+{const st=document.createElement('style');st.id='nsRaceFit';st.textContent=`
+#overlay .nsrace{height:100dvh;min-height:0;max-height:100dvh}
+.nsrace .nsr-sky{height:8vh;min-height:44px}.nsrace .nsr-stand{height:5vh;min-height:24px}.nsrace .nsr-board{padding:2px 0;font-size:13px}
+.nsrace .nsr-track{flex:1 1 auto;min-height:0}
+.nsrace .nsr-res{flex:none;min-height:0;max-height:46dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:10px 14px calc(10px + env(safe-area-inset-bottom))}
+@media (min-width:600px){.nsrace .nsr-res:has(.nsr-row){grid-template-columns:1fr 1fr;column-gap:14px}}
+.nsrace .nsr-row{grid-template-columns:34px 24px 1fr auto;min-width:0}.nsrace .nsr-row em{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.nsrace .nsr-res>.nsr-out,.nsrace .nsr-res>.row,.nsrace .nsr-res>#rzOk,.nsrace .nsr-res>.nsr-wait{grid-column:1/-1}
+.nsrace .nsr-out{font-size:19px;margin:4px 0}
+.nsrace .nsr-res>.row,.nsrace .nsr-res>#rzOk{position:sticky;bottom:0;background:#24461a;padding-top:6px;z-index:2}
+.nsr-x{position:absolute;top:calc(8px + env(safe-area-inset-top));right:10px;z-index:5;width:40px;height:40px;border-radius:50%;border:0;background:#000a;color:#fff;font-size:18px;font-weight:900;display:none}
+.nsrace.done .nsr-x{display:block}
+`;document.head.appendChild(st)}
+// botão ✕ no canto quando a corrida termina, mesmo se a lista de resultados ficar comprida
+{const _rs=nsRaceScene;nsRaceScene=function(field,title,pickI){const pr=_rs(field,title,pickI);try{const r=$ov.querySelector('.nsrace');if(r){r.style.position='relative';r.insertAdjacentHTML('beforeend','<button class="nsr-x" aria-label="Sair">✕</button>');
+  r.querySelector('.nsr-x').onclick=()=>{const b=document.getElementById('rzOut')||document.getElementById('rzOk');if(b)b.click();else{$ov.hidden=true;$ov.innerHTML=''}}}}catch(e){}
+ return pr.then(fin=>{try{const r=$ov.querySelector('.nsrace');if(r)r.classList.add('done')}catch(e){}return fin})}}
