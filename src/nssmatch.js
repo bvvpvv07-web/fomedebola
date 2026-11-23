@@ -155,7 +155,7 @@ async function nsLiveStart(m){
   let ok,auto=false;const sk=k=>typeof skillOf==='function'?skillOf(k):.6;
   if(L.skip||S.lances==='off'||!lancesWanted(true)){auto=true;ok=ch(kind==='pen'?.72+bp/500:kind==='fk'?.12+bp/300:kind==='corner'?.14+bp/600:.22)}
   else{api.flash(T[0]);await sleep(L.skip?0:1000);x.inX=true;
-   const o=kind==='pen'?{kind:'pen',scen:'penalti',title:'Pênalti!',skill:sk('FIN')*.5+(bp-40)/110,keeper:.5,okTxt:'GOL!'}:kind==='fk'?{kind:'fk',scen:ch(.6)?'falta':'faltaLonge',title:'Falta perigosa',skill:(sk('FIN')+sk('PAS'))/2*.6+(bp-40)/140,keeper:.5,okTxt:'GOLAÇO DE FALTA!'}:kind==='corner'?{kind:'cross',scen:ch(.75)?'escanteio':'escCurto',title:'Escanteio',skill:sk('PAS'),keeper:.45,okTxt:'GOL!'}:{kind:'header',scen:ch(.7)?'escCab':'cabeca',title:'Escanteio na área',skill:sk('FIS'),keeper:.5,okTxt:'GOL DE CABEÇA!'};
+   const o=kind==='pen'?{kind:'pen',scen:'penalti',title:'Pênalti!',skill:sk('FIN')*.5+(bp-40)/110,keeper:.5,okTxt:'GOL!'}:kind==='fk'?{kind:'fk',scen:ch(.6)?'falta':'faltaLonge',title:'Falta perigosa',skill:(sk('FIN')+sk('PAS'))/2*.6+(bp-40)/140,keeper:.5,okTxt:'GOLAÇO DE FALTA!'}:kind==='corner'?{kind:'cross',scen:ch(.75)?'escanteio':'escCurto',title:'Escanteio',skill:sk('PAS'),keeper:.45,okTxt:'GOL!'}:{kind:'header',scen:'escCab',title:'Escanteio na área',skill:sk('FIS'),keeper:.5,okTxt:'GOL DE CABEÇA!'};
    try{ok=!!(await nssMoment({...o,comp:m.o.comp,min:L.min})).ok}catch(e){ok=false}x.inX=false;draw()}
   const self=!!NM.selfGoal,dma2=!!NM.dmAssist;NM.selfGoal=false;NM.dmAssist=false;
   if(ok&&NM.teamGoal&&kind!=='pen'){NM.teamGoal=false;const w=nm(RU);const full=(RU.find(p=>nsShort(p.n)===w)||{n:w}).n;x.x.gu=(x.x.gu||0)+1;x.x.sc.push({m:L.min,w:full,us:true});push({m:L.min,side:'u',t:`⚽ GOL de ${w}! Jogada do time`,k:'ngl'});api.flash(`GOL do ${us.n}!`);goalFx(true);setScore();return}NM.teamGoal=false;
@@ -235,7 +235,7 @@ async function nsLiveStart(m){
   return r}}
 function nsIs3D(){try{return lanceMode()==='jogar'&&!L3D.failed}catch(e){return false}}
 // lance com cena pedida (falta, pênalti, escanteio)
-{const _scN=l3dScene;const ALT={falta:'faltaLonge',faltaLonge:'falta',escanteio:'escCurto',escCurto:'escanteio',escCab:'cabeca',cabeca:'escCab',driblar:'driblarP',driblarP:'driblar'};
+{const _scN=l3dScene;const ALT={falta:'faltaLonge',faltaLonge:'falta',escanteio:'escCurto',escCurto:'escanteio',driblar:'driblarP',driblarP:'driblar'};
  l3dScene=function(o){const cur=NSSM.cur;let sc=o&&o.scen?o.scen:_scN(o);if(cur){const U=cur.usedSc||(cur.usedSc=new Set());if(U.has(sc)){if(o&&o.scen){if(ALT[sc]&&!U.has(ALT[sc]))sc=ALT[sc]}else{let g=0;while(U.has(sc)&&g++<14)sc=_scN(o)}}U.add(sc)}return sc}}
 // o lance conta passes certos e dribles do seu jogador
 {const _lr=l3dResult;l3dResult=function(o,res){const r=_lr(o,res);try{NM.heroPasses=(res&&res.passes)||0;NM.drib=(res&&res.drib)||0}catch(e){}return r}}
