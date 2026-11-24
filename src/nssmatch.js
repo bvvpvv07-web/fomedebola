@@ -103,9 +103,9 @@ async function nsLiveStart(m){
   if(!x.x.drK&&P!=='ZAG'&&ch(['ATA','SA','PE','PD','MEI','ME','MD'].includes(P)?.55:.3))type='dribble';else if(type==='dribble'&&x.x.drK)type=chanceType({})==='dribble'?'finish':type;if(type==='dribble')x.x.drK=1;if(type==='header'&&ch(.65))type='finish';
   if(!x.x.tkK&&type!=='dribble'&&(['ZAG','LE','LD','VOL','MC'].includes(P)?ch(.55):ch(.2))){type='tackle';x.x.tkK=1}
   if(ft)type=ft;
-  if(type==='tackle'){x.x.ch=(x.x.ch||0)+1;L.lastX=L.min;push({m:L.min,side:'t',t:`Contra-ataque do ${esc(th.n)}! <b>${ME}</b> volta na marcação…`,k:'nme'});api.flash('🛡️ Marcação: dê o bote na hora certa');await sleep(800);x.inX=true;let okT=false;try{okT=await IO_UI.chance({type:'tackle',planned:false,comp:m.o.comp,min:L.min})}catch(e){}x.inX=false;draw();
+  if(type==='tackle'){x.x.ch=(x.x.ch||0)+1;L.lastX=L.min;push({m:L.min,side:'t',t:`Contra-ataque do ${esc(th.n)}! <b>${ME}</b> volta na marcação…`,k:'nme'});api.flash('🛡️ Marcação: dê o bote na hora certa');await sleep(800);x.inX=true;let okT=false;try{NM.lGoal=undefined}catch(_){}try{okT=await IO_UI.chance({type:'tackle',planned:false,comp:m.o.comp,min:L.min})}catch(e){}x.inX=false;draw();const lgT=NM.lGoal;NM.lGoal=undefined;
    if(okT){x.x.tk=(x.x.tk||0)+1;push({m:L.min,side:'u',t:`🛡️ <b>${ME}</b> desarma e mata o contra-ataque`,k:'nme'});api.flash('Desarme perfeito!')}
-   else if(ch(.38)){x.x.gt=(x.x.gt||0)+1;x.x.sc.push({m:L.min,w:nm(RT),us:false});push({m:L.min,side:'t',t:`⚽ Gol do ${esc(th.n)}. ${nm(RT)} passou por <b>${ME}</b>`,k:'ngl'});api.flash(`Gol do ${th.n}…`)}
+   else if(lgT==='them'||(lgT===undefined&&ch(.38))){x.x.gt=(x.x.gt||0)+1;x.x.sc.push({m:L.min,w:nm(RT),us:false});push({m:L.min,side:'t',t:`⚽ Gol do ${esc(th.n)}. ${nm(RT)} passou por <b>${ME}</b>`,k:'ngl'});api.flash(`Gol do ${th.n}…`)}
    else push({m:L.min,side:'t',t:`<b>${ME}</b> perde o lance, mas a zaga salva`,k:'nme nbad'});setScore();return}
   const dOnly=false; // todo lance pode terminar em chute
   const isPass=['pass','long','cross'].includes(type);x.x.ch=(x.x.ch||0)+1;L.lastX=L.min;

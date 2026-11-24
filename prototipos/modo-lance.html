@@ -1746,7 +1746,7 @@ function endPlay(kind,delay=0){if(S.state==='result')return;S.state='result';S.r
  $('chainB').hidden=true;hideArrow();setHint();
  if(S.auto)return;
  if(kind==='goal')rpRec();const rpT=kind==='goal'&&S.role==='atk'&&rpReady()?(setTimeout(rpStart,1300+delay*1000),RP.dur*1000+500):0;
- if(S.embed){const res=embedRes(kind);const send=()=>{if(RP.play)return setTimeout(send,150);if(!S.embedDone)embedSend(res)};setTimeout(send,(kind==='goal'?2100:SS.on?1500:1700)+rpT+delay*1000);return}
+ if(S.embed){const res=embedRes(kind);const lid=S.lanceId;const send=()=>{if(S.lanceId!==lid)return;if(RP.play)return setTimeout(send,150);if(!S.embedDone)embedSend(res)};setTimeout(send,(kind==='goal'?2100:SS.on?1500:1700)+rpT+delay*1000);return}
  setTimeout(()=>{if(S.mode!=='play')return;const c=S.ch;if(c){c.i++;
    if(c.type==='pen'){const r=penDecided();if(r)return endShootout(r);return startScen(c.i%2?'gkPen':'penalti')}
    if(c.i>=c.list.length)return endChallenge();return startScen(c.list[c.i])}
@@ -1766,7 +1766,7 @@ function startCh(type){S.score={g:0,n:0};if(type==='pen'){S.ch={type:'pen',i:0,u
  const pool=type==='gk'?[...GKS,...GKS]:ATK;S.ch={type,list:pool.slice().sort(()=>Math.random()-.5).slice(0,type==='gk'?6:8),i:0,g:0};startScen(S.ch.list[0])}
 $('bAgain').onclick=()=>{if(S.afterMenu){const t=S.afterMenu;S.afterMenu=false;$('bNext').textContent='Próximo';return startCh(t)}startScen(S.scen)};
 $('bNext').onclick=()=>{if(S.afterMenu){S.afterMenu=false;$('bNext').textContent='Próximo';return showMenu()}const keys=S.role==='gk'?GKS:ATK;startScen(keys[(keys.indexOf(S.scen)+1)%keys.length])};
-$('bMenu').onclick=()=>{if(S.embed){if(!S.embedDone)embedSend({skip:true});return}showMenu()};$('bCam').onclick=()=>{S.camPan.set(0,0,0);S.zoom=1;S.camYaw=0;S.camTilt=0;S.yawVel=0};$('bAng').onclick=()=>setCamPre(S.camPre+1,true);
+$('bMenu').onclick=()=>{if(S.embed){if(!S.embedDone)embedSkip();return}showMenu()};$('bCam').onclick=()=>{S.camPan.set(0,0,0);S.zoom=1;S.camYaw=0;S.camTilt=0;S.yawVel=0};$('bAng').onclick=()=>setCamPre(S.camPre+1,true);
 // ===================== SOM =====================
 // dentro do jogo usa o mesmo áudio da música (no iPad dois áudios brigam e a música parava); cada toque aqui também acorda a música
 let AC=null;function sfxUnlock(){try{if(!AC){try{if(window.parent!==window&&parent.FDB_AUDIO)AC=parent.FDB_AUDIO()}catch(e){}if(!AC)AC=new(window.AudioContext||window.webkitAudioContext)()}if(AC.state!=='running')AC.resume();try{if(window.parent!==window&&parent.FDB_GESTURE)parent.FDB_GESTURE()}catch(e){}}catch(e){}}
@@ -1819,7 +1819,16 @@ function applyCfg(c){const st0=c.stats||null;S.stats=st0;S.powK=st0?clamp(.84+(s
 function embedRes(kind){const gk=S.role==='gk';return{pw:S.pwUsed||[],kind,goal:kind==='goal',role:S.role,heroGoal:kind==='goal'&&!gk&&S.lastKicker===S.hero,heroAssist:kind==='goal'&&!gk&&S.lastKicker!==S.hero&&S.heroPassed,passes:S.heroPasses||0,drib:S.dribN||0,car:S.dribCar||0,
  chain:S.chain,fk:!!S.fkKick,header:S.lastLabel==='CABEÇADA',caught:!!S.caught,dived:gk&&!!S.gkUsed,pen:!!S.pen}}
 function embedSend(res){S.embedDone=true;S.paused=true;try{parent.postMessage({type:'ml-result',res},'*')}catch(e){}}
-function embedPlay(c){S.paused=false;last=performance.now();S.ch=null;S.score={g:0,n:0};S.embedDone=false;applyCfg(c);if(c.cutscene){cutStart(c);return}startScen(c.scen);S.passGoal=c.goal==='pass'?1:0;
+// "Pular" depois que o lance já acabou (comemoração, replay) não pode jogar o gol fora: manda o resultado que aconteceu.
+// Com a bola ainda viajando, espera ela chegar (até 3,5 s) e manda o que deu.
+function embedSkip(){if(S.embedDone)return;const rpOff=()=>{try{if(RP.play)rpStop()}catch(e){}};
+ if(S.state==='result'&&S.result){rpOff();embedSend(embedRes(S.result));return}
+ if(['flight','kicking','windup','contact'].includes(S.state)){if(S.skipQ)return;S.skipQ=true;const t0=performance.now(),n0=S.now,lid=S.lanceId;
+  const iv=setInterval(()=>{if(S.embedDone||S.lanceId!==lid){clearInterval(iv);S.skipQ=false;return}
+   if(S.state==='result'&&S.result){clearInterval(iv);S.skipQ=false;setTimeout(()=>{if(S.lanceId!==lid)return;rpOff();if(!S.embedDone)embedSend(embedRes(S.result))},S.result==='goal'?700:350);return}
+   if(!['flight','kicking','windup','contact'].includes(S.state)||S.now-n0>3.2||performance.now()-t0>9000){clearInterval(iv);S.skipQ=false;embedSend({skip:true})}},80);return}
+ embedSend({skip:true})}
+function embedPlay(c){S.lanceId=(S.lanceId||0)+1;try{if(RP.play){RP.play=null;$('rpTag').hidden=true;$('banner').classList.remove('rp')}}catch(e){}S.skipQ=false;S.paused=false;last=performance.now();S.ch=null;S.score={g:0,n:0};S.embedDone=false;applyCfg(c);if(c.cutscene){cutStart(c);return}startScen(c.scen);S.passGoal=c.goal==='pass'?1:0;
  $('scn').textContent=c.title||SC[c.scen].n;$('score').hidden=true;$('bMenu').textContent='Pular';$('bMenu').classList.remove('icon');$('bMenu').hidden=!!c.noSkip;
  S.introOpen=true;$('intro').hidden=false;$('inMin').textContent=c.min?c.min+"'":'Lance';$('inMin').hidden=!c.min;$('inT').textContent=c.head||SC[c.scen].n;$('inD').textContent=c.desc||SC[c.scen].d;
  $('inHow').textContent=S.passGoal?'Objetivo: acertar o passe. Puxe da bola na direção do companheiro.':S.role==='def'?'Toque na hora certa pra dar o bote. Arraste pra escolher a direção.':S.role==='gk'?'Arraste pro lado que a bola vai pra mergulhar.':'Puxe da bola pra trás e toque nela pra dar efeito.';$('hint').hidden=true
@@ -1931,7 +1940,7 @@ function ssEnd(f,me,scorers){return new Promise(res=>{if(!SS.on)return res();if(
  $('ssEndN').innerHTML=`<div><b>${(+nota).toFixed(1)}</b><small>sua nota</small></div><div><b>${me&&me.g||0}</b><small>gols</small></div><div><b>${me&&me.a||0}</b><small>assist.</small></div><div><b>${SS.won}/${SS.tot}</b><small>lances</small></div><div><b>${SS.best}</b><small>🔥 seguidos</small></div>`;
  $('ssEnd').hidden=false;$('ssEndOk').onclick=()=>{$('ssEnd').hidden=true;ssClose();S.paused=!SS.local;res()}})}
 // ---------- botão ⏭: simula o resto sem lances ----------
-$('ssSkip').onclick=()=>{if(!SS.on||SS.skip)return;SS.skip=true;ssBanner('SIMULANDO…','',900);if(SS.local&&S.mode==='play'&&!S.embedDone){S.embedDone=true;const f=SS.localCb;SS.localCb=null;if(f)f({skip:true})}else if(!SS.local&&S.mode==='play'&&!S.embedDone){embedSend({skip:true})}try{parent.postMessage({type:'ml-sess-skip'},'*')}catch(e){}};
+$('ssSkip').onclick=()=>{if(!SS.on||SS.skip)return;SS.skip=true;ssBanner('SIMULANDO…','',900);const rDone=S.state==='result'&&S.result?embedRes(S.result):null;if(rDone)try{if(RP.play)rpStop()}catch(e){}if(SS.local&&S.mode==='play'&&!S.embedDone){S.embedDone=true;const f=SS.localCb;SS.localCb=null;if(f)f(rDone||{skip:true})}else if(!SS.local&&S.mode==='play'&&!S.embedDone){embedSend(rDone||{skip:true})}try{parent.postMessage({type:'ml-sess-skip'},'*')}catch(e){}};
 // ---------- ordens vindas da carreira ----------
 if(EMBED)addEventListener('message',async e=>{const d=e.data||{};if(d.type!=='ml-sess')return;resize();let out={};
  try{if(d.op==='start')out=await ssStart(d.info);else if(d.op==='clock')await ssClock(d.to);else if(d.op==='event')await ssEvent(d.e||{},d.gu|0,d.gt|0);else if(d.op==='flash'){if(!SS.skip&&SS.on)ssBanner(ssEsc(d.txt||''),'',900)}else if(d.op==='end')await ssEnd(d.f||{},d.me||{},d.scorers||[])}catch(err){out={err:String(err)}}
@@ -2110,7 +2119,7 @@ const RP={buf:[],play:null,dur:2.7};
 function rpRec(){if(S.mode!=='play'||(S.auto&&!S.clip))return;const st=S.state;if(!(st==='windup'||st==='flight'||(st==='result'&&S.now-S.resT<.5)))return;
  RP.buf.push({now:S.now,b:[S.ball.p.x,S.ball.p.y,S.ball.p.z],pl:S.players.map(p=>[p.pos.x,p.pos.z,p.face,p.vel.x,p.vel.z,p.kickT,p.kickTc,p.kickKind,p.jump,p.dive,p.diveT,p.diveH,p.diveSide,p.hold,p.ready,p.cele])});if(RP.buf.length>200)RP.buf.shift()}
 function rpReady(){const f=RP.buf;if(f.length<20)return false;const c=f.findIndex(x=>x.b[2]<=0);return c>8}
-function rpStart(){if(RP.play||!rpReady()||S.mode!=='play')return;const f=RP.buf;const c=f.findIndex(x=>x.b[2]<=0);const t0=f[c].now-1.5,t1=f[c].now+.4;const fr=f.filter(x=>x.now>=t0&&x.now<=t1);if(fr.length<8)return;
+function rpStart(){if(RP.play||!rpReady()||S.mode!=='play'||(S.embed&&S.embedDone))return;const f=RP.buf;const c=f.findIndex(x=>x.b[2]<=0);const t0=f[c].now-1.5,t1=f[c].now+.4;const fr=f.filter(x=>x.now>=t0&&x.now<=t1);if(fr.length<8)return;
  const snap=S.players.map(p=>({x:p.pos.x,z:p.pos.z,face:p.face,cele:p.cele,hold:p.hold,dive:p.dive,diveT:p.diveT,jump:p.jump}));const bs=S.ball.p.clone();
  const sx=-(Math.sign(f[c].b[0])||1);RP.play={fr,t:0,span:fr[fr.length-1].now-fr[0].now,rate:(fr[fr.length-1].now-fr[0].now)/RP.dur,snap,bs,cam:new T.Vector3(sx*1.7,1.4,-3.95),look:new T.Vector3(fr[0].b[0],1,fr[0].b[2]),rip:false};
  $('rpTag').hidden=false;$('banner').classList.add('rp');}

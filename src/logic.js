@@ -387,7 +387,19 @@ async function playMine(o,io){
    else if(DEFP&&!e.us&&(e.t==='g'||e.t==='c')&&ch(e.t==='g'?DEFP:DEFP*.6))c={type:'tackle',planned:e.t==='g'};
    else if(S.pos==='GOL'&&!e.us&&(e.t==='g'||e.t==='c')&&ch(e.t==='g'?(SESS?.9:.75):(SESS?.55:.35)))c={type:'reflex',planned:e.t==='g'};
    if(c){interN++;if(live){live.flash(c.type==='tackle'?'🛡️ Ataque deles! É com você…':c.type==='reflex'?'⚠️ Perigo no seu gol!':c.ast?'⚡ Você tem a bola pra criar…':'⚡ A bola é sua…');await sleep(live.sess?120:S.liveSpeed===3?600:1400)}
-    const ok=await io.chance({...c,comp:o.comp,min:e.m});if(live)live.redraw();const notMe=!!NM.notMe;NM.notMe=false;if(!notMe){lanced=true;
+    try{NM.lGoal=undefined}catch(_){}const ok=await io.chance({...c,comp:o.comp,min:e.m});if(live)live.redraw();const notMe=!!NM.notMe;NM.notMe=false;const lg=NM.lGoal;NM.lGoal=undefined;
+    // lance jogado no 3D: o placar segue exatamente o que apareceu na tela
+    if(!notMe&&lg!==undefined){lanced=true;NM.dmAssist=false;NM.selfGoal=false;NM.teamGoal=false;
+     if(lg==='me')e={...e,t:'g',us:true,mine:true,ast:false,fk:false,w:S.name};
+     else if(lg==='ast')e={...e,t:'g',us:true,mine:false,ast:true,fk:false,w:e.t==='g'&&e.us&&!e.mine&&e.w&&e.w!==S.name?e.w:scorerFrom(usR,S.name)};
+     else if(lg==='team')e={...e,t:'g',us:true,mine:false,ast:false,fk:false,w:e.t==='g'&&e.us&&!e.mine&&e.w&&e.w!==S.name?e.w:scorerFrom(usR,S.name)};
+     else if(lg==='them')e={...e,t:'g',us:false,mine:false,ast:false,fk:false,w:!e.us&&e.w?e.w:scorerFrom(thR)};
+     else if(c.type==='build'){if(ok){myP++;e={...e,t:'ppok'}}else{myPx++;e={...e,t:'ppx'}}}
+     else if(c.type==='tackle'){if(ok){myD++;e={...e,t:'dsr'}}else e={...e,t:'c'}}
+     else if(c.type==='reflex')e={...e,t:'gks'};
+     else if(c.ast){if(e.t==='g')e={...e,t:'c',ast:false}}
+     else if(e.t==='g')e={...e,t:'c',fk:false,missed:true}}
+    else if(!notMe){lanced=true;
     const asst=!!NM.dmAssist;NM.dmAssist=false;const selfG=!!NM.selfGoal;NM.selfGoal=false;const teamG=!!NM.teamGoal;NM.teamGoal=false;
     if(ok&&teamG&&c.type!=='reflex'&&c.type!=='tackle'&&c.type!=='build'){e={...e,t:'g',us:true,mine:false,ast:false,w:scorerFrom(usR,S.name)}}else
     if(ok&&asst&&!c.ast&&c.type!=='reflex'){e={...e,t:'g',ast:true,mine:false,w:scorerFrom(usR,S.name)}}else

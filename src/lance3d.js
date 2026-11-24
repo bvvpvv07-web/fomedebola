@@ -52,7 +52,10 @@ function l3dCfg(o){const ctx=L3D.ctx||{};const us=ctx.us||club()||null,them=ctx.
   crowd:[U.shirt,U.shirt2,Tm.shirt]}}
 // no presídio o lance é no pátio: chão de barro, coletes laranja × listrado, policiais em volta e sem torcida
 {const _cfg=l3dCfg;l3dCfg=function(o){const c=_cfg(o);try{if(o.env==='prison'||(typeof inPrison==='function'&&inPrison())||/presídio|prisão|pátio/i.test(o.comp||'')){c.env='prison';delete c.us;delete c.them;delete c.gkUs;c.crowd=null;if(c.hero)c.hero.boot='#e9e6df'}}catch(e){}return c}}
-function l3dResult(o,res){const K=o.kind||'finish';
+// NM.lGoal: o que o 3D mostrou. 'me' gol seu, 'ast' gol com seu passe, 'team' gol de companheiro, 'them' gol deles, null sem gol.
+// undefined = o lance não foi jogado no 3D (simulado/decisão) e o jogo segue a regra antiga.
+function l3dGoalWho(o,res){const K=o.kind||'finish';if(!res||!res.goal)return null;if(K==='tackle'||K==='keeper')return'them';return res.heroGoal||K==='pen'?'me':res.heroAssist?'ast':'team'}
+function l3dResult(o,res){const K=o.kind||'finish';try{NM.lGoal=l3dGoalWho(o,res)}catch(e){}
  if(o.passOnly){NM.netHit=null;NM.intc=null;NM.dmAssist=false;NM.selfGoal=false;const ok=!!res.goal||res.kind==='passok'||(res.chain|0)>=1;NM.last=res.goal?'Golaço da jogada!':ok?'Passe na medida!':res.kind==='off'?'Impedimento.':'Passe cortado.';NM.grade=res.goal?94:ok?80:40;NM.why='Lance de passe';return{ok,perfect:!!res.goal,grade:NM.grade}}
  if(K==='tackle'){NM.netHit=null;NM.intc=null;NM.dmAssist=false;NM.selfGoal=false;const won=['desarme','corte','block'].includes(res.kind);const ok=!res.goal&&res.kind!=='falta';
   NM.last=res.kind==='desarme'?'Desarmou!':res.kind==='corte'?'Cortou!':res.kind==='block'?'Bloqueou!':res.kind==='falta'?'Falta.':res.goal?'Gol deles.':ok?'O goleiro salvou.':'Passou por você.';
@@ -73,7 +76,7 @@ async function lance3dPlay(o){
  const res=await new Promise(r=>{L3D._res=r;L3D.frame.contentWindow.postMessage({type:'ml-play',cfg},'*')});
  return res}
 // liga no lugar do momento de decisão (fica por baixo do XP do rpg.js, que vem depois)
-{const _nmDecide=nssMoment;nssMoment=async function(o){if(SESS.skipAll)return l3dAuto(o);if(lanceMode()!=='jogar'||L3D.failed)return SESS.on?l3dAuto(o):_nmDecide(o);
+{const _nmDecide=nssMoment;nssMoment=async function(o){try{NM.lGoal=undefined}catch(e){}if(SESS.skipAll)return l3dAuto(o);if(lanceMode()!=='jogar'||L3D.failed)return SESS.on?l3dAuto(o):_nmDecide(o);
   let res;try{res=await lance3dPlay(o)}catch(e){L3D.failed=true;try{toast({ic:'⚠️',title:'Lance 3D indisponível',txt:'Seguindo com os momentos de decisão.',ms:2600})}catch(_){}return _nmDecide(o)}
   if(!res||res.skip)return SESS.on||SESS.skipAll?l3dAuto(o):_nmDecide(o);return l3dResult(o,res)}}
 // guarda os dois times do jogo atual pras cores
